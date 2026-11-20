@@ -1,39 +1,51 @@
-import { Media, Slot, Ph, ProductImg, range } from '../ui.jsx';
+import { Link } from 'react-router-dom';
+import { Media, Slot, Ph, ProductImg } from '../ui.jsx';
+import { PRODUCTS, priceLabel } from '../../content/site.js';
 
-export function PriceRow() {
+/** Price row: price + size pill. Pass no product for the empty placeholder version. */
+export function PriceRow({ product }) {
   return (
     <div className="pcard__price">
-      <Slot className="slot--price" />
-      <Slot className="slot--price" />
-      <Slot className="slot--pill" />
+      <Slot className="slot--price">{product ? priceLabel(product) : undefined}</Slot>
+      {!product && <Slot className="slot--price" />}
+      <Slot className="slot--pill">{product ? product.size : undefined}</Slot>
     </div>
   );
 }
 
-export function ProductCard({ n }) {
+export function ProductCard({ product }) {
   return (
     <article className="pcard" data-reveal>
       <div className="pcard__media">
-        <Media className="media--fill media--product">{n ? <ProductImg n={n} /> : null}</Media>
-        <Slot className="pcard__badge slot--badge" />
-        <button className="pcard__quick" type="button"><Slot className="slot--btn" /></button>
+        <Media className="media--fill media--product">
+          {product ? <ProductImg n={product.photo} alt={product.short} /> : null}
+        </Media>
+        {product && <Link className="pcard__link" to={`/product/${product.id}`} aria-label={`View ${product.short}`} />}
+        <Slot className="pcard__badge slot--badge">{product ? product.tag : undefined}</Slot>
+        <button className="pcard__quick" type="button"><Slot className="slot--btn">{product ? 'Add to bag' : undefined}</Slot></button>
       </div>
-      <h3 className="pcard__title"><Slot className="slot--card-title" /></h3>
-      <PriceRow />
+      <h3 className="pcard__title">
+        {product ? (
+          <Link to={`/product/${product.id}`}><Slot className="slot--card-title">{product.short}</Slot></Link>
+        ) : (
+          <Slot className="slot--card-title" />
+        )}
+      </h3>
+      <PriceRow product={product} />
     </article>
   );
 }
 
 /** Product card carousel. `titled` adds the section headline (used on the About page). */
-export default function Featured({ titled = false, photos = true }) {
+export default function Featured({ titled = false, headline = 'Our products' }) {
   return (
     <section className={`featured${titled ? ' featured--titled' : ''}`}>
-      {titled && <Slot as="h2" className="headline slot--headline" data-reveal />}
+      {titled && <Slot as="h2" className="headline slot--headline" data-reveal>{headline}</Slot>}
       <div className="featured__track" id="featuredTrack">
-        {range(4).map((i) => <ProductCard key={i} n={photos ? i + 1 : 0} />)}
+        {PRODUCTS.slice(0, 4).map((p) => <ProductCard key={p.id} product={p} />)}
       </div>
       <div className="featured__foot">
-        <Ph className="link-btn link-btn--dark"><Slot className="slot--link" /></Ph>
+        <Ph className="link-btn link-btn--dark"><Slot className="slot--link">View all</Slot></Ph>
       </div>
     </section>
   );

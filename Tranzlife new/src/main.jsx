@@ -6,6 +6,12 @@ import './styles/styles.css';
 import './styles/pages.css';
 import './styles/slider.css';
 import './styles/theme.css';
+import './styles/glass.css';
+import './styles/content.css';
+import './styles/golden.css';
+import './styles/showcase.css';
+import './styles/product.css';
+import './styles/polish.css';
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>

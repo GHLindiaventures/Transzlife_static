@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { NavLink } from 'react-router-dom';
-import { Slot, range, stop } from './ui.jsx';
+import { Link, NavLink } from 'react-router-dom';
+import { Slot, stop } from './ui.jsx';
+import { NAV_PRODUCTS } from '../content/site.js';
 import { NAV } from './Header.jsx';
 
 export default function Drawer({ open, onClose }) {
@@ -26,8 +27,8 @@ export default function Drawer({ open, onClose }) {
                     <svg width="10" height="6" viewBox="0 0 8 5" fill="none" stroke="currentColor" strokeWidth="1.2"><path d="M1 1l3 3 3-3" /></svg>
                   </button>
                   <div className="drawer__sub">
-                    {range(3).map((i) => (
-                      <a href="#" onClick={(e) => { stop(e); onClose(); }} key={i}><Slot className="slot--drawer" /></a>
+                    {NAV_PRODUCTS.map((p) => (
+                      <Link to={`/product/${p.id}`} onClick={onClose} key={p.id}><Slot className="slot--drawer">{p.name}</Slot></Link>
                     ))}
                   </div>
                 </>
