@@ -16,17 +16,37 @@ export default function Parallax() {
   const videoRef = useRef(null);
   const [scene, setScene] = useState(0);
 
-  // autoplay the muted video unless the visitor prefers reduced motion
+  // the muted video only loads and plays while the section is on screen (and never with reduced motion)
   useEffect(() => {
-    const v = videoRef.current;
-    if (!v) return undefined;
+    const v = videoRef.current, sec = sectionRef.current;
+    if (!v || !sec) return undefined;
     v.muted = true;
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const apply = () => { if (reduce.matches) v.pause(); else v.play().catch(() => {}); };
-    apply();
+    let visible = false;
+    const apply = () => {
+      if (visible && !reduce.matches) {
+        if (!v.getAttribute('src')) v.src = v.dataset.src;
+        v.play().catch(() => {});
+      } else v.pause();
+    };
+    const io = 'IntersectionObserver' in window
+      ? new IntersectionObserver(([e]) => { visible = e.isIntersecting; apply(); }, { rootMargin: '200px 0px' })
+      : null;
+    if (io) io.observe(sec); else { visible = true; apply(); }
     reduce.addEventListener('change', apply);
-    return () => reduce.removeEventListener('change', apply);
+    return () => { if (io) io.disconnect(); reduce.removeEventListener('change', apply); };
   }, []);
+
+  // the arrow moves on to the next scene (or past the section after the last one)
+  const next = () => {
+    const sec = sectionRef.current, st = stickyRef.current;
+    if (!sec || !st) return;
+    const top = sec.getBoundingClientRect().top + window.scrollY;
+    const total = sec.offsetHeight - st.offsetHeight;
+    const y = scene < 2 ? top + (total * (scene + 1)) / 3 + 2 : top + sec.offsetHeight;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: y, behavior: reduce ? 'auto' : 'smooth' });
+  };
 
   // scroll-linked parallax
   useEffect(() => {
@@ -56,12 +76,11 @@ export default function Parallax() {
           <video
             ref={videoRef}
             className="parallax__video"
-            src={`${BASE}assets/video/forest-parallax.mp4`}
-            autoPlay
+            data-src={`${BASE}assets/video/forest-parallax.mp4`}
             muted
             loop
             playsInline
-            preload="auto"
+            preload="none"
             aria-hidden="true"
           />
         </Media>
@@ -85,8 +104,8 @@ export default function Parallax() {
             <div className="parallax__split-text"><Slot as="h2" className="slot--par-title-sm">{SCENES[2].title}</Slot><Slot as="p" className="slot--par-p-sm">{SCENES[2].text}</Slot></div>
           </div>
         </div>
-        <button className="parallax__arrow" type="button" aria-label="Scroll">
-          <svg width="20" height="12" viewBox="0 0 20 12" fill="none" stroke="currentColor" strokeWidth="1.4"><path d="M1 1l9 9 9-9" /></svg>
+        <button className="parallax__arrow" type="button" aria-label={scene < 2 ? 'Next scene' : 'Continue'} onClick={next}>
+          <svg width="20" height="12" viewBox="0 0 20 12" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><path d="M1 1l9 9 9-9" /></svg>
         </button>
       </div>
     </section>

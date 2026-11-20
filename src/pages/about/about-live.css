@@ -12,7 +12,7 @@
   margin-bottom: clamp(28px, 4.5vh, 44px);
   color: #1a4a22;
   font-family: var(--f-body);
-  font-size: clamp(10.5px, 1.05vw, 12.5px);
+  font-size: clamp(12px, 1.05vw, 13.5px);
   font-weight: 750;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -265,7 +265,7 @@
 .icf-pillars{gap: 12px;}
 }
 @media (max-width: 600px){
-.in-tagline-badge{font-size: 10px;
+.in-tagline-badge{font-size: 12px;
     padding: 5px 14px;
     margin-bottom: 24px;}
 .itb-sub{display: none;}
@@ -291,7 +291,7 @@
 .icf-pillars{flex-direction: column;
     gap: 6px;}
 .icf-divider{display: none;}
-.icf-motto{font-size: 11px;
+.icf-motto{font-size: 13px;
     margin-top: 6px;}
 }
 @keyframes itbSparkle{
@@ -644,7 +644,7 @@
 .ast-place{display: flex; align-items: flex-start; gap: 10px; margin: 18px 0 0; font-size: 13.5px; line-height: 1.45; opacity: .9;}
 .ast-place b{display: block;}
 .ast-place svg{flex: none; width: 22px; height: 22px; fill: none; stroke: #e7c680; stroke-width: 1.8;}
-.ast.is-pinned{--ast-rail: 92px; height: calc(var(--n, 5) * 200vh + 100vh);}
+.ast.is-pinned{--ast-rail: 92px; height: calc(var(--n, 5) * 150vh + 100vh);}
 .ast.is-pinned .ast-pin{position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; background: #10241a;}
 .ast.is-pinned .ast-pin::after{content: ""; position: absolute; inset: 0; z-index: 4; pointer-events: none; background: radial-gradient(ellipse 85% 75% at 50% 50%, transparent 55%, rgba(0, 0, 0, .32) 100%);}
 .ast.is-pinned .ast-scene{position: absolute; inset: 0; opacity: 0; pointer-events: none;}

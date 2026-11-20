@@ -1,0 +1,91 @@
+/* ==========================================================
+   REFINE — readability, accessibility and finishing layer for the shared shell and the Home page.
+   Loaded last (after polish.css); every rule here is scoped to the class it fixes.
+   ========================================================== */
+
+/* ---------------- shell: skip link, focus, anchors ---------------- */
+.skip-link{position:fixed;left:16px;top:-80px;z-index:200;padding:12px 18px;border-radius:10px;background:var(--green-900);color:var(--gold-200);font-weight:700;font-size:14px;transition:top .2s}
+.skip-link:focus{top:12px}
+.main:focus{outline:none}
+#products,#sc-pipeline,#sc-certs,#roots{scroll-margin-top:calc(var(--header-h) + 12px)}
+
+/* ---------------- header: one clear Shop action instead of dead icons ---------------- */
+.header__cta{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 18px;border-radius:999px;background:var(--green-700);color:#fff;font-size:12.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;transition:background .25s var(--ease),color .25s var(--ease)}
+.header__cta:hover{background:var(--green-900);color:var(--gold-400)}
+@media (max-width:989px){.header__cta{min-height:36px;padding:0 14px}}
+@media (max-width:420px){.header__cta span{display:none}.header__cta{width:40px;padding:0;justify-content:center}}
+.mega__tag{display:block;margin-top:2px;font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--green-700);opacity:.8}
+
+/* ---------------- floating "talk to us" button ---------------- */
+.float-widget{gap:8px;padding:0 16px 0 8px;color:var(--green-900);font-size:13px;font-weight:700}
+.float-widget__icon{display:grid;place-items:center;color:var(--green-950)}
+@media (max-width:749px){.float-widget__label{display:none}.float-widget{padding:0 8px}}
+
+/* ---------------- footer ---------------- */
+.footer__col h2{font-size:12.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold-400);margin-bottom:var(--s-3,13px)}
+.footer address{font-style:normal}
+.footer__col--wide a{text-decoration:underline;text-decoration-color:rgba(239,192,74,.5);text-underline-offset:3px}
+.footer__col--wide a:hover{color:var(--gold-400)}
+.footer__copy{font-size:13px;line-height:1.6}
+
+/* ---------------- readable body copy: Archivo for running text, Syne stays for headings and labels ---------------- */
+.rich__text,.featured__sub,.pslider-intro__note,
+.has-text.slot--hero-sub,.has-text.slot--b-text,.has-text.slot--iwt-p,.has-text.slot--par-p,.has-text.slot--par-p-sm,
+.has-text.slot--news-p,.footer .has-text.slot--f-address,.footer__copy{font-family:'Archivo',system-ui,sans-serif;font-stretch:96%}
+
+/* small labels: nothing under 12px */
+.has-text.slot--badge{font-size:12px;letter-spacing:.08em}
+.has-text.slot--pill{font-size:12.5px}
+.announcement:hover .announcement__track,.brands__marquee:hover{animation-play-state:paused}
+
+/* ---------------- hero ---------------- */
+.hero.is-paused .hero__dot.is-active i::after{animation-play-state:paused}
+.hero:not(.is-auto) .hero__dot.is-active i::after{animation:none;transform:scaleX(1)}
+.hero__dots{align-items:center}
+.hero__dot{width:44px;height:44px}
+.hero__pause{display:grid;place-items:center;width:36px;height:36px;margin-left:6px;border-radius:50%;color:#fff;background:rgba(8,38,26,.35);border:1px solid rgba(255,255,255,.45);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);transition:background .25s}
+.hero__pause:hover{background:rgba(8,38,26,.6)}
+.hero--ink .hero__pause{color:var(--green-900);background:rgba(252,250,241,.55);border-color:rgba(15,47,29,.25)}
+.hero--ink .hero__pause:hover{background:rgba(252,250,241,.85)}
+
+/* ---------------- who we are ---------------- */
+.rich__text{max-width:44em;margin:var(--s-4,21px) auto 0;font-size:clamp(16px,1.35vw,19px);line-height:1.65;color:var(--ink-soft)}
+.rich__link{margin-top:var(--s-4,21px)}
+
+/* ---------------- products: 3 × 2 grid on wide screens, swipe row on phones/tablets ---------------- */
+.featured__head{text-align:center;padding-inline:var(--pad);margin-bottom:var(--s-5,34px)}
+.featured__sub{margin-top:var(--s-2,8px);font-size:17px;line-height:1.5;color:var(--ink-soft)}
+@media (min-width:990px){
+  .featured__track{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s-5,34px) var(--s-4,21px);overflow:visible;max-width:1320px;margin-inline:auto}
+  .pcard[data-reveal]:nth-child(n+4){transition-delay:.15s}
+}
+.pcard__quick{text-decoration:none}
+
+/* ---------------- before / after intro ---------------- */
+.pslider-intro{text-align:center;padding:var(--s-7,89px) var(--pad) var(--s-5,34px)}
+.pslider-intro .has-text.slot--eyebrow{margin-bottom:var(--s-2,8px)}
+.pslider-intro__note{margin-top:var(--s-2,8px);font-size:14.5px;line-height:1.5;color:var(--ink-soft)}
+@media (max-width:749px){.pslider-intro{padding:var(--s-6,55px) var(--pad) var(--s-4,21px)}}
+
+/* ---------------- story ---------------- */
+.iwt__text .has-text.slot--eyebrow{margin-bottom:var(--s-3,13px)}
+.iwt__link{margin-top:var(--s-3,13px)}
+
+/* ---------------- parallax: same three scenes, about a third less scrolling ---------------- */
+.parallax{height:2400px}
+@media (max-width:989px){.parallax{height:2250px}}
+@media (max-width:749px){.parallax{height:2100px}}
+
+/* ---------------- recognition badges ---------------- */
+.brands__group{margin:0;padding-left:0;list-style:none}
+.brands .media--logo{display:grid;place-items:center;flex:none;background:#fff;opacity:1;padding:12px 18px;box-shadow:0 6px 18px -10px rgba(15,47,29,.35);border:1px solid rgba(15,47,29,.08)}
+.brands .media--logo>img{position:static;width:100%;height:100%;object-fit:contain}
+
+/* ---------------- closing help card ---------------- */
+.news--help .news__card{display:flex;flex-direction:column;align-items:center}
+.news__actions{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:var(--s-4,21px) var(--s-5,34px)}
+@media (max-width:749px){.news__actions{flex-direction:column}.news__actions .btn{width:100%}}
+
+@media (prefers-reduced-motion:reduce){
+  .skip-link{transition:none}
+}

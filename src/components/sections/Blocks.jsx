@@ -1,7 +1,8 @@
 import { Fragment } from 'react';
+import { Link } from 'react-router-dom';
 import { Media, Slot, Ph, range } from '../ui.jsx';
 import {
-  RICH, BANNER, BENEFITS, STRIP, STORY_BLOCK, BRANDS, BGVIDEO, NEWSLETTER,
+  RICH, BANNER, BENEFITS, STRIP, STORY_BLOCK, BRANDS, BGVIDEO, NEWSLETTER, HELP_CTA,
   PHOTOS,
 } from '../../content/site.js';
 
@@ -15,6 +16,8 @@ export function Rich() {
       <div className="rich__inner" data-reveal>
         <Slot as="p" className="slot--eyebrow">{RICH.eyebrow}</Slot>
         <Slot as="h2" className="slot--rich">{RICH.title}</Slot>
+        {RICH.text && <p className="rich__text">{RICH.text}</p>}
+        {RICH.link && <Link className="link-btn link-btn--dark rich__link" to={RICH.link.to}><Slot className="slot--link">{RICH.link.label}</Slot></Link>}
       </div>
     </section>
   );
@@ -34,7 +37,8 @@ export function Banner() {
             </div>
           ))}
         </div>
-        <Ph className="btn btn--light"><Slot className="slot--btn">{BANNER.cta}</Slot></Ph>
+        <p className="visually-hidden">{BANNER.words.join(' · ')}</p>
+        <Link className="btn btn--light" to={BANNER.to}><Slot className="slot--btn">{BANNER.cta}</Slot></Link>
       </div>
     </section>
   );
@@ -87,8 +91,12 @@ export function ImageWithText() {
     <section className="iwt">
       <div className="iwt__media"><Media className="media--fill" photo={PHOTOS.iwt} data-reveal /></div>
       <div className="iwt__text">
+        {STORY_BLOCK.eyebrow && <Slot as="p" className="slot--eyebrow" data-reveal>{STORY_BLOCK.eyebrow}</Slot>}
         <Slot as="h2" className="slot--iwt-title" data-reveal>{STORY_BLOCK.title}</Slot>
         {STORY_BLOCK.paragraphs.map((t) => <Slot as="p" className="slot--iwt-p" data-reveal key={t}>{t}</Slot>)}
+        {STORY_BLOCK.link && (
+          <div data-reveal><Link className="link-btn link-btn--dark iwt__link" to={STORY_BLOCK.link.to}><Slot className="slot--link">{STORY_BLOCK.link.label}</Slot></Link></div>
+        )}
       </div>
     </section>
   );
@@ -99,11 +107,16 @@ export function Brands() {
     <section className="brands">
       <div className="brands__inner">
         <Slot as="h2" className="headline slot--headline" data-reveal>{BRANDS.headline}</Slot>
-        <div className="brands__marquee" aria-hidden="true">
+        <div className="brands__marquee">
           {range(2).map((g) => (
-            <div className="brands__group" key={g}>
-              {range(8).map((i) => <Media className="media--logo" key={i} />)}
-            </div>
+            // the second copy only exists to make the loop seamless: hidden from screen readers
+            <ul className="brands__group" key={g} aria-hidden={g === 1 || undefined} aria-label={g === 0 ? BRANDS.headline : undefined}>
+              {[...BRANDS.badges, ...BRANDS.badges].map((b, i) => (
+                <li className="media media--logo" key={i} aria-hidden={i >= BRANDS.badges.length || undefined}>
+                  <img src={`${import.meta.env.BASE_URL}assets/badges/${b.src}`} alt={b.alt} loading="lazy" decoding="async" />
+                </li>
+              ))}
+            </ul>
           ))}
         </div>
       </div>
@@ -120,6 +133,23 @@ export function BgVideo({ small = false, photo = BGVIDEO.photo, eyebrow = BGVIDE
       <div className="bgvideo__inner" data-reveal>
         <Slot as="p" className="slot--eyebrow-w">{eyebrow}</Slot>
         <Slot as="h2" className="slot--bgv-title">{title}</Slot>
+      </div>
+    </section>
+  );
+}
+
+/** Closing call to action: where to get help choosing a product. */
+export function HelpCta() {
+  return (
+    <section className="news news--help">
+      <Media className="media--fill news__bg" />
+      <div className="news__card" data-reveal>
+        <Slot as="h2" className="slot--news-title">{HELP_CTA.title}</Slot>
+        <Slot as="p" className="slot--news-p">{HELP_CTA.text}</Slot>
+        <div className="news__actions">
+          <Link className="btn btn--dark" to={HELP_CTA.primary.to}><Slot className="slot--btn-sm">{HELP_CTA.primary.label}</Slot></Link>
+          <Link className="link-btn link-btn--dark" to={HELP_CTA.secondary.to}><Slot className="slot--link">{HELP_CTA.secondary.label}</Slot></Link>
+        </div>
       </div>
     </section>
   );

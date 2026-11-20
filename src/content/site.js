@@ -72,20 +72,35 @@ export const NAV_COLLECTIONS = PRODUCTS.map((p) => p.short);
 
 /* ---------------- home ---------------- */
 export const HERO = [
-  { image: 'hero/hero-1.webp', tone: 'light', bg: 'linear-gradient(to bottom, #162115 0%, #212b20 55%, #494f47 100%)', alt: 'PulmoClear Gummies and LiverDetox bottles on a stone podium with fresh herbs', eyebrow: 'Nature meets science', title: 'Live naturally. Live healthier.', sub: 'Five plant-based formulations rooted in Ayurveda.', cta: 'Shop all products' },
-  { image: 'hero/hero-2.webp', tone: 'ink', bg: 'linear-gradient(to bottom, #d3bba1 0%, #d9bea2 55%, #e5c9aa 100%)', alt: 'Reviva roll-on and BreatheFree inhaler on a stone block with eucalyptus leaves', eyebrow: 'Our vision', title: 'From the roots of nature to the infinity of science', sub: 'TranzLife is shaping the future of life.', cta: 'Our story' },
-  { image: 'hero/hero-3.webp', tone: 'ink', bg: 'linear-gradient(to bottom, #9ca17f 0%, #aaad92 55%, #b8b6ab 100%)', alt: 'CycleRelief roll-on and Energy Booster bottle on a marble podium with lavender', eyebrow: 'Ayurvedic wisdom', title: 'Rooted in nature. Perfected by science.', sub: 'Shaping everyday longevity.', cta: 'Explore the science' },
+  { image: 'hero/hero-1.webp', tone: 'light', bg: 'linear-gradient(to bottom, #162115 0%, #212b20 55%, #494f47 100%)', alt: 'PulmoClear Gummies and LiverDetox bottles on a stone podium with fresh herbs', eyebrow: 'TranzLife Biosciences', title: 'Live naturally. Live healthier.', sub: 'Ayurvedic, plant-based wellness formulations, made in Chennai, India.', cta: 'Shop all products', to: '/#products' },
+  { image: 'hero/hero-2.webp', tone: 'ink', bg: 'linear-gradient(to bottom, #d3bba1 0%, #d9bea2 55%, #e5c9aa 100%)', alt: 'Reviva roll-on and BreatheFree inhaler on a stone block with eucalyptus leaves', eyebrow: 'Our vision', title: 'From the roots of nature to the infinity of science', sub: 'TranzLife is shaping the future of life.', cta: 'Our story', to: '/about' },
+  { image: 'hero/hero-3.webp', tone: 'ink', bg: 'linear-gradient(to bottom, #9ca17f 0%, #aaad92 55%, #b8b6ab 100%)', alt: 'CycleRelief roll-on and Energy Booster bottle on a marble podium with lavender', eyebrow: 'Ayurvedic wisdom', title: 'Rooted in nature. Perfected by science.', sub: 'Classical botanicals, standardised and quality-tested.', cta: 'Explore the science', to: '/science' },
 ];
 
+/* The first thing a visitor reads under the hero: who we are and what we make, in plain words. */
 export const RICH = {
-  eyebrow: 'Plant-based wellness',
-  title: 'Rooted in nature. Built on science.',
+  eyebrow: 'Who we are',
+  title: 'Plant-based wellness, built on science.',
+  text: 'TranzLife Biosciences is a Chennai-based company that brings together Ayurveda and modern science. We make natural wellness products for lung care, quitting smoking, period comfort, liver care and everyday vitality, and every product is quality-tested at every step.',
+  link: { label: 'Read our story', to: '/about' },
 };
 
-export const BANNER = { words: ['Nature meets science', 'Rooted in Ayurveda'], cta: 'Shop all products' };
+export const PRODUCTS_SECTION = {
+  id: 'products',
+  headline: 'Our products',
+  sub: 'Find the formulation for your need.',
+};
+
+export const BANNER = { words: ['Nature meets science', 'Rooted in Ayurveda'], cta: 'Discover our science', to: '/science' };
+
+export const COMPARE_INTRO = {
+  eyebrow: 'What each formula is designed to support',
+  title: 'Drag to compare',
+  note: 'Conceptual illustrations, not clinical results. Individual experience varies.',
+};
 
 export const BENEFITS = {
-  headline: 'Rooted in Nature · Perfected by Science',
+  headline: 'Why TranzLife',
   items: [
     { title: 'Innovate', text: 'Research-driven formulations with a focus on efficacy and safety.' },
     { title: 'Develop', text: 'Advanced R&D and modern technology to create superior products.' },
@@ -101,7 +116,9 @@ export const REELS = { headline: 'Which one is yours?' };
 export const STRIP = ['100% Indigenous', 'Nutraceutical Safety', 'DPIIT Recognized', 'Registered Biotech', 'GeM Govt. Verified'];
 
 export const STORY_BLOCK = {
-  title: 'From the roots of nature to the infinity of science',
+  eyebrow: 'Our story',
+  title: 'Ayurvedic wisdom, modern quality',
+  link: { label: 'Read the full story', to: '/about' },
   paragraphs: [
     'Born in Chennai, TranzLife Biosciences brings together the wisdom of Ayurveda and modern science to create natural, safe and effective solutions that support health and well-being.',
     'We carefully select quality botanicals and check their purity before they enter our formulation process.',
@@ -121,15 +138,34 @@ export const SCENES = [
   },
 ];
 
-export const BRANDS = { headline: 'Government Recognized & Certified' };
+/* Registration and recognition badges (files in /public/assets/badges, also shown on the About page). */
+export const BRANDS = {
+  headline: 'Government Recognized & Certified',
+  badges: [
+    { src: 'fssai.png', alt: 'FSSAI' },
+    { src: 'ayush.png', alt: 'Ministry of AYUSH' },
+    { src: 'make-in-india.png', alt: 'Make in India' },
+    { src: 'dpiit-startup-india.png', alt: 'DPIIT Startup India' },
+    { src: 'msme.png', alt: 'MSME' },
+    { src: 'gem-gov.png', alt: 'GeM, Government e-Marketplace' },
+  ],
+};
 
-export const BGVIDEO = { photo: 'basil-closeup', eyebrow: 'Ayurvedic wisdom', title: 'Rooted in nature · Perfected by science' };
+export const BGVIDEO = { photo: 'basil-closeup', eyebrow: 'Quality & manufacturing', title: 'Made in ISO 7 cleanrooms under AYUSH GMP' };
 
 export const NEWSLETTER = {
   title: 'Live naturally. Live healthier.',
   text: 'Rooted in Nature · Perfected by Science',
   email: 'Email address',
   button: 'Subscribe',
+};
+
+/* Closing call to action on the home page. */
+export const HELP_CTA = {
+  title: 'Not sure which product is right for you?',
+  text: 'Our team in Chennai can help with ingredients, usage and orders, Monday to Saturday, 9 AM to 7 PM IST.',
+  primary: { label: 'Contact us', to: '/contact' },
+  secondary: { label: 'Read the FAQ', to: '/faq' },
 };
 
 /* ---------------- about ---------------- */
@@ -207,12 +243,33 @@ export const CONTACT = {
 };
 
 /* ---------------- footer ---------------- */
+/* Footer links. Only pages that exist are linked (Ingredients, Sustainability, Privacy and Terms
+   come back here once those pages are built). */
 export const FOOTER = {
-  products: { title: 'Products', links: PRODUCTS.map((p) => p.short) },
-  company: { title: 'Company', links: ['About Us', 'Science & Innovation', 'Ingredients', 'Quality & Manufacturing', 'Sustainability', 'Certifications'] },
-  help: { title: 'Help', links: ['Contact Us', 'FAQ', 'Retail partners', 'Corporate gifting', 'Privacy', 'Terms'] },
+  products: { title: 'Products', links: PRODUCTS.map((p) => ({ label: p.short, to: `/product/${p.id}` })) },
+  company: {
+    title: 'Company',
+    links: [
+      { label: 'About Us', to: '/about' },
+      { label: 'Science & Innovation', to: '/science' },
+      { label: 'Quality & Manufacturing', to: '/science#sc-pipeline' },
+      { label: 'Certifications', to: '/science#sc-certs' },
+    ],
+  },
+  help: {
+    title: 'Help',
+    links: [
+      { label: 'Contact Us', to: '/contact' },
+      { label: 'FAQ', to: '/faq' },
+      { label: 'Retail partners', to: '/contact' },
+      { label: 'Corporate gifting', to: '/contact' },
+    ],
+  },
   about: { title: 'About TranzLife' },
 };
+
+/* Social profiles: add the real URLs to show the icons in the footer (empty = hidden). */
+export const SOCIAL_LINKS = { Facebook: '', X: '', Instagram: '', YouTube: '' };
 
 /* ---------------- photography ----------------
    Files in /public/assets/photos, all public domain or CC0 (sources and licences: see CREDITS.md). */

@@ -1,21 +1,31 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
+import { Link, Outlet, useLocation } from 'react-router-dom';
 import Announcement from './Announcement.jsx';
 import Header from './Header.jsx';
 import Drawer from './Drawer.jsx';
 import Footer from './Footer.jsx';
 
 export default function Layout() {
-  const { pathname } = useLocation();
+  const { pathname, hash, key } = useLocation();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const mainRef = useRef(null);
   const footerRef = useRef(null);
+  const lastPath = useRef(pathname);
 
-  // new page -> start at the top, close the drawer
+  // new page -> start at the top (or at the #section the link points to), close the drawer
   useEffect(() => {
-    window.scrollTo(0, 0);
+    const samePage = lastPath.current === pathname;
+    lastPath.current = pathname;
     setDrawerOpen(false);
-  }, [pathname]);
+    const target = hash && document.getElementById(decodeURIComponent(hash.slice(1)));
+    if (target) {
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      // let the new page lay out first, then go to the section (scroll-margin-top clears the sticky header)
+      requestAnimationFrame(() => target.scrollIntoView({ behavior: samePage && !reduce ? 'smooth' : 'auto', block: 'start' }));
+    } else if (!samePage || !hash) {
+      window.scrollTo(0, 0);
+    }
+  }, [pathname, hash, key]);
 
   // lock page scroll while the drawer is open
   useEffect(() => {
@@ -68,23 +78,27 @@ export default function Layout() {
 
   return (
     <>
-      <a className="skip-link" href="#main" />
+      <a className="skip-link" href="#main" onClick={(e) => { e.preventDefault(); mainRef.current?.focus(); mainRef.current?.scrollIntoView(); }}>Skip to content</a>
       <Announcement />
       <div className="sticky-threshold" />
       <Header onBurger={() => setDrawerOpen(true)} />
       <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
 
-      <main id="main" className="main" ref={mainRef}>
+      <main id="main" className="main" ref={mainRef} tabIndex={-1}>
         <Outlet />
       </main>
 
       <Footer ref={footerRef} />
 
-      {/* floating chat widget placeholder */}
-      <a className="float-widget" href="#" onClick={(e) => e.preventDefault()} aria-label="Chat">
-        <span className="float-widget__icon" />
-        <svg width="8" height="5" viewBox="0 0 8 5" fill="none" stroke="currentColor" strokeWidth="1.2"><path d="M1 1l3 3 3-3" /></svg>
-      </a>
+      {/* floating "talk to us" button (replace the link with a live chat once one is set up) */}
+      {pathname !== '/contact' && (
+        <Link className="float-widget" to="/contact" aria-label="Contact us">
+          <span className="float-widget__icon" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"><path d="M3 4h14v9H8l-4 3v-3H3z" /></svg>
+          </span>
+          <span className="float-widget__label">Talk to us</span>
+        </Link>
+      )}
     </>
   );
 }

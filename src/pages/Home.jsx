@@ -1,11 +1,14 @@
 import Hero from '../components/sections/Hero.jsx';
 import Featured from '../components/sections/Featured.jsx';
 import ProductSlider from '../components/sections/ProductSlider.jsx';
-import Reels from '../components/sections/Reels.jsx';
 import Parallax from '../components/sections/Parallax.jsx';
-import Testimonials from '../components/sections/Testimonials.jsx';
-import { Sep, Rich, Banner, Benefits, Strip, ImageWithText, Brands, BgVideo, Newsletter } from '../components/sections/Blocks.jsx';
+import { Sep, Rich, Banner, Benefits, Strip, ImageWithText, Brands, BgVideo, HelpCta } from '../components/sections/Blocks.jsx';
 
+/*
+ * Home: who we are -> what we make -> why trust us -> our story -> recognition -> how to get help.
+ * Reels and Testimonials are left out until real videos and customer reviews are available
+ * (the components are kept in components/sections).
+ */
 export default function Home() {
   return (
     <>
@@ -14,24 +17,15 @@ export default function Home() {
       <Featured />
       <Sep />
       <Banner />
-      <Sep />
       <Benefits />
       <ProductSlider />
-      <Sep />
-      <Reels />
       <Strip />
-      <Sep />
       <ImageWithText />
       <Sep />
       <Parallax />
       <Brands />
-      <Sep />
-      <Sep gap />
       <BgVideo />
-      <Sep />
-      <Testimonials />
-      <Sep />
-      <Newsletter />
+      <HelpCta />
     </>
   );
 }
