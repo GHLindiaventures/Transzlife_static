@@ -1,0 +1,59 @@
+/* ==========================================================
+   REAL COPY INSIDE TEMPLATE SLOTS
+   Slots are fixed-size placeholder boxes. Once a slot holds text (:not(:empty)) it grows to fit,
+   and gets a type size matched to the box the template drew for it.
+   Empty slots are untouched, so pages without copy look exactly as before.
+   Loaded last.
+   ========================================================== */
+.slot:not(:empty){height:auto;min-height:0}
+.show-slots .slot:not(:empty){outline:0}
+
+/* small labels: size to their text */
+.slot--eyebrow:not(:empty),.slot--eyebrow-w:not(:empty),.slot--strip:not(:empty),
+.slot--btn-sm:not(:empty),.slot--link:not(:empty),.slot--headline:not(:empty){width:auto}
+
+.slot--eyebrow:not(:empty),.slot--eyebrow-w:not(:empty){font-size:12px;line-height:18px;font-weight:700;letter-spacing:2px;text-transform:uppercase}
+.slot--eyebrow:not(:empty){color:var(--accent)}
+
+/* page banner title (box 640 x 94) */
+.slot--pb-title:not(:empty){--w:min(760px,100%);font-size:44px;line-height:1.1;font-weight:700}
+
+/* rich text under the banner (box 1161 x 66) */
+.slot--rich:not(:empty){--w:min(980px,100%);font-size:24px;line-height:1.35;font-weight:500}
+
+/* intro (title box 760 x 78, text box 720 x 48) */
+.slot--i-title:not(:empty){font-size:34px;line-height:1.15;font-weight:700}
+.slot--i-text:not(:empty){font-size:16px;line-height:24px;color:var(--ink-soft)}
+
+/* image + text rows (title 24, text 72 = 3 lines of 24) */
+.slot--r-title:not(:empty){font-size:22px;line-height:1.2;font-weight:700}
+.slot--r-text:not(:empty){font-size:15px;line-height:24px;color:var(--ink-soft)}
+.slot--r-text + .slot--r-text{margin-top:12px}
+
+/* features (title 24, text 48) */
+.slot--b-title:not(:empty){font-size:18px;line-height:24px;font-weight:700}
+.slot--b-text:not(:empty){font-size:15px;line-height:24px;color:var(--ink-soft)}
+@media (min-width:990px){.pfeat--3 .pfeat__grid{grid-template-columns:repeat(3,1fr);max-width:1000px}}
+
+/* scrolling strip (row height 20) */
+.slot--strip:not(:empty){font-size:16px;line-height:20px;font-weight:700;white-space:nowrap}
+
+/* background video title (box 817 x 123) */
+.slot--bgv-title:not(:empty){font-size:40px;line-height:1.1;font-weight:700}
+
+/* notes (title 24, text 24) */
+.slot--n-title:not(:empty){font-size:20px;line-height:24px;font-weight:700}
+.slot--n-text:not(:empty){font-size:15px;line-height:24px;color:var(--ink-soft)}
+
+/* newsletter (title 48, text 24) */
+.slot--news-title:not(:empty){font-size:28px;line-height:1.2;font-weight:700}
+.slot--news-p:not(:empty){font-size:15px;line-height:24px}
+
+@media (max-width:749px){
+  .slot--pb-title:not(:empty){font-size:28px}
+  .slot--rich:not(:empty){font-size:18px}
+  .slot--i-title:not(:empty){font-size:26px}
+  .slot--r-title:not(:empty){font-size:20px}
+  .slot--bgv-title:not(:empty){font-size:28px}
+  .slot--news-title:not(:empty){font-size:22px}
+}

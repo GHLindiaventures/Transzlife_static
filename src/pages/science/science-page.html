@@ -1,0 +1,613 @@
+<!-- ================================================================
+     TranzLife – Science & Innovation page (inner body markup only)
+     Rendered by Science.jsx · styles: science-live.css
+     ================================================================ -->
+
+<!-- ════════════════════════════════════════════════════════════════
+     SECTION 1 — SCIENCE HERO (cinematic, full-bleed)
+     ════════════════════════════════════════════════════════════════ -->
+<section class="sc-hero" id="sc-hero">
+  <!-- Background image layer -->
+  <div class="sc-hero__bg" aria-hidden="true">
+    <img class="sc-hero__img" src="/assets/science/science-hero-still.jpg" alt="" width="1376" height="768" loading="eager" fetchpriority="high" decoding="async">
+    <!-- Cinematic overlays -->
+    <div class="sc-hero__vignette"></div>
+    <div class="sc-hero__glow sc-hero__glow--1"></div>
+    <div class="sc-hero__glow sc-hero__glow--2"></div>
+  </div>
+
+  <!-- Animated particle canvas -->
+  <canvas class="sc-hero__canvas" id="scParticleCanvas" aria-hidden="true"></canvas>
+
+  <!-- DNA helix SVG decorative overlay -->
+  <div class="sc-hero__dna" aria-hidden="true">
+    <svg viewBox="0 0 120 600" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <linearGradient id="dnaGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#e0a826" stop-opacity="0.6"/>
+          <stop offset="50%" stop-color="#efc04a" stop-opacity="0.9"/>
+          <stop offset="100%" stop-color="#e0a826" stop-opacity="0.3"/>
+        </linearGradient>
+      </defs>
+      <!-- Left strand -->
+      <path class="dna-strand" d="M20,0 C80,50 20,100 80,150 C20,200 80,250 20,300 C80,350 20,400 80,450 C20,500 80,550 20,600" stroke="url(#dnaGrad)" stroke-width="2" fill="none" stroke-dasharray="6,4"/>
+      <!-- Right strand -->
+      <path class="dna-strand dna-strand--r" d="M100,0 C40,50 100,100 40,150 C100,200 40,250 100,300 C40,350 100,400 40,450 C100,500 40,550 100,600" stroke="url(#dnaGrad)" stroke-width="2" fill="none" stroke-dasharray="6,4" opacity="0.7"/>
+      <!-- Cross-links -->
+      <line class="dna-link" x1="20" y1="37" x2="100" y2="37" stroke="#efc04a" stroke-width="1.2" opacity="0.5"/>
+      <line class="dna-link" x1="20" y1="75" x2="100" y2="75" stroke="#efc04a" stroke-width="1.2" opacity="0.5"/>
+      <line class="dna-link" x1="20" y1="113" x2="100" y2="113" stroke="#efc04a" stroke-width="1.2" opacity="0.5"/>
+      <line class="dna-link" x1="20" y1="150" x2="100" y2="150" stroke="#efc04a" stroke-width="1.2" opacity="0.5"/>
+      <line class="dna-link" x1="20" y1="188" x2="100" y2="188" stroke="#efc04a" stroke-width="1.2" opacity="0.5"/>
+      <line class="dna-link" x1="20" y1="225" x2="100" y2="225" stroke="#efc04a" stroke-width="1.2" opacity="0.5"/>
+      <line class="dna-link" x1="20" y1="263" x2="100" y2="263" stroke="#efc04a" stroke-width="1.2" opacity="0.5"/>
+      <line class="dna-link" x1="20" y1="300" x2="100" y2="300" stroke="#efc04a" stroke-width="1.2" opacity="0.5"/>
+      <line class="dna-link" x1="20" y1="338" x2="100" y2="338" stroke="#efc04a" stroke-width="1.2" opacity="0.5"/>
+      <line class="dna-link" x1="20" y1="375" x2="100" y2="375" stroke="#efc04a" stroke-width="1.2" opacity="0.5"/>
+      <line class="dna-link" x1="20" y1="413" x2="100" y2="413" stroke="#efc04a" stroke-width="1.2" opacity="0.5"/>
+      <line class="dna-link" x1="20" y1="450" x2="100" y2="450" stroke="#efc04a" stroke-width="1.2" opacity="0.5"/>
+      <line class="dna-link" x1="20" y1="488" x2="100" y2="488" stroke="#efc04a" stroke-width="1.2" opacity="0.5"/>
+      <line class="dna-link" x1="20" y1="525" x2="100" y2="525" stroke="#efc04a" stroke-width="1.2" opacity="0.5"/>
+      <line class="dna-link" x1="20" y1="563" x2="100" y2="563" stroke="#efc04a" stroke-width="1.2" opacity="0.5"/>
+    </svg>
+  </div>
+
+  <div class="sc-hero__content">
+    <!-- Eyebrow badge -->
+    <div class="sc-badge sc-reveal" data-delay="0">
+      <span class="sc-badge__dot"></span>
+      Molecular Biotechnology &amp; Clinical Phytochemistry
+    </div>
+
+    <!-- Main headline -->
+    <h1 class="sc-hero__h1 sc-reveal" data-delay="80">
+      Where Plant Intelligence Meets<br>
+      <em>Precision Molecular Science</em>
+    </h1>
+
+    <!-- Subtext -->
+    <p class="sc-hero__sub sc-reveal" data-delay="180">
+      We decode centuries of botanical wisdom with cryogenic extraction, analytical chromatography, and phytosomal delivery platforms — creating predictable, bioavailable wellness solutions that perform at the cellular level.
+    </p>
+
+    <!-- Stat cards row -->
+    <div class="sc-stats sc-reveal" data-delay="260">
+      <div class="sc-stat">
+        <div class="sc-stat__num">+320%<small>Uptake</small></div>
+        <div class="sc-stat__label">Bioavailability Elevation</div>
+        <div class="sc-stat__sub">Phytosome micro-encapsulation vs crude botanical powder</div>
+      </div>
+      <div class="sc-stat">
+        <div class="sc-stat__num">600+<small>Assays</small></div>
+        <div class="sc-stat__label">Phytochemical Screenings</div>
+        <div class="sc-stat__sub">High-resolution mass spectrometry &amp; HPLC verified</div>
+      </div>
+      <div class="sc-stat">
+        <div class="sc-stat__num">98.4%<small>Purity</small></div>
+        <div class="sc-stat__label">Active Standardization</div>
+        <div class="sc-stat__sub">Exact compound milligrams guaranteed batch-to-batch</div>
+      </div>
+      <div class="sc-stat">
+        <div class="sc-stat__num">0.00%<small>Synthetic</small></div>
+        <div class="sc-stat__label">Zero Chemical Solvents</div>
+        <div class="sc-stat__sub">100% clean-label CO₂ thermodynamic extraction</div>
+      </div>
+    </div>
+
+    <!-- Scroll cue -->
+    <div class="sc-hero__scroll" aria-hidden="true">
+      <span>Discover the science</span>
+      <svg width="16" height="24" viewBox="0 0 16 24" fill="none"><rect x="6" y="2" width="4" height="8" rx="2" stroke="currentColor" stroke-width="1.5"/><line x1="8" y1="14" x2="8" y2="22" stroke="currentColor" stroke-width="1.5"/><polyline points="5,19 8,22 11,19" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     SECTION 2 — 4-PILLAR BIOAVAILABILITY GRID  (pfeat–science equiv.)
+     ════════════════════════════════════════════════════════════════ -->
+<section class="sc-pillars pfeat pfeat--science" id="sc-pillars">
+  <div class="sc-sec-label sc-reveal">The Cellular Delivery Platform</div>
+  <h2 class="sc-sec-title sc-reveal">Solving The Botanical Absorption Bottleneck</h2>
+  <p class="sc-sec-desc sc-reveal">Raw botanicals exhibit notoriously poor human bioavailability due to gastric acid degradation, large molecular weights, and rapid hepatic clearance. TranzLife's multi-tier pharmaceutical platform overcomes every barrier.</p>
+
+  <div class="pfeat__grid sc-pillars__grid">
+
+    <!-- Pillar 1 -->
+    <div class="pfeat__item sc-pillar" data-reveal>
+      <div class="sc-pillar__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2v8"/><path d="m4.93 10.93 1.41 1.41"/><path d="M2 18h2"/><path d="M20 18h2"/>
+          <path d="m19.07 10.93-1.41 1.41"/><path d="M22 22H2"/><path d="m16 6-4 4-4-4"/><path d="M16 18a4 4 0 0 0-8 0"/>
+        </svg>
+      </div>
+      <span class="sc-pillar__no">01 / Thermodynamics</span>
+      <h3 class="slot slot--b-title">Supercritical CO₂ Extraction</h3>
+      <p class="slot slot--b-text">By tuning temperature to exactly 31.1°C and pressure above 73.8 bar, CO₂ enters a supercritical state — penetrating plant cellular matrices like a gas while dissolving precious actives like a solvent, leaving zero chemical residues.</p>
+      <div class="sc-pillar__specs">
+        <span>31.1°C Critical Temp</span>
+        <span>73.8 Bar Controlled</span>
+        <span>Zero Hexane / Ethanol</span>
+      </div>
+    </div>
+
+    <!-- Pillar 2 -->
+    <div class="pfeat__item sc-pillar" data-reveal>
+      <div class="sc-pillar__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
+        </svg>
+      </div>
+      <span class="sc-pillar__no">02 / Cellular Kinetics</span>
+      <h3 class="slot slot--b-title">Phytosome &amp; Liposomal Bi-Layers</h3>
+      <p class="slot slot--b-text">Active polyphenol compounds are molecularly bonded to non-GMO sunflower phosphatidylcholine. This bio-compatible lipid envelope shields fragile molecules through the corrosive stomach environment and merges directly with small intestinal enterocytes.</p>
+      <div class="sc-pillar__specs">
+        <span>Phosphatidylcholine Bi-Layer</span>
+        <span>Gastric Acid Resistant</span>
+        <span>Direct Enterocyte Transit</span>
+      </div>
+    </div>
+
+    <!-- Pillar 3 -->
+    <div class="pfeat__item sc-pillar" data-reveal>
+      <div class="sc-pillar__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/>
+        </svg>
+      </div>
+      <span class="sc-pillar__no">03 / Analytics</span>
+      <h3 class="slot slot--b-title">HPLC Quantitative Standardization</h3>
+      <p class="slot slot--b-text">Unlike crude extracts that vary with seasonal weather, our HPLC assays fingerprint and quantify exact active compound fractions — 80% Silymarin, 99.2% 1,8-Cineole, 95% Curcuminoids — with ±1.5% batch reproducibility every single time.</p>
+      <div class="sc-pillar__specs">
+        <span>HPLC / LC-MS Fingerprinting</span>
+        <span>±1.5% Batch Reproducibility</span>
+        <span>Validated Reference Standards</span>
+      </div>
+    </div>
+
+    <!-- Pillar 4 -->
+    <div class="pfeat__item sc-pillar" data-reveal>
+      <div class="sc-pillar__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+      </div>
+      <span class="sc-pillar__no">04 / Synergy</span>
+      <h3 class="slot slot--b-title">Entourage Bio-Architectures</h3>
+      <p class="slot slot--b-text">Single isolated molecules suffer from rapid enzymatic clearance. TranzLife designs multi-terpene botanical architectures where secondary plant flavonoids protect primary actives, prolonging circulating plasma half-life up to 8.5 hours.</p>
+      <div class="sc-pillar__specs">
+        <span>Full-Spectrum Terpenoids</span>
+        <span>Receptor Co-Activation</span>
+        <span>Prolonged Plasma Half-Life</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     SECTION 3 — ABSORPTION SIMULATOR  (Note block enhanced)
+     ════════════════════════════════════════════════════════════════ -->
+<section class="sc-sim pnote" id="sc-simulator">
+  <div data-reveal>
+    <span class="sc-sec-label">Comparative Absorption Simulator</span>
+    <h2 class="slot slot--n-title sc-sim__title">Evaluate Cellular Delivery Kinetics</h2>
+    <p class="slot slot--n-text">Compare standard market formulations against TranzLife's proprietary Bio-Phytosome Delivery Platform.</p>
+
+    <div class="sc-sim__inner">
+      <!-- Tabs -->
+      <div class="sc-sim__tabs" role="tablist">
+        <button class="sc-sim__tab" data-mode="crude" type="button" role="tab">Crude Herb Powder</button>
+        <button class="sc-sim__tab" data-mode="solvent" type="button" role="tab">Solvent Extract</button>
+        <button class="sc-sim__tab sc-sim__tab--active" data-mode="phytosome" type="button" role="tab" aria-selected="true">TranzLife Phytosome</button>
+      </div>
+
+      <div class="sc-sim__display">
+        <!-- Bars -->
+        <div class="sc-sim__bars">
+          <div class="sc-sim__bar-row">
+            <div class="sc-sim__bar-labels">
+              <span>Intestinal Epithelial Permeability</span>
+              <span id="scValPerm">92% Intestinal Transport</span>
+            </div>
+            <div class="sc-sim__bar-track"><div class="sc-sim__bar-fill" id="scBarPerm" style="width:92%"></div></div>
+          </div>
+          <div class="sc-sim__bar-row">
+            <div class="sc-sim__bar-labels">
+              <span>Systemic Plasma Retention (6 Hours)</span>
+              <span id="scValRet">94% Retained Active</span>
+            </div>
+            <div class="sc-sim__bar-track"><div class="sc-sim__bar-fill" id="scBarRet" style="width:94%"></div></div>
+          </div>
+          <div class="sc-sim__bar-row">
+            <div class="sc-sim__bar-labels">
+              <span>Cellular Onset Velocity</span>
+              <span id="scValOnset">95% Cellular Rate</span>
+            </div>
+            <div class="sc-sim__bar-track"><div class="sc-sim__bar-fill" id="scBarOnset" style="width:95%"></div></div>
+          </div>
+        </div>
+
+        <!-- Callout -->
+        <div class="sc-sim__callout">
+          <span class="sc-sim__callout-tag">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            Observed Pharmacokinetics
+          </span>
+          <h4 class="sc-sim__callout-title" id="scSimTitle">TranzLife Bio-Phytosome Delivery Platform</h4>
+          <p class="sc-sim__callout-desc" id="scSimDesc">Botanical actives are molecularly complexed within non-GMO sunflower phosphatidylcholine bi-layers. Resists gastric acid, transits mucosal barriers intact, and achieves rapid 20-minute cellular delivery.</p>
+          <div class="sc-sim__specs">
+            <div><small>Bioavailability</small><b id="scSpecBio">88% – 94%</b></div>
+            <div><small>Peak Plasma (Tmax)</small><b id="scSpecTmax">20 mins</b></div>
+            <div><small>Circulating Half-Life</small><b id="scSpecHalf">8.5 hrs</b></div>
+            <div><small>Gastric Survival</small><b id="scSpecGastric">&gt; 96%</b></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     SECTION 4 — SEED TO SHELF: 6-STAGE PIPELINE  (Row blocks)
+     ════════════════════════════════════════════════════════════════ -->
+<section class="sc-pipeline" id="sc-pipeline">
+  <div class="sc-pipeline__header sc-reveal">
+    <span class="sc-sec-label">Stage Gates in Detail</span>
+    <h2 class="sc-pipeline__title">From Seed to Shelf — Six Precision Gates</h2>
+    <p class="sc-pipeline__desc">Each pipeline stage closes with a measurable release gate. Nothing moves forward until it passes. This is the science of uncompromising botanical integrity.</p>
+  </div>
+
+  <div class="sc-pipeline__track">
+
+    <!-- Stage 1 — full-bleed image+text row (matches iwt--row) -->
+    <article class="iwt iwt--row sc-stage sc-reveal" data-stage="01">
+      <div class="iwt__media sc-stage__media sc-stage__media--1">
+        <div class="sc-stage__overlay">
+          <div class="sc-stage__mol" aria-hidden="true">
+            <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- Molecular decoration: plant root DNA barcoding -->
+              <circle cx="100" cy="100" r="60" stroke="#efc04a" stroke-width="1.5" stroke-dasharray="8 4" opacity="0.5"/>
+              <circle cx="100" cy="100" r="40" stroke="#e0a826" stroke-width="1" opacity="0.4"/>
+              <circle cx="100" cy="100" r="12" fill="#efc04a" opacity="0.8"/>
+              <line x1="100" y1="40" x2="100" y2="88" stroke="#efc04a" stroke-width="2" opacity="0.7"/>
+              <line x1="100" y1="112" x2="100" y2="160" stroke="#efc04a" stroke-width="2" opacity="0.7"/>
+              <line x1="40" y1="100" x2="88" y2="100" stroke="#efc04a" stroke-width="2" opacity="0.7"/>
+              <line x1="112" y1="100" x2="160" y2="100" stroke="#efc04a" stroke-width="2" opacity="0.7"/>
+              <circle cx="100" cy="40" r="8" fill="#238049" stroke="#efc04a" stroke-width="1.5"/>
+              <circle cx="100" cy="160" r="8" fill="#238049" stroke="#efc04a" stroke-width="1.5"/>
+              <circle cx="40" cy="100" r="8" fill="#238049" stroke="#efc04a" stroke-width="1.5"/>
+              <circle cx="160" cy="100" r="8" fill="#238049" stroke="#efc04a" stroke-width="1.5"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="iwt__text sc-stage__text">
+        <div class="sc-stage__badge-row">
+          <span class="sc-stage__num">STAGE 01</span>
+          <span class="sc-stage__gate">Gate: Genetic DNA Match</span>
+        </div>
+        <h2 class="slot slot--r-title" data-reveal>Ethical Sourcing &amp; Terroir Fingerprinting</h2>
+        <p class="slot slot--r-text" data-reveal>Cultivated in certified pesticide-free micro-climates across the Nilgiri biosphere and Himalayan valleys. Each harvest is geo-tagged and DNA-barcoded to eliminate botanical adulteration at the root — before a single gram enters our facility.</p>
+        <div class="sc-stage__meta" data-reveal>
+          <div class="sc-meta"><span>Traceability</span><strong>100% Farm-Lot Logged</strong></div>
+          <div class="sc-meta"><span>Authentication</span><strong>ITS2 DNA Barcoding</strong></div>
+        </div>
+      </div>
+    </article>
+
+    <hr class="sep">
+
+    <!-- Stage 2 -->
+    <article class="iwt iwt--row iwt--rev sc-stage sc-reveal" data-stage="02">
+      <div class="iwt__media sc-stage__media sc-stage__media--2">
+        <div class="sc-stage__overlay">
+          <div class="sc-stage__mol" aria-hidden="true">
+            <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- Cryo snowflake / molecule -->
+              <g transform="translate(100,100)">
+                <line x1="-60" y1="0" x2="60" y2="0" stroke="#efc04a" stroke-width="2" opacity="0.7"/>
+                <line x1="0" y1="-60" x2="0" y2="60" stroke="#efc04a" stroke-width="2" opacity="0.7"/>
+                <line x1="-42" y1="-42" x2="42" y2="42" stroke="#efc04a" stroke-width="2" opacity="0.5"/>
+                <line x1="42" y1="-42" x2="-42" y2="42" stroke="#efc04a" stroke-width="2" opacity="0.5"/>
+                <circle cx="0" cy="0" r="14" fill="#0c3320" stroke="#efc04a" stroke-width="2"/>
+                <text x="0" y="5" text-anchor="middle" fill="#efc04a" font-size="12" font-weight="bold">CO₂</text>
+                <circle cx="60" cy="0" r="6" fill="#238049"/>
+                <circle cx="-60" cy="0" r="6" fill="#238049"/>
+                <circle cx="0" cy="60" r="6" fill="#238049"/>
+                <circle cx="0" cy="-60" r="6" fill="#238049"/>
+              </g>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="iwt__text sc-stage__text">
+        <div class="sc-stage__badge-row">
+          <span class="sc-stage__num">STAGE 02</span>
+          <span class="sc-stage__gate">Gate: Zero Solvent Residue</span>
+        </div>
+        <h2 class="slot slot--r-title" data-reveal>Cryogenic Milling &amp; Supercritical CO₂</h2>
+        <p class="slot slot--r-text" data-reveal>Herbs are flash-frozen to −40°C to fracture cellular walls without generating friction heat. Recycled supercritical CO₂ captures pure terpenes and lipids without thermal degradation or toxic petroleum chemicals — preserving over 99.4% of volatile actives.</p>
+        <div class="sc-stage__meta" data-reveal>
+          <div class="sc-meta"><span>Process Temp</span><strong>Sub-32°C Solvent-Free</strong></div>
+          <div class="sc-meta"><span>Terpene Retention</span><strong>&gt; 99.4% Preserved</strong></div>
+        </div>
+      </div>
+    </article>
+
+    <hr class="sep">
+
+    <!-- Stage 3 -->
+    <article class="iwt iwt--row sc-stage sc-reveal" data-stage="03">
+      <div class="iwt__media sc-stage__media sc-stage__media--3">
+        <div class="sc-stage__overlay">
+          <div class="sc-stage__mol" aria-hidden="true">
+            <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- HPLC chromatogram-style bars -->
+              <rect x="20" y="140" width="16" height="40" fill="#238049" opacity="0.5" rx="2"/>
+              <rect x="44" y="90" width="16" height="90" fill="#efc04a" opacity="0.8" rx="2"/>
+              <rect x="68" y="120" width="16" height="60" fill="#238049" opacity="0.5" rx="2"/>
+              <rect x="92" y="60" width="16" height="120" fill="#efc04a" opacity="1" rx="2"/>
+              <rect x="116" y="110" width="16" height="70" fill="#238049" opacity="0.5" rx="2"/>
+              <rect x="140" y="130" width="16" height="50" fill="#efc04a" opacity="0.6" rx="2"/>
+              <rect x="164" y="150" width="16" height="30" fill="#238049" opacity="0.4" rx="2"/>
+              <!-- baseline -->
+              <line x1="10" y1="180" x2="190" y2="180" stroke="#e0a826" stroke-width="1.5" opacity="0.4"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="iwt__text sc-stage__text">
+        <div class="sc-stage__badge-row">
+          <span class="sc-stage__num">STAGE 03</span>
+          <span class="sc-stage__gate">Gate: HPLC Assay ±1.5%</span>
+        </div>
+        <h2 class="slot slot--r-title" data-reveal>Chromatographic Standardization</h2>
+        <p class="slot slot--r-text" data-reveal>Extracts are analyzed via High-Performance Liquid Chromatography (HPLC) and Mass Spectrometry to verify exact target milligram weights of active biomarkers. 80% Silymarin. 99.2% 1,8-Cineole. 95% Curcuminoids. Unwavering batch-to-batch.</p>
+        <div class="sc-stage__meta" data-reveal>
+          <div class="sc-meta"><span>Instrumentation</span><strong>HPLC, GC-MS, LC-MS</strong></div>
+          <div class="sc-meta"><span>Reproducibility</span><strong>±1.5% Batch Accuracy</strong></div>
+        </div>
+      </div>
+    </article>
+
+    <hr class="sep">
+
+    <!-- Stage 4 -->
+    <article class="iwt iwt--row iwt--rev sc-stage sc-reveal" data-stage="04">
+      <div class="iwt__media sc-stage__media sc-stage__media--4">
+        <div class="sc-stage__overlay">
+          <div class="sc-stage__mol" aria-hidden="true">
+            <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- Liposome concentric rings -->
+              <circle cx="100" cy="100" r="70" stroke="#efc04a" stroke-width="2" opacity="0.3"/>
+              <circle cx="100" cy="100" r="55" stroke="#e0a826" stroke-width="2.5" opacity="0.5"/>
+              <circle cx="100" cy="100" r="38" stroke="#efc04a" stroke-width="2" stroke-dasharray="5 3" opacity="0.7"/>
+              <circle cx="100" cy="100" r="22" fill="rgba(14,74,44,0.8)" stroke="#efc04a" stroke-width="2"/>
+              <circle cx="100" cy="100" r="10" fill="#efc04a" opacity="0.9"/>
+              <!-- phospholipid tails -->
+              <line x1="100" y1="30" x2="100" y2="62" stroke="#efc04a" stroke-width="1.5" opacity="0.6"/>
+              <line x1="170" y1="100" x2="138" y2="100" stroke="#efc04a" stroke-width="1.5" opacity="0.6"/>
+              <line x1="30" y1="100" x2="62" y2="100" stroke="#efc04a" stroke-width="1.5" opacity="0.6"/>
+              <line x1="100" y1="170" x2="100" y2="138" stroke="#efc04a" stroke-width="1.5" opacity="0.6"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="iwt__text sc-stage__text">
+        <div class="sc-stage__badge-row">
+          <span class="sc-stage__num">STAGE 04</span>
+          <span class="sc-stage__gate">Gate: Particle Size &lt; 100nm</span>
+        </div>
+        <h2 class="slot slot--r-title" data-reveal>Phytosome Micro-Emulsification</h2>
+        <p class="slot slot--r-text" data-reveal>Active extracts are co-formulated into phospholipid phytosome complexes sub-100nm in diameter. This micro-encapsulation shields molecules against stomach enzymes, accelerates uptake across mucosal membranes, and delivers up to 29x greater bioavailability than crude extracts.</p>
+        <div class="sc-stage__meta" data-reveal>
+          <div class="sc-meta"><span>Delivery Matrix</span><strong>Sunflower Phosphatidylcholine</strong></div>
+          <div class="sc-meta"><span>Absorption Gain</span><strong>Up to 3.2x – 29x Higher</strong></div>
+        </div>
+      </div>
+    </article>
+
+    <hr class="sep">
+
+    <!-- Stage 5 -->
+    <article class="iwt iwt--row sc-stage sc-reveal" data-stage="05">
+      <div class="iwt__media sc-stage__media sc-stage__media--5">
+        <div class="sc-stage__overlay">
+          <div class="sc-stage__mol" aria-hidden="true">
+            <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- Shield / certification shape -->
+              <path d="M100,20 L160,50 L160,110 C160,150 130,175 100,185 C70,175 40,150 40,110 L40,50 Z" stroke="#efc04a" stroke-width="2" fill="rgba(14,74,44,0.5)" opacity="0.8"/>
+              <path d="M100,40 L145,63 L145,110 C145,140 122,160 100,168 C78,160 55,140 55,110 L55,63 Z" stroke="#e0a826" stroke-width="1.5" fill="none" opacity="0.5"/>
+              <!-- checkmark -->
+              <path d="M75,100 L92,120 L130,80" stroke="#efc04a" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="iwt__text sc-stage__text">
+        <div class="sc-stage__badge-row">
+          <span class="sc-stage__num">STAGE 05</span>
+          <span class="sc-stage__gate">Gate: NABL Release Clearance</span>
+        </div>
+        <h2 class="slot slot--r-title" data-reveal>Triple-Tier Analytical &amp; Toxicology Testing</h2>
+        <p class="slot slot--r-text" data-reveal>Every production lot undergoes independent NABL-accredited laboratory assays screening for heavy metals (Pb, As, Cd, Hg), 140+ pesticides, solvent residues, and microbial pathogens. Nothing ships until every parameter clears internationally recognised safety thresholds.</p>
+        <div class="sc-stage__meta" data-reveal>
+          <div class="sc-meta"><span>Heavy Metals</span><strong>ICP-MS Below Limits</strong></div>
+          <div class="sc-meta"><span>Microbial</span><strong>USP &lt;2021&gt; Pathogen-Free</strong></div>
+        </div>
+      </div>
+    </article>
+
+    <hr class="sep">
+
+    <!-- Stage 6 -->
+    <article class="iwt iwt--row iwt--rev sc-stage sc-reveal" data-stage="06">
+      <div class="iwt__media sc-stage__media sc-stage__media--6">
+        <div class="sc-stage__overlay">
+          <div class="sc-stage__mol" aria-hidden="true">
+            <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- Amber bottle silhouette + nitrogen -->
+              <rect x="80" y="50" width="40" height="80" rx="6" fill="rgba(200,146,26,0.3)" stroke="#efc04a" stroke-width="2"/>
+              <rect x="88" y="38" width="24" height="16" rx="4" fill="rgba(200,146,26,0.4)" stroke="#e0a826" stroke-width="1.5"/>
+              <!-- N₂ bubbles -->
+              <circle cx="93" cy="80" r="4" fill="#efc04a" opacity="0.5"/>
+              <circle cx="107" cy="95" r="5" fill="#efc04a" opacity="0.4"/>
+              <circle cx="96" cy="110" r="3" fill="#efc04a" opacity="0.6"/>
+              <circle cx="110" cy="70" r="3.5" fill="#efc04a" opacity="0.5"/>
+              <!-- leaf eco badge -->
+              <path d="M50,150 C50,120 80,110 100,130 C80,145 60,160 50,150 Z" fill="#238049" opacity="0.7"/>
+              <path d="M50,150 L70,135" stroke="#efc04a" stroke-width="1.5" opacity="0.6"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="iwt__text sc-stage__text">
+        <div class="sc-stage__badge-row">
+          <span class="sc-stage__num">STAGE 06</span>
+          <span class="sc-stage__gate">Gate: 24-Mo Accelerated Stability</span>
+        </div>
+        <h2 class="slot slot--r-title" data-reveal>Hermetic Eco-Grade Packaging &amp; Sealing</h2>
+        <p class="slot slot--r-text" data-reveal>Final formulations are bottled in pharmaceutical amber and violet glass with nitrogen headspace flushing to halt oxidative breakdown. Packaged in FSC-certified biodegradable outer cartons — zero plastic, zero compromise, 24-month guaranteed shelf stability.</p>
+        <div class="sc-stage__meta" data-reveal>
+          <div class="sc-meta"><span>Photoprotection</span><strong>Miron / Amber Glass</strong></div>
+          <div class="sc-meta"><span>Shelf Stability</span><strong>24 Months Guaranteed</strong></div>
+        </div>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     SECTION 5 — R&D FRONTIERS  (pnote equiv. with cards)
+     ════════════════════════════════════════════════════════════════ -->
+<section class="sc-frontiers pfeat pfeat--science" id="sc-frontiers">
+  <div class="sc-sec-label sc-reveal">Tomorrow's Healthcare Today</div>
+  <h2 class="sc-sec-title sc-reveal">Biotechnology &amp; Research Frontiers</h2>
+  <p class="sc-sec-desc sc-reveal">TranzLife Biosciences is actively developing proactive healthcare technologies that redefine preventive, precision, and longevity medicine at the molecular level.</p>
+
+  <div class="pfeat__grid sc-frontiers__grid">
+
+    <div class="pfeat__item sc-frontier sc-frontier--active" data-reveal>
+      <div class="sc-frontier__tag">Active R&amp;D Program</div>
+      <div class="sc-pillar__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+        </svg>
+      </div>
+      <h3 class="slot slot--b-title">Autism Spectrum Disorder (ASD)</h3>
+      <p class="slot slot--b-text">Preclinical exploration of neuro-active botanical complexes targeting neuro-inflammation and cognitive synaptic plasticity using <em>Bacopa monnieri</em>, <em>Juglans regia</em>, and <em>Curcuma caesia</em>.</p>
+    </div>
+
+    <div class="pfeat__item sc-frontier sc-frontier--active" data-reveal>
+      <div class="sc-frontier__tag">Active R&amp;D Program</div>
+      <div class="sc-pillar__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+      </div>
+      <h3 class="slot slot--b-title">Oncology &amp; Cellular Defense</h3>
+      <p class="slot slot--b-text">Investigating cytotoxic Annonaceous acetogenins isolated from <em>Annona muricata</em> (Graviola) to modulate abnormal cellular proliferation and activate programmed apoptotic pathways.</p>
+    </div>
+
+    <div class="pfeat__item sc-frontier" data-reveal>
+      <div class="sc-frontier__tag sc-frontier__tag--coming">Precision Medicine</div>
+      <div class="sc-pillar__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/>
+        </svg>
+      </div>
+      <h3 class="slot slot--b-title">Genetic Innovation &amp; Biomarkers</h3>
+      <p class="slot slot--b-text">Next-generation predictive genetic profiling and metabolic biomarker discovery to enable personalized preventative dosing long before clinical symptomatic onset.</p>
+    </div>
+
+    <div class="pfeat__item sc-frontier" data-reveal>
+      <div class="sc-frontier__tag sc-frontier__tag--coming">AI Health Technology</div>
+      <div class="sc-pillar__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+          <line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+        </svg>
+      </div>
+      <h3 class="slot slot--b-title">AI-Powered Synergistic Solutions</h3>
+      <p class="slot slot--b-text">Machine-learning algorithms modeling multi-terpene botanical affinity across human cellular receptor networks, unlocking unprecedented bioavailability and therapeutic harmony.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     SECTION 6 — CERTIFICATION BADGES  (Strip-style)
+     ════════════════════════════════════════════════════════════════ -->
+<section class="sc-certs" id="sc-certs">
+  <div class="sc-certs__inner sc-reveal">
+    <span class="sc-sec-label">Analytical Rigor &amp; Compliance</span>
+    <h2 class="sc-certs__title">Certified Scientific Standards</h2>
+    <p class="sc-certs__desc">We hold ourselves to rigorous international quality, regulatory, and safety frameworks at every phase of research and manufacturing.</p>
+    <div class="sc-certs__grid">
+      <div class="sc-cert">
+        <div class="sc-cert__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <strong>AYUSH GMP Certified</strong>
+        <span>Pharmaceutical manufacturing standards</span>
+      </div>
+      <div class="sc-cert">
+        <div class="sc-cert__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <strong>ISO 9001:2015</strong>
+        <span>Audited quality and batch safety management</span>
+      </div>
+      <div class="sc-cert">
+        <div class="sc-cert__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </div>
+        <strong>NABL Lab Verified</strong>
+        <span>Every lot screened for heavy metals &amp; toxins</span>
+      </div>
+      <div class="sc-cert">
+        <div class="sc-cert__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 0 1 10 10 10 10 0 0 1-10 10A10 10 0 0 1 2 12 10 10 0 0 1 12 2z"/><path d="m9 12 2 2 4-4"/></svg>
+        </div>
+        <strong>Non-GMO Verified</strong>
+        <span>Pure botanical species, zero genetic alteration</span>
+      </div>
+      <div class="sc-cert">
+        <div class="sc-cert__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        </div>
+        <strong>100% Cruelty-Free</strong>
+        <span>Ethical science, zero animal testing</span>
+      </div>
+      <div class="sc-cert">
+        <div class="sc-cert__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+        </div>
+        <strong>FSSAI Approved</strong>
+        <span>Food safety authority licensed</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     SECTION 7 — CTA BANNER  (bgvideo--sm equiv.)
+     ════════════════════════════════════════════════════════════════ -->
+<section class="sc-cta bgvideo bgvideo--sm" id="sc-cta">
+  <div class="media media--fill bgvideo__bg sc-cta__bg"></div>
+  <div class="bgvideo__shade sc-cta__shade"></div>
+
+  <!-- Particle canvas overlay for CTA -->
+  <canvas class="sc-cta__canvas" id="scCtaCanvas" aria-hidden="true"></canvas>
+
+  <div class="bgvideo__inner sc-cta__inner" data-reveal>
+    <p class="slot slot--eyebrow-w">Experience The Clinical Difference</p>
+    <h2 class="slot slot--bgv-title">Science You Can<br><em>Feel</em> Every Day</h2>
+    <p class="sc-cta__sub">Transform your daily wellness with formulations rooted in authentic botanical wisdom and validated by cutting-edge molecular biotechnology.</p>
+    <div class="sc-cta__actions">
+      <a href="/science" class="btn btn--light">Explore All Products</a>
+      <a href="/contact" class="btn sc-cta__outline">Contact Scientific Team</a>
+    </div>
+  </div>
+</section>

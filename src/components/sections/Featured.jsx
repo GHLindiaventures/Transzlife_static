@@ -1,4 +1,4 @@
-import { Media, Slot, Ph, ProductImg, range } from '../ui.jsx';
+import { Media, Slot, CtaLink, ProductImg, range } from '../ui.jsx';
 
 export function PriceRow() {
   return (
@@ -24,16 +24,16 @@ export function ProductCard({ n }) {
   );
 }
 
-/** Product card carousel. `titled` adds the section headline (used on the About page). */
-export default function Featured({ titled = false, photos = true }) {
+/** Product card carousel. `titled` adds the section headline (used on the About page). link: { label, to } */
+export default function Featured({ titled = false, photos = true, headline, link }) {
   return (
     <section className={`featured${titled ? ' featured--titled' : ''}`}>
-      {titled && <Slot as="h2" className="headline slot--headline" data-reveal />}
+      {titled && <Slot as="h2" className="headline slot--headline" data-reveal>{headline}</Slot>}
       <div className="featured__track" id="featuredTrack">
         {range(4).map((i) => <ProductCard key={i} n={photos ? i + 1 : 0} />)}
       </div>
       <div className="featured__foot">
-        <Ph className="link-btn link-btn--dark"><Slot className="slot--link" /></Ph>
+        <CtaLink to={link?.to} className="link-btn link-btn--dark"><Slot className="slot--link">{link?.label}</Slot></CtaLink>
       </div>
     </section>
   );

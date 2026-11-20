@@ -6,6 +6,7 @@ import './styles/styles.css';
 import './styles/pages.css';
 import './styles/slider.css';
 import './styles/theme.css';
+import './styles/content.css';
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>

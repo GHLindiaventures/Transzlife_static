@@ -1,0 +1,158 @@
+/* ==========================================================
+   About page: fitting the Tranz-life page into this site. Loaded after about-live.css.
+
+   The Tranz-life header floats over the page, so its sections carry extra top padding to clear it
+   (hero 144px, the interlude 92–124px, every chapter 84–108px). This site's header takes its own space,
+   so that padding only left empty bands and pushed content low. Here it is replaced with even spacing
+   from the page's golden scale (8 · 13 · 21 · 34 · 55 · 89 · 144).
+
+   --about-top = the header's height, --about-cut = header + announcement bar (set by About.jsx).
+   ========================================================== */
+
+/* ---------- full-screen parts fit under the sticky header ---------- */
+.about-page .about-hero{min-height:calc(100vh - var(--about-cut,0px));min-height:calc(100svh - var(--about-cut,0px))}
+.about-page .ast.is-pinned .ast-pin,
+.about-page .heal.is-pinned .heal-pin{top:var(--about-top,0px);height:calc(100vh - var(--about-top,0px));height:calc(100svh - var(--about-top,0px))}
+.about-page .ast-progress{top:var(--about-top,0px)}   /* phones: under the header */
+
+/* ---------- hero: centred in the first screen ---------- */
+/* even spacing above and below (was 144 / 55) */
+.about-page section.about-hero.about-hero--vision{padding-top:var(--g4)!important;padding-bottom:var(--g4)!important}
+/* the headline also scales with the screen's height, so the whole statement and "Begin the story" fit in the
+   first screen on laptops; the two sizes keep their 1 : 1.618 ratio (72 : 116.5 at full size) */
+.about-page .about-hero{--d-3:clamp(40px,min(5vw,6.8vh),72px);--d-4:clamp(64.7px,min(8.09vw,11vh),116.5px)}
+/* short laptop screens (768 / 720 px tall): one golden step tighter between the hero's parts */
+@media (min-width:900px) and (max-height:800px){
+  .about-page section.about-hero.about-hero--vision{padding-top:var(--g3)!important;padding-bottom:var(--g3)!important}
+  .about-page .about-hero .in-tagline-badge{margin-bottom:var(--g3)}
+  .about-page .about-hero .in-creed-footer{margin-top:var(--g4)}
+  .about-page .about-hero--vision .av-cta{margin-top:var(--g3)}
+}
+@media (max-width:899px){
+  .about-page section.about-hero.about-hero--vision{padding-top:var(--g5)!important;padding-bottom:var(--g5)!important}
+  .about-page .about-hero{--d-3:clamp(34px,10.5vw,44.5px);--d-4:clamp(55px,17vw,72px)}
+}
+
+/* ---------- "Cure ≠ Heal": centred on its stage ---------- */
+.about-page .heal-pin{padding-top:var(--g4);padding-bottom:var(--g4)}
+@media (max-width:899px){ .about-page .heal-pin{padding-top:var(--g5);padding-bottom:var(--g5)} }
+
+/* ---------- the five chapters ---------- */
+/* equal space above and below the content (was 84–108px above, 4vh below) */
+.about-page .ast{--ast-nav:4vh}
+/* the chapter rail sits 46px further in than on Tranz-life (clear of this site's chat button),
+   so the content keeps that much more room on the right */
+.about-page .ast-rail{right:64px}
+.about-page .ast.is-pinned{--ast-rail:138px}
+/* stacked chapters (phones): one golden step between them */
+.about-page .ast.is-static .ast-scene{padding-top:var(--g5);padding-bottom:var(--g5)}
+/* phones: the five values sit two to a row, so the fifth spans the row instead of leaving half of it empty */
+@media (max-width:599px){
+  .about-page .ast.is-static .ast-values{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .about-page .ast.is-static .ast-values li:last-child:nth-child(odd){grid-column:1 / -1}
+}
+
+/* ---------- the chapters fill large screens ----------
+   Tranz-life caps the chapters at fixed sizes (a 1320px frame, a 560px text column, a 440px mortar, a 400px film,
+   a 460px compass), so on wide or tall screens they sat in the middle of a mostly empty stage.
+   Here (pinned stage, screens taller than 800px; shorter ones keep Tranz-life's own compact sizes):
+   - the frame spans the screen, with equal margins left and right that clear the chapter rail;
+   - the visuals take a golden share of the stage height (0.618 for the mortar, about 0.72 for the film and compass);
+   - all chapter text follows one base size --S that grows with the screen (17px at 1440 x 900, up to 22px),
+     each element a golden step from it: x2.618 headings and stats, x1.618 years, x1.128 lead, x0.886 body,
+     x0.786 fine print. At 1440 x 900 the sizes are unchanged. */
+/* every pinned size: the frame spans the screen, the same margin on both sides (the right one clears the rail) */
+.about-page .ast.is-pinned .ast-body{max-width:none;padding-left:calc(max(24px,env(safe-area-inset-left,0px)) + var(--ast-rail))}
+@media (min-width:900px) and (min-height:801px){
+  .about-page .ast.is-pinned{--stage:calc(100vh - var(--about-top,0px));--S:clamp(17px,min(1.18vw,2.3vh),22px)}
+  .about-page .ast.is-pinned .ast-copy{max-width:calc(var(--S) * 34)}
+  .about-page .ast.is-pinned .ast-badges{max-width:calc(var(--S) * 34)}
+
+  .about-page .ast.is-pinned .ast-kicker,.about-page .ast.is-pinned .ast-vision h3,.about-page .ast.is-pinned .ast-mission h3{font-size:calc(var(--S) * .75)}
+  .about-page .ast.is-pinned .ast-h{font-size:calc(var(--S) * 2.618)}
+  .about-page .ast.is-pinned p.ast-lead.ast-st{font-size:calc(var(--S) * 1.128)!important}
+  .about-page .ast.is-pinned .ast-text,.about-page .ast.is-pinned .ast-mission li,.about-page .ast.is-pinned .ast-steps span,
+  .about-page .ast.is-pinned .ast-program p,.about-page .ast.is-pinned .ast-film-track strong{font-size:calc(var(--S) * .886)}
+  .about-page .ast.is-pinned .ast-vision p{font-size:calc(var(--S) * 1.128)}
+  .about-page .ast.is-pinned .ast-steps b{font-size:var(--S)}
+  .about-page .ast.is-pinned .ast-program.ast-st h3{font-size:var(--S)!important}
+  .about-page .ast.is-pinned .ast-stats.ast-st dd{font-size:calc(var(--S) * 2.618)!important}
+  .about-page .ast.is-pinned .ast-film-track b{font-size:calc(var(--S) * 1.618)!important}
+  .about-page .ast.is-pinned :is(.ast-stats dt,.ast-tags li,.ast-horizons li,.ast-film-track span,.ast-disclaimer,.ast-cap,.ast-more summary){font-size:calc(var(--S) * .786)}
+
+  .about-page .ast.is-pinned .ast-roots-visual{width:min(100%,calc(var(--stage) * .618))}
+  .about-page .ast.is-pinned .ast-orbit li{width:calc(var(--stage) * .618 * .19);height:calc(var(--stage) * .618 * .19)}
+  .about-page .ast.is-pinned .ast-iris{width:min(100%,calc(var(--stage) * .72 * 796 / 1024));max-height:none}
+  .about-page .ast.is-pinned .ast-dial-wrap{width:min(100%,calc(var(--stage) * .72))}
+  .about-page .ast.is-pinned .ast-frame img{max-height:calc(var(--stage) * .38)}
+
+  /* 05 frontier: the research cards were compact, leaving the chapter half the height of the others;
+     card padding and spacing now follow --S too (x1.128 / x1.618 padding, x.786 gap) */
+  .about-page .ast.is-pinned .ast-programs{gap:calc(var(--S) * .786)}
+  .about-page .ast.is-pinned .ast-program{padding:calc(var(--S) * 1.128) calc(var(--S) * 1.618)}
+  .about-page .ast.is-pinned .ast-program h3{margin-bottom:calc(var(--S) * .382)}
+  .about-page .ast.is-pinned .ast-horizons{gap:calc(var(--S) * .5)}
+  .about-page .ast.is-pinned .ast-horizons li{padding:calc(var(--S) * .382) calc(var(--S) * .786)}
+
+  /* "Cure ≠ Heal": the same base size; the two drawings take a golden share of the stage height */
+  .about-page .heal.is-pinned{--stage:calc(100vh - var(--about-top,0px));--S:clamp(17px,min(1.18vw,2.3vh),22px)}
+  .about-page .heal.is-pinned .heal-q{font-size:calc(var(--S) * 2.618)}
+  .about-page .heal.is-pinned p.heal-a{font-size:calc(var(--S) * 2.618)!important}
+  .about-page .heal.is-pinned .heal-side.heal-cure b,.about-page .heal.is-pinned .heal-side.heal-heal b{font-size:calc(var(--S) * 2.618)!important}
+  .about-page .heal.is-pinned .heal-side figcaption span{font-size:var(--S)}
+  .about-page .heal.is-pinned p.heal-close{font-size:calc(var(--S) * 1.272)!important}
+  .about-page .heal.is-pinned .heal-close span{font-size:calc(var(--S) * 1.618)!important}
+  .about-page .heal.is-pinned .heal-whole li{font-size:calc(var(--S) * .886)!important}
+  .about-page .heal.is-pinned .heal-cure,.about-page .heal.is-pinned .heal-heal{--art:min(30vw,calc(var(--stage) * .382))}
+  .about-page .heal.is-pinned .heal-split{width:min(calc(var(--S) * 66),100%)}
+}
+
+/* ---------- golden split on wide screens ----------
+   Chapters built around one object (01 the mortar, 02 the lab film, 04 the compass) give the object the larger
+   golden share: text 1 : visual 1.618. The text column then lands near a 60-character line, so it grows in height
+   instead of running in long lines across a short block, and the composition fills the stage.
+   Below 1600px the columns stay equal (a 38 % text column would be too narrow there). */
+@media (min-width:1600px) and (min-height:801px){
+  .about-page .ast.is-pinned :is(.ast-roots,.ast-compass) .ast-body{grid-template-columns:minmax(0,1fr) minmax(0,1.618fr)}
+  .about-page .ast.is-pinned .ast-science .ast-body{grid-template-columns:minmax(0,1.618fr) minmax(0,1fr)}
+  /* the mortar uses its wider column: three quarters of the stage height instead of 0.618, herbs in proportion */
+  .about-page .ast.is-pinned .ast-roots-visual{width:min(100%,calc(var(--stage) * .75))}
+  .about-page .ast.is-pinned .ast-orbit li{width:calc(var(--stage) * .75 * .19);height:calc(var(--stage) * .75 * .19)}
+}
+
+/* ---------- 01 roots: the ingredients belong to the mortar ----------
+   The herbs orbit on one ring around the bowl (about-story.js publishes it as --orx / --ory / --ocy).
+   A faint track draws that ring, and a soft ground shadow sets the mortar on a surface, so the herbs read as
+   circling it rather than floating free. Both appear with the chapter's entrance (--en). */
+.about-page .ast-roots-visual::before{
+  content:"";position:absolute;left:50%;top:50%;z-index:1;pointer-events:none;
+  width:calc(var(--orx,0px) * 2);height:calc(var(--ory,0px) * 2);
+  transform:translate(-50%,calc(-50% + var(--ocy,0px)));
+  border-radius:50%;border:1px solid rgba(168,102,26,.26);
+  box-shadow:0 0 24px rgba(231,198,128,.18),inset 0 0 24px rgba(231,198,128,.12);
+  opacity:calc(var(--en,1) * .9);
+}
+.about-page .ast-object::after{
+  content:"";position:absolute;left:12%;right:12%;bottom:-3%;height:11%;z-index:-1;pointer-events:none;
+  border-radius:50%;background:radial-gradient(closest-side,rgba(24,40,22,.34),rgba(24,40,22,0));
+  opacity:var(--en,1);
+}
+/* depth: herbs at the back of the ring sit a little softer and dimmer, those in front a little crisper */
+.about-page .ast-orbit li{transition:filter .4s}
+.about-page .ast-orbit li.is-far{filter:saturate(.85)}
+
+/* ---------- chapter rail ----------
+   Same rail and behaviour; spacing on the golden scale (13px), and the chapters not in view are quieter
+   (dimmer, a little desaturated), so the active one, already larger with a gold ring, stands out clearly. */
+.about-page .ast-rail ol{gap:var(--g2)}
+.about-page .ast-rail .ar-thumb{transition:opacity .3s,filter .3s,transform .35s var(--ease-expo),border-color .3s,box-shadow .3s}
+.about-page .ast-rail a:not(.is-on) .ar-thumb{opacity:.72;filter:saturate(.7)}
+.about-page .ast-rail a:hover .ar-thumb,.about-page .ast-rail a:focus-visible .ar-thumb{opacity:1;filter:none}
+
+/* ---------- type: the few sizes still off the golden scale, snapped to it ---------- */
+/* body copy 16 -> 17, card copy 14 -> 15.1, fine print 13 -> 13.4, reading line-height 1.618
+   (the chapters' own tighter sizes for narrow or short screens still apply) */
+.about-page .ast-text{font-size:var(--t-md);line-height:var(--lh-text)}
+.about-page .ast-steps span,.about-page .ast-program p{font-size:var(--t-sm)}
+.about-page .ast-film-track span,.about-page .ast-disclaimer,.about-page .ast-tags li,.about-page .ast-horizons li,
+.about-page .ast-stats dt{font-size:var(--t-xs)}
