@@ -1,0 +1,154 @@
+/* ==========================================================
+   THEME: deep green + golden yellow
+   Loaded last. Change the palette tokens below to re-theme the whole site.
+   ========================================================== */
+:root{
+  /* palette */
+  --green-950:#08261a;
+  --green-900:#0c3320;
+  --green-800:#124a2c;
+  --green-700:#1a6b3c;
+  --green-600:#238049;
+  --green-100:#e3eddc;
+  --gold-600:#c8921a;
+  --gold-500:#e0a826;
+  --gold-400:#efc04a;
+  --gold-200:#f6e3a1;
+  --gold-100:#faf0cf;
+
+  /* tokens used across styles.css / pages.css / slider.css */
+  --bg:#fcfaf1;
+  --bg-warm:#f7efd2;
+  --ink:#0f2f1d;
+  --ink-soft:rgba(15,47,29,.7);
+  --accent:#165a32;
+  --badge:var(--gold-500);
+  --placeholder:#e1e8d5;
+  --placeholder-dark:var(--green-900);
+  --slide-bg:var(--gold-500);
+  --line:rgba(15,47,29,.7);
+}
+
+body{background:var(--bg);color:var(--ink)}
+::selection{background:var(--gold-400);color:var(--green-950)}
+:focus-visible{outline:2px solid var(--gold-500);outline-offset:2px}
+
+/* ---- announcement bar ---- */
+.announcement{background:var(--green-800);color:var(--gold-400)}
+.announcement__close{background:var(--green-800);color:var(--gold-400)}
+
+/* ---- header ---- */
+.header{background:linear-gradient(to bottom,rgba(252,250,241,.97),rgba(252,250,241,.93))}
+.header.is-stuck{background:rgba(252,250,241,.96);box-shadow:0 1px 0 rgba(15,47,29,.1)}
+.nav__link{color:var(--green-900)}
+.nav__link::after{background:var(--gold-500);height:2px}
+.nav__link:hover{color:var(--green-700)}
+.mega{background:var(--bg);border-top:2px solid var(--gold-500)}
+.mega__card:hover .mega__caption{color:var(--green-700);text-decoration-color:var(--gold-500)}
+.mega__circle-dot{background:var(--green-700)}
+.media--circle{background:linear-gradient(135deg,var(--gold-400),var(--gold-600))}
+.icon-btn:hover{color:var(--green-700);opacity:1}
+.drawer{background:var(--bg)}
+.drawer__row{border-top-color:rgba(15,47,29,.12)}
+.drawer__row[aria-current="page"]{background:var(--gold-100)}
+
+/* ---- buttons / links ---- */
+.btn--light{background:var(--gold-500);color:var(--green-950)}
+.btn--light:hover{background:var(--green-800);color:var(--gold-400)}
+.btn--dark{background:var(--green-700);color:#fff}
+.btn--dark:hover{background:var(--green-900);color:var(--gold-400)}
+.link-btn::after{background:var(--gold-500);height:2px}
+.link-btn--dark:hover{color:var(--green-700)}
+.dot{background:rgba(15,47,29,.22)}
+.dot.is-active{background:var(--green-700)}
+
+/* ---- hero ---- */
+.hero{background:var(--green-900)}
+.hero__bg{background:linear-gradient(120deg,#9fb892,#cdd9c4)}
+.hero__shade{background:linear-gradient(90deg,rgba(8,38,26,.5),rgba(8,38,26,0) 65%)}
+.hero__dot i{background:rgba(255,255,255,.4)}
+.hero__dot i::after{background:var(--gold-400)}
+
+/* ---- product cards ---- */
+.pcard__badge{background:var(--gold-500);border-radius:4px}
+.pcard__price .slot--pill{background:var(--gold-500);border-radius:4px}
+.pcard__quick{background:var(--green-700);color:#fff}
+.pcard__quick:hover{background:var(--green-900)}
+.media--product{background:#fff}
+
+/* ---- big banner ---- */
+.banner{background:var(--green-900)}
+.banner__bg{background:linear-gradient(135deg,#1d5a35,#0c3320)}
+.banner__shade{background:rgba(8,38,26,.3)}
+
+/* ---- benefits / features ---- */
+.benefits,.pfeat{background:var(--bg-warm)}
+.pfeat--plain{background:transparent}
+.media--icon{background:var(--gold-200)}
+
+/* ---- product slider: alternate gold / green slides ---- */
+.pslider{background:var(--gold-500)}
+.pslider__slide{background:var(--gold-500)}
+.pslider__slide:nth-child(even){background:var(--green-700)}
+.pslider__right{background:var(--green-900)}
+.pslider__right .media{background:linear-gradient(135deg,#6f9a7c,#3d6b4e)}
+.pslider__next{background:#fff;color:var(--green-900)}
+.pslider__next:hover{background:var(--gold-100)}
+.pslider .dot{background:rgba(255,255,255,.55)}
+.pslider .dot.is-active{background:#fff}
+
+/* ---- reels / strip / brands ---- */
+.reel .media{background:linear-gradient(160deg,var(--green-100),#cfdcc2)}
+.reels__chip{border-color:var(--green-700);background:rgba(250,240,207,.6)}
+.reels__chip:hover{background:var(--gold-100)}
+.strip__group i{background:var(--gold-500)}
+.media--logo{background:var(--green-100)}
+
+/* ---- image with text / parallax ---- */
+.parallax__bg{background:linear-gradient(160deg,#dfe8d2,#f3e6b3)}
+.parallax__arrow{color:var(--green-700)}
+
+/* ---- background video ---- */
+.bgvideo__bg{background:linear-gradient(135deg,#2f6b46,#124a2c)}
+.bgvideo__shade{background:rgba(8,38,26,.35)}
+
+/* ---- testimonials ---- */
+.testi__arrow:hover{color:var(--green-700);opacity:1}
+
+/* ---- newsletter ---- */
+.news__bg{background:linear-gradient(135deg,#f3d272,var(--gold-500) 55%,var(--gold-600))}
+.news__card{background:rgba(252,250,241,.62);border-color:rgba(255,255,255,.55)}
+.news__field input{border-color:rgba(15,47,29,.25)}
+.news__field input:focus{border-color:var(--green-700);box-shadow:0 0 0 3px rgba(224,168,38,.35)}
+
+/* ---- inner page banners ---- */
+.pbanner{background:var(--green-700)}
+.pbanner--dark{background:var(--green-950)}
+.pbanner__shade{background:linear-gradient(to top,rgba(8,38,26,.35),rgba(8,38,26,.05))}
+.pbanner::before{content:"";position:absolute;inset:auto 0 0 0;height:4px;background:var(--gold-500);z-index:2}
+
+/* ---- FAQ / forms / blog / contact ---- */
+.faq__q:hover{color:var(--green-700)}
+.faq__item.is-open .faq__q{color:var(--green-700)}
+.field input:focus,.field textarea:focus{border-color:var(--green-700);box-shadow:0 0 0 3px rgba(224,168,38,.3);background:#fff}
+.bcard:hover .slot--bc-title{outline-color:var(--gold-500)}
+
+/* ---- footer ---- */
+.footer{background:var(--green-900);color:#fff}
+.footer__col h4{color:var(--gold-400)}
+.footer__col li a:hover{color:var(--gold-400)}
+.footer__social a{color:var(--gold-400)}
+.footer__social a:hover{color:#fff;opacity:1}
+.footer__copy{color:rgba(250,240,207,.75)}
+.footer__inner{border-top:4px solid var(--gold-500)}
+
+/* ---- floating widget ---- */
+.float-widget{box-shadow:0 2px 12px rgba(8,38,26,.25)}
+.float-widget__icon{background:var(--gold-500)}
+
+/* ---- dashed placeholder guides in theme colours ---- */
+.show-slots .slot{outline-color:rgba(26,107,60,.45)}
+.show-slots .hero .slot,.show-slots .banner .slot,.show-slots .bgvideo .slot,.show-slots .announcement .slot,
+.show-slots .footer .slot,.show-slots .pbanner .slot,.show-slots .pslider .slot,.show-slots .btn--dark .slot,
+.show-slots .mega__circle-dot .slot{outline-color:rgba(239,192,74,.7)}
+.show-slots .news__card .slot,.show-slots .banner__inner .btn .slot{outline-color:rgba(15,47,29,.4)}
