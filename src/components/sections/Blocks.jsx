@@ -1,16 +1,20 @@
 import { Fragment } from 'react';
-import { Media, MediaContent, Slot, Ph, CtaLink, range } from '../ui.jsx';
+import { Media, Slot, Ph, range } from '../ui.jsx';
+import {
+  RICH, BANNER, BENEFITS, STRIP, STORY_BLOCK, BRANDS, BGVIDEO, NEWSLETTER,
+  PHOTOS,
+} from '../../content/site.js';
 
 export const Sep = ({ gap = false }) => <hr className={`sep${gap ? ' sep--gap' : ''}`} />;
 
 /* ---------------- home page blocks ---------------- */
 
-export function Rich({ eyebrow, title } = {}) {
+export function Rich() {
   return (
     <section className="rich">
       <div className="rich__inner" data-reveal>
-        <Slot as="p" className="slot--eyebrow">{eyebrow}</Slot>
-        <Slot as="h2" className="slot--rich">{title}</Slot>
+        <Slot as="p" className="slot--eyebrow">{RICH.eyebrow}</Slot>
+        <Slot as="h2" className="slot--rich">{RICH.title}</Slot>
       </div>
     </section>
   );
@@ -20,30 +24,29 @@ export function Rich({ eyebrow, title } = {}) {
 export function Banner() {
   return (
     <section className="banner">
-      <Media className="media--fill banner__bg" />
+      <Media className="media--fill banner__bg" photo={PHOTOS.banner} />
       <div className="banner__shade" />
       <div className="banner__inner">
         <div className="banner__marquee" aria-hidden="true">
           {range(2).map((g) => (
             <div className="banner__marquee-group" key={g}>
-              <Slot as="h2" className="slot--banner-title" />
-              <Slot as="h2" className="slot--banner-title" />
+              {BANNER.words.map((w) => <Slot as="h2" className="slot--banner-title" key={w}>{w}</Slot>)}
             </div>
           ))}
         </div>
-        <Ph className="btn btn--light"><Slot className="slot--btn" /></Ph>
+        <Ph className="btn btn--light"><Slot className="slot--btn">{BANNER.cta}</Slot></Ph>
       </div>
     </section>
   );
 }
 
 export function Benefits() {
-  const col = (right) => (
+  const col = (items, right) => (
     <div className={`benefits__col${right ? ' benefits__col--right' : ''}`}>
-      {range(3).map((i) => (
-        <div className="benefit" data-reveal key={i}>
-          <Slot as="h3" className="slot--b-title" />
-          <Slot as="p" className="slot--b-text" />
+      {items.map((b) => (
+        <div className="benefit" data-reveal key={b.title}>
+          <Slot as="h3" className="slot--b-title">{b.title}</Slot>
+          <Slot as="p" className="slot--b-text">{b.text}</Slot>
         </div>
       ))}
     </div>
@@ -51,28 +54,25 @@ export function Benefits() {
   return (
     <section className="benefits">
       <div className="benefits__inner page-pad--lg">
-        <Slot as="h2" className="headline slot--headline" data-reveal />
+        <Slot as="h2" className="headline slot--headline" data-reveal>{BENEFITS.headline}</Slot>
         <div className="benefits__grid">
-          {col(false)}
-          <div className="benefits__center"><Media className="media--benefits" data-reveal /></div>
-          {col(true)}
+          {col(BENEFITS.items.slice(0, 3), false)}
+          <div className="benefits__center"><Media className="media--benefits" photo={PHOTOS.benefits} data-reveal /></div>
+          {col(BENEFITS.items.slice(3), true)}
         </div>
       </div>
     </section>
   );
 }
 
-/** Small scrolling text strip. `items` = optional list of words (the marquee is decorative, so they are also listed for screen readers). */
-export function Strip({ items } = {}) {
-  // short lists are repeated so each marquee group stays wide enough to loop without a gap
-  const shown = items ? (items.length < 8 ? [...items, ...items] : items) : range(4).map(() => null);
+/** Small scrolling text strip. */
+export function Strip({ items = STRIP }) {
   return (
     <section className="strip">
-      {items && <ul className="visually-hidden">{items.map((t) => <li key={t}>{t}</li>)}</ul>}
       <div className="strip__marquee" aria-hidden="true">
         {range(2).map((g) => (
           <div className="strip__group" key={g}>
-            {shown.map((t, i) => (
+            {[...items, ...items].map((t, i) => (
               <Fragment key={i}><Slot className="slot--strip">{t}</Slot><i /></Fragment>
             ))}
           </div>
@@ -85,10 +85,10 @@ export function Strip({ items } = {}) {
 export function ImageWithText() {
   return (
     <section className="iwt">
-      <div className="iwt__media"><Media className="media--fill" data-reveal /></div>
+      <div className="iwt__media"><Media className="media--fill" photo={PHOTOS.iwt} data-reveal /></div>
       <div className="iwt__text">
-        <Slot as="h2" className="slot--iwt-title" data-reveal />
-        {range(3).map((i) => <Slot as="p" className="slot--iwt-p" data-reveal key={i} />)}
+        <Slot as="h2" className="slot--iwt-title" data-reveal>{STORY_BLOCK.title}</Slot>
+        {STORY_BLOCK.paragraphs.map((t) => <Slot as="p" className="slot--iwt-p" data-reveal key={t}>{t}</Slot>)}
       </div>
     </section>
   );
@@ -98,7 +98,7 @@ export function Brands() {
   return (
     <section className="brands">
       <div className="brands__inner">
-        <Slot as="h2" className="headline slot--headline" data-reveal />
+        <Slot as="h2" className="headline slot--headline" data-reveal>{BRANDS.headline}</Slot>
         <div className="brands__marquee" aria-hidden="true">
           {range(2).map((g) => (
             <div className="brands__group" key={g}>
@@ -112,10 +112,10 @@ export function Brands() {
 }
 
 /** Background-video block. `small` = the 560px version used on About / Science. */
-export function BgVideo({ small = false, eyebrow, title, media }) {
+export function BgVideo({ small = false, photo = BGVIDEO.photo, eyebrow = BGVIDEO.eyebrow, title = BGVIDEO.title }) {
   return (
     <section className={`bgvideo${small ? ' bgvideo--sm' : ''}`}>
-      <Media className="media--fill bgvideo__bg"><MediaContent media={media} /></Media>
+      <Media className="media--fill bgvideo__bg" photo={photo} />
       <div className="bgvideo__shade" />
       <div className="bgvideo__inner" data-reveal>
         <Slot as="p" className="slot--eyebrow-w">{eyebrow}</Slot>
@@ -125,19 +125,19 @@ export function BgVideo({ small = false, eyebrow, title, media }) {
   );
 }
 
-export function Newsletter({ small = false, title, text, button }) {
+export function Newsletter({ small = false }) {
   return (
     <section className={`news${small ? ' news--sm' : ''}`}>
       <Media className="media--fill news__bg" />
       <div className="news__card" data-reveal>
-        <Slot as="h2" className="slot--news-title">{title}</Slot>
-        <Slot as="p" className="slot--news-p">{text}</Slot>
+        <Slot as="h2" className="slot--news-title">{NEWSLETTER.title}</Slot>
+        <Slot as="p" className="slot--news-p">{NEWSLETTER.text}</Slot>
         <form className="news__form" onSubmit={(e) => e.preventDefault()}>
           <label className="news__field">
-            <span className="visually-hidden">Email</span>
-            <input type="email" autoComplete="email" />
+            <span className="visually-hidden">{NEWSLETTER.email}</span>
+            <input type="email" autoComplete="email" placeholder={NEWSLETTER.email} />
           </label>
-          <button className="btn btn--dark news__send" type="submit"><Slot className="slot--btn-sm">{button}</Slot></button>
+          <button className="btn btn--dark news__send" type="submit"><Slot className="slot--btn-sm">{NEWSLETTER.button}</Slot></button>
         </form>
       </div>
     </section>
@@ -147,49 +147,47 @@ export function Newsletter({ small = false, title, text, button }) {
 /* ---------------- inner page blocks (about / science / faq / blog / contact) ---------------- */
 
 /** variant: '' (480) | 'about' (661) | 'dark' (580) */
-export function PageBanner({ variant = '', title, media }) {
+export function PageBanner({ variant = '', title, photo }) {
   return (
     <section className={`pbanner${variant ? ` pbanner--${variant}` : ''}`}>
-      <Media className="media--fill"><MediaContent media={media} eager /></Media>
+      <Media className="media--fill" photo={photo} />
       <div className="pbanner__shade" />
       <div className="pbanner__inner"><Slot as="h1" className="slot--pb-title">{title}</Slot></div>
     </section>
   );
 }
 
-export function Intro({ withText = true, title, text }) {
+export function Intro({ title, text }) {
   return (
-    <section className={`pintro${withText ? '' : ' pintro--title-only'}`}>
+    <section className={`pintro${text ? '' : ' pintro--title-only'}`}>
       <div className="pintro__inner" data-reveal>
         <Slot as="h2" className="slot--i-title">{title}</Slot>
-        {withText && <Slot as="p" className="slot--i-text">{text}</Slot>}
+        {text && <Slot as="p" className="slot--i-text">{text}</Slot>}
       </div>
     </section>
   );
 }
 
-/** Image + text row. reverse = image on the right. mod: '' | 'short' | 'tall'. `text` may be one paragraph or a list of them. */
-export function Row({ reverse = false, mod = '', title, text, media }) {
-  const paras = Array.isArray(text) ? text : [text];
+/** Image + text row. reverse = image on the right. mod: '' | 'short' | 'tall' */
+export function Row({ reverse = false, mod = '', title, text, photo }) {
   return (
     <section className={`iwt iwt--row${reverse ? ' iwt--rev' : ''}${mod ? ` iwt--${mod}` : ''}`}>
-      <div className="iwt__media"><Media className="media--fill" data-reveal><MediaContent media={media} /></Media></div>
+      <div className="iwt__media"><Media className="media--fill" photo={photo} data-reveal /></div>
       <div className="iwt__text">
         <Slot as="h2" className="slot--r-title" data-reveal>{title}</Slot>
-        {paras.map((p, i) => <Slot as="p" className="slot--r-text" data-reveal key={i}>{p}</Slot>)}
+        <Slot as="p" className="slot--r-text" data-reveal>{text}</Slot>
       </div>
     </section>
   );
 }
 
 /** Row of icon + title + text columns. cls: 'pfeat--science' | 'pfeat--plain' | '' */
-export function Features({ cls = '', count = 4, items }) {
-  const list = items ?? range(count).map(() => ({}));
+export function Features({ cls = '', items }) {
   return (
     <section className={`pfeat ${cls}`.trim()}>
       <div className="pfeat__grid">
-        {list.map((it, i) => (
-          <div className="pfeat__item" data-reveal key={i}>
+        {items.map((it) => (
+          <div className="pfeat__item" data-reveal key={it.title}>
             <Media className="media--icon" />
             <Slot as="h3" className="slot--b-title">{it.title}</Slot>
             <Slot as="p" className="slot--b-text">{it.text}</Slot>
@@ -200,15 +198,13 @@ export function Features({ cls = '', count = 4, items }) {
   );
 }
 
-/** Short centred note. With content, a missing `title` is left out instead of showing an empty slot. button: { label, to } */
-export function Note({ cta = false, title, text, button }) {
-  const filled = Boolean(title || text);
+export function Note({ title, text, button }) {
   return (
-    <section className={`pnote${cta ? ' pnote--cta' : ''}`}>
+    <section className={`pnote${button ? ' pnote--cta' : ''}`}>
       <div data-reveal>
-        {(!filled || title) && <Slot as="h2" className="slot--n-title">{title}</Slot>}
+        <Slot as="h2" className="slot--n-title">{title}</Slot>
         <Slot as="p" className="slot--n-text">{text}</Slot>
-        {cta && <CtaLink to={button?.to} className="btn btn--dark"><Slot className="slot--btn-sm">{button?.label}</Slot></CtaLink>}
+        {button && <Ph className="btn btn--dark"><Slot className="slot--btn-sm">{button}</Slot></Ph>}
       </div>
     </section>
   );

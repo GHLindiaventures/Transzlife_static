@@ -1,0 +1,104 @@
+/* Product details page (summary + "more" row). The showcase section has its own stylesheet: showcase.css */
+.pdp{padding:var(--s-6) 0 var(--s-7)}
+.pdp__inner{width:min(1296px,100% - 2 * var(--pad));margin-inline:auto}
+.pdp__back{display:inline-block;margin-bottom:var(--s-5);font-size:var(--fs--1);font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--green-700)}
+.pdp__back:hover{color:var(--green-900);text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--gold-500)}
+
+/* image : text = 1 : phi (golden split) */
+.pdp__grid{display:grid;grid-template-columns:1fr 1.618fr;gap:var(--s-6);align-items:center}
+.pdp__pack{
+  aspect-ratio:1/1;display:grid;place-items:center;padding:var(--s-5);border-radius:var(--r-4);
+  background:radial-gradient(ellipse 100% 90% at 50% 40%,#fffaea,#f6e8bd 60%,#ebd28a);
+  border:1px solid var(--glass-border,rgba(255,255,255,.65));
+  box-shadow:0 18px 50px rgba(15,47,29,.16),inset 0 1px 0 rgba(255,255,255,.75);
+}
+.pdp__pack img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 20px 22px rgba(80,55,10,.28))}
+
+.pdp__tag{margin:0 0 var(--s-3);font-size:var(--fs--1);font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--green-600)}
+.pdp__title{margin:0;font-size:var(--fs-5);line-height:var(--lh-d);font-weight:700;color:var(--green-900)}
+.pdp__price{display:flex;align-items:baseline;gap:var(--s-3);margin:var(--s-4) 0 0}
+.pdp__price span{font-size:var(--fs-3);font-weight:700;color:var(--green-800)}
+.pdp__price small{font-size:var(--fs-0);color:var(--ink-soft)}
+.pdp__desc{margin:var(--s-4) 0 0;max-width:36em;font-size:var(--fs-1);line-height:var(--lh);color:var(--ink)}
+.pdp__k{margin:var(--s-5) 0 var(--s-3);font-size:var(--fs--1);font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--green-600)}
+.pdp__chips{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:var(--s-2)}
+.pdp__chips li{padding:var(--s-2) var(--s-3);border-radius:999px;font-size:var(--fs-0);font-weight:600;color:var(--green-800);background:rgba(255,255,255,.7);border:1px solid rgba(15,47,29,.14)}
+.pdp__dose{margin:0;font-size:var(--fs-0);line-height:var(--lh)}
+
+.pdp-more{padding:var(--s-7) 0 var(--s-8);background:var(--bg-warm)}
+.pdp-more .pdp__k{margin-top:0;margin-bottom:var(--s-5)}
+.pdp-more__grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s-4)}
+.pdp-more__grid a{display:grid;gap:var(--s-1);justify-items:center;text-align:center;padding:var(--s-4);border-radius:var(--r-3);background:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.7);box-shadow:var(--glass-shadow,0 8px 32px rgba(15,47,29,.12));transition:transform .4s var(--ease),box-shadow .4s var(--ease)}
+.pdp-more__grid a:hover{transform:translateY(-4px)}
+.pdp-more__img{width:100%;aspect-ratio:1.272/1;display:grid;place-items:center}
+.pdp-more__img img{width:72%;height:100%;object-fit:contain}
+.pdp-more__grid b{font-size:var(--fs-0);color:var(--green-900)}
+.pdp-more__grid small{font-size:var(--fs--1);color:var(--ink-soft)}
+
+@media (max-width:989px){.pdp__grid{grid-template-columns:1fr;gap:var(--s-5)}.pdp__pack{max-width:420px;margin-inline:auto;width:100%}.pdp__title{font-size:var(--fs-4)}.pdp-more__grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:749px){.pdp{padding:var(--s-5) 0 var(--s-6)}.pdp__title{font-size:var(--fs-3)}.pdp__desc{font-size:var(--fs-0)}.pdp-more{padding:var(--s-6) 0 var(--s-7)}.pdp-more__grid{gap:var(--s-3)}}
+
+/* product links: whole image area of a card is clickable (under the quick-add button), names are links */
+.pcard__link{position:absolute;inset:0;z-index:1;border-radius:inherit}
+.pcard__badge,.pcard__quick{z-index:2}
+.pcard__title{margin:0}
+.pcard__title a,.pslider__name a{display:block;color:inherit}
+.pcard__title a:hover .slot,.pslider__name a:hover .slot{text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--gold-500)}
+.pslider__name{margin:0;text-align:center}
+.pslider__left .pslider__name .slot--card-title{margin:0 auto 6px;max-width:90%}
+
+/* "More from TranzLife": equal, shrinkable columns so nothing pushes the page wider than the screen */
+.pdp-more__grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+.pdp-more__grid li,.pdp-more__grid a{min-width:0}
+@media (max-width:989px){.pdp-more__grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.pdp-more__grid a{grid-template-columns:minmax(0,1fr)}
+.pdp-more__img{min-width:0;overflow:hidden}
+.pdp-more__img img{max-width:100%;min-width:0}
+
+/* product names: keep the ™ on the same line as the name */
+.has-text.slot--card-title{white-space:nowrap}
+.pslider__left .has-text.slot--card-title{max-width:none}
+
+/* ==========================================================
+   PRODUCT SLIDER: right half = the before / after comparison slider (same handle, labels and sweep as the product pages)
+   ========================================================== */
+.pslider__right{background:var(--green-900)}
+.pslider__right::after{display:none}                      /* no photo shade over the comparison */
+.cmp{position:absolute;inset:0;overflow:hidden;isolation:isolate;touch-action:pan-y;user-select:none;-webkit-user-select:none;cursor:ew-resize;--pos:50}
+.cmp .psc-layer{position:absolute;inset:0}
+.cmp-bg{position:absolute;inset:0;overflow:hidden}
+.cmp-img{position:absolute;pointer-events:none;max-width:none}
+
+/* two full pictures, aligned and edge to edge (same zoom on both so they line up exactly) */
+.cmp--scene .cmp-bg{display:none}
+.cmp--scene .cmp-img{inset:0;width:100%;height:100%;object-fit:cover;object-position:center;transform:scale(1.13)}
+
+/* cut-out artwork: murky "before" backdrop, fresh botanical "after" backdrop */
+.cmp--cutout .cmp-before .cmp-bg{background:radial-gradient(ellipse 55% 60% at 50% 52%,rgba(120,104,78,.55),transparent 70%),radial-gradient(ellipse 120% 90% at 50% 50%,#57513f 0%,#3b3a2f 55%,#26261f 100%)}
+.cmp--cutout .cmp-before .cmp-bg::before{content:"";position:absolute;inset:0;opacity:.5;
+  background-image:radial-gradient(circle,rgba(196,178,140,.55) 1.2px,transparent 1.8px),radial-gradient(circle,rgba(150,140,110,.4) 1px,transparent 1.6px);
+  background-size:46px 46px,29px 29px;background-position:0 0,13px 17px}
+.cmp-haze{position:absolute;inset:-10%;filter:blur(8px);
+  background:radial-gradient(ellipse 45% 35% at 30% 30%,rgba(160,150,120,.22),transparent 70%),radial-gradient(ellipse 40% 30% at 75% 75%,rgba(120,110,90,.25),transparent 70%)}
+.cmp--cutout .cmp-after .cmp-bg{background:radial-gradient(ellipse 120% 95% at 50% 45%,#f7f4e3 0%,#e3efd8 46%,#b9d7a6 100%)}
+.cmp-glow{position:absolute;left:50%;top:50%;width:62%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;
+  background:radial-gradient(circle,rgba(255,236,170,.75) 0%,rgba(231,198,128,.28) 38%,transparent 68%)}
+.cmp-glow::after{content:"";position:absolute;inset:14%;border-radius:50%;border:1px solid rgba(214,162,58,.35)}
+.cmp--cutout .cmp-img{inset:8%;width:84%;height:84%;object-fit:contain;filter:drop-shadow(0 18px 22px rgba(30,20,10,.28))}
+
+/* labels: "Before" is dark glass on the murky side / photo, "After" is light glass */
+.cmp .psc-label--left{color:#f3ecd8;background:rgba(28,26,20,.5)}
+.cmp:hover .psc-knob,.cmp.is-dragging .psc-knob{transform:scale(1.08)}
+.cmp .psc-handle:focus-visible .psc-knob{box-shadow:0 0 0 4px #fff,0 0 0 7px var(--gold-500),0 14px 30px -8px rgba(10,30,14,.6)}
+
+@media (max-width:749px){
+  .pslider__slide{grid-template-rows:56% 44%}
+  .pslider__left{padding:var(--s-3) var(--s-4) var(--s-5);justify-content:center}
+  .pslider__left .media--pslider{width:min(150px,44%);border-radius:var(--r-3)}
+  .pslider__left .media--pslider>img{border-radius:var(--r-3)}
+  .pslider__dots{left:50%;transform:translateX(-50%);bottom:calc(44% + 10px)}
+  .pslider__next{top:28%;right:var(--s-3)}
+  .cmp--scene .cmp-img{transform:scale(1.42);transform-origin:50% 28%}
+  .cmp--cutout .cmp-img{inset:6% 10%;width:80%;height:88%}
+  .cmp .psc-knob{width:44px}
+}

@@ -1,0 +1,289 @@
+/* ==========================================================
+   SITE CONTENT
+   All copy lives here, taken from the original TranzLife project
+   (Tranz_life_dev: src/data/*.js and the page HTML).
+   Edit this file to change text; components never hard-code copy.
+   ========================================================== */
+
+export const BRAND = {
+  name: 'TranzLife Biosciences',
+  tagline: 'Innovating life beyond limits',
+  creed: 'Rooted in Nature · Perfected by Science · Shaping Everyday Longevity',
+  email: 'info@tranzlife.in',
+  careEmail: 'care@tranzlife.in',
+  phone: '+91 917 611 2188 / +91 44 1234 5678',
+  address: 'Tranz Life Biosciences Pvt. Ltd., 6, Flat 2D, 2nd Floor, Queenscourt, Montieth Road, Egmore, Chennai - 600 008, Tamil Nadu, India.',
+  hours: 'Mon – Sat: 9:00 AM – 7:00 PM IST',
+  license: 'Manufacturing Lic. TN/AYU/24/1234',
+  copyright: '© 2026 TranzLife Biosciences',
+  disclaimer:
+    'TranzLife products are plant-based wellness products and are not intended to diagnose, treat, cure or prevent any disease. Consult your doctor before use if you are pregnant, nursing or managing a health condition.',
+};
+
+/* Product photos live in /public/assets (product-N.jpg). `photo` = N. */
+export const PRODUCTS = [
+  {
+    id: 'gummies', compare: { kind: "cutout", before: { src: "illustrations/lungs-before.webp", label: "Before", sub: "Everyday pollutants", alt: "Illustration of discoloured lungs burdened by everyday pollutants" }, after: { src: "illustrations/lungs.webp", label: "After", sub: "Supported with Lung Booster", alt: "Illustration of healthy, clear lungs" } }, photo: 4, ingredients: ['Vasaka 100mg','Tulsi 100mg','Mulethi 100mg','Turmeric 80mg','Giloy 80mg','Vitamin C 40mg','Zinc 5mg'], dosage: 'Adults: 2 gummies twice daily after meals', name: 'PulmoClear™ Lung Booster Gummies', short: 'PulmoClear™', tag: 'Lung Detox',
+    price: 549, size: '60 Gummies',
+    desc: '100% Ayurvedic Lung Booster & Craving Control Gummies for heavy smokers. Detoxifies, cleanses, and strengthens respiratory health with Vasaka, Tulsi, Mulethi, Vitamin C & Zinc. Natural Berry Flavour.',
+    story: { title: 'Lung Detox', text: 'Standardized Vasaka, Tulsi, Mulethi & Vitamin C in berry gummies to help heavy smokers control cravings and cleanse airways.', note: 'Breathe Freely · Live Fully' },
+  },
+  {
+    id: 'inhaler', compare: { kind: "scene", before: { src: "illustrations/inhaler-before.webp", label: "Before", sub: "The urge hits", alt: "A stressed man on a grey city terrace, hand on his forehead, holding a cigarette pack" }, after: { src: "illustrations/inhaler.webp", label: "After", sub: "With BreatheFree", alt: "The same man calm on a green, sunlit terrace, breathing in from a small white inhaler, the cigarette pack crushed and set aside" } }, photo: 6, ingredients: ['Black Pepper Oil','Peppermint Oil','Tulsi Oil','Lavender Oil','Eucalyptus Oil'], dosage: 'Inhale deeply through each nostril 2–3 times whenever cravings arise', name: 'Craving Control™ Aromatherapy Inhaler', short: 'Craving Control™', tag: 'Quit Smoking',
+    price: 249, size: '10 ml Pocket Inhaler',
+    desc: '100% natural, non-addictive aromatherapy inhaler for tobacco and smoking cessation. Pure therapeutic blend of Peppermint, Black Pepper, Tulsi, Lavender and Eucalyptus oils to curb nicotine cravings instantly on the go.',
+    story: { title: 'Craving Control', text: 'Pure essential oils of Peppermint, Black Pepper, Tulsi & Lavender to curb nicotine cravings instantly on the go.', note: 'Pocket Friendly · 100% Natural' },
+  },
+  {
+    id: 'rollon', compare: { kind: "scene", before: { src: "illustrations/cycle-before.webp", label: "Before", sub: "Uneasy days", alt: "Illustration of a young woman holding her stomach, looking uncomfortable" }, after: { src: "illustrations/cycle.webp", label: "After", sub: "With the CycleRelief ritual", alt: "Illustration of the same young woman smiling and relaxed" } }, photo: 1, ingredients: ['Dill essential oil','Eucalyptus essential oil','100% plant-based','Non-greasy formula'], dosage: 'Roll gently around the belly button every morning on an empty stomach', name: 'CycleRelief™ Menstrual Comfort Roll-On', short: 'CycleRelief™', tag: 'Period Relief',
+    price: 399, size: '50 ml Roll-On',
+    desc: '100% natural plant-based formula that eases menstrual cramps, soothes abdominal discomfort, and relaxes tense pelvic muscles with pure Dill and Eucalyptus essential oils. Fast-absorbing and non-greasy.',
+    story: { title: 'Cycle Relief', text: 'Fast-absorbing Dill and Eucalyptus essential oils to ease menstrual cramps and soothe abdominal discomfort naturally.', note: 'Nature’s Care Every Cycle' },
+  },
+  {
+    id: 'reviva', compare: { kind: "scene", before: { src: "illustrations/reviva-before.webp", label: "Before", sub: "A heavy start", alt: "A tired man sitting on the edge of his bed in dim morning light, rubbing his neck" }, after: { src: "illustrations/reviva.webp", label: "After", sub: "With the Reviva ritual", alt: "The same man refreshed and smiling in warm sunlight, holding a roll-on bottle" } }, photo: 3, ingredients: ['Dill essential oil','Eucalyptus essential oil','Massage roll-on','External use'], dosage: 'Apply a small amount to intact skin and massage gently', name: 'Reviva™ Roll-On', short: 'Reviva™', tag: 'Botanical Massage Roll-On',
+    price: 399, size: '50 ml Massage Roll-On',
+    desc: 'Botanical massage roll-on for an everyday wellness and vitality ritual. A practical massage roll-on designed to complement a daily self-care routine with a refreshing topical application.',
+    story: { title: 'Wellness & Vitality', text: 'Botanical massage roll-on with Dill and Eucalyptus essential oils, for an everyday wellness and vitality ritual.', note: 'Massage Roll-On · 50 ml' },
+  },
+  {
+    id: 'liver', compare: { kind: "cutout", before: { src: "illustrations/liver-before.webp", label: "Before", sub: "Everyday strain", alt: "Illustration of a dull, mottled liver under everyday strain" }, after: { src: "illustrations/liver-botanical.webp", label: "After", sub: "Supported with Liver Booster", alt: "Illustration of a smooth, healthy liver" } }, photo: 5, ingredients: ['Bhumyamalaki 500mg','Kalmegh 400mg','Kutki 400mg','Punarnava 300mg','Bhringraj 300mg','Daruharidra 200mg'], dosage: 'Adults: 10 ml (2 tsp) twice daily after meals', name: 'LiverDetox™ Polyherbal Concoction', short: 'LiverDetox™', tag: 'Liver Booster',
+    price: 649, size: '500 ml Classical Concoction',
+    desc: '100% Ayurvedic Liver Booster. Detoxifies, protects, and rejuvenates liver parenchyma cells with 11 classical botanicals including Bhumyamalaki, Kalmegh, Kutki, Punarnava, and Daruharidra.',
+    story: { title: 'Liver Booster', text: '500 ml classical polyherbal concoction of Bhumyamalaki, Kalmegh, Kutki & Punarnava to detoxify, protect and rejuvenate.', note: 'Classical Ayurvedic Wisdom' },
+  },
+  {
+    id: 'energy', photo: 2, ingredients: ['Ruta graveolens (Q)','Hecla lava (3X)','Symphytum officinale (Q)','Calcarea phosphorica (8X)','Echinacea angustifolia (Q)'], dosage: '7.5 ml twice daily, or as advised by a healthcare professional', name: 'TranzLife Energy Booster™', short: 'Energy Booster™', tag: 'Energy & Vitality',
+    price: null, size: '500 ml Oral Liquid',
+    desc: 'Herbal & bioactive wellness formulation. A convenient oral liquid designed to complement an active lifestyle and everyday wellness routine.',
+    story: { title: 'Energy & Vitality', text: 'A convenient oral liquid designed to complement an active lifestyle and everyday wellness routine.', note: 'Oral Liquid · 500 ml' },
+  },
+];
+
+export const priceLabel = (p) => (p.price == null ? 'Price to be announced' : `₹${p.price}`);
+
+export const ANNOUNCEMENTS = [
+  'Free delivery on orders over ₹999',
+  'Government Recognized & Certified',
+  'Live naturally. Live healthier.',
+];
+
+export const NAV_COLLECTIONS = PRODUCTS.map((p) => p.short);
+
+/* ---------------- home ---------------- */
+export const HERO = [
+  { image: 'hero/hero-1.webp', tone: 'light', bg: 'linear-gradient(to bottom, #162115 0%, #212b20 55%, #494f47 100%)', alt: 'PulmoClear Gummies and LiverDetox bottles on a stone podium with fresh herbs', eyebrow: 'Nature meets science', title: 'Live naturally. Live healthier.', sub: 'Five plant-based formulations rooted in Ayurveda.', cta: 'Shop all products' },
+  { image: 'hero/hero-2.webp', tone: 'ink', bg: 'linear-gradient(to bottom, #d3bba1 0%, #d9bea2 55%, #e5c9aa 100%)', alt: 'Reviva roll-on and BreatheFree inhaler on a stone block with eucalyptus leaves', eyebrow: 'Our vision', title: 'From the roots of nature to the infinity of science', sub: 'TranzLife is shaping the future of life.', cta: 'Our story' },
+  { image: 'hero/hero-3.webp', tone: 'ink', bg: 'linear-gradient(to bottom, #9ca17f 0%, #aaad92 55%, #b8b6ab 100%)', alt: 'CycleRelief roll-on and Energy Booster bottle on a marble podium with lavender', eyebrow: 'Ayurvedic wisdom', title: 'Rooted in nature. Perfected by science.', sub: 'Shaping everyday longevity.', cta: 'Explore the science' },
+];
+
+export const RICH = {
+  eyebrow: 'Plant-based wellness',
+  title: 'Rooted in nature. Built on science.',
+};
+
+export const BANNER = { words: ['Nature meets science', 'Rooted in Ayurveda'], cta: 'Shop all products' };
+
+export const BENEFITS = {
+  headline: 'Rooted in Nature · Perfected by Science',
+  items: [
+    { title: 'Innovate', text: 'Research-driven formulations with a focus on efficacy and safety.' },
+    { title: 'Develop', text: 'Advanced R&D and modern technology to create superior products.' },
+    { title: 'Deliver', text: 'High-quality manufacturing and stringent quality standards.' },
+    { title: 'Impact', text: 'Empowering healthier lives while promoting sustainability and ethical practices.' },
+    { title: 'Rooted in Ayurveda', text: 'Classical wisdom from the Charaka Samhita and Sushruta Samhita, standardized for today.' },
+    { title: 'GMP certified', text: 'Made in certified Class 10,000 (ISO 7) cleanrooms under AYUSH GMP and ISO 9001:2015.' },
+  ],
+};
+
+export const REELS = { headline: 'Which one is yours?' };
+
+export const STRIP = ['100% Indigenous', 'Nutraceutical Safety', 'DPIIT Recognized', 'Registered Biotech', 'GeM Govt. Verified'];
+
+export const STORY_BLOCK = {
+  title: 'From the roots of nature to the infinity of science',
+  paragraphs: [
+    'Born in Chennai, TranzLife Biosciences brings together the wisdom of Ayurveda and modern science to create natural, safe and effective solutions that support health and well-being.',
+    'We carefully select quality botanicals and check their purity before they enter our formulation process.',
+    'Every product is quality-tested at every step.',
+  ],
+};
+
+export const SCENES = [
+  { title: 'TranzLife is shaping the future of life', text: '100% Ayurvedic Roots · Bio-Active Molecular Science · Clinical Innovation' },
+  {
+    title: 'Ayurvedic wisdom',
+    text: 'Health in Ayurveda means the body is free of toxins; the mind is at peace, the emotions are calm and happy, wastes are efficiently eliminated, the organs function normally and the immune system is strong.',
+  },
+  {
+    title: 'Technology collaboration with NRDC',
+    text: 'TranzLife Biosciences has entered into a technology collaboration with the National Research Development Corporation (NRDC), Ministry of Science and Technology, Government of India.',
+  },
+];
+
+export const BRANDS = { headline: 'Government Recognized & Certified' };
+
+export const BGVIDEO = { photo: 'basil-closeup', eyebrow: 'Ayurvedic wisdom', title: 'Rooted in nature · Perfected by science' };
+
+export const NEWSLETTER = {
+  title: 'Live naturally. Live healthier.',
+  text: 'Rooted in Nature · Perfected by Science',
+  email: 'Email address',
+  button: 'Subscribe',
+};
+
+/* ---------------- about ---------------- */
+export const ABOUT = {
+  banner: 'About Us',
+  intro: {
+    title: 'From the roots of nature to the infinity of science',
+    text: 'Born in Chennai, TranzLife Biosciences brings together the wisdom of Ayurveda and modern science to create natural, safe and effective solutions that support health and well-being.',
+  },
+  rows: [
+    { photo: 'ayurveda', title: 'Rooted in 5,000 years of Ayurvedic wisdom', text: 'For thousands of years, classical Ayurvedic texts such as the Charaka Samhita and Sushruta Samhita have documented plants that support health and vitality. TranzLife was founded to bridge the gap between sacred plants and modern formulation science.' },
+    { photo: 'lab-microscope', title: 'Where molecular science unlocks bioavailability', text: 'We do not simply grind herbs into capsules. We isolate, standardize and protect the active phytochemical keys that make nature heal, and deliver them in modern formats: inhalers, roll-ons, gummies and polyherbal concoctions.' },
+    { photo: 'lotus', title: 'Recognized by the nation, welcomed by the world', text: 'Our work is shaped through collaboration with government institutions and engagement with international partners.' },
+  ],
+  video: { photo: 'green-leaves', eyebrow: 'National technology collaboration', title: 'Technology collaboration with NRDC' },
+  products: 'Our products',
+  pillars: BENEFITS.items.slice(0, 4),
+};
+
+export const MILESTONES = [
+  { year: '2021', title: 'Botanical Heritage & Inception', text: 'TranzLife Biosciences founded in Chennai to bring together classical Ayurvedic wisdom and modern scientific validation.' },
+  { year: '2022', title: 'Extraction & Standardization Protocols', text: 'Pioneered clean, solvent-free botanical extraction and quality testing standards.' },
+  { year: '2023', title: 'NRDC Technology Collaboration', text: 'Technology collaboration with the National Research Development Corporation (NRDC), Govt. of India.' },
+  { year: '2024', title: 'Novel Delivery Formats Portfolio', text: 'A modern multi-format line: pocket aromatherapy inhalers, roll-ons, gummies and polyherbal concoctions.' },
+];
+
+/* ---------------- science ---------------- */
+export const SCIENCE = {
+  banner: 'Science & Innovation',
+  intro: { title: 'Where plant intelligence meets precision molecular science' },
+  stats: [
+    { title: '+320% uptake', text: 'Bioavailability elevation' },
+    { title: '600+ assays', text: 'Phytochemical screenings' },
+    { title: '98.4% purity', text: 'Active standardization' },
+    { title: '0.00% synthetic', text: 'Zero chemical solvents' },
+  ],
+  note: {
+    title: 'Solving the botanical absorption bottleneck',
+    text: 'Raw botanicals show poor human bioavailability. TranzLife’s multi-tier platform is built to overcome these barriers.',
+  },
+  pillars: [
+    { photo: 'green-leaves', title: 'Supercritical CO₂ fluid extraction', text: 'At 31.1°C and above 73.8 bar, carbon dioxide penetrates plant cells like a gas and dissolves active lipids like a solvent, leaving zero chemical residue.' },
+    { photo: 'lab-research', title: 'Phytosome & liposomal bi-layers', text: 'Active polyphenols are bonded to non-GMO sunflower phosphatidylcholine, a lipid envelope that shields fragile molecules through the stomach.' },
+    { photo: 'lab-microscope', title: 'HPLC quantitative standardization', text: 'High-performance liquid chromatography fingerprints and quantifies exact active fractions in every batch, for consistent dosing.' },
+    { photo: 'ayurveda-ingredients', title: 'Entourage bio-architectures', text: 'Multi-terpene botanical architectures where secondary plant flavonoids protect primary active ligands and prolong plasma half-life.' },
+    { photo: 'turmeric-dried', title: 'TranzLife bio-phytosome delivery platform', text: 'Actives are complexed within phosphatidylcholine bi-layers: resistant to gastric acid and designed for rapid cellular delivery.' },
+  ],
+  cta: { title: 'Interactive 3D compound explorer', text: 'Rotate and explore the atomic geometry of our active botanical compounds.', button: 'Explore' },
+  video: { photo: 'lab-microscope', eyebrow: 'The cellular delivery platform', title: 'Plant intelligence, precision science' },
+};
+
+/* ---------------- faq ---------------- */
+export const FAQ = {
+  banner: 'FAQ',
+  items: [
+    { q: 'Where are TranzLife formulations manufactured?', a: 'All TranzLife products are manufactured inside certified Class 10,000 (ISO 7) cleanroom facilities in India adhering strictly to AYUSH GMP and ISO 9001:2015 pharmaceutical-grade standards.' },
+    { q: 'How do you verify heavy metal and pesticide safety?', a: 'Every production lot undergoes independent NABL-accredited third-party laboratory testing via Inductively Coupled Plasma Mass Spectrometry (ICP-MS) to screen for lead, arsenic, cadmium, mercury, and 140+ pesticides before market release.' },
+    { q: 'What is your domestic shipping delivery timeframe?', a: 'Orders placed before 2:00 PM IST are dispatched on the same day. Delivery takes 2 to 4 business days across metropolitan areas in India. We offer complimentary insured shipping on all orders over ₹999.' },
+    { q: 'Can I customize corporate wellness gifting packages?', a: 'Yes. Our corporate wellness team curates wellness suites in branded biodegradable presentation boxes with custom corporate notes.' },
+  ],
+};
+
+/* ---------------- contact ---------------- */
+export const CONTACT = {
+  banner: 'Contact Us',
+  title: 'Let’s start a conversation about better health',
+  text: 'Questions about our formulations, corporate wellness programs, retail distribution or research collaborations? Our team is here to help.',
+  fields: { name: 'Full name', phone: 'Phone number', email: 'Email address *', message: 'Your message', send: 'Send message' },
+  info: [
+    { title: 'Registered headquarters', text: BRAND.address },
+    { title: 'Customer care', text: `${BRAND.careEmail} · ${BRAND.phone}` },
+    { title: 'Clinical science', text: BRAND.email },
+    { title: 'Support hours', text: BRAND.hours },
+  ],
+};
+
+/* ---------------- footer ---------------- */
+export const FOOTER = {
+  products: { title: 'Products', links: PRODUCTS.map((p) => p.short) },
+  company: { title: 'Company', links: ['About Us', 'Science & Innovation', 'Ingredients', 'Quality & Manufacturing', 'Sustainability', 'Certifications'] },
+  help: { title: 'Help', links: ['Contact Us', 'FAQ', 'Retail partners', 'Corporate gifting', 'Privacy', 'Terms'] },
+  about: { title: 'About TranzLife' },
+};
+
+/* ---------------- photography ----------------
+   Files in /public/assets/photos, all public domain or CC0 (sources and licences: see CREDITS.md). */
+export const PHOTOS = {
+  banner: 'green-canopy',
+  benefits: 'ayurveda-ingredients',
+  iwt: 'ayurveda-banyan',
+  parallax: 'forest-leaves',
+  parallaxSide: ['lotus', 'ayurveda-ingredients'],
+  aboutBanner: 'lavender',
+  scienceBanner: 'lab-research',
+  faqBanner: 'dill',
+  contactBanner: 'lotus',
+  contactSide: 'holy-basil',
+};
+
+export const PHOTO_EXT = { 'ayurveda-ingredients': 'png', 'ayurveda-banyan': 'webp' }; // photos that are not .jpg
+
+export const PHOTO_ALT = {
+  ayurveda: 'Jars of powdered and dried Ayurvedic herbs being scooped with wooden spoons',
+  'green-leaves': 'Fresh green leaves in soft light',
+  'green-canopy': 'Aerial view of a dense green forest canopy',
+  'ayurveda-banyan': 'Ayurvedic herbs, turmeric, amla, neem and a stone mortar on slate under an ancient banyan tree',
+  'forest-leaves': 'Green leaves in a forest',
+  'lab-microscope': 'Researcher working with a microscope in a laboratory',
+  'lab-research': 'Scientist in safety glasses examining coloured samples in a lab',
+  lavender: 'Lavender field in bloom',
+  lotus: 'Pink lotus flower against dark green leaves',
+  'ayurveda-ingredients': 'Tulsi leaves, ginger, cardamom, cloves and cinnamon arranged in the shape of a mortar',
+  dill: 'Fresh dill fronds',
+  'basil-closeup': 'Fresh mint and basil leaves',
+  'holy-basil': 'Holy basil (tulsi) plant',
+  'turmeric-dried': 'Hand holding dried turmeric roots over a pile of turmeric',
+};
+
+/* ---------------- product pages ---------------- */
+export const getProduct = (id) => PRODUCTS.find((p) => p.id === id);
+
+/**
+ * "Conceptual illustration" showcase on a product page: the product on the left, a nature-inspired
+ * illustration of what it is built from on the right. Only products listed here get the section.
+ */
+export const SHOWCASE = {
+  liver: {
+    eyebrow: 'Liver Booster · LiverDetox',
+    title: ['Designed to support a', 'cleaner, healthier liver'],
+    intro: 'Drag the slider to explore. On the left, the formulation; on the right, a visual guide to what this 100% Ayurvedic polyherbal concoction is designed to support: it detoxifies, protects and rejuvenates.',
+    left: { label: 'The product', sub: 'LiverDetox™ · 500 ml', tags: ['100% Ayurvedic', 'Polyherbal formula', 'Eleven classical herbs'] },
+    right: {
+      label: 'The inspiration',
+      sub: 'Classical botanicals',
+      image: 'illustrations/liver-botanical.webp',
+      alt: 'Illustration of a smooth, healthy liver surrounded by classical Ayurvedic leaves',
+      tags: ['Natural detox support', 'Antioxidant protection', 'Digestion & vitality'],
+    },
+    concept: 'Conceptual illustration',
+    benefits: [
+      ['Supports liver detoxification', 'Helps flush out toxins and supports natural cleansing.', 'drop'],
+      ['Promotes liver health', 'Protects liver cells and supports healthy liver function.', 'shield'],
+      ['Powerful antioxidant', 'Rich in natural antioxidants that combat oxidative stress.', 'spark'],
+      ['Improves digestion', 'Supports digestion and nutrient absorption.', 'cycle'],
+      ['Enhances vitality', 'Helps improve energy, immunity and overall well-being.', 'bolt'],
+    ],
+    botanicalsTitle: 'Each 10 ml contains 11 classical botanicals',
+    botanicals: [
+      ['Bhumyamalaki', '500 mg'], ['Kalmegh', '400 mg'], ['Kutki', '400 mg'], ['Punarnava', '300 mg'],
+      ['Bhringraj', '300 mg'], ['Daruharidra', '200 mg'], ['Guduchi', '200 mg'], ['Amla', '200 mg'],
+      ['Haritaki', '200 mg'], ['Turmeric', '150 mg'], ['Black Pepper', '50 mg'],
+    ],
+    note: 'Illustrative only: these images show what Liver Booster is designed to support. They are not clinical before-and-after results, and individual experience varies. Liver Booster is an Ayurvedic proprietary medicine and is not intended to diagnose, treat, cure or prevent any disease. Not recommended for pregnant or lactating women; consult your physician if you are under medication.',
+  },
+};
+
+export const NAV_PRODUCTS = PRODUCTS.map((p) => ({ id: p.id, name: p.short }));

@@ -1,17 +1,19 @@
 import { useState } from 'react';
 import { Media, Slot, Ph, range } from '../ui.jsx';
+import { REELS, PRODUCTS, priceLabel } from '../../content/site.js';
 
 const POSITIONS = ['is-prev2', 'is-prev', 'is-active', 'is-next', 'is-next2'];
 const TOTAL = 10;
 
 export default function Reels() {
   const [idx, setIdx] = useState(0);
+  const product = PRODUCTS[idx % PRODUCTS.length];
   const go = (i) => setIdx((i + TOTAL) % TOTAL);
 
   return (
     <section className="reels">
       <div className="reels__inner">
-        <Slot as="h2" className="headline slot--headline" data-reveal />
+        <Slot as="h2" className="headline slot--headline" data-reveal>{REELS.headline}</Slot>
         <div className="reels__stage" id="reels">
           {POSITIONS.map((pos, n) => (
             <div
@@ -36,9 +38,9 @@ export default function Reels() {
         <Ph className="reels__chip">
           <Media className="media--chip" />
           <div className="reels__chip-text">
-            <Slot className="slot--card-title" />
+            <Slot className="slot--card-title">{product.short}</Slot>
             <span className="reels__chip-price">
-              <Slot className="slot--price" /><Slot className="slot--price" /><Slot className="slot--pill" />
+              <Slot className="slot--price">{priceLabel(product)}</Slot><Slot className="slot--pill">{product.tag}</Slot>
             </span>
           </div>
         </Ph>

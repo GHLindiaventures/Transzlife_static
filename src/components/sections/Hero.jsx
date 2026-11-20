@@ -1,8 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
-import { Media, Slot, Ph, range } from '../ui.jsx';
+import { Media, Slot, Ph } from '../ui.jsx';
+import { HERO } from '../../content/site.js';
 
-const COUNT = 3;
+const COUNT = HERO.length;
+const BASE = import.meta.env.BASE_URL;
 
+/**
+ * Home hero slideshow. Each slide is a full-bleed product image (/public/assets/hero) with the headline
+ * on the empty left side. `tone: 'ink'` slides have light backgrounds, so their text and progress bars turn dark.
+ */
 export default function Hero() {
   const [idx, setIdx] = useState(0);
   const touchX = useRef(0);
@@ -17,7 +23,7 @@ export default function Hero() {
 
   return (
     <section
-      className="hero"
+      className={`hero${HERO[idx].tone === 'ink' ? ' hero--ink' : ''}`}
       id="hero"
       onTouchStart={(e) => { touchX.current = e.touches[0].clientX; }}
       onTouchEnd={(e) => {
@@ -26,21 +32,31 @@ export default function Hero() {
       }}
     >
       <div className="hero__slides" style={{ transform: `translateX(${-100 * idx}%)` }}>
-        {range(COUNT).map((n) => (
-          <div className={`hero__slide${n === idx ? ' is-active' : ''}`} key={n}>
-            <Media className="media--fill hero__bg" />
+        {HERO.map((s, n) => (
+          <div className={`hero__slide hero__slide--${s.tone}${n === idx ? ' is-active' : ''}`} key={n}>
+            <Media className="media--fill hero__bg" style={{ background: s.bg }}>
+              <img
+                src={`${BASE}assets/${s.image}`}
+                alt={s.alt}
+                width="2000"
+                height="1116"
+                loading={n === 0 ? 'eager' : 'lazy'}
+                decoding="async"
+                fetchpriority={n === 0 ? 'high' : undefined}
+              />
+            </Media>
             <div className="hero__shade" />
             <div className="hero__content page-pad">
-              <Slot as="p" className="slot--eyebrow-w" />
-              <Slot as="h2" className="slot--hero-title" />
-              <Slot as="p" className="slot--hero-sub" />
-              <Ph className="link-btn"><Slot className="slot--link" /></Ph>
+              <Slot as="p" className="slot--eyebrow-w">{s.eyebrow}</Slot>
+              <Slot as="h2" className="slot--hero-title">{s.title}</Slot>
+              <Slot as="p" className="slot--hero-sub">{s.sub}</Slot>
+              <Ph className="link-btn"><Slot className="slot--link">{s.cta}</Slot></Ph>
             </div>
           </div>
         ))}
       </div>
       <div className="hero__dots page-pad" role="tablist">
-        {range(COUNT).map((n) => (
+        {HERO.map((_, n) => (
           <button
             key={n}
             className={`hero__dot${n === idx ? ' is-active' : ''}`}

@@ -1,59 +1,281 @@
 /* ==========================================================
-   REAL COPY INSIDE TEMPLATE SLOTS
-   Slots are fixed-size placeholder boxes. Once a slot holds text (:not(:empty)) it grows to fit,
-   and gets a type size matched to the box the template drew for it.
-   Empty slots are untouched, so pages without copy look exactly as before.
+   CONTENT TYPOGRAPHY
+   A ".slot.has-text" is a placeholder that now holds real copy:
+   it drops the fixed placeholder size/outline and takes the
+   typography measured from the reference design.
    Loaded last.
    ========================================================== */
-.slot:not(:empty){height:auto;min-height:0}
-.show-slots .slot:not(:empty){outline:0}
+.slot.has-text{
+  width:auto;max-width:100%;height:auto;min-height:0;
+  outline:none!important;
+  overflow-wrap:anywhere;
+}
+.show-slots .slot.has-text{outline:none}
+.slot.has-text:where(span){display:inline}
 
-/* small labels: size to their text */
-.slot--eyebrow:not(:empty),.slot--eyebrow-w:not(:empty),.slot--strip:not(:empty),
-.slot--btn-sm:not(:empty),.slot--link:not(:empty),.slot--headline:not(:empty){width:auto}
+/* ---- shared text styles ---- */
+.has-text.slot--eyebrow,.has-text.slot--eyebrow-w{font-size:12px;line-height:18px;font-weight:700;letter-spacing:2px;text-transform:uppercase}
+.has-text.slot--eyebrow{margin-bottom:12px;color:var(--green-700)}
+.has-text.slot--link{font-size:12px;line-height:18px;font-weight:700;letter-spacing:2px;text-transform:uppercase}
+.has-text.slot--btn,.has-text.slot--btn-sm{font-size:12px;line-height:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;white-space:nowrap}
+.has-text.slot--headline{font-size:22px;line-height:1.1;font-weight:700;letter-spacing:.5px;text-transform:uppercase;text-align:center;display:block}
 
-.slot--eyebrow:not(:empty),.slot--eyebrow-w:not(:empty){font-size:12px;line-height:18px;font-weight:700;letter-spacing:2px;text-transform:uppercase}
-.slot--eyebrow:not(:empty){color:var(--accent)}
+/* ---- hero ---- */
+.has-text.slot--hero-title{font-size:37.4px;line-height:41px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;max-width:640px;margin-bottom:12px}
+.has-text.slot--hero-sub{font-size:16px;line-height:24px;max-width:480px;margin-bottom:16px}
+@media (max-width:749px){.has-text.slot--hero-title{font-size:30px;line-height:34px}}
 
-/* page banner title (box 640 x 94) */
-.slot--pb-title:not(:empty){--w:min(760px,100%);font-size:44px;line-height:1.1;font-weight:700}
+/* ---- rich text ---- */
+.has-text.slot--rich{font-size:44px;line-height:1.2;font-weight:700;text-transform:uppercase;max-width:1161px;margin:0 auto;display:block}
+@media (max-width:989px){.has-text.slot--rich{font-size:32px}}
+@media (max-width:749px){.has-text.slot--rich{font-size:21.6px;line-height:1.5}}
 
-/* rich text under the banner (box 1161 x 66) */
-.slot--rich:not(:empty){--w:min(980px,100%);font-size:24px;line-height:1.35;font-weight:500}
+/* ---- product cards ---- */
+.pcard__title{text-align:center}
+.has-text.slot--card-title{font-size:16px;line-height:24px;display:block;margin:0 auto}
+.has-text.slot--price{font-size:14px;line-height:20px;font-weight:600}
+.has-text.slot--pill{font-size:11px;line-height:20px;padding:0 8px;font-weight:600;white-space:nowrap}
+.has-text.slot--badge{font-size:10px;line-height:22px;padding:0 10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--green-950);white-space:nowrap;max-width:calc(100% - 24px)}
 
-/* intro (title box 760 x 78, text box 720 x 48) */
-.slot--i-title:not(:empty){font-size:34px;line-height:1.15;font-weight:700}
-.slot--i-text:not(:empty){font-size:16px;line-height:24px;color:var(--ink-soft)}
+/* ---- banner marquee ---- */
+.has-text.slot--banner-title{font-size:134.2px;line-height:1.1;font-weight:700;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;flex:none}
+@media (max-width:989px){.has-text.slot--banner-title{font-size:80px}}
+@media (max-width:749px){.has-text.slot--banner-title{font-size:54px}}
 
-/* image + text rows (title 24, text 72 = 3 lines of 24) */
-.slot--r-title:not(:empty){font-size:22px;line-height:1.2;font-weight:700}
-.slot--r-text:not(:empty){font-size:15px;line-height:24px;color:var(--ink-soft)}
-.slot--r-text + .slot--r-text{margin-top:12px}
+/* ---- benefits / features ---- */
+.has-text.slot--b-title{font-size:17.6px;line-height:24.64px;font-weight:700;text-transform:uppercase;display:block;margin-bottom:6px}
+.has-text.slot--b-text{font-size:16px;line-height:24px;display:block}
+.pfeat .has-text.slot--b-title{font-size:20px}
+@media (max-width:749px){.has-text.slot--b-title{font-size:15px;line-height:20px}.has-text.slot--b-text{font-size:14px;line-height:20px}.pfeat .has-text.slot--b-title{font-size:16px}}
 
-/* features (title 24, text 48) */
-.slot--b-title:not(:empty){font-size:18px;line-height:24px;font-weight:700}
-.slot--b-text:not(:empty){font-size:15px;line-height:24px;color:var(--ink-soft)}
-@media (min-width:990px){.pfeat--3 .pfeat__grid{grid-template-columns:repeat(3,1fr);max-width:1000px}}
+/* ---- product slider ---- */
+.has-text.slot--pslider-title{font-size:61.6px;line-height:67.76px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;display:block;margin:0}
+.pslider__title .has-text.slot--pslider-text{font-size:16px;line-height:24px;display:block;margin-top:10px;max-width:520px}
+@media (max-width:989px){.has-text.slot--pslider-title{font-size:40px;line-height:44px}}
+@media (max-width:749px){.has-text.slot--pslider-title{font-size:24px;line-height:28px}.pslider__title .has-text.slot--pslider-text{font-size:13px;line-height:18px;margin-top:6px}}
+.pslider__left .has-text.slot--card-title{margin:0 auto 6px;max-width:90%}
 
-/* scrolling strip (row height 20) */
-.slot--strip:not(:empty){font-size:16px;line-height:20px;font-weight:700;white-space:nowrap}
+/* ---- strip ---- */
+.has-text.slot--strip{font-size:19.8px;line-height:21.78px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;flex:none}
+@media (max-width:749px){.has-text.slot--strip{font-size:16.2px}}
 
-/* background video title (box 817 x 123) */
-.slot--bgv-title:not(:empty){font-size:40px;line-height:1.1;font-weight:700}
+/* ---- image with text (home) ---- */
+.has-text.slot--iwt-title{font-size:61.6px;line-height:67.76px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:21px;margin-left:-34px}
+.has-text.slot--iwt-p{font-size:17.6px;line-height:26.4px;display:block;margin-bottom:16px}
+@media (max-width:1190px){.has-text.slot--iwt-title{font-size:44px;line-height:48px;margin-left:0}}
+@media (max-width:749px){.has-text.slot--iwt-title{font-size:28.8px;line-height:31.68px}.has-text.slot--iwt-p{font-size:16px;line-height:24px}}
 
-/* notes (title 24, text 24) */
-.slot--n-title:not(:empty){font-size:20px;line-height:24px;font-weight:700}
-.slot--n-text:not(:empty){font-size:15px;line-height:24px;color:var(--ink-soft)}
+/* ---- parallax ---- */
+.has-text.slot--par-title{font-size:92.4px;line-height:101.64px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:12px}
+.has-text.slot--par-p{font-size:16px;line-height:24px;display:block;margin:0 auto;max-width:800px}
+.has-text.slot--par-title-sm{font-size:55px;line-height:60.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:16px}
+.has-text.slot--par-p-sm{font-size:16px;line-height:24px;display:block}
+@media (max-width:989px){.has-text.slot--par-title{font-size:56px;line-height:62px}.has-text.slot--par-title-sm{font-size:36px;line-height:40px}}
+@media (max-width:749px){.has-text.slot--par-title{font-size:32.4px;line-height:35.64px}.has-text.slot--par-title-sm{font-size:26px;line-height:29px}}
 
-/* newsletter (title 48, text 24) */
-.slot--news-title:not(:empty){font-size:28px;line-height:1.2;font-weight:700}
-.slot--news-p:not(:empty){font-size:15px;line-height:24px}
+/* ---- background video ---- */
+.has-text.slot--bgv-title{font-size:55px;line-height:60.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;display:block;max-width:817px;margin-inline:auto}
+.bgvideo--sm .has-text.slot--bgv-title{font-size:37.4px;line-height:41px}
+@media (max-width:749px){.has-text.slot--bgv-title{font-size:25.2px;line-height:27.72px}}
 
+/* ---- testimonials ---- */
+.has-text.slot--quote{font-size:32px;line-height:48px;display:block;margin-inline:auto}
+.has-text.slot--name{font-size:14px;line-height:18px;display:block;margin:24px auto 0}
+@media (max-width:749px){.has-text.slot--quote{font-size:20px;line-height:30px}}
+
+/* ---- newsletter ---- */
+.has-text.slot--news-title{font-size:44px;line-height:48.4px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;display:block;margin:0 auto 12px}
+.has-text.slot--news-p{font-size:16px;line-height:24px;display:block;margin:0 auto 24px}
+@media (max-width:749px){.has-text.slot--news-title{font-size:25.2px;line-height:27.72px}}
+
+/* ---- footer ---- */
+.footer .has-text.slot--f-head{font-size:12px;line-height:18px;font-weight:700;letter-spacing:2px;text-transform:uppercase;display:block;margin-bottom:24px;color:var(--gold-400)}
+.footer .has-text.slot--f-link{font-size:14px;line-height:20px;display:inline}
+.footer .has-text.slot--f-address{font-size:14px;line-height:22px;display:block;margin-bottom:14px;color:rgba(255,255,255,.88)}
+.footer .has-text.slot--copy{font-size:12px;line-height:18px;display:block;margin:0 auto;max-width:720px;color:rgba(250,240,207,.75)}
+.footer__copy{display:flex;flex-direction:column;gap:10px}
+.footer__col li{margin-bottom:12px}
+.footer__col li a:hover .slot{color:var(--gold-400)}
+
+/* ---- announcement ---- */
+.announcement .has-text.slot--announce{font-size:13px;line-height:16px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;white-space:nowrap;flex:none}
+
+/* ---- nav dropdown ---- */
+.has-text.slot--dd{font-size:14px;line-height:20px}
+.has-text.slot--explore{font-size:12px;line-height:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#fff}
+.has-text.slot--drawer{font-size:14px;line-height:20px}
+
+/* ---- inner pages ---- */
+.has-text.slot--pb-title{font-size:72.6px;line-height:79.86px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;display:block;margin-inline:auto}
+.pbanner--about .has-text.slot--pb-title{font-size:85.8px;line-height:94px}
+.pbanner--dark .has-text.slot--pb-title{font-size:88px;line-height:97px}
+@media (max-width:989px){.has-text.slot--pb-title,.pbanner--about .has-text.slot--pb-title,.pbanner--dark .has-text.slot--pb-title{font-size:48px;line-height:54px}}
+@media (max-width:749px){.has-text.slot--pb-title,.pbanner--about .has-text.slot--pb-title,.pbanner--dark .has-text.slot--pb-title{font-size:34px;line-height:38px}}
+
+.has-text.slot--i-title{font-size:35.2px;line-height:39px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;display:block;margin:0 auto 16px;max-width:760px}
+.has-text.slot--i-text{font-size:16px;line-height:24px;display:block;margin:0 auto;max-width:720px}
+.pintro--title-only .has-text.slot--i-title{margin-bottom:0}
+@media (max-width:749px){.has-text.slot--i-title{font-size:24px;line-height:28px}}
+
+.has-text.slot--r-title{font-size:22px;line-height:26px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:16px}
+.has-text.slot--r-text{font-size:16px;line-height:24px;display:block}
+
+.has-text.slot--n-title{font-size:22px;line-height:26px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;display:block;margin:0 auto 16px}
+.has-text.slot--n-text{font-size:16px;line-height:24px;display:block;margin:0 auto 16px;max-width:720px}
+.pnote--cta .btn .has-text.slot--btn-sm{color:inherit}
+
+/* FAQ */
+.faq .has-text.slot--q-num{font-size:14px;line-height:20px;font-weight:700;width:26px;flex:none}
+.faq .has-text.slot--q{font-size:14px;line-height:20px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;flex:1 1 auto}
+.faq__a .has-text.slot{font-size:15px;line-height:24px;display:block;margin:0 0 24px 38px;max-width:calc(100% - 38px)}
+.faq__q{padding-block:14px}
+
+/* blog */
+.has-text.slot--bc-meta{font-size:11px;line-height:14px;letter-spacing:1px;text-transform:uppercase;color:var(--ink-soft);display:block;margin-bottom:12px}
+.has-text.slot--bc-title{font-size:19px;line-height:24px;font-weight:700;text-transform:uppercase;display:block;margin-bottom:12px}
+.has-text.slot--bc-text{font-size:14px;line-height:21px;display:block;margin-bottom:16px}
+
+/* contact */
+.has-text.slot--c-title{font-size:30.8px;line-height:34px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;display:block;margin:0 auto 16px;max-width:760px}
+.has-text.slot--c-text{font-size:16px;line-height:24px;display:block;margin:0 auto 32px;max-width:620px}
+.has-text.slot--ci-title{font-size:12px;line-height:18px;font-weight:700;letter-spacing:2px;text-transform:uppercase;display:block;margin-bottom:8px;color:var(--green-700)}
+.has-text.slot--ci-text{font-size:15px;line-height:23px;display:block;max-width:440px}
+@media (max-width:749px){.has-text.slot--c-title{font-size:24px;line-height:28px}}
+
+/* milestone / extra text rows */
+.pmile{padding:0 var(--pad) 8px}
+
+/* Shop menu now lists tile + all six products */
+.mega__inner--shop{grid-template-columns:repeat(7,1fr);gap:20px}
+.mega__inner--shop .mega__caption{font-size:14px;line-height:20px}
+
+/* green slider slides: show the product on a white card instead of multiplying into the green */
+.pslider__slide:nth-child(even) .media--pslider{background:#fff;border-radius:28px;box-shadow:0 14px 40px rgba(8,38,26,.3)}
+.pslider__slide:nth-child(even) .media--product>img{mix-blend-mode:normal}
+
+/* product slider: show the product in its true colours on a white card (no colour blending) */
+.pslider .media--product>img,
+.pslider__slide .media--product>img{mix-blend-mode:normal}
+.pslider__left .media--pslider{background:#fff;border-radius:28px;box-shadow:0 14px 40px rgba(8,38,26,.22)}
+.pslider__left .media--pslider>img{border-radius:28px}
+
+/* ==========================================================
+   Pinned parallax section: landscape video + readable text
+   ========================================================== */
+.parallax__sticky{color:#fff;background:var(--green-950)}
+.parallax__bg{background:var(--green-950);will-change:transform}
+.parallax__video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center}
+
+/* dark scrim: even tone overall + extra darkness behind the centre text, so white copy never blends into the footage */
+.parallax__scrim{
+  position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 50%,rgba(5,25,16,.62),rgba(5,25,16,0) 100%),
+    linear-gradient(to bottom,rgba(5,25,16,.55),rgba(5,25,16,.38) 45%,rgba(5,25,16,.62));
+}
+
+/* text: white, with a soft shadow, drifting up slowly while its scene is on screen */
+.parallax__scene{color:#fff}
+.parallax__center,.parallax__split{
+  transform:translateY(calc((0.5 - var(--sp,0)) * 70px));
+  transition:transform .15s linear;
+}
+.parallax__scene .slot,.parallax__scene .has-text{color:#fff;text-shadow:0 2px 28px rgba(0,0,0,.55),0 1px 3px rgba(0,0,0,.5)}
+.has-text.slot--par-p{font-size:19px;line-height:30px;max-width:760px}
+.has-text.slot--par-p-sm{font-size:17px;line-height:27px}
+
+/* side-by-side scenes: text sits on a dark frosted panel */
+.parallax__split-text{
+  padding:32px 34px;
+  background:rgba(6,30,19,.5);
+  border:1px solid rgba(255,255,255,.22);
+  border-radius:26px;
+  box-shadow:0 20px 60px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.2);
+  -webkit-backdrop-filter:blur(16px) saturate(1.3);backdrop-filter:blur(16px) saturate(1.3);
+}
+.parallax__split-text .has-text.slot--par-title-sm{font-size:44px;line-height:48px}
+.media--par-side{border-radius:26px;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.parallax__arrow{color:#fff;filter:drop-shadow(0 2px 6px rgba(0,0,0,.5))}
+@media (max-width:989px){.parallax__split-text .has-text.slot--par-title-sm{font-size:30px;line-height:34px}}
+@media (max-width:749px){.parallax__split-text{padding:20px}.has-text.slot--par-p{font-size:16px;line-height:25px}.has-text.slot--par-p-sm{font-size:15px;line-height:23px}.parallax__split-text .has-text.slot--par-title-sm{font-size:22px;line-height:26px}}
+@media (prefers-reduced-motion:reduce){.parallax__center,.parallax__split{transform:none}}
+
+/* keep scene titles from breaking mid-word */
+.parallax__split-text{max-width:580px}
+.parallax__split-text .has-text.slot--par-title-sm{font-size:38px;line-height:44px;overflow-wrap:break-word;word-break:normal;hyphens:manual}
+.parallax__split-text .has-text.slot--par-p-sm{overflow-wrap:break-word}
+@media (max-width:989px){.parallax__split-text .has-text.slot--par-title-sm{font-size:28px;line-height:32px}}
+@media (max-width:749px){.parallax__split-text .has-text.slot--par-title-sm{font-size:21px;line-height:25px}}
+
+/* The source clip is stored as a vertical 720x1280 file but was filmed landscape (it is on its side).
+   Rotate it 90deg counter-clockwise so it plays as an upright 1280x720 landscape video, sized to cover the stage. */
+.parallax__bg>.parallax__video{
+  inset:auto;top:50%;left:50%;max-width:none;
+  height:max(100vw,177.78vh);
+  width:calc(max(100vw,177.78vh) * .5625);
+  transform:translate(-50%,-50%) rotate(-90deg);
+  object-fit:cover;
+}
+
+/* ==========================================================
+   HOME HERO: product images with text on the empty left side
+   ========================================================== */
+.hero__bg>img{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover;object-position:center 78%}
+
+/* dark-green slide: white text. light slides ("ink"): dark text, soft light shade, dark progress bars */
+.hero__slide--light{color:#fff}
+.hero__slide--ink{color:var(--green-950)}
+.hero__slide--light .hero__shade{background:linear-gradient(90deg,rgba(6,28,18,.38),rgba(6,28,18,0) 58%)}
+.hero__slide--ink .hero__shade{background:linear-gradient(90deg,rgba(252,250,241,.5),rgba(252,250,241,0) 58%)}
+.hero__slide--ink .link-btn::after{background:var(--green-700)}
+.hero--ink .hero__dot i{background:rgba(15,47,29,.22)}
+.hero--ink .hero__dot i::after{background:var(--green-700)}
+.hero__slide--ink .slot.has-text{text-shadow:none}
+.hero__slide--light .slot.has-text{text-shadow:0 2px 20px rgba(0,0,0,.35)}
+.hero__slide--ink .has-text.slot--eyebrow-w{color:var(--green-700)}
+
+/* tablet: keep the products (right side) in view */
+@media (max-width:989px){.hero__bg>img{object-position:85% 85%}}
+
+/* phone: image sits along the bottom on the slide's own colour, headline above it */
 @media (max-width:749px){
-  .slot--pb-title:not(:empty){font-size:28px}
-  .slot--rich:not(:empty){font-size:18px}
-  .slot--i-title:not(:empty){font-size:26px}
-  .slot--r-title:not(:empty){font-size:20px}
-  .slot--bgv-title:not(:empty){font-size:28px}
-  .slot--news-title:not(:empty){font-size:22px}
+  .hero__bg>img{inset:auto 0 0 0;height:auto;aspect-ratio:2000/1116;object-fit:cover;object-position:center;
+    -webkit-mask-image:linear-gradient(to bottom,transparent,#000 26%);mask-image:linear-gradient(to bottom,transparent,#000 26%)}
+  .hero__content{justify-content:flex-start;padding-top:44px;padding-bottom:0}
+  .hero__shade{display:none}
+  .has-text.slot--hero-title{font-size:28px;line-height:32px}
+}
+
+/* phone: enlarge the artwork and anchor it to the right so the products are clearly visible */
+@media (max-width:749px){
+  .hero__bg>img{inset:auto 0 0 auto;width:178%;height:auto;max-width:none;object-position:right bottom}
+}
+
+/* ==========================================================
+   HERO: always show the whole product image (never crop the bottles)
+   desktop: the hero is as tall as the image allows (capped to the window), the image is scaled to FIT
+   and anchored right; the left side (empty in the artwork) fades into the slide's own colour.
+   ========================================================== */
+@media (min-width:990px){
+  .hero{height:clamp(480px,min(55.8vw,100svh - 118px),760px)}
+  .hero__bg>img{
+    object-fit:contain;object-position:right center;
+    -webkit-mask-image:linear-gradient(to right,transparent 0,#000 24%);
+    mask-image:linear-gradient(to right,transparent 0,#000 24%);
+  }
+}
+/* tablet: keep full height, show the right-hand part of the artwork where the products are */
+@media (min-width:750px) and (max-width:989px){
+  .hero{height:680px}
+  .hero__bg>img{object-fit:cover;object-position:88% center}
+}
+
+/* desktop: the <img> box hugs the artwork (right-aligned) so the left-edge fade starts exactly where the picture starts */
+@media (min-width:990px){
+  .hero__bg>img{
+    inset:0 0 0 auto;width:auto;height:100%;aspect-ratio:2000/1116;max-width:none;
+    object-fit:cover;object-position:center;
+    -webkit-mask-image:linear-gradient(to right,transparent 0,#000 22%);
+    mask-image:linear-gradient(to right,transparent 0,#000 22%);
+  }
 }

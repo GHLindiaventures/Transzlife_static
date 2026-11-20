@@ -1,0 +1,205 @@
+/* ==========================================================
+   PRODUCT SHOWCASE  (port of the product-page "conceptual illustration" stage)
+   Same stage: 21:10 frame, 28px corners, drag handle, tags, labels, benefit cards, botanicals, note.
+   Left layer = the product, right layer = the conceptual illustration.
+   --pos (0..100, set by JS) is where the handle stands: the product shows to its left, the
+   illustration (clipped) to its right.
+   ========================================================== */
+.psc-band{
+  --forest:var(--green-800);
+  --sage:var(--green-600);
+  --gold:var(--gold-500);
+  --line:rgba(15,47,29,.14);
+  --panel:rgba(255,255,255,.72);
+  --panel-2:var(--gold-100);
+  --muted:rgba(15,47,29,.72);
+  --faint:rgba(15,47,29,.55);
+  margin-top:clamp(60px,8vw,110px);
+  padding-block:clamp(60px,8vw,100px);
+  background:radial-gradient(ellipse 70% 60% at 85% 0%,rgba(140,184,106,.16),transparent 70%),var(--bg);
+  border-top:1px solid var(--line);
+}
+.psc-wrap{width:min(1296px,100% - 2 * var(--pad));margin-inline:auto}
+
+.psc-head{
+  display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);
+  gap:clamp(20px,4vw,64px);align-items:end;margin-bottom:clamp(28px,4vw,48px);
+}
+.psc-eyebrow{margin:0;font-size:var(--fs--1);font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--sage)}
+.psc-h2{margin:14px 0 0;font-size:clamp(2.3rem,4.6vw,4.2rem);line-height:1.05;font-weight:700;letter-spacing:.01em;text-transform:none;color:var(--forest)}
+.psc-h2 em{font-style:normal;color:var(--sage)}
+.psc-sub{margin:0;max-width:46ch;color:var(--muted);font-size:var(--fs-0);line-height:var(--lh)}
+
+/* ---------- stage ---------- */
+.psc-stage{
+  --pos:50;
+  position:relative;aspect-ratio:21/10;border-radius:28px;overflow:hidden;isolation:isolate;
+  touch-action:pan-y;user-select:none;-webkit-user-select:none;cursor:ew-resize;
+  box-shadow:0 30px 70px -34px rgba(20,52,26,.45),0 0 0 1px rgba(31,70,35,.12);
+}
+.psc-layer{position:absolute;inset:0}
+.psc-bg{position:absolute;inset:0;overflow:hidden}
+
+/* left layer: the product on a warm, golden backdrop that matches the brand */
+.psc-product .psc-bg{background:radial-gradient(ellipse 120% 95% at 28% 45%,#fffaea 0%,#f6e8bd 48%,#e8cd80 100%)}
+.psc-warm{position:absolute;left:27%;top:46%;width:58%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.85) 0%,rgba(255,241,190,.35) 42%,transparent 70%)}
+.psc-shadow{position:absolute;left:27%;bottom:7%;width:30%;height:5%;transform:translateX(-50%);border-radius:50%;
+  background:radial-gradient(ellipse,rgba(70,50,10,.32),transparent 70%);filter:blur(6px)}
+.psc-pack{position:absolute;left:4%;top:8%;width:46%;height:84%;display:grid;place-items:center;pointer-events:none}
+.psc-pack img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 22px 26px rgba(80,55,10,.28));pointer-events:none}
+
+/* right layer: fresh, light, botanical (clipped from the handle to the right) */
+.psc-illus{clip-path:inset(0 0 0 calc(var(--pos) * 1%))}
+.psc-illus .psc-bg{background:radial-gradient(ellipse 120% 95% at 72% 45%,#f7f4e3 0%,#e3efd8 46%,#b9d7a6 100%)}
+.psc-glow{
+  position:absolute;left:73%;top:52%;width:50%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;
+  background:radial-gradient(circle,rgba(255,236,170,.75) 0%,rgba(231,198,128,.28) 38%,transparent 68%);
+}
+.psc-glow::after{content:"";position:absolute;inset:14%;border-radius:50%;border:1px solid rgba(214,162,58,.35)}
+.psc-leaf{position:absolute;width:clamp(60px,9vw,130px);fill:rgba(111,158,76,.2);stroke:rgba(36,80,42,.35);stroke-width:1.4;stroke-linecap:round}
+.psc-leaf--a{right:4%;top:6%;transform:rotate(18deg)}
+.psc-leaf--b{right:12%;bottom:4%;transform:rotate(-110deg) scale(.8)}
+.psc-leaf--c{left:56%;bottom:8%;transform:rotate(-40deg) scale(.7)}
+.psc-sprig{position:absolute;height:62%;fill:rgba(111,158,76,.28);stroke:rgba(36,80,42,.38);stroke-width:1.2;stroke-linecap:round}
+.psc-sprig .psc-stem{fill:none;stroke-width:2}
+.psc-sprig--l{left:51.5%;bottom:-4%;transform:rotate(-6deg)}
+.psc-sprig--r{right:2%;top:-6%;transform:rotate(172deg);height:52%}
+.psc-dots{position:absolute;inset:0;opacity:.35;
+  background-image:radial-gradient(circle,rgba(36,80,42,.35) 1.2px,transparent 1.8px);
+  background-size:38px 38px;
+  -webkit-mask-image:radial-gradient(ellipse 45% 55% at 73% 50%,transparent 38%,#000 100%);
+  mask-image:radial-gradient(ellipse 45% 55% at 73% 50%,transparent 38%,#000 100%)}
+.psc-art{position:absolute;left:54%;top:14%;width:38%;height:72%;object-fit:contain;pointer-events:none;
+  filter:drop-shadow(0 18px 22px rgba(60,30,20,.22))}
+
+/* ---------- tags on each picture ---------- */
+.psc-tags{position:absolute;inset:0;margin:0;padding:0;list-style:none;pointer-events:none}
+.psc-tag{
+  position:absolute;display:inline-flex;align-items:center;gap:8px;padding:7px 13px 7px 10px;border-radius:999px;
+  font-size:clamp(11px,1vw,13.5px);font-weight:700;letter-spacing:.02em;white-space:nowrap;
+}
+.psc-tag::before{content:"";width:7px;height:7px;border-radius:50%;flex:none}
+.psc-tag--left{left:3%;color:var(--forest);background:rgba(255,255,255,.7);border:1px solid rgba(120,90,20,.18);backdrop-filter:blur(6px)}
+.psc-tag--left::before{background:var(--gold);box-shadow:0 0 0 3px rgba(224,168,38,.28)}
+.psc-tag--right{right:3%;color:var(--forest);background:rgba(255,255,255,.72);border:1px solid rgba(36,80,42,.14);backdrop-filter:blur(6px)}
+.psc-tag--right::before{background:var(--sage);box-shadow:0 0 0 3px rgba(111,158,76,.22)}
+.psc-tag:nth-child(1){top:30%}
+.psc-tag:nth-child(2){top:48%}
+.psc-tag:nth-child(3){top:66%}
+.psc-tag--left:nth-child(2){left:1.8%}
+.psc-tag--right:nth-child(2){right:1.8%}
+
+/* ---------- labels: each fades as its side is covered ---------- */
+.psc-label{
+  position:absolute;top:clamp(14px,2.2vw,26px);z-index:3;margin:0;display:grid;gap:2px;
+  padding:10px 16px 11px;border-radius:16px;pointer-events:none;transition:opacity .25s ease;
+}
+.psc-label b{font-weight:800;font-size:clamp(1.15rem,2vw,1.6rem);letter-spacing:.02em;text-transform:uppercase;line-height:1}
+.psc-label small{font-size:11.5px;font-weight:600;letter-spacing:.04em;opacity:.85}
+.psc-label--left{left:clamp(14px,2.2vw,26px);color:var(--forest);background:rgba(255,255,255,.72);backdrop-filter:blur(8px);
+  opacity:clamp(0,(var(--pos) - 10) / 12,1)}
+.psc-label--right{right:clamp(14px,2.2vw,26px);text-align:right;color:var(--forest);background:rgba(255,255,255,.75);backdrop-filter:blur(8px);
+  opacity:clamp(0,(90 - var(--pos)) / 12,1)}
+.psc-concept{
+  position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:3;margin:0;padding:5px 12px;border-radius:999px;
+  font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap;color:#fff;
+  background:rgba(20,40,24,.45);backdrop-filter:blur(6px);pointer-events:none;
+}
+
+/* ---------- handle ---------- */
+.psc-handle{position:absolute;top:0;bottom:0;left:calc(var(--pos) * 1%);z-index:4;width:56px;margin-left:-28px;display:grid;place-items:center;outline:none}
+.psc-line{position:absolute;top:0;bottom:0;left:50%;width:2px;margin-left:-1px;
+  background:linear-gradient(to bottom,rgba(255,255,255,0),#fff 12%,#fff 88%,rgba(255,255,255,0));box-shadow:0 0 14px rgba(255,255,255,.55)}
+.psc-knob{
+  position:relative;width:clamp(50px,5vw,60px);aspect-ratio:1;border-radius:50%;display:grid;place-items:center;color:#fff;background:var(--forest);
+  box-shadow:0 0 0 4px rgba(255,255,255,.9),0 0 0 6px rgba(227,162,26,.55),0 14px 30px -8px rgba(10,30,14,.6);
+  transition:transform .3s var(--ease),box-shadow .3s ease;
+}
+.psc-knob svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.psc-stage:hover .psc-knob,.psc-stage.is-dragging .psc-knob{transform:scale(1.08)}
+.psc-handle:focus-visible .psc-knob{box-shadow:0 0 0 4px #fff,0 0 0 7px var(--gold),0 14px 30px -8px rgba(10,30,14,.6)}
+
+/* ---------- below the picture ---------- */
+.psc-benefits{list-style:none;margin:clamp(26px,3.5vw,40px) 0 0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
+.psc-benefits li{display:grid;gap:6px;align-content:start;padding:18px 18px 20px;border-radius:20px;background:var(--panel);border:1px solid var(--line)}
+.psc-benefits b{font-size:15px;color:var(--forest);line-height:1.2}
+.psc-bd{font-size:13.5px;line-height:1.45;color:var(--muted)}
+.psc-ic{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:var(--panel-2);color:var(--forest);margin-bottom:4px}
+.psc-ic svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+
+.psc-herbs{margin-top:clamp(24px,3vw,34px)}
+.psc-herbs__k{margin:0 0 12px;font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--sage)}
+.psc-herbs ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.psc-herbs li{padding:7px 13px;border-radius:999px;font-size:13.5px;font-weight:650;color:var(--forest);background:rgba(255,255,255,.65);border:1px solid var(--line)}
+.psc-herbs small{font-weight:600;color:var(--faint);margin-left:3px}
+
+.psc-caption{display:none;margin:12px 0 0;text-align:center;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--sage)}
+.psc-note{margin:22px 0 0;max-width:92ch;font-size:12.5px;line-height:1.55;color:var(--faint)}
+
+/* ---------- tablet ---------- */
+@media (max-width:1100px){
+  .psc-stage{aspect-ratio:16/10}
+  .psc-pack{left:2%;top:12%;width:48%;height:76%}
+  .psc-art{left:52%;top:18%;width:44%;height:66%}
+  .psc-tag:nth-child(3){display:none}
+  .psc-tag:nth-child(1){top:auto;bottom:22%}
+  .psc-tag:nth-child(2){top:auto;bottom:10%}
+}
+@media (max-width:980px){
+  .psc-head{grid-template-columns:1fr;align-items:start}
+  .psc-benefits{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+/* ---------- phone: product on the left half, illustration on the right half ---------- */
+@media (max-width:640px){
+  .psc-stage{aspect-ratio:4/3.6;border-radius:22px}
+  .psc-pack{left:0;top:24%;width:50%;height:58%}
+  .psc-art{left:50%;top:26%;width:50%;height:52%}
+  .psc-tag{padding:5px 10px 5px 8px;font-size:11px}
+  .psc-tag:nth-child(1){top:auto;bottom:15%}
+  .psc-tag:nth-child(2){top:auto;bottom:4%}
+  .psc-tag:nth-child(3){display:none}
+  .psc-tag--left:nth-child(2),.psc-tag--left:nth-child(1){left:3%}
+  .psc-tag--right:nth-child(2),.psc-tag--right:nth-child(1){right:3%}
+  .psc-label{padding:8px 12px}
+  .psc-label small{display:none}
+  .psc-concept{display:none}
+  .psc-caption{display:block}
+  .psc-sprig--l,.psc-leaf--c{display:none}
+  .psc-benefits{grid-template-columns:1fr;gap:10px}
+  .psc-benefits li{grid-template-columns:38px minmax(0,1fr);column-gap:14px;row-gap:2px;padding:14px 16px;border-radius:16px}
+  .psc-benefits .psc-ic{grid-row:span 2;margin-bottom:0}
+}
+@media (prefers-reduced-motion:reduce){.psc-knob,.psc-label{transition:none}}
+
+/* ---------- richer botanical frame around the illustration ---------- */
+.psc-wreath{position:absolute;left:69%;top:52%;width:46%;aspect-ratio:1;transform:translate(-50%,-50%);overflow:visible}
+.psc-wreath .psc-ring{fill:none;stroke:rgba(214,162,58,.4);stroke-width:1.2;stroke-dasharray:2 6}
+.psc-wreath .psc-w1{fill:rgba(111,158,76,.34);stroke:rgba(36,80,42,.5);stroke-width:2.4;stroke-linecap:round}
+.psc-wreath .psc-w2{fill:rgba(160,196,112,.4);stroke:rgba(36,80,42,.42);stroke-width:3;stroke-linecap:round}
+.psc-wreath .psc-berry{fill:#e3a21a;stroke:rgba(255,255,255,.7);stroke-width:1.2}
+/* liver a touch smaller and left of the tags, centred in the wreath */
+.psc-art{left:53%;top:17%;width:32%;height:66%}
+.psc-glow{left:69%}
+@media (max-width:1100px){.psc-art{left:51%;top:20%;width:36%;height:60%}.psc-wreath{left:68%;width:50%}}
+@media (max-width:640px){
+  .psc-art{left:52%;top:30%;width:44%;height:46%}
+  .psc-wreath{left:75%;top:50%;width:56%}
+  .psc-glow{left:75%}
+}
+@media (prefers-reduced-motion:no-preference){
+  .psc-wreath{animation:pscSpin 90s linear infinite}
+}
+@keyframes pscSpin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+
+/* ---------- phone refinements ---------- */
+@media (max-width:640px){
+  .psc-label{padding:6px 10px 7px;border-radius:12px;max-width:46%}
+  .psc-label b{font-size:.82rem;letter-spacing:.04em;white-space:nowrap}
+  .psc-label--left{left:10px}
+  .psc-label--right{right:10px}
+}
+@media (max-width:640px){
+  .psc-label b{font-size:.68rem;letter-spacing:.02em}
+  .psc-label{padding:6px 8px 7px;max-width:none}
+}

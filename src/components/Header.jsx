@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { Media, Slot, PRODUCTS, ProductImg, range, stop } from './ui.jsx';
+import { Media, Slot, ProductImg, stop } from './ui.jsx';
+import { PRODUCTS, NAV_PRODUCTS } from '../content/site.js';
 
 export const NAV = [
   { label: 'Shop', mega: 'shop' },
@@ -26,30 +27,30 @@ function ShopMega() {
       <a className="mega__card mega__card--all" href="#" onClick={stop}>
         <div className="mega__circle">
           <Media className="media--circle" />
-          <span className="mega__circle-dot"><Slot className="slot--explore" /></span>
+          <span className="mega__circle-dot"><Slot className="slot--explore">Explore</Slot></span>
         </div>
         <p className="mega__caption">View All Products</p>
       </a>
-      {PRODUCTS.slice(0, 5).map((name, i) => (
-        <a className="mega__card" href="#" onClick={stop} key={name}>
-          <Media className="media--mega media--product"><ProductImg n={i + 1} eager /></Media>
-          <p className="mega__caption">{name}</p>
-        </a>
+      {PRODUCTS.map((p) => (
+        <Link className="mega__card" to={`/product/${p.id}`} key={p.id}>
+          <Media className="media--mega media--product"><ProductImg n={p.photo} alt={p.short} eager /></Media>
+          <p className="mega__caption">{p.short}</p>
+        </Link>
       ))}
     </div>
   );
 }
 
-function AllMega() {
+/** Compact dropdown list for "All Collections" (one link per collection). */
+function CollectionsDropdown() {
   return (
-    <div className="mega__inner">
-      {range(6).map((i) => (
-        <a className="mega__card" href="#" onClick={stop} key={i}>
-          <Media className="media--mega" />
-          <Slot as="p" className="slot--caption" />
-        </a>
+    <ul className="dropdown">
+      {NAV_PRODUCTS.map((p) => (
+        <li key={p.id}>
+          <Link to={`/product/${p.id}`}><Slot className="slot--dd">{p.name}</Slot></Link>
+        </li>
       ))}
-    </div>
+    </ul>
   );
 }
 
@@ -86,20 +87,27 @@ export default function Header({ onBurger }) {
             <svg width="20" height="14" viewBox="0 0 20 14" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M0 1h20M0 7h20M0 13h20" /></svg>
           </button>
           <button className="icon-btn header__search-m" aria-label="Search" type="button"><SearchIcon /></button>
-          <Link className="header__logo" to="/" aria-label="Logo"><Slot className="slot--logo" /></Link>
+          <Link className="header__logo" to="/" aria-label="Home">
+            <img className="logo__img" src={`${import.meta.env.BASE_URL}assets/logo.png`} alt="Logo" width="56" height="56" />
+          </Link>
         </div>
 
         <nav className="nav" aria-label="Primary">
           <ul className="nav__list">
             {NAV.map((item) =>
               item.mega ? (
-                <li className={`nav__item has-mega${openMega === item.mega ? ' is-open' : ''}`} key={item.label}>
+                <li
+                  className={`nav__item ${item.mega === 'shop' ? 'has-mega' : 'nav__item--dropdown'}${openMega === item.mega ? ' is-open' : ''}`}
+                  key={item.label}
+                >
                   <a className="nav__link" href="#" onClick={(e) => onMegaClick(e, item.mega)}>
                     <span className="nav__label">{item.label}</span><Chevron />
                   </a>
-                  <div className="mega">
-                    {item.mega === 'shop' ? <ShopMega /> : <AllMega />}
-                  </div>
+                  {item.mega === 'shop' ? (
+                    <div className="mega"><ShopMega /></div>
+                  ) : (
+                    <CollectionsDropdown />
+                  )}
                 </li>
               ) : (
                 <li className="nav__item" key={item.label}>
