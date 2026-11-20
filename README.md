@@ -1,1 +1,0 @@
-# Transzlife_static

@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FAQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="pages.css">
+</head>
+<!-- Empty ".slot" = text placeholder, ".media" = image/video placeholder. Remove "show-slots" from <body> to hide the dashed guides. -->
+<body class="show-slots">
+
+<a class="skip-link" href="#main"></a>
+
+<!-- ============ ANNOUNCEMENT BAR ============ -->
+<section class="announcement" id="announcement">
+  <div class="announcement__track">
+    <div class="announcement__group">
+      <span class="slot slot--announce"></span><span class="slot slot--announce"></span><span class="slot slot--announce"></span>
+    </div>
+    <div class="announcement__group" aria-hidden="true">
+      <span class="slot slot--announce"></span><span class="slot slot--announce"></span><span class="slot slot--announce"></span>
+    </div>
+  </div>
+  <button class="announcement__close" aria-label="Close" type="button">
+    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M1 1l8 8M9 1L1 9"/></svg>
+  </button>
+</section>
+
+<!-- ============ HEADER ============ -->
+<div class="sticky-threshold"></div>
+<header class="header" id="header">
+  <div class="header__inner">
+    <div class="header__left">
+      <button class="icon-btn header__burger" id="burger" aria-label="Menu" type="button">
+        <svg width="20" height="14" viewBox="0 0 20 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M0 1h20M0 7h20M0 13h20"/></svg>
+      </button>
+      <button class="icon-btn header__search-m" aria-label="Search" type="button">
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8.5" cy="8.5" r="6.5"/><path d="M13.5 13.5L19 19"/></svg>
+      </button>
+      <a class="header__logo" href="index.html" aria-label="Logo"><span class="slot slot--logo"></span></a>
+    </div>
+
+    <nav class="nav" aria-label="Primary">
+      <ul class="nav__list">
+        <li class="nav__item has-mega">
+          <a class="nav__link" href="#"><span class="nav__label">Shop</span><svg class="chev" width="8" height="5" viewBox="0 0 8 5" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M1 1l3 3 3-3"/></svg></a>
+          <div class="mega">
+            <div class="mega__inner mega__inner--shop">
+              <a class="mega__card mega__card--all" href="#"><div class="mega__circle"><div class="media media--circle"></div><span class="mega__circle-dot"><span class="slot slot--explore"></span></span></div><p class="mega__caption">View All Products</p></a>
+              <a class="mega__card" href="#"><div class="media media--mega media--product"><img src="assets/product-1.jpg" alt="CycleRelief" loading="eager" decoding="async"></div><p class="mega__caption">CycleRelief</p></a>
+              <a class="mega__card" href="#"><div class="media media--mega media--product"><img src="assets/product-2.jpg" alt="Energy Booster" loading="eager" decoding="async"></div><p class="mega__caption">Energy Booster</p></a>
+              <a class="mega__card" href="#"><div class="media media--mega media--product"><img src="assets/product-3.jpg" alt="Reviva" loading="eager" decoding="async"></div><p class="mega__caption">Reviva</p></a>
+              <a class="mega__card" href="#"><div class="media media--mega media--product"><img src="assets/product-4.jpg" alt="PulmoClear" loading="eager" decoding="async"></div><p class="mega__caption">PulmoClear</p></a>
+              <a class="mega__card" href="#"><div class="media media--mega media--product"><img src="assets/product-5.jpg" alt="Liver Detox" loading="eager" decoding="async"></div><p class="mega__caption">Liver Detox</p></a>
+            </div>
+          </div>
+        </li>
+        <li class="nav__item has-mega">
+          <a class="nav__link" href="#"><span class="nav__label">All Collections</span><svg class="chev" width="8" height="5" viewBox="0 0 8 5" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M1 1l3 3 3-3"/></svg></a>
+          <div class="mega">
+            <div class="mega__inner">
+              <a class="mega__card" href="#"><div class="media media--mega"></div><p class="slot slot--caption"></p></a>
+              <a class="mega__card" href="#"><div class="media media--mega"></div><p class="slot slot--caption"></p></a>
+              <a class="mega__card" href="#"><div class="media media--mega"></div><p class="slot slot--caption"></p></a>
+              <a class="mega__card" href="#"><div class="media media--mega"></div><p class="slot slot--caption"></p></a>
+              <a class="mega__card" href="#"><div class="media media--mega"></div><p class="slot slot--caption"></p></a>
+              <a class="mega__card" href="#"><div class="media media--mega"></div><p class="slot slot--caption"></p></a>
+            </div>
+          </div>
+        </li>
+        <li class="nav__item"><a class="nav__link" href="about.html"><span class="nav__label">About</span></a></li>
+        <li class="nav__item"><a class="nav__link" href="science.html"><span class="nav__label">Science</span></a></li>
+        <li class="nav__item"><a class="nav__link" href="faq.html" aria-current="page"><span class="nav__label">FAQ</span></a></li>
+        <li class="nav__item"><a class="nav__link" href="blog.html"><span class="nav__label">Blog</span></a></li>
+        <li class="nav__item"><a class="nav__link" href="contact.html"><span class="nav__label">Contact</span></a></li>
+      </ul>
+    </nav>
+
+    <div class="header__right">
+      <button class="icon-btn header__search" aria-label="Search" type="button">
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8.5" cy="8.5" r="6.5"/><path d="M13.5 13.5L19 19"/></svg>
+      </button>
+      <a class="icon-btn" href="#" aria-label="Account">
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="6" r="4"/><path d="M2 19c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+      </a>
+      <a class="icon-btn" href="#" aria-label="Cart">
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 6h14l-1 13H4L3 6z"/><path d="M7 8V5a3 3 0 016 0v3"/></svg>
+      </a>
+    </div>
+  </div>
+</header>
+
+<!-- ============ MOBILE MENU DRAWER ============ -->
+<div class="drawer-overlay" id="drawerOverlay"></div>
+<aside class="drawer" id="drawer" aria-hidden="true">
+  <div class="drawer__head">
+    <button class="icon-btn" id="drawerClose" aria-label="Close" type="button">
+      <svg width="14" height="14" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M1 1l8 8M9 1L1 9"/></svg>
+    </button>
+  </div>
+  <ul class="drawer__list">
+    <li><button class="drawer__row" type="button" data-acc><span class="nav__label">Shop</span><svg width="10" height="6" viewBox="0 0 8 5" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M1 1l3 3 3-3"/></svg></button>
+      <div class="drawer__sub"><a href="#"><span class="slot slot--drawer"></span></a><a href="#"><span class="slot slot--drawer"></span></a><a href="#"><span class="slot slot--drawer"></span></a></div></li>
+    <li><button class="drawer__row" type="button" data-acc><span class="nav__label">All Collections</span><svg width="10" height="6" viewBox="0 0 8 5" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M1 1l3 3 3-3"/></svg></button>
+      <div class="drawer__sub"><a href="#"><span class="slot slot--drawer"></span></a><a href="#"><span class="slot slot--drawer"></span></a><a href="#"><span class="slot slot--drawer"></span></a></div></li>
+    <li><a class="drawer__row" href="about.html"><span class="nav__label">About</span></a></li>
+    <li><a class="drawer__row" href="science.html"><span class="nav__label">Science</span></a></li>
+    <li><a class="drawer__row" href="faq.html" aria-current="page"><span class="nav__label">FAQ</span></a></li>
+    <li><a class="drawer__row" href="blog.html"><span class="nav__label">Blog</span></a></li>
+    <li><a class="drawer__row" href="contact.html"><span class="nav__label">Contact</span></a></li>
+  </ul>
+</aside>
+
+<main id="main" class="main">
+
+  <section class="pbanner">
+    <div class="media media--fill"></div>
+    <div class="pbanner__shade"></div>
+    <div class="pbanner__inner"><h1 class="slot slot--pb-title"></h1></div>
+  </section>
+  <section class="faq">
+    <div class="faq__list">
+      <div class="faq__item" data-reveal>
+        <button class="faq__q" type="button" aria-expanded="false"><span class="slot slot--q-num"></span><span class="slot slot--q"></span><span class="faq__plus" aria-hidden="true"></span></button>
+        <div class="faq__a"><div><p class="slot"></p></div></div>
+      </div>
+      <div class="faq__item" data-reveal>
+        <button class="faq__q" type="button" aria-expanded="false"><span class="slot slot--q-num"></span><span class="slot slot--q"></span><span class="faq__plus" aria-hidden="true"></span></button>
+        <div class="faq__a"><div><p class="slot"></p></div></div>
+      </div>
+      <div class="faq__item" data-reveal>
+        <button class="faq__q" type="button" aria-expanded="false"><span class="slot slot--q-num"></span><span class="slot slot--q"></span><span class="faq__plus" aria-hidden="true"></span></button>
+        <div class="faq__a"><div><p class="slot"></p></div></div>
+      </div>
+      <div class="faq__item" data-reveal>
+        <button class="faq__q" type="button" aria-expanded="false"><span class="slot slot--q-num"></span><span class="slot slot--q"></span><span class="faq__plus" aria-hidden="true"></span></button>
+        <div class="faq__a"><div><p class="slot"></p></div></div>
+      </div>
+      <div class="faq__item" data-reveal>
+        <button class="faq__q" type="button" aria-expanded="false"><span class="slot slot--q-num"></span><span class="slot slot--q"></span><span class="faq__plus" aria-hidden="true"></span></button>
+        <div class="faq__a"><div><p class="slot"></p></div></div>
+      </div>
+      <div class="faq__item" data-reveal>
+        <button class="faq__q" type="button" aria-expanded="false"><span class="slot slot--q-num"></span><span class="slot slot--q"></span><span class="faq__plus" aria-hidden="true"></span></button>
+        <div class="faq__a"><div><p class="slot"></p></div></div>
+      </div>
+      <div class="faq__item" data-reveal>
+        <button class="faq__q" type="button" aria-expanded="false"><span class="slot slot--q-num"></span><span class="slot slot--q"></span><span class="faq__plus" aria-hidden="true"></span></button>
+        <div class="faq__a"><div><p class="slot"></p></div></div>
+      </div>
+      <div class="faq__item" data-reveal>
+        <button class="faq__q" type="button" aria-expanded="false"><span class="slot slot--q-num"></span><span class="slot slot--q"></span><span class="faq__plus" aria-hidden="true"></span></button>
+        <div class="faq__a"><div><p class="slot"></p></div></div>
+      </div>
+      <div class="faq__item" data-reveal>
+        <button class="faq__q" type="button" aria-expanded="false"><span class="slot slot--q-num"></span><span class="slot slot--q"></span><span class="faq__plus" aria-hidden="true"></span></button>
+        <div class="faq__a"><div><p class="slot"></p></div></div>
+      </div>
+      <div class="faq__item" data-reveal>
+        <button class="faq__q" type="button" aria-expanded="false"><span class="slot slot--q-num"></span><span class="slot slot--q"></span><span class="faq__plus" aria-hidden="true"></span></button>
+        <div class="faq__a"><div><p class="slot"></p></div></div>
+      </div>
+    </div>
+  </section>
+  <hr class="sep">
+
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer" id="footer">
+  <div class="footer__inner page-pad--lg">
+    <div class="footer__cols">
+      <div class="footer__col">
+        <h4 class="slot slot--f-head"></h4>
+        <ul>
+          <li><a href="#"><span class="slot slot--f-link"></span></a></li><li><a href="#"><span class="slot slot--f-link"></span></a></li><li><a href="#"><span class="slot slot--f-link"></span></a></li><li><a href="#"><span class="slot slot--f-link"></span></a></li><li><a href="#"><span class="slot slot--f-link"></span></a></li>
+        </ul>
+      </div>
+      <div class="footer__col">
+        <h4 class="slot slot--f-head"></h4>
+        <ul>
+          <li><a href="#"><span class="slot slot--f-link"></span></a></li><li><a href="#"><span class="slot slot--f-link"></span></a></li><li><a href="#"><span class="slot slot--f-link"></span></a></li><li><a href="#"><span class="slot slot--f-link"></span></a></li><li><a href="#"><span class="slot slot--f-link"></span></a></li>
+        </ul>
+      </div>
+      <div class="footer__col">
+        <h4 class="slot slot--f-head"></h4>
+        <ul>
+          <li><a href="#"><span class="slot slot--f-link"></span></a></li><li><a href="#"><span class="slot slot--f-link"></span></a></li><li><a href="#"><span class="slot slot--f-link"></span></a></li><li><a href="#"><span class="slot slot--f-link"></span></a></li><li><a href="#"><span class="slot slot--f-link"></span></a></li>
+        </ul>
+      </div>
+      <div class="footer__col footer__col--wide">
+        <h4 class="slot slot--f-head"></h4>
+        <p class="slot slot--f-address"></p>
+        <p class="slot slot--f-address slot--f-address-2"></p>
+      </div>
+    </div>
+    <ul class="footer__social">
+      <li><a href="#" aria-label="Social 1"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M9 16V9h2.4l.4-3H9V4.3c0-.8.2-1.3 1.4-1.3H12V.4C11.700.3 10.800.2 9.800.2 7.600.2 6.100 1.500 6.100 4v2H3.700v3h2.400v7z"/></svg></a></li>
+      <li><a href="#" aria-label="Social 2"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1.500 1.500l13 13M14.500 1.500l-13 13"/></svg></a></li>
+      <li><a href="#" aria-label="Social 3"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1" y="1" width="14" height="14" rx="4"/><circle cx="8" cy="8" r="3.200"/><circle cx="12" cy="4" r=".6" fill="currentColor"/></svg></a></li>
+      <li><a href="#" aria-label="Social 4"><svg width="18" height="16" viewBox="0 0 18 16" fill="currentColor"><path d="M1 3.500C1 2.100 2.100 1 3.500 1h11C15.900 1 17 2.100 17 3.500v9c0 1.400-1.100 2.500-2.500 2.500h-11C2.100 15 1 13.900 1 12.500zM7 5v6l5-3z"/></svg></a></li>
+    </ul>
+    <p class="footer__copy"><span class="slot slot--copy"></span></p>
+  </div>
+</footer>
+
+<!-- floating chat widget placeholder -->
+<a class="float-widget" href="#" aria-label="Chat"><span class="float-widget__icon"></span><svg width="8" height="5" viewBox="0 0 8 5" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M1 1l3 3 3-3"/></svg></a>
+
+<script src="main.js"></script>
+</body>
+</html>
