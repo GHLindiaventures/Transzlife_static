@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App.jsx';
 import './styles/styles.css';
 import './styles/pages.css';
+import './styles/slider.css';
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
