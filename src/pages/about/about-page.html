@@ -1,0 +1,409 @@
+<!-- About page body, taken from Tranz-life/about.html (<main class="about-page">). Rendered by About.jsx;
+     the animations are in ./about-story.js, ./heal-interlude.js and ./hero-live.js, the styles in ./about-*.css. -->
+    <!-- ======================================================================
+         SECTION 1: OUR VISION (landing)
+         ====================================================================== -->
+    <section class="about-hero about-hero--vision" id="hero" aria-label="Our vision">
+      <div class="about-hero-bg" aria-hidden="true">
+        <picture class="about-hero-picture">
+                    <img class="about-hero-img" src="/assets/about/about-hero-tree-science.webp" alt="A tree with deep roots joined by an infinity loop to DNA, molecules and lab glassware" loading="eager" decoding="async">
+        </picture>
+        <!-- the spotlight: a softened copy over the photo, with a clear lens where the pointer is (about-story.js) -->
+        <img class="about-hero-blur" src="/assets/about/blur/about-hero-tree-science.webp" alt="" decoding="async">
+        <div class="about-hero-overlay"></div>
+        <div class="about-journey-layer">
+          <svg class="about-journey-svg" viewBox="0 0 1376 768" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+            <defs>
+              <filter id="goldGlow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="3.5" result="blur1"/>
+                <feGaussianBlur in="SourceGraphic" stdDeviation="7" result="blur2"/>
+                <feMerge>
+                  <feMergeNode in="blur2"/>
+                  <feMergeNode in="blur1"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+            </defs>
+            <path id="aboutJourneyPath" class="about-journey-path" d="M 340,750 C 360,650 390,560 425,470 C 455,390 510,340 600,335 C 690,330 780,350 880,380 C 960,400 1030,440 1120,485 C 1170,420 1220,400 1270,420 C 1325,445 1320,500 1280,530 C 1235,555 1165,530 1120,485 C 1075,440 1020,455 1025,495 C 1030,535 1080,530 1120,485" fill="none" stroke="none"/>
+            <circle class="about-journey-pulse pulse-head" r="5" fill="#fffbe0" filter="url(#goldGlow)">
+              <animateMotion dur="7s" repeatCount="indefinite" path="M 340,750 C 360,650 390,560 425,470 C 455,390 510,340 600,335 C 690,330 780,350 880,380 C 960,400 1030,440 1120,485 C 1170,420 1220,400 1270,420 C 1325,445 1320,500 1280,530 C 1235,555 1165,530 1120,485 C 1075,440 1020,455 1025,495 C 1030,535 1080,530 1120,485"/>
+            </circle>
+            <circle class="about-journey-pulse pulse-tail" r="3.2" fill="#e3a21a" filter="url(#goldGlow)" opacity="0.8">
+              <animateMotion dur="7s" begin="-0.2s" repeatCount="indefinite" path="M 340,750 C 360,650 390,560 425,470 C 455,390 510,340 600,335 C 690,330 780,350 880,380 C 960,400 1030,440 1120,485 C 1170,420 1220,400 1270,420 C 1325,445 1320,500 1280,530 C 1235,555 1165,530 1120,485 C 1075,440 1020,455 1025,495 C 1030,535 1080,530 1120,485"/>
+            </circle>
+          </svg>
+          <div class="about-gold-particles" id="aboutParticles"></div>
+        </div>
+        <div class="about-hero-glow-1"></div>
+        <div class="about-hero-glow-2"></div>
+      </div>
+      <!-- OUR VISION: the page's landing statement, over the original roots-to-infinity background.
+           Entrance choreography: about.css (.av-*); scroll lift: --about-sy from about.js. -->
+      <div class="wrap about-hero-in av-in">
+        <div class="in-tagline-badge" aria-label="Our vision">
+          <span class="itb-icon" aria-hidden="true">
+            <svg viewBox="0 0 20 20" class="itb-leaf">
+              <path d="M10 2C6 6 4 11 6 15c2 4 7 4 9 2 2-2 1-7-3-9-2-1-2-6-2-6z" fill="currentColor" />
+            </svg>
+          </span>
+          <span class="itb-text">Our vision</span>
+          <span class="itb-sep" aria-hidden="true">·</span>
+          <span class="itb-sub">What drives TranzLife</span>
+          <span class="itb-spark" aria-hidden="true">✦</span>
+        </div>
+
+        <h1 class="in-tagline-hero av-statement"
+          aria-label="From the roots of nature to the infinity of science, TranzLife is shaping the future of Life.">
+          <!-- Line 1: From the roots of nature -->
+          <span class="it-line it-line-1">
+            <span class="it-plain">From the </span>
+            <span class="it-word it-roots">
+              <span class="it-roots-text">roots</span>
+              <svg class="it-rootlet-svg" viewBox="0 0 70 20" aria-hidden="true">
+                <path d="M2 4 C 18 16, 38 4, 54 13 S 68 8, 68 8" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" />
+                <path d="M26 12 C 32 18, 42 16, 46 19" fill="none" stroke="currentColor" stroke-width="1.4"
+                  stroke-linecap="round" />
+              </svg>
+            </span>
+            <span class="it-plain"> of </span>
+            <span class="it-highlight it-nature">
+              <span class="it-nature-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
+                  <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
+                </svg>
+              </span>
+              <em class="it-nature-text">NATURE</em>
+            </span>
+          </span>
+
+          <!-- Line 2: to the infinity of science, -->
+          <span class="it-line it-line-2">
+            <span class="it-plain">to the </span>
+            <span class="it-word it-infinity">
+              <span class="it-inf-glyph" aria-hidden="true">
+                <svg viewBox="0 0 38 18" class="it-inf-svg">
+                  <path class="it-inf-track"
+                    d="M10 2 A 7 7 0 0 0 3 9 A 7 7 0 0 0 10 16 C 14.5 16 16.8 11.5 19 9 C 21.2 6.5 23.5 2 28 2 A 7 7 0 0 1 35 9 A 7 7 0 0 1 28 16 C 23.5 16 21.2 11.5 19 9 C 16.8 6.5 14.5 2 10 2 Z" />
+                  <path class="it-inf-draw"
+                    d="M10 2 A 7 7 0 0 0 3 9 A 7 7 0 0 0 10 16 C 14.5 16 16.8 11.5 19 9 C 21.2 6.5 23.5 2 28 2 A 7 7 0 0 1 35 9 A 7 7 0 0 1 28 16 C 23.5 16 21.2 11.5 19 9 C 16.8 6.5 14.5 2 10 2 Z" />
+                </svg>
+              </span>
+              <span class="it-inf-text">infinity</span>
+            </span>
+            <span class="it-plain"> of </span>
+            <span class="it-highlight it-science">
+              <span class="it-sci-spark" aria-hidden="true">✦</span>
+              <span class="it-science-text">science<span class="it-comma">,</span></span>
+              <span class="it-sci-ring" aria-hidden="true"></span>
+            </span>
+          </span>
+
+          <!-- Line 3: TranzLife is shaping the -->
+          <span class="it-line it-line-3">
+            <span class="it-brand">
+              <span class="it-brand-logo" aria-hidden="true"></span>
+              <strong class="it-brand-name">TranzLife</strong>
+            </span>
+            <span class="it-plain">&nbsp;is shaping the</span>
+          </span>
+
+          <!-- Line 4: future of Life. -->
+          <span class="it-line it-line-4">
+            <span class="it-highlight it-future-life">
+              <span class="it-fl-text">future of Life<span class="it-fl-period">.</span></span>
+              <span class="it-fl-halo" aria-hidden="true"></span>
+            </span>
+          </span>
+        </h1>
+
+        <p class="about-hero-sub av-sub">
+          Born in Chennai, TranzLife Biosciences brings together the wisdom of Ayurveda and modern science to create natural, safe and effective solutions that support health and well-being.
+        </p>
+
+        <div class="in-creed-footer av-pillars">
+        <div class="icf-line-wrap" aria-hidden="true">
+            <span class="icf-line"></span>
+            <span class="icf-gem">◆</span>
+            <span class="icf-line"></span>
+          </div>
+          <div class="icf-pillars">
+            <div class="icf-pillar">
+              <span class="icfp-dot"></span>
+              <span class="icfp-t">100% Ayurvedic Roots</span>
+            </div>
+            <span class="icf-divider" aria-hidden="true">·</span>
+            <div class="icf-pillar">
+              <span class="icfp-dot"></span>
+              <span class="icfp-t">Bio-Active Molecular Science</span>
+            </div>
+            <span class="icf-divider" aria-hidden="true">·</span>
+            <div class="icf-pillar">
+              <span class="icfp-dot"></span>
+              <span class="icfp-t">Clinical Innovation</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="av-cta">
+          <a href="#roots" class="pill light">
+            <i aria-hidden="true">↓</i><b>Begin the story</b>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- INTERLUDE, "Cure ≠ Heal": the philosophy before the story. A question, then the answer drawn: CURE is one sharp
+         point (one condition), HEAL opens into a warm circle that reaches the whole of you (body, mind, habits,
+         balance). Pinned and scroll-driven on wide screens; stacked with a light entrance on phones; still with reduced
+         motion (features/about/heal-interlude.js, styles/sections/about-heal.css). A belief, not a product claim. -->
+    <section class="heal" id="heal" aria-labelledby="healQ">
+      <div class="heal-pin">
+        <p class="heal-kicker">Our philosophy</p>
+        <h2 class="heal-q" id="healQ">Is curing the same as <em>healing?</em></h2>
+        <p class="heal-a">Not really.</p>
+        <div class="heal-split">
+          <figure class="heal-side heal-cure">
+            <svg class="heal-art" viewBox="-150 -150 300 300" aria-hidden="true">
+              <circle class="hc-ring" r="34"/><line class="hc-cross" x1="-56" y1="0" x2="56" y2="0"/><line class="hc-cross" x1="0" y1="-56" x2="0" y2="56"/>
+              <circle class="hc-dot" r="7"/>
+            </svg>
+            <figcaption><b>Cure</b><span>Treats one condition.</span></figcaption>
+          </figure>
+          <span class="heal-ne" aria-hidden="true">≠</span>
+          <figure class="heal-side heal-heal">
+            <svg class="heal-art" viewBox="-150 -150 300 300" aria-hidden="true">
+              <defs><radialGradient id="healGlow"><stop offset="0" stop-color="#f6cf86" stop-opacity=".95"/><stop offset=".55" stop-color="#eab765" stop-opacity=".35"/><stop offset="1" stop-color="#eab765" stop-opacity="0"/></radialGradient></defs>
+              <circle class="hh-glow" r="128" fill="url(#healGlow)"/>
+              <circle class="hh-ring" r="104"/>
+              <circle class="hh-orbit" r="118"/>
+              <circle class="hh-dot" r="7"/>
+            </svg>
+            <ul class="heal-whole" aria-label="Healing cares for">
+              <li style="--k:0">Body</li><li style="--k:1">Mind</li><li style="--k:2">Habits</li><li style="--k:3">Balance</li>
+            </ul>
+            <figcaption><b>Heal</b><span>Cares for the whole of you.</span></figcaption>
+          </figure>
+        </div>
+        <p class="heal-close">At TranzLife, wellness is a journey. <span>And every small step matters.</span></p>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         THE STORY: five chapters on one pinned stage, like scenes in a film
+         (features/about/about-story.js, sections/about-story.css).
+         Wide screens: scrolling moves the camera through the scenes: the chapter in view is sharp over its blurred
+         background; between chapters it pulls focus (the old scene blurs and recedes, a title card and letterbox
+         bars pass, the next scene comes into focus) and each scene has its own entrance. Every animation follows the
+         scroll position, so it reverses exactly and never takes the scroll over.
+         Phones and reduced motion: the same scenes stacked, each with a light entrance (or none).
+         All the copy lives here, in the markup.
+         ====================================================================== -->
+    <div class="ast" id="story">
+      <div class="ast-pin">
+
+        <!-- CHAPTER 01: ROOTS -->
+        <section class="ast-scene ast-light ast-roots" id="roots" data-no="01" data-name="Roots" aria-labelledby="rootsH">
+          <div class="ast-bg" aria-hidden="true"><img src="/assets/about/blur/botanical-ayurveda-roots.webp" alt="" decoding="async"></div>
+          <div class="ast-body wrap">
+            <div class="ast-copy">
+              <p class="ast-kicker ast-st" style="--k:0"><span>Chapter 01</span>Roots</p>
+              <h2 class="ast-h ast-st" style="--k:1" id="rootsH">Rooted in 5,000 years of <em>Ayurvedic wisdom</em></h2>
+              <p class="ast-lead ast-st" style="--k:2">For thousands of years, classical texts such as the Charaka Samhita and Sushruta Samhita have documented plants that support health and vitality.</p>
+              <p class="ast-text ast-st" style="--k:3">But raw herbs are hard to get right: active levels vary, the taste is harsh, and much of their potency is lost in crude powders. TranzLife was founded to bridge that gap, starting with quality botanicals that are checked for purity before they enter our formulation process.</p>
+              <ul class="ast-tags ast-st" style="--k:4"><li>Natural ingredients</li><li>Ayurvedic wisdom</li><li>100% plant-derived</li><li>Science backed</li></ul>
+            </div>
+            <figure class="ast-visual ast-roots-visual">
+              <figcaption class="ast-cap">Our botanical heritage, from root to ritual</figcaption>
+              <!-- the hero object: a marble mortar and pestle with fresh herbs (transparent cut-out: scripts/make-about-mortar.py) -->
+              <div class="ast-photo ast-object"><img src="/assets/about/mortar.webp" alt="A green marble mortar and pestle filled with fresh herbs and spices" loading="lazy" decoding="async" width="755" height="900"></div>
+              <!-- ten of our ingredients orbiting it, evenly spaced (transparent cut-outs) -->
+              <ul class="ast-orbit" aria-label="Some of our ingredients">
+                <li><img src="/assets/ingredients/cutout/ginger.webp" alt="" loading="lazy" decoding="async"><span>Ginger</span></li>
+                <li><img src="/assets/ingredients/cutout/echinacea.webp" alt="" loading="lazy" decoding="async"><span>Echinacea</span></li>
+                <li><img src="/assets/ingredients/cutout/peppermint.webp" alt="" loading="lazy" decoding="async"><span>Peppermint</span></li>
+                <li><img src="/assets/ingredients/cutout/lemon.webp" alt="" loading="lazy" decoding="async"><span>Lemon</span></li>
+                <li><img src="/assets/ingredients/cutout/lavender.webp" alt="" loading="lazy" decoding="async"><span>Lavender</span></li>
+                <li><img src="/assets/ingredients/cutout/amla.webp" alt="" loading="lazy" decoding="async"><span>Amla</span></li>
+                <li><img src="/assets/ingredients/cutout/wintergreen.webp" alt="" loading="lazy" decoding="async"><span>Wintergreen</span></li>
+                <li><img src="/assets/ingredients/cutout/eucalyptus.webp" alt="" loading="lazy" decoding="async"><span>Eucalyptus</span></li>
+                <li><img src="/assets/ingredients/cutout/licorice.webp" alt="" loading="lazy" decoding="async"><span>Licorice</span></li>
+                <li><img src="/assets/ingredients/cutout/black-turmeric.webp" alt="" loading="lazy" decoding="async"><span>Black turmeric</span></li>
+              </ul>
+            </figure>
+          </div>
+        </section>
+
+        <!-- CHAPTER 02: SCIENCE -->
+        <section class="ast-scene ast-light ast-science" id="science" data-no="02" data-name="Science" aria-labelledby="scienceH">
+          <div class="ast-bg" aria-hidden="true"><img src="/assets/about/blur/biotech-lab-cleanroom.webp" alt="" decoding="async"></div>
+          <div class="ast-body wrap">
+            <figure class="ast-visual ast-iris">
+              <!-- a short film of botanical extraction in the lab (about-story.js plays it only while this chapter is on screen;
+                   reduced motion and data saver keep the poster) -->
+              <div class="ast-iris-lens"><video class="ast-lab-film" id="astLabFilm" muted loop playsinline preload="none" disablepictureinpicture
+                poster="/assets/about/science-lab.webp" data-src="/assets/about/science-lab.mp4" width="720" height="1280"
+                role="img" aria-label="Scientists preparing botanical extracts in a modern laboratory"></video></div>
+              <span class="ast-iris-ring" aria-hidden="true"></span>
+            </figure>
+            <div class="ast-copy">
+              <p class="ast-kicker ast-st" style="--k:0"><span>Chapter 02</span>Science</p>
+              <h2 class="ast-h ast-st" style="--k:1" id="scienceH">Where modern science unlocks <em>bioavailability</em></h2>
+              <p class="ast-lead ast-st" style="--k:2">We don't simply grind herbs into capsules. We extract, standardise and protect the active plant compounds that make each formula work.</p>
+              <ol class="ast-steps ast-st" style="--k:3">
+                <li><b>Select</b><span>Quality botanicals, checked for purity before formulation.</span></li>
+                <li><b>Extract</b><span>Modern methods that protect delicate plant compounds, without harsh chemical solvents.</span></li>
+                <li><b>Standardise</b><span>Consistent active levels in every batch, for consistent dosing.</span></li>
+              </ol>
+              <dl class="ast-stats ast-st" style="--k:4">
+                <div><dt>Market-ready products</dt><dd data-count="6">6</dd></div>
+                <div><dt>Products in development</dt><dd data-count="14">14</dd></div>
+                <div><dt>Delivery formats</dt><dd data-count="6">6</dd></div>
+              </dl>
+              <details class="ast-more ast-st" style="--k:5">
+                <summary>Our formats</summary>
+                <p>Aromatherapy inhalers, roll-ons, gummies, capsules, effervescent tablets and polyherbal liquids, each made to the same four pillars: innovate, develop, deliver and make an impact.</p>
+              </details>
+            </div>
+          </div>
+        </section>
+
+        <!-- CHAPTER 03: RECOGNITION -->
+        <section class="ast-scene ast-dark ast-recognition" id="recognition" data-no="03" data-name="Recognition" aria-labelledby="recognitionH">
+          <div class="ast-bg" aria-hidden="true"><img src="/assets/about/blur/leadership-delegation-nrdc.webp" alt="" decoding="async"></div>
+          <div class="ast-body wrap">
+            <div class="ast-copy">
+              <p class="ast-kicker ast-st" style="--k:0"><span>Chapter 03</span>Recognition</p>
+              <h2 class="ast-h ast-st" style="--k:1" id="recognitionH">Recognised by the <em>nation</em>, welcomed by the <em>world</em></h2>
+              <!-- CONFIRM: nature of the NRDC agreement -->
+              <p class="ast-lead ast-st" style="--k:2">TranzLife has a technology collaboration with the National Research Development Corporation (NRDC), Ministry of Science &amp; Technology, Government of India, helping us turn validated bio-innovations into standardised formulations for India and beyond.</p>
+              <ul class="ast-badges" aria-label="Registrations and recognition">
+                <li style="--k:0;--r:-14"><img src="/assets/badges/fssai.png" alt="FSSAI" loading="lazy"></li>
+                <li style="--k:1;--r:10"><img src="/assets/badges/make-in-india.png" alt="Make in India" loading="lazy"></li>
+                <li style="--k:2;--r:-8"><img src="/assets/badges/dpiit-startup-india.png" alt="DPIIT Startup India" loading="lazy"></li>
+                <li style="--k:3;--r:12"><img src="/assets/badges/msme.png" alt="MSME" loading="lazy"></li>
+                <li style="--k:4;--r:-10"><img src="/assets/badges/gem-gov.png" alt="GeM" loading="lazy"></li>
+                <li style="--k:5;--r:8"><img src="/assets/badges/ayush.png" alt="Ministry of AYUSH" loading="lazy"></li>
+              </ul>
+            </div>
+            <figure class="ast-visual ast-frame ast-st" style="--k:2">
+              <img src="/assets/about/leadership-delegation-nrdc.jpg" alt="TranzLife leadership with the National Research Development Corporation and international delegations" loading="lazy" decoding="async" width="1024" height="590">
+              <figcaption class="ast-cap">TranzLife leadership with NRDC, Ministry of Science &amp; Technology, and international delegations.</figcaption>
+            </figure>
+            <!-- CONFIRM: real milestone dates -->
+            <div class="ast-film ast-st" style="--k:4">
+              <ol class="ast-film-track" aria-label="Our journey">
+                <li><b>2021</b><strong>Founded in Chennai</strong><span>Ayurvedic wisdom meets modern science.</span></li>
+                <li><b>2022</b><strong>Clean extraction</strong><span>Solvent-free extraction and quality-testing standards.</span></li>
+                <li><b>2023</b><strong>NRDC collaboration</strong><span>A technology collaboration with the Government of India's NRDC.</span></li>
+                <li><b>2024</b><strong>New delivery formats</strong><span>Inhalers, roll-ons, gummies and herbal liquids.</span></li>
+                <li><b>2025</b><strong>Phytochemical research</strong><span>Computational modelling and early-stage research programmes.</span></li>
+                <li><b>2026</b><strong>Growing reach</strong><span>6 market-ready products, 14 in development.</span></li>
+              </ol>
+            </div>
+          </div>
+        </section>
+
+        <!-- CHAPTER 04: OUR COMPASS -->
+        <section class="ast-scene ast-light ast-compass" id="compass" data-no="04" data-name="Our Compass" aria-labelledby="compassH">
+          <div class="ast-bg" aria-hidden="true"><img src="/assets/about/blur/compass.webp" alt="" decoding="async"></div>
+          <div class="ast-body wrap">
+            <div class="ast-copy">
+              <p class="ast-kicker ast-st" style="--k:0"><span>Chapter 04</span>Our compass</p>
+              <h2 class="ast-h ast-st" style="--k:1" id="compassH">Vision, mission and <em>values</em></h2>
+              <div class="ast-vision ast-st" style="--k:2">
+                <h3>Our vision</h3>
+                <p>To be a globally trusted leader in life sciences, turning natural resources and innovative science into safe, effective and sustainable solutions that enhance health and enrich lives.</p>
+              </div>
+              <div class="ast-mission ast-st" style="--k:3">
+                <h3>Our mission</h3>
+                <ul>
+                  <li>Innovate science-backed, natural and sustainable products that promote wellness and prevent disease.</li>
+                  <li>Deliver excellence through quality, safety and regulatory compliance at every step.</li>
+                  <li>Collaborate and adopt advanced technologies to address global health challenges.</li>
+                  <li>Create value for our stakeholders, ethically and responsibly.</li>
+                </ul>
+              </div>
+            </div>
+            <div class="ast-visual ast-dial-wrap">
+              <div class="ast-dial" id="astDial">
+                <svg class="ast-dial-face" viewBox="0 0 200 200" aria-hidden="true">
+                  <circle cx="100" cy="100" r="96" class="adf-ring"/>
+                  <circle cx="100" cy="100" r="80" class="adf-inner"/>
+                  <g class="adf-ticks"></g>
+                  <path class="adf-needle" d="M100 -2 L109 16 L100 12 L91 16 Z"/>
+                </svg>
+                <ol class="ast-values" aria-label="Our values">
+                  <li style="--i:0"><b>Innovation</b><span>Pioneering solutions for a better tomorrow.</span></li>
+                  <li style="--i:1"><b>Integrity</b><span>Ethical in all that we do.</span></li>
+                  <li style="--i:2"><b>Quality</b><span>Committed to excellence.</span></li>
+                  <li style="--i:3"><b>Sustainability</b><span>Respecting nature, nurturing the future.</span></li>
+                  <li style="--i:4"><b>Well-being</b><span>Enhancing lives, every day.</span></li>
+                </ol>
+                <p class="ast-dial-core" aria-hidden="true"><b></b><span></span></p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- CHAPTER 05: THE FRONTIER -->
+        <section class="ast-scene ast-dark ast-frontier" id="frontier" data-no="05" data-name="The Frontier" aria-labelledby="frontierH">
+          <div class="ast-bg" aria-hidden="true"><img src="/assets/about/blur/corporate-innovation-hub.webp" alt="" decoding="async"><canvas class="ast-particles"></canvas></div>
+          <div class="ast-body wrap">
+            <div class="ast-copy">
+              <p class="ast-kicker ast-st" style="--k:0"><span>Chapter 05</span>The frontier</p>
+              <h2 class="ast-h ast-assemble" id="frontierH">The next frontier of <em>TranzLife R&amp;D</em></h2>
+              <p class="ast-lead ast-st" style="--k:2">From our research hub in Egmore, Chennai, we pair botanical pharmacognosy with modern cellular biology to explore what natural compounds could do next.</p>
+              <ul class="ast-horizons ast-st" style="--k:3" aria-label="Research horizons">
+                <li>Genetic innovation</li><li>Biomarker discovery</li><li>AI-powered insights</li><li>Prenatal &amp; genetic screening</li><li>Preventive healthcare</li>
+              </ul>
+              <p class="ast-place ast-st" style="--k:4">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.6"/></svg>
+                <span><b>TranzLife Biosciences Pvt. Ltd.</b> Queenscourt, Montieth Road, Egmore, Chennai 600 008</span>
+              </p>
+            </div>
+            <div class="ast-visual ast-programs">
+              <article class="ast-program ast-st" style="--k:2">
+                <h3>AI-powered phytochemical research</h3>
+                <p>Computational modelling of how herbal ingredients interact, to help design safer and more effective formulations.</p>
+              </article>
+              <article class="ast-program ast-st" style="--k:3">
+                <h3>Autism spectrum (ASD) research</h3>
+                <p>Early-stage research into Bacopa monnieri, Juglans regia and Curcuma caesia as potential bioactive components.</p>
+              </article>
+              <article class="ast-program ast-st" style="--k:4">
+                <h3>Oncology research</h3>
+                <p>Early-stage research into Annona muricata as a potential bioactive component.</p>
+              </article>
+              <p class="ast-disclaimer ast-st" style="--k:5">These are research programmes. No TranzLife product is intended to diagnose, treat, cure or prevent any disease.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- between chapters: the title card and the letterbox bars -->
+        <div class="ast-title" id="astTitle" aria-hidden="true"><span class="ast-title-no"></span><span class="ast-title-name"></span></div>
+        <div class="ast-letterbox" aria-hidden="true"><i></i><i></i></div>
+      </div>
+    </div>
+
+    <!-- EPILOGUE: daylight returns -->
+    <section class="ab-epilogue" id="cta" aria-labelledby="ctaH">
+      <div class="ab-dawn" aria-hidden="true"><span class="ab-dawn-sun"></span><span class="ab-dawn-sweep"></span></div>
+      <div class="wrap ab-epi-in">
+        <p class="ast-kicker"><span>Epilogue</span>Join our journey</p>
+        <h2 class="ast-h" id="ctaH">Experience the future of <em>natural science</em></h2>
+        <p class="ab-epi-text">For everyday wellness, for practitioners exploring plant-based science, and for partners around the world.</p>
+        <div class="ab-epi-actions">
+          <a href="/" class="pill"><i aria-hidden="true">↗</i><b>Explore our products</b></a>
+          <a href="/contact" class="pill light"><i aria-hidden="true">↗</i><b>Contact Chennai HQ</b></a>
+        </div>
+      </div>
+    </section>
+
+    <!-- chapter rail (wide screens) and progress bar (phones): built by about-story.js from the scenes -->
+    <nav class="ast-rail" id="astRail" aria-label="Chapters"></nav>
+    <div class="ast-progress" aria-hidden="true"><i id="astProgress"></i></div>
+    <!-- film grain + vignette over the whole page -->
+    <div class="ab-grain" aria-hidden="true"></div>

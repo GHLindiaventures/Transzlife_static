@@ -1,0 +1,52 @@
+/* ==========================================================
+   About page: the Tranz-life design tokens and base styles, scoped to .about-page so the rest of the site
+   (which uses the template theme) is not affected. Loaded before about-live.css.
+   Sources: Tranz-life/src/styles/base/tokens.css, base/global.css, golden.css (:root) and sections/about.css (:root).
+   ========================================================== */
+.about-page{
+  /* tokens.css */
+  --ground:#e9efe3;--ground-2:#dfe8d5;--panel:#ffffff;--panel-2:#f4f8ef;
+  --line:rgba(31,70,35,.14);--line-strong:rgba(31,70,35,.3);
+  --ink:#1f4423;--muted:#4c6648;--faint:#52694d;
+  --sage:#6f9e4c;--sage-ink:#41692b;--moss:#8cb86a;--leafy:#8db86b;--stage:#b6cba5;--forest:#24502a;
+  --cream:#24502a;--on-cream:#f4f8ef;--gold:#e3a21a;--glass:rgba(255,255,255,.5);--halo:rgba(140,184,106,.32);--tint:rgba(140,184,106,.3);
+  --f-display:"Archivo","Arial Narrow",system-ui,sans-serif;--f-body:"Archivo",system-ui,sans-serif;--f-hand:"Caveat","Segoe Print",cursive;--f-mono:"Archivo",system-ui,sans-serif;
+  --ease:cubic-bezier(.2,.7,.1,1);--rail:0px;
+  --dur-fast:.25s;--dur-base:.6s;--dur-slow:1s;
+  --ease-entrance:cubic-bezier(.215,.61,.355,1);--ease-move:cubic-bezier(.45,0,.55,1);
+  --ease-expo:cubic-bezier(.16,1,.3,1);--ease-smooth:cubic-bezier(.25,1,.5,1);
+  --stagger-fast:.06s;--stagger-base:.08s;--stagger-slow:.12s;
+  --dist-sm:16px;--dist-md:24px;--dist-lg:40px;
+  /* golden.css */
+  --phi:1.618;
+  --g1:8px;--g2:13px;--g3:21px;--g4:34px;--g5:55px;--g6:89px;--g7:144px;
+  --t-xs:13.4px;--t-sm:15.1px;--t-md:17px;--t-lg:19.1px;--t-xl:21.6px;
+  --d-1:clamp(23px,1.91vw,27.5px);--d-2:clamp(34px,3.09vw,44.5px);--d-3:clamp(44.5px,5vw,72px);--d-4:clamp(72px,8.09vw,116.5px);
+  --lh-text:1.618;--lh-lead:1.5;--lh-head:1.06;--measure:66ch;
+  --sec:clamp(89px,10vw,144px);
+  /* about.css */
+  --deep-teal:#0d2b2e;--bio-cyan:#5ee6d0;--bio-blue:#4ebae0;
+
+  /* global.css body text */
+  font-family:var(--f-body);font-stretch:88%;font-weight:500;font-size:17px;line-height:1.45;
+  -webkit-font-smoothing:antialiased;color-scheme:light;
+}
+
+/* global.css: headings, focus, layout and pill buttons (generic names, so kept inside the page) */
+.about-page :is(h1,h2,h3,h4){font-family:var(--f-display);margin:0;font-weight:800;font-stretch:70%;letter-spacing:-.015em;line-height:.95;text-wrap:balance}
+.about-page :focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:6px}
+.about-page .wrap{max-width:1320px;margin-inline:auto;padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px))}
+.about-page .pill{display:inline-flex;align-items:center;gap:2px;font-weight:700;font-stretch:80%;font-size:16px;color:var(--on-cream);transition:transform .3s var(--ease-expo);will-change:transform}
+.about-page .pill i{width:32px;height:32px;border-radius:50%;background:var(--cream);display:grid;place-items:center;font-style:normal;font-size:15px;transition:transform .35s var(--ease-expo)}
+.about-page .pill b{background:var(--cream);border-radius:999px;padding:6px 14px;font-weight:700;line-height:1.25;transition:background .3s ease}
+.about-page .pill:hover{transform:translateY(-2px)}
+.about-page .pill:hover i{transform:scale(1.08) rotate(45deg)}
+.about-page .pill:active{transform:translateY(1px) scale(.97)}
+.about-page .pill.light{color:var(--forest)}
+.about-page .pill.light i,.about-page .pill.light b{background:#fff}
+
+/* The template's reset removes the browser's list and figure spacing; the Tranz-life page relies on the defaults
+   where it does not set its own. Same specificity as the reset (loaded later), so any class rule still wins. */
+:where(.about-page) ul,:where(.about-page) ol{list-style:revert;margin:revert;padding:revert}
+:where(.about-page) figure{margin:revert}
+:where(.about-page) video{display:inline}
