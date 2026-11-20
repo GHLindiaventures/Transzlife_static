@@ -1,0 +1,11 @@
+# The React + Vite app lives in the "Tranzlife new" sub-folder of this repository.
+[build]
+  base = "Tranzlife new"
+  command = "npm run build"
+  publish = "dist"
+
+# Single-page app: send every route (/about, /product/liver ...) to index.html
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
