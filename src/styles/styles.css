@@ -17,20 +17,20 @@
    /* product slider (each slide may override --slide-bg) */
    --line: rgba(21, 21, 21, .75);
    --font: 'Syne', sans-serif;
-   --pad: 32px;
-   --header-h: 83px;
+   --pad: 34px;
+   --header-h: 55px;
    --ease: cubic-bezier(.22, .61, .36, 1);
 }
 
 @media (max-width:989px) {
    :root {
-      --header-h: 57px
+      --header-h: 34px
    }
 }
 
 @media (max-width:749px) {
    :root {
-      --pad: 16px
+      --pad: 21px
    }
 }
 
@@ -48,8 +48,8 @@ html {
 body {
    margin: 0;
    font-family: var(--font);
-   font-size: 15px;
-   line-height: 1.5;
+   font-size: 16px;
+   line-height: 1.618;
    color: var(--ink);
    background: var(--bg);
    overflow-x: hidden

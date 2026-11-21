@@ -38,9 +38,9 @@
   --split-rev:1.618fr 1fr;   /* wide | narrow */
 
   --pad:34px;
-  --header-h:89px;
+  --header-h:55px;
 }
-@media (max-width:989px){:root{--header-h:55px}}
+@media (max-width:989px){:root{--header-h:34px}}
 @media (max-width:749px){:root{--pad:21px}}
 
 body{line-height:var(--lh);font-size:var(--fs-0)}
