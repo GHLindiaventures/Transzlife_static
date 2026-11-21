@@ -379,20 +379,38 @@ li.is-open>.drawer__shop{display:grid}
   }
 }
 
-/* ---------------- FAQ banner: clean display for conference table graphic ---------------- */
+/* ---------------- FAQ banner: full-width display for conference table graphic ---------------- */
 .pbanner--faq {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 480px !important;
+  aspect-ratio: auto !important;
   background-color: #6e7621 !important;
-  aspect-ratio: 16 / 9 !important;
-  max-height: 480px !important;
+  position: relative !important;
+  overflow: hidden !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 .pbanner--faq .pbanner__shade {
   display: none !important;
 }
 
+.pbanner--faq .media,
+.pbanner--faq .media--fill {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
 .pbanner--faq .media img {
-  object-fit: contain !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
   object-position: center !important;
+  display: block !important;
 }
 
 .pbanner--faq .slot--pb-title {
@@ -407,9 +425,15 @@ li.is-open>.drawer__shop{display:grid}
   border: 0 !important;
 }
 
+@media (max-width: 989px) {
+  .pbanner--faq {
+    height: 380px !important;
+  }
+}
+
 @media (max-width: 749px) {
   .pbanner--faq {
-    aspect-ratio: 16 / 9 !important;
+    height: 260px !important;
     min-height: 220px !important;
   }
 }
