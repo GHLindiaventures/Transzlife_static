@@ -60,6 +60,17 @@ export const PRODUCTS = [
   },
 ];
 
+/* Product pages live in the store section (/products/<store id>, copied from the store project). */
+export const STORE_ID = {
+  gummies: 'pulmoclear-gummies',
+  inhaler: 'breathefree-inhaler',
+  rollon: 'cyclerelief-roll-on',
+  reviva: 'reviva-roll-on',
+  liver: 'liver-booster',
+  energy: 'energy-booster',
+};
+export const productUrl = (id) => (STORE_ID[id] ? `/products/${STORE_ID[id]}` : '/shop');
+
 export const priceLabel = (p) => (p.price == null ? 'Price to be announced' : `₹${p.price}`);
 
 export const ANNOUNCEMENTS = [
@@ -72,7 +83,7 @@ export const NAV_COLLECTIONS = PRODUCTS.map((p) => p.short);
 
 /* ---------------- home ---------------- */
 export const HERO = [
-  { image: 'hero/hero-1.webp', tone: 'light', bg: 'linear-gradient(to bottom, #162115 0%, #212b20 55%, #494f47 100%)', alt: 'PulmoClear Gummies and LiverDetox bottles on a stone podium with fresh herbs', eyebrow: 'TranzLife Biosciences', title: 'Live naturally. Live healthier.', sub: 'Ayurvedic, plant-based wellness formulations, made in Chennai, India.', cta: 'Shop all products', to: '/#products' },
+  { image: 'hero/hero-1.webp', tone: 'light', bg: 'linear-gradient(to bottom, #162115 0%, #212b20 55%, #494f47 100%)', alt: 'PulmoClear Gummies and LiverDetox bottles on a stone podium with fresh herbs', eyebrow: 'TranzLife Biosciences', title: 'Live naturally. Live healthier.', sub: 'Ayurvedic, plant-based wellness formulations, made in Chennai, India.', cta: 'Shop all products', to: '/shop' },
   { image: 'hero/hero-2.webp', tone: 'ink', bg: 'linear-gradient(to bottom, #d3bba1 0%, #d9bea2 55%, #e5c9aa 100%)', alt: 'Reviva roll-on and BreatheFree inhaler on a stone block with eucalyptus leaves', eyebrow: 'Our vision', title: 'From the roots of nature to the infinity of science', sub: 'TranzLife is shaping the future of life.', cta: 'Our story', to: '/about' },
   { image: 'hero/hero-3.webp', tone: 'ink', bg: 'linear-gradient(to bottom, #9ca17f 0%, #aaad92 55%, #b8b6ab 100%)', alt: 'CycleRelief roll-on and Energy Booster bottle on a marble podium with lavender', eyebrow: 'Ayurvedic wisdom', title: 'Rooted in nature. Perfected by science.', sub: 'Classical botanicals, standardised and quality-tested.', cta: 'Explore the science', to: '/science' },
 ];
@@ -246,7 +257,7 @@ export const CONTACT = {
 /* Footer links. Only pages that exist are linked (Ingredients, Sustainability, Privacy and Terms
    come back here once those pages are built). */
 export const FOOTER = {
-  products: { title: 'Products', links: PRODUCTS.map((p) => ({ label: p.short, to: `/product/${p.id}` })) },
+  products: { title: 'Products', links: PRODUCTS.map((p) => ({ label: p.short, to: productUrl(p.id) })) },
   company: {
     title: 'Company',
     links: [

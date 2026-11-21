@@ -1,0 +1,215 @@
+/* =====================================================================
+   Phone layout (≤ 640px). Loaded last so it refines every page.
+   Goals: shorter page, calmer text sizes, swipe instead of long stacks,
+   thumb-friendly controls.
+   ===================================================================== */
+
+/* Swipeable rows (rhythm panels, "know your body", journal) */
+@media (max-width: 640px) {
+  .m-scroll {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: var(--s-3) !important;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+    margin-inline: -16px;
+    padding: 0 16px var(--s-2);
+    scroll-padding-inline: 16px;
+    scrollbar-width: none;
+  }
+  .m-scroll::-webkit-scrollbar { display: none; }
+  .m-scroll > * { flex: 0 0 82%; scroll-snap-align: start; min-width: 0; }
+}
+
+@media (max-width: 640px) {
+  /* ---------- Global rhythm ---------- */
+  .section { padding: var(--s-6) 0; }
+  .section--tight { padding: var(--s-5) 0; }
+  h2 { font-size: 1.618rem; }
+  .shead { margin-bottom: var(--s-4); gap: var(--s-3); }
+  .shead__text, .lead { font-size: 1.0625rem; line-height: 1.6; }
+  .eyebrow { margin-bottom: var(--s-2); }
+
+  /* ---------- Hero ---------- */
+  .lhero__inner { min-height: 0; padding: calc(var(--s-7) + var(--s-5)) 0 calc(var(--s-6) + var(--s-3)); gap: var(--s-4); }
+  .lhero__slide.is-active { min-height: 0; }
+  .lhero h1 { font-size: 2.15rem; margin-bottom: var(--s-3); }
+  .lhero__text { font-size: 1rem; margin-bottom: var(--s-4); }
+  .lhero__ctas .btn { flex: 0 0 auto; padding: 13px 21px; font-size: .95rem; }
+  .lhero__ctas .btn--outline-light { display: none; }
+  .lhero__feature { padding: 5px var(--s-3) 5px 5px; gap: var(--s-2); }
+  .lhero__feature-img { width: 55px; height: 55px; }
+  .lhero__feature strong { font-size: 1rem; }
+  .lhero__controls { bottom: var(--s-4); }
+  .lhero__arrows { display: none; }
+  .lhero__dots button { width: 34px; }
+
+  .ticker { padding: var(--s-2) 0; }
+  .ticker span { font-size: 1rem; gap: var(--s-3); padding-right: var(--s-3); }
+
+  /* ---------- Rhythm: swipe between three panels ---------- */
+  .rhythm { height: auto; }
+  .rhythm.m-scroll > .rhythm__panel { flex: 0 0 82%; height: 420px; }
+  .daystory__bridge { margin-top: var(--s-5); }
+  .daystory__bridge span { display: none; }
+  .daystory__bridge p { font-size: 1.05rem; margin: 0 auto; }
+
+  /* ---------- Manifesto over video ---------- */
+  .manifesto--video { padding: var(--s-7) 0; }
+  .manifesto__grid { gap: var(--s-5); }
+  .manifesto__statement { font-size: 1.5rem; margin-bottom: var(--s-4); }
+  .facts-col { gap: var(--s-2); }
+  .manifesto--video .fact { padding: var(--s-3) var(--s-4); display: flex; align-items: center; gap: var(--s-3); }
+  .fact strong { font-size: 1.75rem; flex-direction: column; align-items: flex-start; gap: 0; min-width: 6.2em; }
+  .fact strong .fact__unit { font-size: .85rem; }
+  .fact p { margin: 0; font-size: .9rem; line-height: 1.45; }
+
+  /* ---------- Wellness goals: compact 2-column bento ---------- */
+  .bento { grid-template-columns: 1fr 1fr; grid-auto-rows: 144px; gap: var(--s-2); }
+  .bento__cell--0 { grid-column: span 2; grid-row: span 1; }
+  .bento__cell--3 { grid-column: auto; }
+  .bento__cell--0 .bento__card { min-height: 0; }
+  .bento__body { left: var(--s-3); right: var(--s-3); bottom: var(--s-3); }
+  .bento__body small { display: none; }
+  .bento__body strong, .bento__cell--0 .bento__body strong { font-size: 1.05rem; }
+  .bento__icon { width: 28px; height: 28px; margin-bottom: var(--s-1); }
+  .bento__icon svg { width: 15px; height: 15px; }
+  .bento__go { width: 28px; height: 28px; top: var(--s-2); right: var(--s-2); }
+
+  /* ---------- Product stories: photo on top, compact product row ---------- */
+  .story-band, .story-band--flip { display: flex; flex-direction: column; }
+  .story-band__photo { order: -1; min-height: 233px; }
+  .story-band__statement { font-size: 1.75rem; left: var(--s-4); bottom: var(--s-4); }
+  .story-band__panel { display: grid; grid-template-columns: 89px 1fr; align-items: start; gap: var(--s-2) var(--s-4); padding: var(--s-5) 16px var(--s-6); }
+  .story-band__pack { width: 89px; padding: 5px; grid-row: span 2; border-radius: var(--r-sm); }
+  .story-band__panel .eyebrow { margin-bottom: 2px; }
+  .story-band__panel h3 { font-size: 1.3rem; margin-bottom: var(--s-2); }
+  .story-band__panel ul { gap: 2px; margin-bottom: var(--s-3); font-size: .92rem; }
+
+  /* ---------- Science: smaller circle, 2-column points ---------- */
+  .orbit { grid-template-columns: 1fr 1fr; gap: var(--s-2); }
+  .orbit__centre { grid-column: span 2; width: 233px; margin: 0 auto var(--s-5); }
+  .orbit__ring { inset: -8px; }
+  .orbit__col { gap: var(--s-2); }
+  .orbit .orbit__item, .orbit__col--left .orbit__item { flex-direction: column; text-align: left; padding: var(--s-3); gap: var(--s-2); height: 100%; }
+  .orbit__icon { width: 38px; height: 38px; }
+  .orbit__icon svg { width: 18px; height: 18px; }
+  .orbit__item h3 { font-size: .98rem; }
+  .orbit__item p { font-size: .8rem; line-height: 1.45; }
+  .center-cta { margin-top: var(--s-5); }
+
+  /* ---------- Ingredient story ---------- */
+  .ingstory__grid { gap: var(--s-5); }
+  .ingstory__inset { width: 30%; bottom: var(--s-3); right: var(--s-3); border-width: 3px; }
+  .ingstory__tag { top: var(--s-3); left: var(--s-3); }
+  .herb-chips { gap: 5px; margin: var(--s-3) 0 var(--s-4); }
+
+  /* ---------- Know your body cards inside the swipe row ---------- */
+  .kcard__stat strong { font-size: 1.5rem; }
+  .kcard p { font-size: .95rem; }
+
+  /* ---------- Range: tighter 2-column cards ---------- */
+  .range { gap: var(--s-2); }
+  .range__card { padding: var(--s-2) var(--s-2) var(--s-3); }
+  .range__card small { display: none; }
+  .range__card strong { font-size: 1rem; }
+  .range__fmt { font-size: .66rem; }
+
+  /* ---------- Emotion band ---------- */
+  .emotion__inner { min-height: 0; padding: var(--s-7) 0; }
+  .emotion__quote { font-size: 2.3rem; }
+  .emotion__sub { font-size: 1rem; }
+
+  /* ---------- Journal cards inside the swipe row ---------- */
+  .acard h3 { font-size: 1.1rem; }
+  .acard p { font-size: .92rem; }
+
+  /* ---------- FAQ block ---------- */
+  .faq-home { gap: 0; }
+  .faq-home .shead { margin-bottom: var(--s-4); }
+  .acc .acc__q { padding: var(--s-3) var(--s-4); font-size: .95rem; }
+  .acc .acc__a { font-size: .95rem; }
+
+  /* ---------- Product cards (shop, related) ---------- */
+  .pcard__badge { font-size: .62rem; padding: 3px 7px; top: 8px; left: 8px; }
+  .pcard__off { font-size: .64rem; padding: 3px 7px; top: auto; bottom: 8px; right: 8px; }
+  .pcard__format { font-size: .64rem; }
+
+  /* ---------- Inner page heroes ---------- */
+  .chero, .ing-hero, .shop-hero { padding-bottom: var(--s-5); }
+  .chero__text, .phero__text, .ing-hero p { font-size: 1.0625rem; }
+  .chero__img, .phero__img, .ing-hero img { max-height: 233px; }
+  .chero__icon { width: 48px; height: 48px; margin: var(--s-3) 0 var(--s-2); }
+  .pdp-about h2 { font-size: 1.3rem; }
+
+  /* ---------- Floating WhatsApp button ---------- */
+  .wa-fab { width: 48px; height: 48px; right: 14px; bottom: 14px; }
+  .wa-fab svg { width: 24px; height: 24px; }
+}
+
+/* =====================================================================
+   Phone hero, RediClinic-style: full-screen portrait photo, everything
+   centred, bold uppercase headline, simple underlined call to action.
+   ===================================================================== */
+@media (max-width: 640px) {
+  .lhero { background: #10261a; }
+  .lhero__slide.is-active { display: block; height: clamp(560px, calc(100svh - 104px), 700px); }
+  .lhero__bg { object-position: var(--mpos, 50% 35%); }
+  .lhero__slide::after {
+    background:
+      radial-gradient(120% 70% at 50% 50%, rgba(8, 22, 13, .58) 0%, rgba(8, 22, 13, .38) 61.8%, rgba(8, 22, 13, .2) 100%),
+      linear-gradient(180deg, rgba(8, 22, 13, .25) 0%, transparent 30%, transparent 70%, rgba(8, 22, 13, .5) 100%);
+  }
+  .lhero__inner {
+    height: 100%; min-height: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; gap: 0;
+    padding: var(--s-6) 0 calc(var(--s-6) + var(--s-4));
+  }
+  .lhero__copy { max-width: 21em; margin: auto 0; display: flex; flex-direction: column; align-items: center; }
+  .lhero .eyebrow { color: #fff; font-size: .74rem; letter-spacing: .22em; margin-bottom: var(--s-3); }
+  .lhero h1 {
+    font-family: var(--f-body); font-weight: 800; text-transform: uppercase;
+    font-size: clamp(1.9rem, 9.2vw, 2.4rem); line-height: 1.06; letter-spacing: .005em;
+    margin-bottom: var(--s-3); text-wrap: balance;
+  }
+  .lhero h1 em { font-style: normal; color: var(--gold-2); }
+  .lhero__text { font-size: .95rem; line-height: 1.5; max-width: 24em; margin: 0 auto var(--s-4); color: rgba(255, 255, 255, .9); }
+  .lhero__ctas { display: none; }
+  .lhero__mcta {
+    display: inline-block; color: #fff; font-weight: 700; font-size: .86rem;
+    letter-spacing: .2em; text-transform: uppercase;
+    padding-bottom: 4px; border-bottom: 1.5px solid currentColor;
+  }
+  .lhero__mcta:active { color: var(--gold-2); }
+
+  /* Featured product sits quietly at the bottom, centred */
+  .lhero__feature { align-self: center; justify-self: center; padding: 4px var(--s-3) 4px 4px; }
+  .lhero__feature-img { width: 44px; height: 44px; border-radius: 10px; }
+  .lhero__feature small { font-size: .62rem; }
+  .lhero__feature strong { font-size: .92rem; }
+  .lhero__feature em { display: none; }
+
+  /* Centred slide lines */
+  .lhero__controls { justify-content: center; bottom: var(--s-4); }
+  .lhero__dots { gap: 6px; }
+  .lhero__dots button { width: 28px; height: 2px; background: rgba(255, 255, 255, .35); }
+}
+
+
+/* Footer on phones: two tidy columns per row, tighter spacing */
+@media (max-width: 640px) {
+  .footer__news-inner { padding: var(--s-5) 0; gap: var(--s-3); }
+  .footer__news h3 { font-size: 1.3rem; }
+  .footer__news p { font-size: .9rem; }
+  .footer__grid { grid-template-columns: 1fr 1fr; gap: var(--s-5) var(--s-4); padding: var(--s-5) 0 var(--s-4); }
+  .footer__brand, .footer__contact { grid-column: span 2; }
+  .footer__brand p { font-size: .88rem; margin-bottom: var(--s-3); }
+  .footer__logo { height: 28px; margin-bottom: var(--s-3); }
+  .footer__grid h4 { font-size: .74rem; margin-bottom: var(--s-2); }
+  .footer__grid > div > a { padding: 3px 0; font-size: .88rem; }
+  .footer__contact a, .footer__contact p { font-size: .86rem; padding: 3px 0; }
+  .footer__legal { padding: var(--s-3) 0 var(--s-4); font-size: .74rem; }
+  .footer__legal p { margin-bottom: var(--s-2); }
+}

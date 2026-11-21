@@ -1,0 +1,57 @@
+// Ingredient library. "Traditional use" notes describe how an ingredient has
+// been used in Ayurveda / folk practice; they are not claims about what a
+// TranzLife product does. Exact quantities per product are pending from the
+// formulation team.
+
+export const INGREDIENT_TYPES = {
+  herb: { label: 'Ayurvedic herb', color: '#2f6b3a' },
+  oil: { label: 'Essential oil', color: '#14806a' },
+  nutrient: { label: 'Micronutrient', color: '#b7791f' },
+  homeo: { label: 'Homeopathic preparation', color: '#6b4fa0' },
+};
+
+export const INGREDIENTS = [
+  // Respiratory herbs
+  { id: 'tulsi', name: 'Tulsi', alt: 'Holy Basil', latin: 'Ocimum sanctum', type: 'herb', part: 'Leaf', note: 'Revered in Indian homes as the “queen of herbs”. Traditionally taken as kadha for the throat, chest and seasonal wellness, and valued as an adaptogen for stress.' },
+  { id: 'vasaka', name: 'Vasaka', alt: 'Adulsa / Malabar Nut', latin: 'Adhatoda vasica', type: 'herb', part: 'Leaf', note: 'A classical Ayurvedic herb for the respiratory tract. Traditionally used in preparations for the chest and airways.' },
+  { id: 'mulethi', name: 'Mulethi', alt: 'Licorice Root', latin: 'Glycyrrhiza glabra', type: 'herb', part: 'Root', note: 'Naturally sweet root traditionally used to soothe the throat. A common ingredient in Ayurvedic respiratory blends.' },
+  { id: 'sukku', name: 'Sukku', alt: 'Dry Ginger', latin: 'Zingiber officinale', type: 'herb', part: 'Dried rhizome', note: 'A warming kitchen spice, one of the three “Trikatu” herbs. Traditionally used for digestion and warmth in the chest.' },
+  { id: 'thippili', name: 'Thippili', alt: 'Long Pepper', latin: 'Piper longum', type: 'herb', part: 'Fruit', note: 'Another Trikatu herb. Traditionally used in Siddha and Ayurveda for respiratory and digestive wellness.' },
+  { id: 'black-pepper', name: 'Black Pepper', alt: 'Milagu', latin: 'Piper nigrum', type: 'herb', part: 'Fruit', note: 'The third Trikatu spice. Its aroma is sharp and clearing, and it is traditionally paired with other herbs to support their use in the body.' },
+  { id: 'jeera', name: 'Jeera', alt: 'Cumin', latin: 'Cuminum cyminum', type: 'herb', part: 'Seed', note: 'A familiar kitchen seed traditionally used for digestion and gut comfort.' },
+  { id: 'karumanjal', name: 'Karumanjal', alt: 'Black Turmeric', latin: 'Curcuma caesia', type: 'herb', part: 'Rhizome', note: 'A rare relative of turmeric with a blue-black core. Traditionally used in folk remedies for the chest and for its warming nature.' },
+  { id: 'small-onion', name: 'Small Onion Extract', alt: 'Shallot / Chinna Vengayam', latin: 'Allium cepa var. aggregatum', type: 'herb', part: 'Bulb', note: 'A South Indian home staple, traditionally used with honey or jaggery during seasonal coughs and colds.' },
+  { id: 'vitamin-c', name: 'Vitamin C', alt: 'Ascorbic acid', latin: '', type: 'nutrient', part: '', note: 'An essential vitamin that contributes to the normal function of the immune system and protects cells from oxidative stress.' },
+  { id: 'vitamin-d3', name: 'Vitamin D3', alt: 'Cholecalciferol', latin: '', type: 'nutrient', part: '', note: 'The “sunshine vitamin”. Contributes to normal immune function and healthy bones and muscles. Many Indians are low in it.' },
+  { id: 'zinc', name: 'Zinc', alt: 'Trace mineral', latin: '', type: 'nutrient', part: '', note: 'A trace mineral that contributes to normal immune function and cell protection.' },
+
+  // Liver herbs
+  { id: 'milk-thistle', name: 'Milk Thistle', alt: 'Carduus marianus', latin: 'Silybum marianum', type: 'herb', part: 'Seed', note: 'The best-known liver herb worldwide. Its seeds contain silymarin, studied for its antioxidant and liver-supporting properties.' },
+  { id: 'amla', name: 'Amla', alt: 'Indian Gooseberry', latin: 'Phyllanthus emblica', type: 'herb', part: 'Fruit', note: 'One of the richest natural sources of Vitamin C and a pillar of Ayurveda. Traditionally used for digestion, antioxidant support and rejuvenation.' },
+  { id: 'bhumyamalaki', name: 'Bhumyamalaki', alt: 'Keezhanelli', latin: 'Phyllanthus niruri', type: 'herb', part: 'Whole plant', note: 'Known in Tamil homes as Keezhanelli. One of the most traditionally used herbs for liver wellness in South India.' },
+  { id: 'kalmegh', name: 'Kalmegh', alt: 'King of Bitters', latin: 'Andrographis paniculata', type: 'herb', part: 'Leaf', note: 'An intensely bitter herb traditionally used for the liver and digestion, and studied for its antioxidant activity.' },
+  { id: 'kutki', name: 'Kutki', alt: 'Picrorhiza', latin: 'Picrorhiza kurroa', type: 'herb', part: 'Root', note: 'A Himalayan bitter root used in classical Ayurveda for liver function and digestion.' },
+  { id: 'giloy', name: 'Giloy', alt: 'Guduchi', latin: 'Tinospora cordifolia', type: 'herb', part: 'Stem', note: 'Called “Amrita” in Ayurveda. Traditionally used as a rejuvenating herb and for immune and liver support.' },
+  { id: 'punarnava', name: 'Punarnava', alt: 'Spreading Hogweed', latin: 'Boerhavia diffusa', type: 'herb', part: 'Whole plant', note: 'Its name means “one that renews”. Traditionally used for liver and kidney wellness.' },
+  { id: 'bhringraj', name: 'Bhringraj', alt: 'Karisalankanni', latin: 'Eclipta prostrata', type: 'herb', part: 'Whole plant', note: 'Famous for hair care, and also traditionally used in Siddha medicine as a liver herb.' },
+  { id: 'chelidonium', name: 'Chelidonium majus', alt: 'Greater Celandine', latin: 'Chelidonium majus', type: 'homeo', part: '', note: 'A traditional European botanical preparation associated with bile flow and liver function.' },
+  { id: 'lycopodium', name: 'Lycopodium clavatum', alt: 'Club Moss', latin: 'Lycopodium clavatum', type: 'homeo', part: '', note: 'A classical homeopathic preparation traditionally associated with digestion and liver support.' },
+  { id: 'nux-vomica', name: 'Nux vomica', alt: 'Strychnos nux-vomica', latin: 'Strychnos nux-vomica', type: 'homeo', part: '', note: 'Used in homeopathic potencies, traditionally associated with digestive comfort after rich food and late nights.' },
+  { id: 'bryonia', name: 'Bryonia alba', alt: 'White Bryony', latin: 'Bryonia alba', type: 'homeo', part: '', note: 'A homeopathic preparation traditionally associated with liver and digestive comfort.' },
+  { id: 'chionanthus', name: 'Chionanthus virginica', alt: 'Fringe Tree', latin: 'Chionanthus virginicus', type: 'homeo', part: '', note: 'A North American botanical traditionally used for hepatic (liver) support.' },
+
+  // Essential oils
+  { id: 'dill', name: 'Dill Oil', alt: 'Sowa', latin: 'Anethum graveolens', type: 'oil', part: 'Seed', note: 'Dill (sowa) seeds are a traditional Indian home remedy for tummy comfort. The essential oil has a warm, sweet, herbal aroma.' },
+  { id: 'eucalyptus', name: 'Eucalyptus Oil', alt: 'Nilgiri Thailam', latin: 'Eucalyptus globulus', type: 'oil', part: 'Leaf', note: 'The familiar Nilgiri oil. Cooling, fresh and clearing, widely used in massage and steam inhalation.' },
+  { id: 'peppermint', name: 'Peppermint Oil', alt: 'Pudina', latin: 'Mentha × piperita', type: 'oil', part: 'Leaf', note: 'Bright, cooling and refreshing. One of the most popular oils in aromatherapy.' },
+  { id: 'lavender', name: 'Lavender Oil', alt: '', latin: 'Lavandula angustifolia', type: 'oil', part: 'Flower', note: 'Soft, floral and widely used in aromatherapy for relaxation and calm.' },
+
+  // Energy Booster
+  { id: 'ruta', name: 'Ruta graveolens (Q)', alt: 'Rue', latin: 'Ruta graveolens', type: 'homeo', part: 'Mother tincture', note: 'A botanical mother tincture traditionally associated with tired muscles and joints.' },
+  { id: 'hecla-lava', name: 'Hecla lava (3X)', alt: 'Volcanic ash', latin: '', type: 'homeo', part: 'Mineral', note: 'A mineral-origin homeopathic preparation from volcanic ash, traditionally associated with bone health.' },
+  { id: 'symphytum', name: 'Symphytum officinale (Q)', alt: 'Comfrey', latin: 'Symphytum officinale', type: 'homeo', part: 'Mother tincture', note: 'Known as “knitbone”, comfrey has a long traditional association with bones and tissues.' },
+  { id: 'calc-phos', name: 'Calcarea phosphorica (8X)', alt: 'Calcium phosphate', latin: '', type: 'homeo', part: 'Mineral', note: 'A mineral-origin tissue salt traditionally associated with vitality, growth and recovery.' },
+  { id: 'echinacea', name: 'Echinacea angustifolia (Q)', alt: 'Coneflower', latin: 'Echinacea angustifolia', type: 'homeo', part: 'Mother tincture', note: 'A popular botanical traditionally associated with immune support and general vitality.' },
+];
+
+export const getIngredient = (id) => INGREDIENTS.find((i) => i.id === id);

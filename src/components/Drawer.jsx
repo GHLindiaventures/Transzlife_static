@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { Slot } from './ui.jsx';
-import { NAV_PRODUCTS } from '../content/site.js';
+import { ProductImg } from './ui.jsx';
+import { PRODUCTS, productUrl } from '../content/site.js';
 import { NAV } from './Header.jsx';
 
 export default function Drawer({ open, onClose }) {
@@ -39,12 +39,14 @@ export default function Drawer({ open, onClose }) {
                 <>
                   <button className="drawer__row" type="button" aria-expanded={!!expanded[item.label]} onClick={() => toggle(item.label)}>
                     <span className="nav__label">{item.label}</span>
-                    <svg width="10" height="6" viewBox="0 0 8 5" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true"><path d="M1 1l3 3 3-3" /></svg>
+                    <span className="drawer__pm" aria-hidden="true" />
                   </button>
-                  <div className="drawer__sub">
-                    <Link to={item.to} onClick={onClose}><Slot className="slot--drawer">All products</Slot></Link>
-                    {NAV_PRODUCTS.map((p) => (
-                      <Link to={`/product/${p.id}`} onClick={onClose} key={p.id}><Slot className="slot--drawer">{p.name}</Slot></Link>
+                  <div className="drawer__sub drawer__shop">
+                    {PRODUCTS.map((p) => (
+                      <Link className="drawer__prod" to={productUrl(p.id)} onClick={onClose} key={p.id}>
+                        <span className="drawer__prod-img"><ProductImg n={p.photo} alt="" /></span>
+                        <span className="drawer__prod-name">{p.short}</span>
+                      </Link>
                     ))}
                   </div>
                 </>
