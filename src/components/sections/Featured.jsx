@@ -20,7 +20,17 @@ export function ProductCard({ product }) {
     <article className="pcard" data-product={product.id} data-reveal>
       <div className="pcard__media">
         <Media className="media--fill media--product">
-          <ProductImg n={product.photo} alt={product.name} />
+          {product.showcase ? (
+            <img
+              src={`${import.meta.env.BASE_URL}${product.showcase.replace(/^\//, '')}`}
+              alt={product.name}
+              className="pcard__showcase-img"
+              loading="lazy"
+              decoding="async"
+            />
+          ) : (
+            <ProductImg n={product.photo} alt={product.name} />
+          )}
         </Media>
         {/* the whole picture is clickable for pointer users; keyboard users get the title and button links */}
         <Link className="pcard__link" to={url} tabIndex={-1} aria-hidden="true" />
