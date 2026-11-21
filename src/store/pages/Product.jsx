@@ -12,7 +12,7 @@ import Icon from '../components/Icon';
 import { Accordion, Breadcrumbs, Reveal, SectionHead, useTitle } from '../components/Common';
 import { inr, pctOff } from '../utils/format';
 import NotFound from './NotFound';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../components/ui/tooltip.jsx';
 
 function Gallery({ p }) {
   const [i, setI] = useState(0);
