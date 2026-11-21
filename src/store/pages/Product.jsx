@@ -1,26 +1,30 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { Check, Download, ShieldCheck, Truck, RotateCcw, Leaf, TriangleAlert, Users, ArrowRight, Lock, Clock } from 'lucide-react';
+import { Check, Download, ShieldCheck, Truck, RotateCcw, Leaf, ArrowRight, Lock } from 'lucide-react';
 import { getProduct, PRODUCTS, PACKS } from '../data/products';
-import { getIngredient, INGREDIENT_TYPES } from '../data/ingredients';
+import { getIngredient } from '../data/ingredients';
 import { getConcern } from '../data/concerns';
 import { ARTICLES } from '../data/articles';
 import { useCart, packPrice, packMrp } from '../context/CartContext';
 import { QtyStepper } from '../components/CartDrawer';
 import ProductCard from '../components/ProductCard';
 import Icon from '../components/Icon';
-import { Accordion, Breadcrumbs, Reveal, SectionHead, useTitle } from '../components/Common';
+import { Breadcrumbs, Reveal, SectionHead, useTitle } from '../components/Common';
+import { listReviews, summarise } from '../data/reviewStore';
+import { RatingLine, GalleryActions } from '../components/pdp/ProductActions';
+import { IngredientGrid, UseTabs, FaqList, FaqHelp } from '../components/pdp/Sections';
+import Reviews from '../components/pdp/Reviews';
 import { inr, pctOff } from '../utils/format';
 import NotFound from './NotFound';
-import { Tooltip, TooltipContent, TooltipTrigger } from '../components/ui/tooltip.jsx';
 
-function Gallery({ p }) {
+function Gallery({ p, children }) {
   const [i, setI] = useState(0);
   useEffect(() => setI(0), [p.id]);
   return (
     <div className="gallery">
       <div className="gallery__main" style={{ background: p.tint }}>
         <img src={p.images[i]} alt={p.name} key={p.images[i]} />
+        {children}
       </div>
       {p.images.length > 1 && (
         <div className="gallery__thumbs">
@@ -44,6 +48,14 @@ export default function Product() {
   const [qty, setQty] = useState(1);
   useTitle(p?.name);
   useEffect(() => { setPack(1); setQty(1); }, [id]);
+  const [reviews, setReviews] = useState([]);
+  useEffect(() => {
+    let live = true;
+    setReviews([]);
+    if (p) listReviews(p.id).then((r) => live && setReviews(r));
+    return () => { live = false; };
+  }, [p?.id]);
+  const summary = useMemo(() => summarise(reviews), [reviews]);
 
   if (!p) return <NotFound />;
 
@@ -61,10 +73,11 @@ export default function Product() {
       <section className="container pdp">
         <Breadcrumbs items={[['Shop', '/shop'], [p.short]]} />
         <div className="pdp__grid">
-          <Gallery p={p} />
+          <Gallery p={p}><GalleryActions product={p} /></Gallery>
           <div className="pdp__info">
             {p.badge && <span className="tag">{p.badge}</span>}
             <h1>{p.name}</h1>
+            <RatingLine summary={summary} />
             <p className="pdp__tagline">{p.tagline}</p>
             <div className="pdp__chips">
               {concerns.map((c) => (
@@ -142,47 +155,15 @@ export default function Product() {
 
       <section className="section section--sand">
         <div className="container">
-          <SectionHead eyebrow="Key ingredients" title="What’s inside" text={`${ings.length} carefully chosen ingredients. Tap any ingredient to learn more in our ingredient library.`} action={<Link to="/ingredients" className="link-arrow">Ingredient library <ArrowRight size={16} /></Link>} />
-          <div className="ings">
-            {ings.map((ing, k) => (
-              <Reveal key={ing.id} delay={k * 40}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Link to={`/ingredients#${ing.id}`} className="ing">
-                      <span className="ing__dot" style={{ background: INGREDIENT_TYPES[ing.type].color }}>{ing.name.charAt(0)}</span>
-                      <span>
-                        <strong>{ing.name}</strong>
-                        <small>{ing.alt}</small>
-                        <em>{INGREDIENT_TYPES[ing.type].label}</em>
-                      </span>
-                    </Link>
-                  </TooltipTrigger>
-                  <TooltipContent side="top" sideOffset={8} className="tip">{ing.note}</TooltipContent>
-                </Tooltip>
-              </Reveal>
-            ))}
-          </div>
+          <SectionHead eyebrow="Key ingredients" title="What’s inside" text={`${ings.length} carefully chosen ingredients. Tap one to learn more.`} action={<Link to="/ingredients" className="link-arrow">Ingredient library <ArrowRight size={16} /></Link>} />
+          <IngredientGrid ings={ings} />
           {p.id === 'breathefree-inhaler' && <p className="note">Aroma profile shown above. The full essential-oil declaration is printed on the pack.</p>}
         </div>
       </section>
 
       <section className="section">
-        <div className="container pdp-use">
-          <Reveal className="use-card">
-            <Clock size={26} strokeWidth={1.5} />
-            <h3>How to use</h3>
-            <ol>{p.howToUse.map((s) => <li key={s}>{s}</li>)}</ol>
-          </Reveal>
-          <Reveal className="use-card" delay={80}>
-            <Users size={26} strokeWidth={1.5} />
-            <h3>Who is it for?</h3>
-            <ul>{p.whoFor.map((s) => <li key={s}>{s}</li>)}</ul>
-          </Reveal>
-          <Reveal className="use-card use-card--warn" delay={160}>
-            <TriangleAlert size={26} strokeWidth={1.5} />
-            <h3>Precautions</h3>
-            <ul>{p.precautions.map((s) => <li key={s}>{s}</li>)}</ul>
-          </Reveal>
+        <div className="container">
+          <UseTabs p={p} />
         </div>
       </section>
 
@@ -201,10 +182,15 @@ export default function Product() {
 
       <section className="section">
         <div className="container faq-home">
-          <SectionHead eyebrow="FAQs" title="Questions about this product" />
-          <Accordion items={p.faqs} />
+          <div>
+            <SectionHead eyebrow="FAQs" title="Questions about this product" />
+            <FaqHelp className="faqhelp--side" />
+          </div>
+          <Reveal><FaqList items={p.faqs} /><FaqHelp className="faqhelp--below" /></Reveal>
         </div>
       </section>
+
+      <Reviews product={p} reviews={reviews} setReviews={setReviews} summary={summary} />
 
       {reads.length > 0 && (
         <section className="section section--tight reads">
