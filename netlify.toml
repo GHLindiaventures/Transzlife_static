@@ -1,0 +1,16 @@
+# Netlify build settings (these override the settings in the Netlify dashboard).
+# The React + Vite app lives at the repository root.
+[build]
+  base = ""
+  command = "npm run build"   # Netlify installs the dependencies before this runs
+  publish = "dist"
+
+[build.environment]
+  # Tailwind CSS v4 (used by the store pages) needs Node 20 or newer
+  NODE_VERSION = "20"
+
+# Single-page app: send every route (/shop, /products/liver-booster, /about ...) to index.html
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
