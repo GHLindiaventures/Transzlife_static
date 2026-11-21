@@ -308,7 +308,7 @@ export const PHOTOS = {
   exploreCircle: 'explore-circle',
   aboutBanner: 'lavender',
   scienceBanner: 'lab-research',
-  faqBanner: 'dill',
+  faqBanner: 'faq-banner',
   contactBanner: 'lotus',
   contactSide: 'holy-basil',
 };
@@ -326,7 +326,8 @@ export const PHOTO_ALT = {
   lavender: 'Lavender field in bloom',
   lotus: 'Pink lotus flower against dark green leaves',
   'ayurveda-ingredients': 'Tulsi leaves, ginger, cardamom, cloves and cinnamon arranged in the shape of a mortar',
-  dill: 'Fresh dill fronds',
+  'faq-banner': 'Frequently Asked Questions and customer support',
+  dill: 'Frequently Asked Questions and customer support',
   'mint-leaves': 'Fresh vibrant green mint leaves',
   'basil-closeup': 'Fresh mint leaves',
   'explore-circle': 'Botanical crystal geometry cube with lush green foliage',

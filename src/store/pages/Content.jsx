@@ -255,7 +255,7 @@ export function Faq() {
   useTitle('FAQs');
   return (
     <>
-      <PageHero eyebrow="Help centre" title="Frequently asked questions" text="Quick answers about our products, orders and delivery." />
+      <PageHero eyebrow="Help centre" title="Frequently asked questions" text="Quick answers about our products, orders and delivery." image="/assets/photos/faq-banner.jpg" />
       <section className="section">
         <div className="container faq-page">
           {FAQ_GROUPS.map(([g, items]) => (
