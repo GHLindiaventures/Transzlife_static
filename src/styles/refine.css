@@ -246,6 +246,20 @@
 @media (max-width:989px){.parallax{height:2250px}}
 @media (max-width:749px){.parallax{height:2100px}}
 
+/* ---------------- bgvideo / manufacturing showcase ---------------- */
+.bgvideo{background:var(--bg,#fcfaf1);color:var(--green-950,#08261a)}
+.bgvideo__shade{background:radial-gradient(ellipse at center,rgba(254,252,244,.2) 0%,rgba(226,238,224,.1) 60%,transparent 100%)}
+.bgvideo__inner .slot--eyebrow-w{
+  color:var(--green-700,#1a6b3c);
+  font-weight:700;
+  letter-spacing:.14em;
+  text-shadow:0 1px 4px rgba(255,255,255,.9);
+}
+.bgvideo__inner .slot--bgv-title{
+  color:var(--green-950,#08261a);
+  text-shadow:0 2px 18px rgba(255,255,255,.95),0 1px 3px rgba(255,255,255,.9);
+}
+
 /* ---------------- recognition badges ---------------- */
 .brands__group{margin:0;padding-left:0;list-style:none}
 .brands .media--logo{display:grid;place-items:center;flex:none;background:#fff;opacity:1;padding:12px 18px;box-shadow:0 6px 18px -10px rgba(15,47,29,.35);border:1px solid rgba(15,47,29,.08)}
