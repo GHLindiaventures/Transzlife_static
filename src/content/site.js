@@ -7,6 +7,7 @@
 
 export const BRAND = {
   name: 'TranzLife Biosciences',
+  wordmark: 'TranzLife',
   tagline: 'Innovating life beyond limits',
   creed: 'Rooted in Nature · Perfected by Science · Shaping Everyday Longevity',
   email: 'info@tranzlife.in',
