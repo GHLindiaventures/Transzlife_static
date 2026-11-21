@@ -55,6 +55,12 @@ const Footer = forwardRef(function Footer(_, ref) {
           <Slot className="slot--copy">{BRAND.copyright} · {BRAND.license}</Slot>
           <Slot className="slot--copy">{BRAND.disclaimer}</Slot>
         </p>
+        <div className="footer__massive-brand" aria-hidden="true">
+          <span className="footer__massive-text">
+            {BRAND.wordmark || 'TranzLife'}
+            <span className="footer__massive-reg">®</span>
+          </span>
+        </div>
       </div>
     </footer>
   );

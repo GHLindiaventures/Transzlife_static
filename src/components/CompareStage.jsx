@@ -22,7 +22,7 @@ export default function CompareStage({ data }) {
   );
 
   return (
-    <div className={`cmp cmp--${kind}`} ref={stageRef} style={{ '--pos': 50 }} aria-roledescription="before and after comparison">
+    <div className={`cmp cmp--${kind}`} ref={stageRef} style={{ '--pos': 50 }} aria-roledescription="comparison">
       <div className="psc-layer cmp-before">
         <div className="cmp-bg" aria-hidden="true"><span className="cmp-haze" /></div>
         {pic(before)}
@@ -32,8 +32,6 @@ export default function CompareStage({ data }) {
         {pic(after)}
       </div>
 
-      <p className="psc-label psc-label--left cmp-label" aria-hidden="true"><b>{before.label}</b><small>{before.sub}</small></p>
-      <p className="psc-label psc-label--right cmp-label" aria-hidden="true"><b>{after.label}</b><small>{after.sub}</small></p>
       <p className="psc-concept" aria-hidden="true">Conceptual illustration</p>
 
       <div
@@ -41,11 +39,11 @@ export default function CompareStage({ data }) {
         ref={handleRef}
         role="slider"
         tabIndex={0}
-        aria-label={`Compare before and after: drag or use the arrow keys`}
+        aria-label="Drag or use the arrow keys to compare"
         aria-valuemin="0"
         aria-valuemax="100"
         aria-valuenow="50"
-        aria-valuetext="Half before, half after"
+        aria-valuetext="Comparison slider"
       >
         <span className="psc-line" aria-hidden="true" />
         <span className="psc-knob" aria-hidden="true">

@@ -23,7 +23,7 @@ function ShopMega({ onPick }) {
     <div className="mega__inner mega__inner--shop">
       <Link className="mega__card mega__card--all" to={SHOP_URL} onClick={onPick}>
         <div className="mega__circle">
-          <Media className="media--circle" />
+          <Media className="media--circle" photo="explore-circle" />
           <span className="mega__circle-dot"><Slot className="slot--explore">Explore</Slot></span>
         </div>
         <p className="mega__caption">View All Products</p>

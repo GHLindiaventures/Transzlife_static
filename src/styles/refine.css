@@ -26,7 +26,15 @@
 .footer address{font-style:normal}
 .footer__col--wide a{text-decoration:underline;text-decoration-color:rgba(239,192,74,.5);text-underline-offset:3px}
 .footer__col--wide a:hover{color:var(--gold-400)}
-.footer__copy{font-size:13px;line-height:1.6}
+.footer__inner{justify-content:space-between;padding-bottom:clamp(20px,3vw,36px)}
+.footer__copy{font-size:13px;line-height:1.6;margin-top:clamp(24px,3.5vw,40px)}
+.footer__massive-brand{display:flex;align-items:center;justify-content:center;width:100%;margin-top:clamp(24px,4vw,52px);padding:0;user-select:none;pointer-events:none;overflow:hidden}
+.footer__massive-text{font-family:'Manrope','Syne',sans-serif;font-size:clamp(56px,16vw,230px);font-weight:800;letter-spacing:-.035em;line-height:.82;color:#ffffff;text-align:center;white-space:nowrap;display:inline-flex;align-items:baseline;justify-content:center;transform:translateZ(0)}
+.footer__massive-reg{font-family:'Manrope','Syne',sans-serif;font-size:.22em;font-weight:600;line-height:1;transform:translateY(-1.55em);margin-left:.08em;opacity:.9}
+@media (max-width:640px){
+  .footer__massive-brand{margin-top:18px}
+  .footer__massive-text{font-size:clamp(44px,16.5vw,76px)}
+}
 
 /* ---------------- readable body copy: Archivo for running text, Syne stays for headings and labels ---------------- */
 .rich__text,.featured__sub,.pslider-intro__note,
