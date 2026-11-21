@@ -329,7 +329,7 @@ export const PHOTO_ALT = {
   'ayurveda-ingredients': 'Tulsi leaves, ginger, cardamom, cloves and cinnamon arranged in the shape of a mortar',
   'faq-banner': 'Frequently Asked Questions and customer support',
   dill: 'Frequently Asked Questions and customer support',
-  'mint-leaves': 'Fresh vibrant green mint leaves',
+  'mint-leaves': 'Ayurvedic botanicals, turmeric, seeds, herbs and wellness preparations',
   'basil-closeup': 'Fresh mint leaves',
   'explore-circle': 'Botanical crystal geometry cube with lush green foliage',
   'holy-basil': 'Holy basil (tulsi) plant',
