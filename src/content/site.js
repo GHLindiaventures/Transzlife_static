@@ -18,7 +18,7 @@ export const BRAND = {
   license: 'Manufacturing Lic. TN/AYU/24/1234',
   copyright: '© 2026 TranzLife Biosciences',
   disclaimer:
-    'TranzLife products are plant-based wellness products and are not intended to diagnose, treat, cure or prevent any disease. Consult your doctor before use if you are pregnant, nursing or managing a health condition.',
+    'We don’t cure. We care. TranzLife products support everyday well-being and are not intended to treat or cure any disease.',
 };
 
 /* Product photos live in /public/assets (product-N.jpg). `photo` = N. */
