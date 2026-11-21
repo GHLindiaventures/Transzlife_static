@@ -7,4 +7,6 @@
 @media (max-width:860px){
   .tl-store:has(.sticky-buy){padding-bottom:66px}
   body:has(.tl-store .sticky-buy) .float-widget{bottom:84px}
+  /* (the :not(#…) parts only add weight so this beats the scoped store rules) */
+  body:has(.tl-store .sticky-buy) .tl-store:not(#tl-a):not(#tl-b):not(#tl-c) .toast{bottom:84px}
 }

@@ -48,6 +48,6 @@ root.walkDecls(/^animation(-name)?$/, (d) => {
   d.value = d.value.replace(/[A-Za-z_][\w-]*/g, (w) => (names.has(w) ? `tl-${w}` : w));
 });
 
-writeFileSync(out, `/* GENERATED from the TranzLife store project (main, home, enhance, mobile, mrange .css),
+writeFileSync(out, `/* GENERATED from the TranzLife store project (main, home, enhance, mobile, mrange .css) plus pdp-plus.css,
    every rule scoped under .tl-store. Re-run scope-css.mjs instead of editing by hand. */\n` + reset + root.toString());
 console.log('keyframes renamed:', [...names].join(' '));
