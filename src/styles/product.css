@@ -1,43 +1,3 @@
-/* Product details page (summary + "more" row). The showcase section has its own stylesheet: showcase.css */
-.pdp{padding:var(--s-6) 0 var(--s-7)}
-.pdp__inner{width:min(1296px,100% - 2 * var(--pad));margin-inline:auto}
-.pdp__back{display:inline-block;margin-bottom:var(--s-5);font-size:var(--fs--1);font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--green-700)}
-.pdp__back:hover{color:var(--green-900);text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--gold-500)}
-
-/* image : text = 1 : phi (golden split) */
-.pdp__grid{display:grid;grid-template-columns:1fr 1.618fr;gap:var(--s-6);align-items:center}
-.pdp__pack{
-  aspect-ratio:1/1;display:grid;place-items:center;padding:var(--s-5);border-radius:var(--r-4);
-  background:radial-gradient(ellipse 100% 90% at 50% 40%,#fffaea,#f6e8bd 60%,#ebd28a);
-  border:1px solid var(--glass-border,rgba(255,255,255,.65));
-  box-shadow:0 18px 50px rgba(15,47,29,.16),inset 0 1px 0 rgba(255,255,255,.75);
-}
-.pdp__pack img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 20px 22px rgba(80,55,10,.28))}
-
-.pdp__tag{margin:0 0 var(--s-3);font-size:var(--fs--1);font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--green-600)}
-.pdp__title{margin:0;font-size:var(--fs-5);line-height:var(--lh-d);font-weight:700;color:var(--green-900)}
-.pdp__price{display:flex;align-items:baseline;gap:var(--s-3);margin:var(--s-4) 0 0}
-.pdp__price span{font-size:var(--fs-3);font-weight:700;color:var(--green-800)}
-.pdp__price small{font-size:var(--fs-0);color:var(--ink-soft)}
-.pdp__desc{margin:var(--s-4) 0 0;max-width:36em;font-size:var(--fs-1);line-height:var(--lh);color:var(--ink)}
-.pdp__k{margin:var(--s-5) 0 var(--s-3);font-size:var(--fs--1);font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--green-600)}
-.pdp__chips{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:var(--s-2)}
-.pdp__chips li{padding:var(--s-2) var(--s-3);border-radius:999px;font-size:var(--fs-0);font-weight:600;color:var(--green-800);background:rgba(255,255,255,.7);border:1px solid rgba(15,47,29,.14)}
-.pdp__dose{margin:0;font-size:var(--fs-0);line-height:var(--lh)}
-
-.pdp-more{padding:var(--s-7) 0 var(--s-8);background:var(--bg-warm)}
-.pdp-more .pdp__k{margin-top:0;margin-bottom:var(--s-5)}
-.pdp-more__grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s-4)}
-.pdp-more__grid a{display:grid;gap:var(--s-1);justify-items:center;text-align:center;padding:var(--s-4);border-radius:var(--r-3);background:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.7);box-shadow:var(--glass-shadow,0 8px 32px rgba(15,47,29,.12));transition:transform .4s var(--ease),box-shadow .4s var(--ease)}
-.pdp-more__grid a:hover{transform:translateY(-4px)}
-.pdp-more__img{width:100%;aspect-ratio:1.272/1;display:grid;place-items:center}
-.pdp-more__img img{width:72%;height:100%;object-fit:contain}
-.pdp-more__grid b{font-size:var(--fs-0);color:var(--green-900)}
-.pdp-more__grid small{font-size:var(--fs--1);color:var(--ink-soft)}
-
-@media (max-width:989px){.pdp__grid{grid-template-columns:1fr;gap:var(--s-5)}.pdp__pack{max-width:420px;margin-inline:auto;width:100%}.pdp__title{font-size:var(--fs-4)}.pdp-more__grid{grid-template-columns:repeat(2,1fr)}}
-@media (max-width:749px){.pdp{padding:var(--s-5) 0 var(--s-6)}.pdp__title{font-size:var(--fs-3)}.pdp__desc{font-size:var(--fs-0)}.pdp-more{padding:var(--s-6) 0 var(--s-7)}.pdp-more__grid{gap:var(--s-3)}}
-
 /* product links: whole image area of a card is clickable (under the quick-add button), names are links */
 .pcard__link{position:absolute;inset:0;z-index:1;border-radius:inherit}
 .pcard__badge,.pcard__quick{z-index:2}
@@ -46,14 +6,6 @@
 .pcard__title a:hover .slot,.pslider__name a:hover .slot{text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--gold-500)}
 .pslider__name{margin:0;text-align:center}
 .pslider__left .pslider__name .slot--card-title{margin:0 auto 6px;max-width:90%}
-
-/* "More from TranzLife": equal, shrinkable columns so nothing pushes the page wider than the screen */
-.pdp-more__grid{grid-template-columns:repeat(4,minmax(0,1fr))}
-.pdp-more__grid li,.pdp-more__grid a{min-width:0}
-@media (max-width:989px){.pdp-more__grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-.pdp-more__grid a{grid-template-columns:minmax(0,1fr)}
-.pdp-more__img{min-width:0;overflow:hidden}
-.pdp-more__img img{max-width:100%;min-width:0}
 
 /* product names: keep the ™ on the same line as the name */
 .has-text.slot--card-title{white-space:nowrap}

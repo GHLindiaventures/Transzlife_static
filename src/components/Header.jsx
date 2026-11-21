@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { Media, Slot, ProductImg } from './ui.jsx';
-import { PRODUCTS } from '../content/site.js';
+import { PRODUCTS, productUrl } from '../content/site.js';
+import { useCart } from '../store/context/CartContext';
 
-export const SHOP_URL = '/#products';
+export const SHOP_URL = '/shop';
 
 export const NAV = [
   { label: 'Shop', mega: 'shop', to: SHOP_URL },
@@ -28,7 +29,7 @@ function ShopMega({ onPick }) {
         <p className="mega__caption">View All Products</p>
       </Link>
       {PRODUCTS.map((p) => (
-        <Link className="mega__card" to={`/product/${p.id}`} key={p.id} onClick={onPick}>
+        <Link className="mega__card" to={productUrl(p.id)} key={p.id} onClick={onPick}>
           <Media className="media--mega media--product"><ProductImg n={p.photo} alt="" /></Media>
           <p className="mega__caption">{p.short}<small className="mega__tag">{p.tag}</small></p>
         </Link>
@@ -111,8 +112,20 @@ export default function Header({ onBurger }) {
             <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><path d="M3 6h14l-1 13H4L3 6z" /><path d="M7 8V5a3 3 0 016 0v3" /></svg>
             <span>Shop</span>
           </Link>
+          <CartButton />
         </div>
       </div>
     </header>
+  );
+}
+
+/** Opens the store's cart drawer; shows the item count. */
+function CartButton() {
+  const { count, setOpen } = useCart();
+  return (
+    <button type="button" className="icon-btn header__cart" onClick={() => setOpen(true)} aria-label={`Cart, ${count} item${count === 1 ? '' : 's'}`}>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" /><path d="M3 6h18" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>
+      {count > 0 && <span className="header__cart-count">{count}</span>}
+    </button>
   );
 }

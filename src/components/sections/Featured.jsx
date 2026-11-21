@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Media, Slot, ProductImg } from '../ui.jsx';
-import { PRODUCTS, PRODUCTS_SECTION, priceLabel } from '../../content/site.js';
+import { PRODUCTS, PRODUCTS_SECTION, priceLabel, productUrl } from '../../content/site.js';
 
 /** Price row: price + size pill. Pass no product for the empty placeholder version. */
 export function PriceRow({ product }) {
@@ -15,7 +15,7 @@ export function PriceRow({ product }) {
 }
 
 export function ProductCard({ product }) {
-  const url = `/product/${product.id}`;
+  const url = productUrl(product.id);
   return (
     <article className="pcard" data-product={product.id} data-reveal>
       <div className="pcard__media">

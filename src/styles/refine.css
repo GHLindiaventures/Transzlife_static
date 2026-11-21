@@ -251,3 +251,16 @@
 @media (prefers-reduced-motion:reduce){
   .skip-link{transition:none}
 }
+
+/* ---- mobile menu: Shop opens a 2-column product grid (image + name) ---- */
+.drawer__pm{position:relative;width:14px;height:14px;flex-shrink:0}
+.drawer__pm::before,.drawer__pm::after{content:"";position:absolute;left:0;right:0;top:50%;height:1.5px;margin-top:-.75px;background:currentColor;transition:transform .3s var(--ease)}
+.drawer__pm::after{transform:rotate(90deg)}
+li.is-open>.drawer__row .drawer__pm::after{transform:rotate(0deg)}
+li.is-open>.drawer__shop{display:grid}
+.drawer__shop{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s-4) var(--s-3);padding:var(--s-2) 16px var(--s-5)}
+.drawer__shop .drawer__prod{display:grid;justify-items:center;gap:var(--s-2);padding:0;text-align:center;color:var(--green-900)}
+.drawer__prod-img{width:100%;aspect-ratio:1;display:grid;place-items:center;border-radius:var(--r-2);background:radial-gradient(ellipse 80% 70% at 50% 45%,#fff,var(--gold-100) 75%);overflow:hidden}
+.drawer__prod-img img{width:82%;height:82%;object-fit:contain;filter:drop-shadow(0 10px 10px rgba(30,20,10,.18));transition:transform .4s var(--ease)}
+.drawer__prod:hover .drawer__prod-img img,.drawer__prod:focus-visible .drawer__prod-img img{transform:scale(1.05)}
+.drawer__prod-name{font-size:14px;line-height:1.3;font-weight:600}

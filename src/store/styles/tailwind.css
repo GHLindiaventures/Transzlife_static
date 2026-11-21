@@ -1,0 +1,67 @@
+/* Tailwind + shadcn/ui theme.
+   Tailwind's preflight reset is intentionally NOT imported: the site's own
+   styles (main.css, home.css) are hand-written and must stay untouched.
+   Tailwind utilities are only used inside shadcn components (src/components/ui).
+   In this site only the store folder (src/store) is scanned for class names. */
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities) source(none);
+@source "../";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@theme inline {
+  --font-heading: 'Fraunces', Georgia, serif;
+  --font-sans: 'Manrope', system-ui, sans-serif;
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.618);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.618);
+  --radius-2xl: calc(var(--radius) * 2);
+}
+
+/* shadcn tokens mapped to the TranzLife palette (scoped: the host site has its own --accent etc.) */
+.tl-store, [data-radix-popper-content-wrapper] {
+  --background: #fbf8f1;
+  --foreground: #1b2a1f;
+  --card: #ffffff;
+  --card-foreground: #1b2a1f;
+  --popover: #ffffff;
+  --popover-foreground: #1b2a1f;
+  --primary: #173f24;
+  --primary-foreground: #fbf8f1;
+  --secondary: #f4efe3;
+  --secondary-foreground: #173f24;
+  --muted: #f4efe3;
+  --muted-foreground: #5b6a5e;
+  --accent: #e7f1df;
+  --accent-foreground: #173f24;
+  --destructive: #b4471f;
+  --border: #e5dfd0;
+  --input: #e5dfd0;
+  --ring: #c8962a;
+  --radius: 0.8125rem; /* 13px, Fibonacci */
+}
+
+/* Border colour only for shadcn parts, so the rest of the site is unaffected */
+@layer base {
+  [data-slot] { border-color: var(--border); border-style: solid; border-width: 0; }
+}
