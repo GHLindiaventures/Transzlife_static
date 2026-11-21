@@ -506,6 +506,9 @@
 .tl-store:not(#tl-a):not(#tl-b) .ing small { display: block; color: var(--text-2); font-size: .8rem; }
 .tl-store:not(#tl-a):not(#tl-b) .ing em { font-style: normal; font-size: .72rem; color: var(--faint); }
 .tl-store:not(#tl-a):not(#tl-b) .ing__dot { width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0; display: grid; place-items: center; color: #fff; font-family: var(--f-head); font-size: 1.2rem; font-weight: 600; background: var(--c, var(--forest)); }
+.tl-store:not(#tl-a):not(#tl-b) .ing__thumb { width: 48px; height: 48px; border-radius: 50%; flex-shrink: 0; display: grid; place-items: center; background: radial-gradient(circle at 40% 35%, #ffffff 0%, #f6f3ea 70%, #ede6d5 100%); border: 1.5px solid rgba(47, 107, 58, 0.16); box-shadow: 0 3px 8px rgba(23, 63, 36, 0.08), inset 0 1px 2px rgba(255, 255, 255, 0.85); overflow: hidden; padding: 3px; position: relative; }
+.tl-store:not(#tl-a):not(#tl-b) .ing__img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.12)); transition: transform .3s var(--ease); }
+.tl-store:not(#tl-a):not(#tl-b) .ingcard:hover .ing__img, .tl-store:not(#tl-a):not(#tl-b) .ing:hover .ing__img { transform: scale(1.12); }
 .tl-store:not(#tl-a):not(#tl-b) .pdp-use { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
 .tl-store:not(#tl-a):not(#tl-b) .use-card { padding: 28px; border-radius: var(--r-lg); background: var(--white); border: 1px solid var(--line); height: 100%; }
 .tl-store:not(#tl-a):not(#tl-b) .use-card > svg { color: var(--p-accent); margin-bottom: 10px; }
@@ -1516,6 +1519,9 @@
 .tl-store:not(#tl-a):not(#tl-b) .ing2 { position: relative; display: flex; align-items: center; gap: 10px; height: 100%; padding: 10px 12px; border-radius: 14px; background: var(--white); border: 1px solid var(--line); transition: border-color .2s, transform .25s var(--ease), box-shadow .25s; }
 .tl-store:not(#tl-a):not(#tl-b) .ing2:hover { border-color: var(--leaf); transform: translateY(-2px); box-shadow: var(--shadow); }
 .tl-store:not(#tl-a):not(#tl-b) .ing2__dot { width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0; display: grid; place-items: center; color: #fff; font-family: var(--f-head); font-size: 1.05rem; font-weight: 600; }
+.tl-store:not(#tl-a):not(#tl-b) .ing2__thumb { width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0; display: grid; place-items: center; background: radial-gradient(circle at 40% 35%, #ffffff 0%, #f6f3ea 70%, #ede6d5 100%); border: 1px solid rgba(47, 107, 58, 0.14); box-shadow: 0 2px 6px rgba(23, 63, 36, 0.08), inset 0 1px 2px rgba(255, 255, 255, 0.8); overflow: hidden; padding: 2px; position: relative; }
+.tl-store:not(#tl-a):not(#tl-b) .ing2__img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1)); transition: transform .3s var(--ease); }
+.tl-store:not(#tl-a):not(#tl-b) .ing2:hover .ing2__img { transform: scale(1.12); }
 .tl-store:not(#tl-a):not(#tl-b) .ing2__text { min-width: 0; display: grid; }
 .tl-store:not(#tl-a):not(#tl-b) .ing2__text strong { font-size: .92rem; line-height: 1.25; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .tl-store:not(#tl-a):not(#tl-b) .ing2__text small { font-size: .76rem; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -1702,6 +1708,7 @@
   .tl-store:not(#tl-a):not(#tl-b) .ing2 { flex-direction: column; align-items: flex-start; gap: 8px; padding: 12px; }
   .tl-store:not(#tl-a):not(#tl-b) .ing2__type { position: absolute; top: 10px; right: 10px; margin: 0; font-size: .58rem; padding: 2px 6px; }
   .tl-store:not(#tl-a):not(#tl-b) .ing2__dot { width: 32px; height: 32px; font-size: .95rem; }
+  .tl-store:not(#tl-a):not(#tl-b) .ing2__thumb { width: 34px; height: 34px; }
   .tl-store:not(#tl-a):not(#tl-b) .ing2__text { width: 100%; }
   .tl-store:not(#tl-a):not(#tl-b) .ings2:not(.is-all) .ings2__item:nth-child(n+7) { display: none; }
   .tl-store:not(#tl-a):not(#tl-b) .ings2.is-all .ings2__item:nth-child(n+7) { animation: tl-rvIn .45s var(--ease) both; animation-delay: calc(var(--d) - 210ms); }
