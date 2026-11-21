@@ -87,6 +87,12 @@
 .featured--titled .headline{margin-bottom:32px;padding-inline:var(--pad)}
 @media (max-width:749px){.bgvideo--sm{height:400px}.bgvideo--sm .slot--bgv-title{--h:83px}.featured--titled{padding-top:56px}}
 
+/* ---- help section with background image ---- */
+.news.news--help{height:auto;min-height:520px;padding:89px var(--pad)}
+.news.news--help .news__card{width:min(776px,100%);padding:55px 55px}
+@media (max-width:989px){.news.news--help{min-height:480px}.news.news--help .news__card{padding:34px 34px}}
+@media (max-width:749px){.news.news--help{min-height:420px;padding:55px 21px}.news.news--help .news__card{padding:34px 21px}}
+
 /* ---- FAQ accordion (10 rows x 79px) ---- */
 .faq{padding:55px var(--pad)}
 .faq__list{max-width:890px;margin:0 auto;border-top:1px solid var(--line)}

@@ -258,12 +258,20 @@
 
 /* ---- newsletter ---- */
 .news__card {
-  background: rgba(255, 255, 255, .34);
+  background: rgba(255, 255, 255, .55);
   border: 1px solid rgba(255, 255, 255, .7);
   border-radius: 28px;
-  box-shadow: var(--glass-shadow-lg);
+  box-shadow: 0 8px 32px rgba(15, 47, 29, .12), 0 2px 8px rgba(15, 47, 29, .08);
   -webkit-backdrop-filter: blur(22px) saturate(1.6);
   backdrop-filter: blur(22px) saturate(1.6);
+}
+.news.news--help .news__card {
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-top: 3px solid var(--gold-500);
+  box-shadow: 0 16px 48px rgba(8, 38, 26, 0.2), 0 6px 16px rgba(8, 38, 26, 0.15);
+  backdrop-filter: blur(24px) saturate(1.8);
+  -webkit-backdrop-filter: blur(24px) saturate(1.8);
 }
 
 .news__field input {
@@ -380,9 +388,16 @@
 
 /* ---- floating widget ---- */
 .float-widget {
-  background: var(--glass-bg-strong);
-  border: 1px solid var(--glass-border);
-  border-right: 0
+  background: rgba(255, 255, 255, .65);
+  border: 1px solid rgba(26, 107, 60, .25);
+  border-right: 0;
+  box-shadow: 0 8px 24px rgba(15, 47, 29, .15), 0 2px 8px rgba(15, 47, 29, .1);
+  transition: background .25s, box-shadow .25s
+}
+
+.float-widget:hover {
+  background: rgba(255, 255, 255, .8);
+  box-shadow: 0 12px 32px rgba(15, 47, 29, .2), 0 4px 12px rgba(15, 47, 29, .15)
 }
 
 /* ---- footer ---- */

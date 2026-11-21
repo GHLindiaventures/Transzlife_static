@@ -266,8 +266,15 @@
 .brands .media--logo>img{position:static;width:100%;height:100%;object-fit:contain}
 
 /* ---------------- closing help card ---------------- */
-.news--help .news__card{display:flex;flex-direction:column;align-items:center}
+.news.news--help .news__card{display:flex;flex-direction:column;align-items:center}
+.news__leaf-icon{display:flex;justify-content:center;margin:var(--s-3,13px) 0 var(--s-2,8px)}
+.news__leaf{width:32px;height:32px;color:var(--green-700)}
 .news__actions{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:var(--s-4,21px) var(--s-5,34px)}
+.news.news--help .btn--dark{background:var(--green-700);color:#fff;border:1px solid var(--green-700)}
+.news.news--help .btn--dark:hover{background:var(--green-900);color:var(--gold-400);border-color:var(--green-900)}
+.news.news--help .link-btn--dark{color:var(--green-700)}
+.news.news--help .link-btn--dark:hover{color:var(--green-900)}
+.news.news--help .link-btn--dark::after{background:var(--gold-500)}
 @media (max-width:749px){.news__actions{flex-direction:column}.news__actions .btn{width:100%}}
 
 @media (prefers-reduced-motion:reduce){

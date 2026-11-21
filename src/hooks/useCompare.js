@@ -40,7 +40,7 @@ export default function useCompare(stageRef, handleRef, names = ['before', 'afte
         if (t >= 1) { demo = null; target = 50; }
         else target = 50 + Math.sin(t * Math.PI * 2) * -22 * (1 - t * 0.35); // 50 -> 28 -> 72 -> 50
       }
-      pos += (target - pos) * (dragging ? 0.45 : 0.22);
+      pos += (target - pos) * (dragging ? 0.5 : 0.25);
       if (Math.abs(target - pos) < 0.05 && !demo) pos = target;
       write();
       if (pos !== target || demo) raf = requestAnimationFrame(step);

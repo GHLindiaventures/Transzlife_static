@@ -197,9 +197,13 @@ export function BgVideo({ small = false, photo = BGVIDEO.photo, eyebrow = BGVIDE
 export function HelpCta() {
   return (
     <section className="news news--help">
-      <Media className="media--fill news__bg" />
       <div className="news__card" data-reveal>
         <Slot as="h2" className="slot--news-title">{HELP_CTA.title}</Slot>
+        <div className="news__leaf-icon">
+          <svg viewBox="0 0 24 24" fill="currentColor" className="news__leaf">
+            <path d="M12 2C8 6 6 11 8 15c2 4 7 4 9 2 2-2 1-7-3-9-2-1-2-6-2-6z"/>
+          </svg>
+        </div>
         <Slot as="p" className="slot--news-p">{HELP_CTA.text}</Slot>
         <div className="news__actions">
           <Link className="btn btn--dark" to={HELP_CTA.primary.to}><Slot className="slot--btn-sm">{HELP_CTA.primary.label}</Slot></Link>
