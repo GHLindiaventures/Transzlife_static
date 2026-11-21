@@ -256,16 +256,37 @@ export const FAQ = {
 
 /* ---------------- contact ---------------- */
 export const CONTACT = {
-  banner: 'Contact Us',
-  title: 'Let’s start a conversation about better health',
-  text: 'Questions about our formulations, corporate wellness programs, retail distribution or research collaborations? Our team is here to help.',
-  fields: { name: 'Full name', phone: 'Phone number', email: 'Email address *', message: 'Your message', send: 'Send message' },
-  info: [
-    { title: 'Registered headquarters', text: BRAND.address },
-    { title: 'Customer care', text: `${BRAND.careEmail} · ${BRAND.phone}` },
-    { title: 'Clinical science', text: BRAND.email },
-    { title: 'Support hours', text: BRAND.hours },
+  eyebrow: 'Get in touch',
+  title: ['Contact', 'TranzLife Biosciences'],
+  text: 'Questions about a product, an order, bulk supply or a partnership? Our wellness team is here to help you every step of the way.',
+  form: {
+    title: 'Send us an enquiry',
+    text: 'Fill in your details and our team will get back to you by your preferred method.',
+    topics: ['Product enquiry', 'Order & delivery', 'Bulk / corporate order', 'Distributor / retail partnership', 'Research collaboration', 'Feedback', 'General enquiry'],
+    methods: ['Phone', 'Email', 'WhatsApp'],
+    consent: 'I agree to the Privacy Policy and consent to being contacted.',
+    send: 'Send enquiry',
+  },
+  offices: [
+    { title: 'Chennai (Head Office)', text: 'Tranz Life Biosciences Pvt. Ltd., 6, Flat 2D, 2nd Floor, Queenscourt, Montieth Road, Egmore, Chennai – 600 008, Tamil Nadu, India' },
   ],
+  phones: ['+91 917 611 2188'],
+  whatsapp: '919176112188', // number for wa.me links, digits only with country code
+  emails: [
+    { label: 'General enquiries', value: BRAND.email },
+    { label: 'Customer care', value: BRAND.careEmail },
+  ],
+  hours: ['Mon – Sat: 9:00 AM – 7:00 PM IST', 'Sunday: Closed'],
+  mapQuery: 'Queenscourt, Montieth Road, Egmore, Chennai 600008',
+  faqTitle: 'Frequently Asked Questions',
+  faqs: [
+    { q: 'How do I place an order?', a: 'Shop online from our Shop page and check out securely, or send us an enquiry on this page and our team will help you place the order by phone or WhatsApp.' },
+    { q: 'Do you deliver across India?', a: 'Yes. We ship across India. Orders are usually dispatched within 1–2 working days and delivered in 3–7 working days, depending on your location.' },
+    { q: 'What if my order arrives damaged?', a: 'Contact us within 48 hours of delivery with photos of the package and the product, and we will arrange a replacement or a refund.' },
+    { q: 'Can I order in bulk or become a distributor?', a: 'Yes. Choose “Bulk / corporate order” or “Distributor / retail partnership” in the enquiry form and our team will share pricing and next steps.' },
+    { q: 'Can you tell me which product is right for me?', a: 'Our team can explain what each product contains and how it is used. For medical conditions, pregnancy or ongoing medication, please consult your doctor before use.' },
+  ],
+  whatsappStrip: 'Have questions? Chat with us on WhatsApp',
 };
 
 /* ---------------- footer ---------------- */
