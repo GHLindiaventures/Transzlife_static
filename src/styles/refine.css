@@ -247,9 +247,10 @@
 @media (max-width:749px){.parallax{height:2100px}}
 
 /* ---------------- bgvideo / manufacturing showcase ---------------- */
-.bgvideo__shade{background:rgba(8,38,26,.46)}
-.bgvideo__inner .slot--bgv-title{text-shadow:0 2px 14px rgba(0,0,0,.45)}
-.bgvideo__inner .slot--eyebrow-w{text-shadow:0 1px 8px rgba(0,0,0,.4)}
+.bgvideo{background:#000}
+.bgvideo__shade{background:rgba(0,0,0,.35)}
+.bgvideo__inner .slot--bgv-title{text-shadow:0 3px 18px rgba(0,0,0,.8),0 1px 4px rgba(0,0,0,.6)}
+.bgvideo__inner .slot--eyebrow-w{text-shadow:0 2px 10px rgba(0,0,0,.8)}
 
 /* ---------------- recognition badges ---------------- */
 .brands__group{margin:0;padding-left:0;list-style:none}
