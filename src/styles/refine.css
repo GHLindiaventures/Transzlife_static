@@ -48,16 +48,158 @@
 .hero--ink .hero__pause{color:var(--green-900);background:rgba(252,250,241,.55);border-color:rgba(15,47,29,.25)}
 .hero--ink .hero__pause:hover{background:rgba(252,250,241,.85)}
 
-/* ---------------- who we are ---------------- */
-.rich__text{max-width:44em;margin:var(--s-4,21px) auto 0;font-size:clamp(16px,1.35vw,19px);line-height:1.65;color:var(--ink-soft)}
-.rich__link{margin-top:var(--s-4,21px)}
+/* ---------------- intro headline (eyebrow, paragraph and link removed) ---------------- */
+.rich{padding-bottom:0}
 
-/* ---------------- products: 3 × 2 grid on wide screens, swipe row on phones/tablets ---------------- */
-.featured__head{text-align:center;padding-inline:var(--pad);margin-bottom:var(--s-5,34px)}
+/* ---------------- products: slider (home) and grid (/products) ---------------- */
+.featured{
+  --fw:min(1480px,calc(100vw - 2 * var(--pad)));      /* content width the first three cards line up with */
+  --fgap:clamp(16px,1.7vw,28px);
+  --fedge:calc((100vw - var(--fw)) / 2);               /* inset so card 1 starts at the content edge */
+  --fcard:calc((var(--fw) - 2 * var(--fgap)) / 3);
+  --ftop:30px;                                         /* room above the cards for the hover lift */
+  background:none;
+}
+.featured__head{text-align:center;padding-inline:var(--pad);margin-bottom:var(--s-3,13px)}
 .featured__sub{margin-top:var(--s-2,8px);font-size:17px;line-height:1.5;color:var(--ink-soft)}
-@media (min-width:990px){
-  .featured__track{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s-5,34px) var(--s-4,21px);overflow:visible;max-width:1320px;margin-inline:auto}
-  .pcard[data-reveal]:nth-child(n+4){transition-delay:.15s}
+.featured__viewport{position:relative}
+.featured .featured__track{
+  display:flex;gap:var(--fgap);overflow-x:auto;overflow-y:hidden;
+  scroll-snap-type:x proximity;scroll-padding-inline:var(--fedge);
+  padding:var(--ftop) var(--fedge) 56px;               /* room so the floating shadows are not clipped */
+  max-width:none;margin:0;scrollbar-width:none;
+}
+.featured .featured__track::-webkit-scrollbar{display:none}
+.featured .featured__track:focus-visible{outline:2px solid var(--green-700);outline-offset:-6px;border-radius:8px}
+
+/* card = floating image tile; name and price sit on the page below it */
+.featured .pcard{
+  flex:0 0 var(--fcard);min-width:0;
+  scroll-snap-align:start;
+  padding:0;background:none;background-image:none;border:0;border-radius:0;box-shadow:none;
+  -webkit-backdrop-filter:none;backdrop-filter:none;
+}
+.featured .pcard::before{content:none}
+.featured .pcard:hover{transform:none;box-shadow:none}
+.featured .pcard[data-reveal]{opacity:1;transform:none;transition-delay:0s}   /* off-screen slides must not wait for a reveal */
+
+.featured .pcard__media{
+  aspect-ratio:1/1;border-radius:20px;overflow:visible;isolation:isolate;
+  background-color:#eef0ea;
+  box-shadow:
+    0 1px 2px rgba(20,30,20,.08),
+    0 12px 24px -12px rgba(20,35,25,.26),
+    0 34px 56px -26px rgba(20,35,25,.32);
+  transition:transform .55s var(--ease),box-shadow .55s var(--ease);
+}
+.featured .pcard:hover .pcard__media>.media{transform:none}   /* zoom the packshot, not the frame */
+/* soft contact shadow under the tile */
+.featured .pcard__media::after{
+  content:"";position:absolute;z-index:-1;left:12%;right:12%;bottom:-22px;height:40px;border-radius:50%;
+  background:radial-gradient(ellipse at center,rgba(20,35,25,.32) 0%,rgba(20,35,25,.1) 50%,transparent 72%);
+  filter:blur(10px);opacity:.7;pointer-events:none;
+  transition:opacity .55s var(--ease),transform .55s var(--ease);
+}
+/* hairline edge + white top highlight */
+.featured .pcard__media::before{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:3;
+  box-shadow:inset 0 0 0 1px rgba(20,35,25,.06),inset 0 1px 0 rgba(255,255,255,.75);
+}
+.featured .pcard:hover .pcard__media,
+.featured .pcard:focus-within .pcard__media{
+  transform:translateY(-10px);
+  box-shadow:
+    0 2px 4px rgba(20,30,20,.08),
+    0 22px 34px -14px rgba(20,35,25,.30),
+    0 54px 80px -34px rgba(20,35,25,.38);
+}
+.featured .pcard:hover .pcard__media::after,
+.featured .pcard:focus-within .pcard__media::after{opacity:1;transform:translateY(12px) scaleX(1.08)}
+
+/* ---- one backdrop per product, keyed to its pack colours ----
+   every tile: a soft light pool behind the pack, then the product's own texture (--tex) over its colour wash (--wash) */
+.featured .pcard__media>.media{
+  border-radius:inherit;overflow:hidden;
+  background:
+    radial-gradient(58% 52% at 50% 46%,rgba(255,255,255,.75),rgba(255,255,255,0) 70%),
+    var(--tex,linear-gradient(transparent,transparent)),
+    var(--wash,#eef0ea);
+}
+/* PulmoClear (lungs, green pack, orange berries): fresh sage with tiny air bubbles */
+.featured .pcard[data-product="gummies"]{
+  --wash:linear-gradient(160deg,#eef5ea 0%,#d5e5cf 60%,#bfd6b8 100%);
+  --tex:radial-gradient(circle,rgba(255,255,255,.75) 1.6px,transparent 2.2px) 0 0/22px 22px;
+}
+/* Craving Control (white inhaler, breathing): cool eucalyptus blue with vapour rings */
+.featured .pcard[data-product="inhaler"]{
+  --wash:linear-gradient(165deg,#eef5f7 0%,#d3e3e8 60%,#b9d0d8 100%);
+  --tex:repeating-radial-gradient(circle at 80% 16%,rgba(255,255,255,0) 0 22px,rgba(255,255,255,.5) 22px 23px);
+}
+/* CycleRelief (lavender label, calm): lavender with soft petal blooms */
+.featured .pcard[data-product="rollon"]{
+  --wash:linear-gradient(160deg,#f4f0f8 0%,#e1d7ee 60%,#cbbce2 100%);
+  --tex:radial-gradient(30% 24% at 14% 18%,rgba(255,255,255,.6),transparent 70%),
+        radial-gradient(34% 26% at 88% 86%,rgba(150,120,195,.25),transparent 70%);
+}
+/* Reviva (orange label, massage): warm clay with a fine linen weave */
+.featured .pcard[data-product="reviva"]{
+  --wash:linear-gradient(160deg,#fbf1ea 0%,#f0d6c4 60%,#e3bca3 100%);
+  --tex:repeating-linear-gradient(45deg,rgba(255,255,255,.2) 0 1px,transparent 1px 7px),
+        repeating-linear-gradient(-45deg,rgba(160,90,50,.06) 0 1px,transparent 1px 7px);
+}
+/* LiverDetox (amber bottle, herbal leaves): earthy olive with a leaf line drawing */
+.featured .pcard[data-product="liver"]{
+  --wash:linear-gradient(160deg,#f1f1e6 0%,#dcdcc4 60%,#c6c8a6 100%);
+  --tex:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%23556b3a' stroke-width='1.2' opacity='.3'%3E%3Cpath d='M20 104C30 60 62 30 108 18C100 64 70 94 20 104Z'/%3E%3Cpath d='M20 104L96 30M44 82l-6-22M60 66l-4-24M76 50l-2-20M48 80h22M64 64l22-2'/%3E%3C/g%3E%3C/svg%3E") no-repeat right -4% bottom -4%/44% auto;
+}
+/* Energy Booster (purple label, sunrise): dawn sky from violet to coral with light rays */
+.featured .pcard[data-product="energy"]{
+  --wash:linear-gradient(180deg,#e9e0f1 0%,#f1dde0 55%,#f4cfc0 100%);
+  --tex:repeating-conic-gradient(from -90deg at 50% 110%,rgba(255,255,255,.24) 0 4deg,rgba(255,255,255,0) 4deg 12deg);
+}
+
+.featured .pcard__title{padding:24px 8px 6px;text-align:center}
+.featured .pcard__price{justify-content:center}
+
+/* ---- arrows: centred on the picture, straddling the content edges ---- */
+.featured__arrow{
+  position:absolute;z-index:5;top:calc(var(--ftop) + var(--fcard) / 2);translate:0 -50%;
+  display:grid;place-items:center;width:54px;height:54px;padding:0;border-radius:50%;
+  color:var(--green-900);background:rgba(255,255,255,.94);border:1px solid rgba(15,47,29,.1);
+  box-shadow:0 10px 24px -10px rgba(15,47,29,.35),0 2px 6px rgba(15,47,29,.08);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  cursor:pointer;transition:background .25s,color .25s,opacity .25s,transform .25s var(--ease);
+}
+.featured__arrow--prev{left:max(8px,calc(var(--fedge) - 27px))}
+.featured__arrow--next{right:max(8px,calc(var(--fedge) - 27px))}
+.featured__arrow:hover:not(:disabled){background:var(--green-900);color:#fff;transform:scale(1.06)}
+.featured__arrow:focus-visible{outline:2px solid var(--green-700);outline-offset:3px}
+.featured__arrow:disabled{opacity:.35;cursor:default;box-shadow:none}
+
+/* ---- progress bar + View all ---- */
+.featured__progress{position:relative;width:var(--fw);height:3px;margin:0 auto;border-radius:3px;background:rgba(15,47,29,.12);overflow:hidden}
+.featured__progress>span{position:absolute;top:0;bottom:0;border-radius:inherit;background:var(--green-900);transition:left .15s linear,width .2s}
+.featured__all{display:flex;justify-content:center;margin-top:var(--s-5,34px)}
+
+/* ---- grid layout for the full products page ---- */
+.featured--grid .featured__track{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));row-gap:var(--s-5,34px);overflow:visible}
+.featured--grid .pcard{flex:none}
+.featured.featured--grid{padding-top:var(--s-7,89px)}
+@media (max-width:749px){.featured.featured--grid{padding-top:var(--s-6,55px)}}
+
+@media (max-width:989px){
+  .featured{--fcard:calc((var(--fw) - var(--fgap)) / 2.1)}
+  .featured--grid .featured__track{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:749px){
+  .featured{--fcard:82vw;--ftop:20px}
+  .featured .featured__track{padding-bottom:44px}
+  .featured__arrow{width:44px;height:44px}
+  .featured--grid .featured__track{grid-template-columns:minmax(0,1fr)}
+}
+@media (prefers-reduced-motion:reduce){
+  .featured .pcard__media,.featured .pcard__media::after,.featured__arrow{transition:none}
+  .featured .pcard:hover .pcard__media,.featured .pcard:focus-within .pcard__media{transform:none}
 }
 .pcard__quick{text-decoration:none}
 

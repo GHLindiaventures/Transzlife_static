@@ -77,18 +77,21 @@ export const HERO = [
   { image: 'hero/hero-3.webp', tone: 'ink', bg: 'linear-gradient(to bottom, #9ca17f 0%, #aaad92 55%, #b8b6ab 100%)', alt: 'CycleRelief roll-on and Energy Booster bottle on a marble podium with lavender', eyebrow: 'Ayurvedic wisdom', title: 'Rooted in nature. Perfected by science.', sub: 'Classical botanicals, standardised and quality-tested.', cta: 'Explore the science', to: '/science' },
 ];
 
-/* The first thing a visitor reads under the hero: who we are and what we make, in plain words. */
+/* The first thing a visitor reads under the hero: a single headline that leads into the products. */
 export const RICH = {
-  eyebrow: 'Who we are',
   title: 'Plant-based wellness, built on science.',
-  text: 'TranzLife Biosciences is a Chennai-based company that brings together Ayurveda and modern science. We make natural wellness products for lung care, quitting smoking, period comfort, liver care and everyday vitality, and every product is quality-tested at every step.',
-  link: { label: 'Read our story', to: '/about' },
 };
 
 export const PRODUCTS_SECTION = {
+    sub: 'Find the formulation for your need.',
   id: 'products',
   headline: 'Our products',
   sub: 'Find the formulation for your need.',
+};
+
+export const PRODUCTS_PAGE = {
+  headline: 'All products',
+  sub: 'Every TranzLife formulation, in one place.',
 };
 
 export const BANNER = { words: ['Nature meets science', 'Rooted in Ayurveda'], cta: 'Discover our science', to: '/science' };

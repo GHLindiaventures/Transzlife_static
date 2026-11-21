@@ -6,6 +6,7 @@ import Science from './pages/Science.jsx';
 import Faq from './pages/Faq.jsx';
 import Blog from './pages/Blog.jsx';
 import Contact from './pages/Contact.jsx';
+import Products from './pages/Products.jsx';
 import ProductDetail from './pages/ProductDetail.jsx';
 
 export default function App() {
@@ -18,6 +19,7 @@ export default function App() {
         <Route path="faq" element={<Faq />} />
         <Route path="blog" element={<Blog />} />
         <Route path="contact" element={<Contact />} />
+        <Route path="products" element={<Products />} />
         <Route path="product/:id" element={<ProductDetail />} />
         <Route path="*" element={<Home />} />
       </Route>
