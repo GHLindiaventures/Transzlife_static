@@ -23,21 +23,74 @@ export function Rich() {
   );
 }
 
+export function LeafIcon({ className = 'banner__leaf-icon' }) {
+  return (
+    <span className="banner__leaf-wrap" aria-hidden="true">
+      <svg
+        className={className}
+        viewBox="0 0 32 32"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        {/* Vibrant botanical leaf body */}
+        <path
+          d="M27.5 4.5C27.5 4.5 22 5 15.5 11C9 17 5 23 5 28C10 28 16 24 22 17.5C28 11 27.5 4.5 27.5 4.5Z"
+          fill="#22c55e"
+          stroke="#4ade80"
+          strokeWidth="1.8"
+          strokeLinejoin="round"
+        />
+        {/* High-contrast crisp center vein */}
+        <path
+          d="M5 28C11 22 17.5 16 27.5 4.5"
+          stroke="#ffffff"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+        />
+        {/* Side leaf veins for botanical detail */}
+        <path
+          d="M12 21C15 20.5 17 18.5 17.5 17"
+          stroke="#ffffff"
+          strokeWidth="1.4"
+          strokeLinecap="round"
+          strokeOpacity="0.85"
+        />
+        <path
+          d="M16 16C19 15.5 21 13.5 21.5 12"
+          stroke="#ffffff"
+          strokeWidth="1.4"
+          strokeLinecap="round"
+          strokeOpacity="0.85"
+        />
+      </svg>
+    </span>
+  );
+}
+
 /** Full-width banner with a scrolling headline and a button. */
 export function Banner() {
+  const cleanWords = BANNER.words.map((w) => w.replace(/\.+$/, ''));
+  // Repeat sequence 3 times in each half to ensure seamless width on all displays
+  const sequence = [...cleanWords, ...cleanWords, ...cleanWords];
+
   return (
     <section className="banner">
       <Media className="media--fill banner__bg" photo={PHOTOS.banner} />
       <div className="banner__shade" />
       <div className="banner__inner">
         <div className="banner__marquee" aria-hidden="true">
-          {range(2).map((g) => (
-            <div className="banner__marquee-group" key={g}>
-              {BANNER.words.map((w) => <Slot as="h2" className="slot--banner-title" key={w}>{w}</Slot>)}
+          {[0, 1].map((half) => (
+            <div className="banner__marquee-group" key={half}>
+              {sequence.map((w, idx) => (
+                <span className="banner__item" key={idx}>
+                  <Slot as="h2" className="slot--banner-title">{w}</Slot>
+                  <LeafIcon />
+                </span>
+              ))}
             </div>
           ))}
         </div>
-        <p className="visually-hidden">{BANNER.words.join(' · ')}</p>
+        <p className="visually-hidden">{cleanWords.join(' ')}</p>
         <Link className="btn btn--light" to={BANNER.to}><Slot className="slot--btn">{BANNER.cta}</Slot></Link>
       </div>
     </section>
