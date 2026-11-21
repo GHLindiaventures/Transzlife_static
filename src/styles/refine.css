@@ -246,6 +246,12 @@
 @media (max-width:989px){.parallax{height:2250px}}
 @media (max-width:749px){.parallax{height:2100px}}
 
+/* ---------------- bgvideo / manufacturing showcase ---------------- */
+.bgvideo{background:#000}
+.bgvideo__shade{background:rgba(0,0,0,.35)}
+.bgvideo__inner .slot--bgv-title{text-shadow:0 3px 18px rgba(0,0,0,.8),0 1px 4px rgba(0,0,0,.6)}
+.bgvideo__inner .slot--eyebrow-w{text-shadow:0 2px 10px rgba(0,0,0,.8)}
+
 /* ---------------- recognition badges ---------------- */
 .brands__group{margin:0;padding-left:0;list-style:none}
 .brands .media--logo{display:grid;place-items:center;flex:none;background:#fff;opacity:1;padding:12px 18px;box-shadow:0 6px 18px -10px rgba(15,47,29,.35);border:1px solid rgba(15,47,29,.08)}
