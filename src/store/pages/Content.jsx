@@ -289,7 +289,7 @@ export function Contact() {
   };
   return (
     <>
-      <PageHero eyebrow="Contact" title="We are here to help" text="Questions about a product, an order or a bulk enquiry? Reach out and our team will get back to you." />
+      <PageHero eyebrow="Contact" title="We are here to help" text="Questions about a product, an order or a bulk enquiry? Reach out and our team will get back to you." image="/assets/photos/contact-banner.jpg" />
       <section className="section">
         <div className="container contact">
           <div className="contact__info">
