@@ -7,6 +7,7 @@
 
 export const BRAND = {
   name: 'TranzLife Biosciences',
+  wordmark: 'TranzLife',
   tagline: 'Innovating life beyond limits',
   creed: 'Rooted in Nature · Perfected by Science · Shaping Everyday Longevity',
   email: 'info@tranzlife.in',
@@ -23,42 +24,65 @@ export const BRAND = {
 /* Product photos live in /public/assets (product-N.jpg). `photo` = N. */
 export const PRODUCTS = [
   {
-    id: 'gummies', compare: { kind: "cutout", before: { src: "illustrations/lungs-before.webp", label: "Before", sub: "Everyday pollutants", alt: "Illustration of discoloured lungs burdened by everyday pollutants" }, after: { src: "illustrations/lungs.webp", label: "After", sub: "Supported with Lung Booster", alt: "Illustration of healthy, clear lungs" } }, photo: 4, ingredients: ['Vasaka 100mg','Tulsi 100mg','Mulethi 100mg','Turmeric 80mg','Giloy 80mg','Vitamin C 40mg','Zinc 5mg'], dosage: 'Adults: 2 gummies twice daily after meals', name: 'PulmoClear™ Lung Booster Gummies', short: 'PulmoClear™', tag: 'Lung Detox',
+    id: 'gummies',
+    showcase: 'assets/products/showcase-gummies.jpg',
+    compare: { kind: "cutout", before: { src: "illustrations/lungs-before.webp", label: "Before", sub: "Everyday pollutants", alt: "Illustration of discoloured lungs burdened by everyday pollutants" }, after: { src: "illustrations/lungs.webp", label: "After", sub: "Supported with Lung Booster", alt: "Illustration of healthy, clear lungs" } }, photo: 4, ingredients: ['Vasaka 100mg', 'Tulsi 100mg', 'Mulethi 100mg', 'Turmeric 80mg', 'Giloy 80mg', 'Vitamin C 40mg', 'Zinc 5mg'], dosage: 'Adults: 2 gummies twice daily after meals', name: 'PulmoClear™ Lung Booster Gummies', short: 'PulmoClear™', tag: 'Lung Detox',
     price: 549, size: '60 Gummies',
     desc: '100% Ayurvedic Lung Booster & Craving Control Gummies for heavy smokers. Detoxifies, cleanses, and strengthens respiratory health with Vasaka, Tulsi, Mulethi, Vitamin C & Zinc. Natural Berry Flavour.',
     story: { title: 'Lung Detox', text: 'Standardized Vasaka, Tulsi, Mulethi & Vitamin C in berry gummies to help heavy smokers control cravings and cleanse airways.', note: 'Breathe Freely · Live Fully' },
   },
   {
-    id: 'inhaler', compare: { kind: "scene", before: { src: "illustrations/inhaler-before.webp", label: "Before", sub: "The urge hits", alt: "A stressed man on a grey city terrace, hand on his forehead, holding a cigarette pack" }, after: { src: "illustrations/inhaler.webp", label: "After", sub: "With BreatheFree", alt: "The same man calm on a green, sunlit terrace, breathing in from a small white inhaler, the cigarette pack crushed and set aside" } }, photo: 6, ingredients: ['Black Pepper Oil','Peppermint Oil','Tulsi Oil','Lavender Oil','Eucalyptus Oil'], dosage: 'Inhale deeply through each nostril 2–3 times whenever cravings arise', name: 'Craving Control™ Aromatherapy Inhaler', short: 'Craving Control™', tag: 'Quit Smoking',
-    price: 249, size: '10 ml Pocket Inhaler',
-    desc: '100% natural, non-addictive aromatherapy inhaler for tobacco and smoking cessation. Pure therapeutic blend of Peppermint, Black Pepper, Tulsi, Lavender and Eucalyptus oils to curb nicotine cravings instantly on the go.',
-    story: { title: 'Craving Control', text: 'Pure essential oils of Peppermint, Black Pepper, Tulsi & Lavender to curb nicotine cravings instantly on the go.', note: 'Pocket Friendly · 100% Natural' },
-  },
-  {
-    id: 'rollon', compare: { kind: "scene", before: { src: "illustrations/cycle-before.webp", label: "Before", sub: "Uneasy days", alt: "Illustration of a young woman holding her stomach, looking uncomfortable" }, after: { src: "illustrations/cycle.webp", label: "After", sub: "With the CycleRelief ritual", alt: "Illustration of the same young woman smiling and relaxed" } }, photo: 1, ingredients: ['Dill essential oil','Eucalyptus essential oil','100% plant-based','Non-greasy formula'], dosage: 'Roll gently around the belly button every morning on an empty stomach', name: 'CycleRelief™ Menstrual Comfort Roll-On', short: 'CycleRelief™', tag: 'Period Relief',
-    price: 399, size: '50 ml Roll-On',
-    desc: '100% natural plant-based formula that eases menstrual cramps, soothes abdominal discomfort, and relaxes tense pelvic muscles with pure Dill and Eucalyptus essential oils. Fast-absorbing and non-greasy.',
-    story: { title: 'Cycle Relief', text: 'Fast-absorbing Dill and Eucalyptus essential oils to ease menstrual cramps and soothe abdominal discomfort naturally.', note: 'Nature’s Care Every Cycle' },
-  },
-  {
-    id: 'reviva', compare: { kind: "scene", before: { src: "illustrations/reviva-before.webp", label: "Before", sub: "A heavy start", alt: "A tired man sitting on the edge of his bed in dim morning light, rubbing his neck" }, after: { src: "illustrations/reviva.webp", label: "After", sub: "With the Reviva ritual", alt: "The same man refreshed and smiling in warm sunlight, holding a roll-on bottle" } }, photo: 3, ingredients: ['Dill essential oil','Eucalyptus essential oil','Massage roll-on','External use'], dosage: 'Apply a small amount to intact skin and massage gently', name: 'Reviva™ Roll-On', short: 'Reviva™', tag: 'Botanical Massage Roll-On',
-    price: 399, size: '50 ml Massage Roll-On',
-    desc: 'Botanical massage roll-on for an everyday wellness and vitality ritual. A practical massage roll-on designed to complement a daily self-care routine with a refreshing topical application.',
-    story: { title: 'Wellness & Vitality', text: 'Botanical massage roll-on with Dill and Eucalyptus essential oils, for an everyday wellness and vitality ritual.', note: 'Massage Roll-On · 50 ml' },
-  },
-  {
-    id: 'liver', compare: { kind: "cutout", before: { src: "illustrations/liver-before.webp", label: "Before", sub: "Everyday strain", alt: "Illustration of a dull, mottled liver under everyday strain" }, after: { src: "illustrations/liver-botanical.webp", label: "After", sub: "Supported with Liver Booster", alt: "Illustration of a smooth, healthy liver" } }, photo: 5, ingredients: ['Bhumyamalaki 500mg','Kalmegh 400mg','Kutki 400mg','Punarnava 300mg','Bhringraj 300mg','Daruharidra 200mg'], dosage: 'Adults: 10 ml (2 tsp) twice daily after meals', name: 'LiverDetox™ Polyherbal Concoction', short: 'LiverDetox™', tag: 'Liver Booster',
+    id: 'liver',
+    showcase: 'assets/products/showcase-liver.jpg',
+    compare: { kind: "cutout", before: { src: "illustrations/liver-before.webp", label: "Before", sub: "Everyday strain", alt: "Illustration of a dull, mottled liver under everyday strain" }, after: { src: "illustrations/liver-botanical.webp", label: "After", sub: "Supported with Liver Booster", alt: "Illustration of a smooth, healthy liver" } }, photo: 5, ingredients: ['Bhumyamalaki 500mg', 'Kalmegh 400mg', 'Kutki 400mg', 'Punarnava 300mg', 'Bhringraj 300mg', 'Daruharidra 200mg'], dosage: 'Adults: 10 ml (2 tsp) twice daily after meals', name: 'LiverDetox™ Polyherbal Concoction', short: 'LiverDetox™', tag: 'Liver Booster',
     price: 649, size: '500 ml Classical Concoction',
     desc: '100% Ayurvedic Liver Booster. Detoxifies, protects, and rejuvenates liver parenchyma cells with 11 classical botanicals including Bhumyamalaki, Kalmegh, Kutki, Punarnava, and Daruharidra.',
     story: { title: 'Liver Booster', text: '500 ml classical polyherbal concoction of Bhumyamalaki, Kalmegh, Kutki & Punarnava to detoxify, protect and rejuvenate.', note: 'Classical Ayurvedic Wisdom' },
   },
   {
-    id: 'energy', photo: 2, ingredients: ['Ruta graveolens (Q)','Hecla lava (3X)','Symphytum officinale (Q)','Calcarea phosphorica (8X)','Echinacea angustifolia (Q)'], dosage: '7.5 ml twice daily, or as advised by a healthcare professional', name: 'TranzLife Energy Booster™', short: 'Energy Booster™', tag: 'Energy & Vitality',
+    id: 'rollon',
+    showcase: 'assets/products/showcase-rollon.jpg',
+    compare: { kind: "scene", before: { src: "illustrations/cycle-before.webp", label: "Before", sub: "Uneasy days", alt: "Illustration of a young woman holding her stomach, looking uncomfortable" }, after: { src: "illustrations/cycle.webp", label: "After", sub: "With the CycleRelief ritual", alt: "Illustration of the same young woman smiling and relaxed" } }, photo: 1, ingredients: ['Dill essential oil', 'Eucalyptus essential oil', '100% plant-based', 'Non-greasy formula'], dosage: 'Roll gently around the belly button every morning on an empty stomach', name: 'CycleRelief™ Menstrual Comfort Roll-On', short: 'CycleRelief™', tag: 'Period Relief',
+    price: 399, size: '50 ml Roll-On',
+    desc: '100% natural plant-based formula that eases menstrual cramps, soothes abdominal discomfort, and relaxes tense pelvic muscles with pure Dill and Eucalyptus essential oils. Fast-absorbing and non-greasy.',
+    story: { title: 'Cycle Relief', text: 'Fast-absorbing Dill and Eucalyptus essential oils to ease menstrual cramps and soothe abdominal discomfort naturally.', note: 'Nature’s Care Every Cycle' },
+  },
+  {
+    id: 'reviva',
+    showcase: 'assets/products/showcase-reviva.jpg',
+    compare: { kind: "scene", before: { src: "illustrations/reviva-before.webp", label: "Before", sub: "A heavy start", alt: "A tired man sitting on the edge of his bed in dim morning light, rubbing his neck" }, after: { src: "illustrations/reviva.webp", label: "After", sub: "With the Reviva ritual", alt: "The same man refreshed and smiling in warm sunlight, holding a roll-on bottle" } }, photo: 3, ingredients: ['Dill essential oil', 'Eucalyptus essential oil', 'Massage roll-on', 'External use'], dosage: 'Apply a small amount to intact skin and massage gently', name: 'Reviva™ Roll-On', short: 'Reviva™', tag: 'Botanical Massage Roll-On',
+    price: 399, size: '50 ml Massage Roll-On',
+    desc: 'Botanical massage roll-on for an everyday wellness and vitality ritual. A practical massage roll-on designed to complement a daily self-care routine with a refreshing topical application.',
+    story: { title: 'Wellness & Vitality', text: 'Botanical massage roll-on with Dill and Eucalyptus essential oils, for an everyday wellness and vitality ritual.', note: 'Massage Roll-On · 50 ml' },
+  },
+  {
+    id: 'energy',
+    showcase: 'assets/products/showcase-energy.jpg',
+    photo: 2, ingredients: ['Ruta graveolens (Q)', 'Hecla lava (3X)', 'Symphytum officinale (Q)', 'Calcarea phosphorica (8X)', 'Echinacea angustifolia (Q)'], dosage: '7.5 ml twice daily, or as advised by a healthcare professional', name: 'TranzLife Energy Booster™', short: 'Energy Booster™', tag: 'Energy & Vitality',
     price: null, size: '500 ml Oral Liquid',
     desc: 'Herbal & bioactive wellness formulation. A convenient oral liquid designed to complement an active lifestyle and everyday wellness routine.',
     story: { title: 'Energy & Vitality', text: 'A convenient oral liquid designed to complement an active lifestyle and everyday wellness routine.', note: 'Oral Liquid · 500 ml' },
   },
+  {
+    id: 'inhaler',
+    showcase: 'assets/products/showcase-inhaler.jpg',
+    compare: { kind: "scene", before: { src: "illustrations/inhaler-before.webp", label: "Before", sub: "The urge hits", alt: "A stressed man on a grey city terrace, hand on his forehead, holding a cigarette pack" }, after: { src: "illustrations/inhaler.webp", label: "After", sub: "With BreatheFree", alt: "The same man calm on a green, sunlit terrace, breathing in from a small white inhaler, the cigarette pack crushed and set aside" } }, photo: 6, ingredients: ['Black Pepper Oil', 'Peppermint Oil', 'Tulsi Oil', 'Lavender Oil', 'Eucalyptus Oil'], dosage: 'Inhale deeply through each nostril 2–3 times whenever cravings arise', name: 'Craving Control™ Aromatherapy Inhaler', short: 'Craving Control™', tag: 'Quit Smoking',
+    price: 249, size: '10 ml Pocket Inhaler',
+    desc: '100% natural, non-addictive aromatherapy inhaler for tobacco and smoking cessation. Pure therapeutic blend of Peppermint, Black Pepper, Tulsi, Lavender and Eucalyptus oils to curb nicotine cravings instantly on the go.',
+    story: { title: 'Craving Control', text: 'Pure essential oils of Peppermint, Black Pepper, Tulsi & Lavender to curb nicotine cravings instantly on the go.', note: 'Pocket Friendly · 100% Natural' },
+  },
 ];
+
+/* Product pages live in the store section (/products/<store id>, copied from the store project). */
+export const STORE_ID = {
+  gummies: 'pulmoclear-gummies',
+  energy: 'energy-booster',
+  rollon: 'cyclerelief-roll-on',
+  reviva: 'reviva-roll-on',
+  liver: 'liver-booster',
+  inhaler: 'breathefree-inhaler',
+};
+export const productUrl = (id) => (STORE_ID[id] ? `/products/${STORE_ID[id]}` : '/shop');
 
 export const priceLabel = (p) => (p.price == null ? 'Price to be announced' : `₹${p.price}`);
 
@@ -72,23 +96,25 @@ export const NAV_COLLECTIONS = PRODUCTS.map((p) => p.short);
 
 /* ---------------- home ---------------- */
 export const HERO = [
-  { image: 'hero/hero-1.webp', tone: 'light', bg: 'linear-gradient(to bottom, #162115 0%, #212b20 55%, #494f47 100%)', alt: 'PulmoClear Gummies and LiverDetox bottles on a stone podium with fresh herbs', eyebrow: 'TranzLife Biosciences', title: 'Live naturally. Live healthier.', sub: 'Ayurvedic, plant-based wellness formulations, made in Chennai, India.', cta: 'Shop all products', to: '/#products' },
+  { image: 'hero/hero-1.webp', tone: 'light', bg: 'linear-gradient(to bottom, #162115 0%, #212b20 55%, #494f47 100%)', alt: 'PulmoClear Gummies and LiverDetox bottles on a stone podium with fresh herbs', eyebrow: 'TranzLife Biosciences', title: 'Live naturally. Live healthier.', sub: 'Ayurvedic, plant-based wellness formulations, made in Chennai, India.', cta: 'Shop all products', to: '/shop' },
   { image: 'hero/hero-2.webp', tone: 'ink', bg: 'linear-gradient(to bottom, #d3bba1 0%, #d9bea2 55%, #e5c9aa 100%)', alt: 'Reviva roll-on and BreatheFree inhaler on a stone block with eucalyptus leaves', eyebrow: 'Our vision', title: 'From the roots of nature to the infinity of science', sub: 'TranzLife is shaping the future of life.', cta: 'Our story', to: '/about' },
   { image: 'hero/hero-3.webp', tone: 'ink', bg: 'linear-gradient(to bottom, #9ca17f 0%, #aaad92 55%, #b8b6ab 100%)', alt: 'CycleRelief roll-on and Energy Booster bottle on a marble podium with lavender', eyebrow: 'Ayurvedic wisdom', title: 'Rooted in nature. Perfected by science.', sub: 'Classical botanicals, standardised and quality-tested.', cta: 'Explore the science', to: '/science' },
 ];
 
-/* The first thing a visitor reads under the hero: who we are and what we make, in plain words. */
+/* The first thing a visitor reads under the hero: a single headline that leads into the products. */
 export const RICH = {
-  eyebrow: 'Who we are',
   title: 'Plant-based wellness, built on science.',
-  text: 'TranzLife Biosciences is a Chennai-based company that brings together Ayurveda and modern science. We make natural wellness products for lung care, quitting smoking, period comfort, liver care and everyday vitality, and every product is quality-tested at every step.',
-  link: { label: 'Read our story', to: '/about' },
 };
 
 export const PRODUCTS_SECTION = {
   id: 'products',
   headline: 'Our products',
   sub: 'Find the formulation for your need.',
+};
+
+export const PRODUCTS_PAGE = {
+  headline: 'All products',
+  sub: 'Every TranzLife formulation, in one place.',
 };
 
 export const BANNER = { words: ['Nature meets science', 'Rooted in Ayurveda'], cta: 'Discover our science', to: '/science' };
@@ -246,7 +272,7 @@ export const CONTACT = {
 /* Footer links. Only pages that exist are linked (Ingredients, Sustainability, Privacy and Terms
    come back here once those pages are built). */
 export const FOOTER = {
-  products: { title: 'Products', links: PRODUCTS.map((p) => ({ label: p.short, to: `/product/${p.id}` })) },
+  products: { title: 'Products', links: PRODUCTS.map((p) => ({ label: p.short, to: productUrl(p.id) })) },
   company: {
     title: 'Company',
     links: [

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Media, Slot, ProductImg } from '../ui.jsx';
 import CompareStage from '../CompareStage.jsx';
 import { PriceRow } from './Featured.jsx';
-import { PRODUCTS, COMPARE_INTRO } from '../../content/site.js';
+import { PRODUCTS, COMPARE_INTRO, productUrl } from '../../content/site.js';
 
 const SLIDES = PRODUCTS.filter((p) => p.compare);
 const COUNT = SLIDES.length;
@@ -81,7 +81,7 @@ export default function ProductSlider() {
           >
             <div className="pslider__left">
               <Media className="media--pslider media--product"><ProductImg n={p.photo} alt={p.short} /></Media>
-              <h3 className="pslider__name"><Link to={`/product/${p.id}`}><Slot className="slot--card-title">{p.short}</Slot></Link></h3>
+              <h3 className="pslider__name"><Link to={productUrl(p.id)}><Slot className="slot--card-title">{p.short}</Slot></Link></h3>
               <PriceRow product={p} />
             </div>
             <div

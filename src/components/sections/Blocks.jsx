@@ -14,7 +14,7 @@ export function Rich() {
   return (
     <section className="rich">
       <div className="rich__inner" data-reveal>
-        <Slot as="p" className="slot--eyebrow">{RICH.eyebrow}</Slot>
+        {RICH.eyebrow && <Slot as="p" className="slot--eyebrow">{RICH.eyebrow}</Slot>}
         <Slot as="h2" className="slot--rich">{RICH.title}</Slot>
         {RICH.text && <p className="rich__text">{RICH.text}</p>}
         {RICH.link && <Link className="link-btn link-btn--dark rich__link" to={RICH.link.to}><Slot className="slot--link">{RICH.link.label}</Slot></Link>}

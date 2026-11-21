@@ -1,4 +1,5 @@
-import { Routes, Route } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
+import { Routes, Route, Navigate, useParams } from 'react-router-dom';
 import Layout from './components/Layout.jsx';
 import Home from './pages/Home.jsx';
 import About from './pages/About.jsx';
@@ -6,21 +7,67 @@ import Science from './pages/Science.jsx';
 import Faq from './pages/Faq.jsx';
 import Blog from './pages/Blog.jsx';
 import Contact from './pages/Contact.jsx';
-import ProductDetail from './pages/ProductDetail.jsx';
+import Products from './pages/Products.jsx';
+import { CartProvider } from './store/context/CartContext';
+import { TooltipProvider } from './store/components/ui/tooltip';
+import StoreLayout, { StoreOverlays } from './store/StoreLayout.jsx';
+import { STORE_ID } from './content/site.js';
+
+/* Store pages (copied from the Tranz-Life-Vishnu-Personal project), each its own chunk */
+const Shop = lazy(() => import('./store/pages/Shop'));
+const Product = lazy(() => import('./store/pages/Product'));
+const Concern = lazy(() => import('./store/pages/Concern'));
+const ConcernsIndex = lazy(() => import('./store/pages/Concern').then((m) => ({ default: m.ConcernsIndex })));
+const Ingredients = lazy(() => import('./store/pages/Ingredients'));
+const content = (name) => lazy(() => import('./store/pages/Content').then((m) => ({ default: m[name] })));
+const Journal = content('Journal');
+const Article = content('Article');
+const Policy = content('Policy');
+const checkout = (name) => lazy(() => import('./store/pages/Checkout').then((m) => ({ default: m[name] })));
+const Cart = checkout('Cart');
+const Checkout = checkout('Checkout');
+const OrderSuccess = checkout('OrderSuccess');
+
+const page = (el) => <Suspense fallback={<div className="page-loading" aria-busy="true" />}>{el}</Suspense>;
+
+/** Old /product/<id> links point at the store's product pages. */
+function OldProductLink() {
+  const { id } = useParams();
+  return <Navigate to={STORE_ID[id] ? `/products/${STORE_ID[id]}` : '/shop'} replace />;
+}
 
 export default function App() {
   return (
-    <Routes>
-      <Route element={<Layout />}>
-        <Route index element={<Home />} />
-        <Route path="about" element={<About />} />
-        <Route path="science" element={<Science />} />
-        <Route path="faq" element={<Faq />} />
-        <Route path="blog" element={<Blog />} />
-        <Route path="contact" element={<Contact />} />
-        <Route path="product/:id" element={<ProductDetail />} />
-        <Route path="*" element={<Home />} />
-      </Route>
-    </Routes>
+    <CartProvider>
+      <TooltipProvider delayDuration={250}>
+        <Routes>
+          <Route element={<Layout />}>
+            <Route index element={<Home />} />
+            <Route path="about" element={<About />} />
+            <Route path="science" element={<Science />} />
+            <Route path="faq" element={<Faq />} />
+            <Route path="blog" element={<Blog />} />
+            <Route path="contact" element={<Contact />} />
+            <Route path="products" element={<Products />} />
+            <Route path="product/:id" element={<OldProductLink />} />
+            <Route element={<StoreLayout />}>
+              <Route path="shop" element={page(<Shop />)} />
+              <Route path="products/:id" element={page(<Product />)} />
+              <Route path="concerns" element={page(<ConcernsIndex />)} />
+              <Route path="concerns/:id" element={page(<Concern />)} />
+              <Route path="ingredients" element={page(<Ingredients />)} />
+              <Route path="journal" element={page(<Journal />)} />
+              <Route path="journal/:id" element={page(<Article />)} />
+              <Route path="policies/:id" element={page(<Policy />)} />
+              <Route path="cart" element={page(<Cart />)} />
+              <Route path="checkout" element={page(<Checkout />)} />
+              <Route path="order/:id" element={page(<OrderSuccess />)} />
+            </Route>
+            <Route path="*" element={<Home />} />
+          </Route>
+        </Routes>
+        <StoreOverlays />
+      </TooltipProvider>
+    </CartProvider>
   );
 }
