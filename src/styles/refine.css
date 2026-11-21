@@ -378,3 +378,39 @@ li.is-open>.drawer__shop{display:grid}
     transform: translate3d(-50%, 0, 0);
   }
 }
+
+/* ---------------- FAQ banner: clean display for conference table graphic ---------------- */
+.pbanner--faq {
+  background-color: #6e7621 !important;
+  aspect-ratio: 16 / 9 !important;
+  max-height: 480px !important;
+}
+
+.pbanner--faq .pbanner__shade {
+  display: none !important;
+}
+
+.pbanner--faq .media img {
+  object-fit: contain !important;
+  object-position: center !important;
+}
+
+.pbanner--faq .slot--pb-title {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+@media (max-width: 749px) {
+  .pbanner--faq {
+    aspect-ratio: 16 / 9 !important;
+    min-height: 220px !important;
+  }
+}
+

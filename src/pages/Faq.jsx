@@ -7,7 +7,7 @@ export default function Faq() {
   const [open, setOpen] = useState(null); // index of the open question (one at a time)
   return (
     <>
-      <PageBanner title={FAQ.banner} photo={PHOTOS.faqBanner} />
+      <PageBanner variant="faq" title={FAQ.banner} photo={PHOTOS.faqBanner} />
       <section className="faq">
         <div className="faq__list">
           {FAQ.items.map((item, i) => {
