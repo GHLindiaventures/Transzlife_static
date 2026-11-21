@@ -264,20 +264,20 @@
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.5);
+  color: rgba(255,255,255,0.85);
   display: block;
   margin-top: 2px;
 }
 .sc-stat__label {
   font-size: 12px;
   font-weight: 700;
-  color: rgba(255,255,255,0.9);
+  color: #ffffff;
   margin-bottom: 4px;
   letter-spacing: 0.02em;
 }
 .sc-stat__sub {
-  font-size: 11px;
-  color: rgba(255,255,255,0.45);
+  font-size: 11.5px;
+  color: rgba(255,255,255,0.82);
   line-height: 1.4;
 }
 
@@ -290,7 +290,7 @@
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.5);
+  color: rgba(255,255,255,0.85);
   animation: sc-bob 2.5s ease-in-out infinite;
 }
 @keyframes sc-bob {

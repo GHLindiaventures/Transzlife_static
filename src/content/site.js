@@ -245,12 +245,23 @@ export const SCIENCE = {
 
 /* ---------------- faq ---------------- */
 export const FAQ = {
-  banner: 'FAQ',
+  banner: 'Frequently Asked Questions',
+  categories: [
+    { id: 'all', label: 'All Questions' },
+    { id: 'safety', label: 'Safety & Usage' },
+    { id: 'quality', label: 'Quality & Cleanroom' },
+    { id: 'orders', label: 'Orders & Shipping' },
+  ],
   items: [
-    { q: 'Where are TranzLife formulations manufactured?', a: 'All TranzLife products are manufactured inside certified Class 10,000 (ISO 7) cleanroom facilities in India adhering strictly to AYUSH GMP and ISO 9001:2015 pharmaceutical-grade standards.' },
-    { q: 'How do you verify heavy metal and pesticide safety?', a: 'Every production lot undergoes independent NABL-accredited third-party laboratory testing via Inductively Coupled Plasma Mass Spectrometry (ICP-MS) to screen for lead, arsenic, cadmium, mercury, and 140+ pesticides before market release.' },
-    { q: 'What is your domestic shipping delivery timeframe?', a: 'Orders placed before 2:00 PM IST are dispatched on the same day. Delivery takes 2 to 4 business days across metropolitan areas in India. We offer complimentary insured shipping on all orders over ₹999.' },
-    { q: 'Can I customize corporate wellness gifting packages?', a: 'Yes. Our corporate wellness team curates wellness suites in branded biodegradable presentation boxes with custom corporate notes.' },
+    { cat: 'safety', q: 'Can I take TranzLife formulations alongside prescription medications?', a: 'Always consult your prescribing physician before combining any herbal supplements with ongoing allopathic treatments. As a standard clinical guideline, maintain a separation interval of 60 to 90 minutes between herbal supplements and prescription drugs to prevent potential metabolic absorption interference.' },
+    { cat: 'safety', q: 'Can I take PulmoClear gummies if I have diabetes?', a: 'PulmoClear gummies are pectin-based and formulated with low-glycemic natural fruit extracts rather than high-fructose corn syrups. However, individuals managing diabetes should review the detailed nutritional carbohydrate panel and consult their diabetologist.' },
+    { cat: 'safety', q: 'Are TranzLife formulations safe during pregnancy or nursing?', a: 'As a conservative safety precaution, pregnant women and lactating mothers should refrain from starting active botanical detox formulations (such as PulmoClear or LiverDetox) without explicit prior authorization from their obstetrician or healthcare provider.' },
+    { cat: 'quality', q: 'Where are TranzLife formulations manufactured?', a: 'All TranzLife products are manufactured inside certified Class 10,000 (ISO 7) cleanroom facilities in Tamil Nadu, India adhering strictly to AYUSH GMP, ISO 9001:2015, and pharmaceutical-grade validation protocols.' },
+    { cat: 'quality', q: 'How do you verify heavy metal and pesticide safety?', a: 'Every production lot undergoes independent NABL-accredited third-party laboratory testing via Inductively Coupled Plasma Mass Spectrometry (ICP-MS) to screen for lead, arsenic, cadmium, mercury, and 140+ pesticides adhering to strict USP <2232> limits before market release.' },
+    { cat: 'quality', q: 'What extraction methods do you use?', a: 'We utilize closed-loop supercritical CO₂ thermodynamic extraction and cryogenic milling. This completely eliminates toxic petrochemical solvents like hexane, benzene, and acetone, preserving delicate thermolabile enzymes in their natural state.' },
+    { cat: 'orders', q: 'What is your domestic shipping delivery timeframe?', a: 'Orders placed before 2:00 PM IST are dispatched on the same day. Delivery typically takes 2 to 4 business days across Indian metropolitan centers and 3 to 7 days for regional destinations. We offer complimentary insured shipping on all orders over ₹999.' },
+    { cat: 'orders', q: 'What is your replacement and return policy?', a: 'If your order arrives damaged, leaking, or defective, contact our customer care team within 48 hours of delivery with packaging photos for an immediate replacement or full refund. Unopened products in their original tamper-evident packaging can be returned within 7 days.' },
+    { cat: 'orders', q: 'Can I customize corporate wellness gifting packages?', a: 'Yes. Our corporate wellness team curates bespoke executive wellness suites in branded biodegradable presentation boxes with custom corporate letterpress notes. Contact us through our enquiry form or via WhatsApp.' },
   ],
 };
 
@@ -299,6 +310,7 @@ export const FOOTER = {
     links: [
       { label: 'About Us', to: '/about' },
       { label: 'Science & Innovation', to: '/science' },
+      { label: 'Sustainability', to: '/sustainability' },
       { label: 'Quality & Manufacturing', to: '/science#sc-pipeline' },
       { label: 'Certifications', to: '/science#sc-certs' },
     ],
