@@ -177,7 +177,7 @@ export const BRANDS = {
   ],
 };
 
-export const BGVIDEO = { photo: 'basil-closeup', eyebrow: 'Quality & manufacturing', title: 'Made in ISO 7 cleanrooms under AYUSH GMP' };
+export const BGVIDEO = { photo: 'mint-leaves', eyebrow: 'Quality & manufacturing', title: 'Made in ISO 7 cleanrooms under AYUSH GMP' };
 
 export const NEWSLETTER = {
   title: 'Live naturally. Live healthier.',
@@ -305,9 +305,10 @@ export const PHOTOS = {
   iwt: 'ayurveda-banyan',
   parallax: 'forest-leaves',
   parallaxSide: ['lotus', 'ayurveda-ingredients'],
+  exploreCircle: 'explore-circle',
   aboutBanner: 'lavender',
   scienceBanner: 'lab-research',
-  faqBanner: 'dill',
+  faqBanner: 'faq-banner',
   contactBanner: 'lotus',
   contactSide: 'holy-basil',
 };
@@ -325,8 +326,11 @@ export const PHOTO_ALT = {
   lavender: 'Lavender field in bloom',
   lotus: 'Pink lotus flower against dark green leaves',
   'ayurveda-ingredients': 'Tulsi leaves, ginger, cardamom, cloves and cinnamon arranged in the shape of a mortar',
-  dill: 'Fresh dill fronds',
-  'basil-closeup': 'Fresh mint and basil leaves',
+  'faq-banner': 'Frequently Asked Questions and customer support',
+  dill: 'Frequently Asked Questions and customer support',
+  'mint-leaves': 'Fresh vibrant green mint leaves',
+  'basil-closeup': 'Fresh mint leaves',
+  'explore-circle': 'Botanical crystal geometry cube with lush green foliage',
   'holy-basil': 'Holy basil (tulsi) plant',
   'turmeric-dried': 'Hand holding dried turmeric roots over a pile of turmeric',
 };

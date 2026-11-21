@@ -61,10 +61,10 @@
 
 /* ---------------- products: slider (home) and grid (/products) ---------------- */
 .featured{
-  --fw:min(1480px,calc(100vw - 2 * var(--pad)));      /* content width the first three cards line up with */
-  --fgap:clamp(16px,1.7vw,28px);
-  --fedge:calc((100vw - var(--fw)) / 2);               /* inset so card 1 starts at the content edge */
-  --fcard:calc((var(--fw) - 2 * var(--fgap)) / 3);
+  --fw:min(1480px,calc(100vw - 2 * var(--pad)));
+  --fgap:clamp(16px,1.6vw,26px);
+  --fedge:var(--pad);                                  /* reduced side gap so card 1 aligns cleanly with page content */
+  --fcard:clamp(280px,calc((100vw - 2 * var(--fedge) - 2.5 * var(--fgap)) / 3.25),440px);
   --ftop:30px;                                         /* room above the cards for the hover lift */
   background:none;
 }
@@ -198,14 +198,14 @@
   -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
   cursor:pointer;transition:background .25s,color .25s,opacity .25s,transform .25s var(--ease);
 }
-.featured__arrow--prev{left:max(8px,calc(var(--fedge) - 27px))}
-.featured__arrow--next{right:max(8px,calc(var(--fedge) - 27px))}
+.featured__arrow--prev{left:max(8px,calc(var(--fedge) - 24px))}
+.featured__arrow--next{right:max(8px,calc(var(--fedge) - 24px))}
 .featured__arrow:hover:not(:disabled){background:var(--green-900);color:#fff;transform:scale(1.06)}
 .featured__arrow:focus-visible{outline:2px solid var(--green-700);outline-offset:3px}
 .featured__arrow:disabled{opacity:.35;cursor:default;box-shadow:none}
 
 /* ---- progress bar + View all ---- */
-.featured__progress{position:relative;width:var(--fw);height:3px;margin:0 auto;border-radius:3px;background:rgba(15,47,29,.12);overflow:hidden}
+.featured__progress{position:relative;width:calc(100% - 2 * var(--fedge));max-width:1480px;height:3px;margin:0 auto;border-radius:3px;background:rgba(15,47,29,.12);overflow:hidden}
 .featured__progress>span{position:absolute;top:0;bottom:0;border-radius:inherit;background:var(--green-900);transition:left .15s linear,width .2s}
 .featured__all{display:flex;justify-content:center;margin-top:var(--s-5,34px)}
 
@@ -216,7 +216,7 @@
 @media (max-width:749px){.featured.featured--grid{padding-top:var(--s-6,55px)}}
 
 @media (max-width:989px){
-  .featured{--fcard:calc((var(--fw) - var(--fgap)) / 2.1)}
+  .featured{--fcard:calc((100vw - 2 * var(--fedge) - var(--fgap)) / 2.2)}
   .featured--grid .featured__track{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media (max-width:749px){

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ShieldCheck, Truck, Leaf, FlaskConical } from 'lucide-react';
 import { CERTIFICATIONS } from '../data/site';
-import { Accordion as UIAccordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
+import { Accordion as UIAccordion, AccordionItem, AccordionTrigger, AccordionContent } from './ui/accordion.jsx';
 import LogoLoop from './rb/LogoLoop';
 
 // Fade/slide content in when it scrolls into view.

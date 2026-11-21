@@ -1,7 +1,7 @@
 import { useId, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Clock, Users, TriangleAlert, Plus, MessageCircle, ArrowRight, ChevronDown } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip.jsx';
 import { INGREDIENT_TYPES } from '../../data/ingredients';
 
 const SHOW = 6; // ingredients shown on phones before "show all"
