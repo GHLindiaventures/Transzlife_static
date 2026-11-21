@@ -159,9 +159,9 @@
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%) translateY(22px) scale(0.97);
-  width: 72%;
+  width: 74%;
   max-width: 860px;
-  max-height: 65%;
+  max-height: 68%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -171,10 +171,11 @@
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.5s ease, transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
-  padding: clamp(14px, 2.2vw, 28px) clamp(18px, 3vw, 40px);
+  padding: clamp(16px, 2.5vw, 32px) clamp(20px, 3.5vw, 44px);
   border-radius: 20px;
-  background: radial-gradient(ellipse at center, rgba(254, 250, 240, 0.76) 0%, rgba(246, 240, 222, 0.5) 55%, rgba(246, 240, 222, 0) 80%);
-  backdrop-filter: blur(3px);
+  background: radial-gradient(ellipse at center, rgba(255, 253, 247, 0.9) 0%, rgba(248, 243, 228, 0.72) 55%, rgba(248, 243, 228, 0) 85%);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 
 .ayur-content.is-visible {
@@ -208,29 +209,29 @@
 }
 
 .ayur-quote {
-  font-family: var(--f-display);
-  font-weight: 700;
-  font-size: clamp(15px, 2vw, 26px);
-  line-height: 1.5;
-  color: #0f2b13;
-  letter-spacing: -0.015em;
+  font-family: 'Manrope', 'Archivo', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 500;
+  font-size: clamp(16px, 1.85vw, 23px);
+  line-height: 1.62;
+  color: #14351a;
+  letter-spacing: 0;
   margin: 0;
   text-wrap: balance;
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.95);
 }
 
 .aq-quote-mark {
-  color: #559336;
-  font-family: Georgia, serif;
-  font-size: 1.25em;
+  color: #2e6e3c;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.45em;
   line-height: 0;
   vertical-align: -0.1em;
-  margin: 0 2px;
+  margin: 0 4px;
 }
 
 .aq-accent {
-  font-weight: 850;
-  color: #081d0c;
+  font-weight: 700;
+  color: #05210d;
 }
 
 .ayur-sign {
@@ -364,8 +365,8 @@
     padding: 10px 16px;
   }
   .ayur-quote {
-    font-size: clamp(13px, 2.4vw, 18px);
-    line-height: 1.4;
+    font-size: clamp(14px, 2vw, 17.5px);
+    line-height: 1.55;
   }
   .ayur-sign {
     margin-top: 10px;
@@ -393,7 +394,7 @@
   }
   .ayur-quote {
     font-size: 13.5px;
-    line-height: 1.36;
+    line-height: 1.48;
   }
   .ayur-sign {
     margin-top: 6px;
