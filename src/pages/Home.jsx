@@ -1,7 +1,6 @@
 import Hero from '../components/sections/Hero.jsx';
 import Featured from '../components/sections/Featured.jsx';
 import ProductSlider from '../components/sections/ProductSlider.jsx';
-import Parallax from '../components/sections/Parallax.jsx';
 import { Sep, Rich, Banner, Benefits, Strip, ImageWithText, Brands, BgVideo, HelpCta } from '../components/sections/Blocks.jsx';
 
 /*
@@ -21,10 +20,8 @@ export default function Home() {
       <ProductSlider />
       <Strip />
       <ImageWithText />
-      <Sep />
-      <Parallax />
-      <Brands />
       <BgVideo />
+      <Brands />
       <HelpCta />
     </>
   );

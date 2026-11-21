@@ -124,12 +124,14 @@ export function Brands() {
   );
 }
 
-/** Background-video block. `small` = the 560px version used on About / Science. */
+/** Background-video / Mint showcase block with parallax curtain reveal effect. `small` = the 560px version used on About / Science. */
 export function BgVideo({ small = false, photo = BGVIDEO.photo, eyebrow = BGVIDEO.eyebrow, title = BGVIDEO.title }) {
   return (
     <section className={`bgvideo${small ? ' bgvideo--sm' : ''}`}>
-      <Media className="media--fill bgvideo__bg" photo={photo} />
-      <div className="bgvideo__shade" />
+      <div className="bgvideo__fixed" aria-hidden="true">
+        <Media className="media--fill bgvideo__bg" photo={photo} />
+        <div className="bgvideo__shade" />
+      </div>
       <div className="bgvideo__inner" data-reveal>
         <Slot as="p" className="slot--eyebrow-w">{eyebrow}</Slot>
         <Slot as="h2" className="slot--bgv-title">{title}</Slot>
