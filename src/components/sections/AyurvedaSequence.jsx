@@ -24,7 +24,21 @@ export default function AyurvedaSequence() {
 
     if (!root || !canvas) return;
 
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const ctx = canvas.getContext('2d', { alpha: false });
+
+    if (prefersReduced) {
+      const img = new Image();
+      img.src = '/frames/ayurveda/frame_113.webp';
+      img.onload = () => {
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      };
+      if (contentRef.current) contentRef.current.classList.add('is-visible');
+      if (powerRef.current) powerRef.current.style.display = 'none';
+      if (hintRef.current) hintRef.current.style.display = 'none';
+      return;
+    }
+
     const frames = new Array(TOTAL_FRAMES);
     let lastDrawnIndex = -1;
 
@@ -304,6 +318,11 @@ export default function AyurvedaSequence() {
       <div className="ayur-seq" id="ayurSeq" ref={rootRef}>
         <div className="ayur-pin" id="ayurPin" ref={pinRef}>
           <div className="ayur-viewport">
+            {/* Direct skip shortcut for shoppers who want to view products immediately */}
+            <a href="#products" className="ayur-skip-btn" aria-label="Skip animation and go directly to products">
+              Skip to formulations &darr;
+            </a>
+
             <div className="ayur-frame-box">
               <canvas
                 id="ayurCanvas"

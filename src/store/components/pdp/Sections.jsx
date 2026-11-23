@@ -2,7 +2,7 @@ import { useId, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Clock, Users, TriangleAlert, Plus, MessageCircle, ArrowRight, ChevronDown } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip.jsx';
-import { INGREDIENT_TYPES } from '../../data/ingredients';
+import { INGREDIENT_TYPES, getIngredientImg } from '../../data/ingredients';
 
 const SHOW = 6; // ingredients shown on phones before "show all"
 
@@ -20,7 +20,24 @@ export function IngredientGrid({ ings }) {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Link to={`/ingredients#${ing.id}`} className="ing2">
-                    <span className="ing2__dot" style={{ background: t.color }} aria-hidden="true">{ing.name.charAt(0)}</span>
+                    <span className="ing2__thumb" aria-hidden="true">
+                      <img
+                        src={getIngredientImg(ing.id)}
+                        alt={ing.name}
+                        className="ing2__img"
+                        loading="lazy"
+                        decoding="async"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                          if (e.currentTarget.nextElementSibling) {
+                            e.currentTarget.nextElementSibling.style.display = 'grid';
+                          }
+                        }}
+                      />
+                      <span className="ing2__dot ing2__dot--fallback" style={{ background: t.color, display: 'none' }}>
+                        {ing.name.charAt(0)}
+                      </span>
+                    </span>
                     <span className="ing2__text">
                       <strong>{ing.name}</strong>
                       <small>{ing.alt}</small>

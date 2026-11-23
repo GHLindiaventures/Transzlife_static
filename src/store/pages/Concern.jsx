@@ -3,7 +3,7 @@ import { ArrowRight, Check, Stethoscope, Lightbulb, Activity } from 'lucide-reac
 import { getConcern, CONCERNS } from '../data/concerns';
 import { PRODUCTS } from '../data/products';
 import { ARTICLES } from '../data/articles';
-import { getIngredient, INGREDIENT_TYPES } from '../data/ingredients';
+import { getIngredient, getIngredientImg, INGREDIENT_TYPES } from '../data/ingredients';
 import ProductCard from '../components/ProductCard';
 import Icon from '../components/Icon';
 import { Breadcrumbs, Reveal, SectionHead, useTitle } from '../components/Common';
@@ -114,7 +114,24 @@ export default function Concern() {
                 const ing = getIngredient(iid);
                 return (
                   <Link key={iid} to={`/ingredients#${iid}`} className="ing">
-                    <span className="ing__dot" style={{ background: INGREDIENT_TYPES[ing.type].color }}>{ing.name.charAt(0)}</span>
+                    <span className="ing__thumb" aria-hidden="true">
+                      <img
+                        src={getIngredientImg(ing.id)}
+                        alt={ing.name}
+                        className="ing__img"
+                        loading="lazy"
+                        decoding="async"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                          if (e.currentTarget.nextElementSibling) {
+                            e.currentTarget.nextElementSibling.style.display = 'grid';
+                          }
+                        }}
+                      />
+                      <span className="ing__dot ing__dot--fallback" style={{ background: INGREDIENT_TYPES[ing.type].color, display: 'none' }}>
+                        {ing.name.charAt(0)}
+                      </span>
+                    </span>
                     <span><strong>{ing.name}</strong><small>{ing.alt}</small></span>
                   </Link>
                 );

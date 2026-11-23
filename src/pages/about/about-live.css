@@ -530,6 +530,10 @@
 .ast-pin{position: relative;}
 .ast-scene{position: relative; color: var(--ink);}
 .ast-dark{color: #f2f7ee;}
+.ast-dark .ast-text{color: rgba(242, 247, 238, 0.95); opacity: 1;}
+.ast-dark .ast-lead{color: #ffffff;}
+.ast-dark .ast-cap{color: rgba(242, 247, 238, 0.85); opacity: 1;}
+.ast-dark .ast-more p{color: rgba(242, 247, 238, 0.92); opacity: 1;}
 .ast-bg{position: absolute; inset: 0; overflow: hidden; z-index: 0; background: #17301f;}
 .ast-bg img{position: absolute; left: -6%; top: -6%; width: 112%; height: 112%; max-width: none; object-fit: cover;}
 .ast-bg::after{content: ""; position: absolute; inset: 0;}

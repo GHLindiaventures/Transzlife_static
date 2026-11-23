@@ -279,3 +279,278 @@
     mask-image:linear-gradient(to right,transparent 0,#000 22%);
   }
 }
+
+
+/* ---------------- Sustainability Page ---------------- */
+.sustain-page {
+  background: var(--bg, #fcfaf1);
+  color: var(--ink, #123318);
+}
+.sustain-hero {
+  position: relative;
+  padding: clamp(60px, 8vw, 110px) var(--pad) clamp(40px, 6vw, 80px);
+  background: radial-gradient(ellipse 90% 70% at 50% 30%, #f6f0dd 0%, #ece5cc 60%, #e1d8ba 100%);
+  text-align: center;
+}
+.sustain-hero__inner {
+  max-width: 860px;
+  margin: 0 auto;
+}
+.sustain-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border-radius: 999px;
+  background: rgba(36, 80, 42, 0.08);
+  border: 1px solid rgba(36, 80, 42, 0.2);
+  color: var(--green-800, #165a32);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+.sustain-pill__ic { color: var(--green-600, #2e7d48); }
+.sustain-hero__title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(34px, 5.2vw, 68px);
+  line-height: 1.05;
+  font-weight: 800;
+  color: var(--green-950, #08261a);
+  margin: 0 0 20px;
+}
+.sustain-hero__title em {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-style: italic;
+  font-weight: 600;
+  color: var(--green-700, #1a6b3c);
+}
+.sustain-hero__lead {
+  font-family: 'Manrope', 'Archivo', sans-serif;
+  font-size: clamp(16px, 1.4vw, 19px);
+  line-height: 1.65;
+  color: #23422a;
+  max-width: 740px;
+  margin: 0 auto;
+}
+.sustain-metrics {
+  background: #0d281a;
+  color: #fff;
+  padding: clamp(36px, 5vw, 60px) var(--pad);
+}
+.sustain-metrics__grid {
+  max-width: 1180px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: clamp(20px, 3vw, 40px);
+}
+.sustain-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-left: 2px solid rgba(239, 192, 74, 0.35);
+  padding-left: 18px;
+}
+.sustain-metric__num {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(30px, 3.4vw, 44px);
+  font-weight: 800;
+  color: var(--gold-400, #efc04a);
+  line-height: 1;
+}
+.sustain-metric__label {
+  font-family: 'Manrope', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+}
+.sustain-metric__sub {
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.72);
+}
+.sustain-pillars {
+  padding: clamp(60px, 8vw, 100px) var(--pad);
+  max-width: 1220px;
+  margin: 0 auto;
+}
+.sustain-section-header {
+  text-align: center;
+  max-width: 760px;
+  margin: 0 auto clamp(40px, 6vw, 60px);
+}
+.sustain-kicker {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--green-700, #1a6b3c);
+  display: block;
+  margin-bottom: 12px;
+}
+.sustain-section-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(28px, 3.8vw, 46px);
+  font-weight: 800;
+  color: var(--green-950, #08261a);
+  margin: 0 0 16px;
+}
+.sustain-section-desc {
+  font-family: 'Manrope', sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #38553f;
+}
+.sustain-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: clamp(24px, 3vw, 40px);
+}
+.sustain-card {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: clamp(28px, 4vw, 44px);
+  box-shadow: 0 8px 30px -10px rgba(10, 40, 20, 0.08);
+  border: 1px solid rgba(26, 107, 60, 0.12);
+  display: flex;
+  flex-direction: column;
+}
+.sustain-card__icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
+  background: rgba(36, 80, 42, 0.08);
+  color: var(--green-700, #1a6b3c);
+  display: grid;
+  place-items: center;
+  margin-bottom: 18px;
+}
+.sustain-card__step {
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--gold-600, #a8661a);
+  margin-bottom: 8px;
+}
+.sustain-card h3 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(19px, 1.8vw, 24px);
+  font-weight: 750;
+  color: var(--green-950, #08261a);
+  margin: 0 0 14px;
+  line-height: 1.25;
+}
+.sustain-card p {
+  font-family: 'Manrope', sans-serif;
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: #3b5742;
+  margin: 0 0 20px;
+}
+.sustain-card__list {
+  margin-top: auto;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.sustain-card__list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: #1a4223;
+  font-weight: 550;
+}
+.sustain-card__list svg {
+  color: var(--green-600, #2e7d48);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.sustain-cta {
+  background: linear-gradient(135deg, #103320 0%, #071f13 100%);
+  color: #fff;
+  padding: clamp(60px, 7vw, 90px) var(--pad);
+  text-align: center;
+}
+.sustain-cta__inner {
+  max-width: 680px;
+  margin: 0 auto;
+}
+.sustain-cta h2 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(26px, 3.4vw, 42px);
+  font-weight: 800;
+  margin: 0 0 16px;
+}
+.sustain-cta p {
+  font-family: 'Manrope', sans-serif;
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0 0 28px;
+}
+.sustain-cta__btns {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.btn--outline {
+  border: 1.5px solid rgba(255, 255, 255, 0.45);
+  color: #ffffff;
+  padding: 12px 24px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: all .25s ease;
+}
+.btn--outline:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: #fff;
+}
+@media (max-width: 900px) {
+  .sustain-metrics__grid { grid-template-columns: repeat(2, 1fr); }
+  .sustain-cards { grid-template-columns: 1fr; }
+}
+@media (max-width: 580px) {
+  .sustain-metrics__grid { grid-template-columns: 1fr; }
+}
+
+/* Ayurveda Skip Button */
+.ayur-skip-btn {
+  position: absolute;
+  top: 20px;
+  right: clamp(16px, 4vw, 36px);
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: rgba(252, 250, 241, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(26, 107, 60, 0.25);
+  color: #12381c;
+  font-family: 'Manrope', 'Archivo', sans-serif;
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  box-shadow: 0 4px 16px rgba(10, 40, 20, 0.08);
+  transition: all .25s ease;
+}
+.ayur-skip-btn:hover {
+  background: var(--green-900, #0c3320);
+  color: var(--gold-400, #efc04a);
+  transform: translateY(-2px);
+}
