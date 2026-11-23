@@ -96,7 +96,7 @@ export default function Hero() {
 
   return (
     <section
-      className={`hero${currentSlide.tone === 'ink' ? ' hero--ink' : ''}${auto && !held ? '' : ' is-paused'}${auto ? ' is-auto' : ''}`}
+      className={`hero${currentSlide.tone === 'ink' ? ' hero--ink' : ''}${auto && !held ? '' : ' is-paused'}${auto ? ' is-auto' : ''}${withTransition ? '' : ' is-snap'}`}
       id="hero"
       aria-roledescription="carousel"
       aria-label="Introduction"
@@ -141,7 +141,7 @@ export default function Hero() {
                   alt={s.alt}
                   width="2000"
                   height="1116"
-                  loading={index <= 2 ? 'eager' : 'lazy'}
+                  loading="eager"
                   decoding="async"
                   fetchpriority={index === 1 ? 'high' : undefined}
                 />
