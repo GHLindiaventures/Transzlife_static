@@ -416,3 +416,45 @@ li.is-open>.drawer__shop{display:grid}
     transform: translate3d(-50%, 0, 0);
   }
 }
+
+/* ===== Featured cards: price-first block + Buy now ===== */
+.featured .pcard__title{padding:20px 8px 2px}
+.featured .pcard__size{
+  margin:0 0 10px;text-align:center;
+  font:500 12.5px/1.4 'Manrope',system-ui,sans-serif;letter-spacing:.02em;color:rgba(15,47,29,.58);
+}
+.featured .pcard__price--deal{
+  display:flex;flex-wrap:wrap;align-items:baseline;justify-content:center;gap:4px 10px;margin:0;
+  font-family:'Manrope',system-ui,sans-serif;font-variant-numeric:tabular-nums lining-nums;
+}
+.featured .pcard__now{font-size:26px;line-height:1.1;font-weight:800;letter-spacing:-.02em;color:var(--green-800)}
+.featured .pcard__mrp{font-size:15px;font-weight:500;color:rgba(15,47,29,.45);text-decoration-thickness:1.5px;text-decoration-color:rgba(15,47,29,.5)}
+.featured .pcard__save{
+  align-self:center;padding:3px 9px;border-radius:999px;
+  font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+  color:#7a4a00;background:var(--gold-200);box-shadow:inset 0 0 0 1px rgba(200,146,26,.35);
+}
+.featured .pcard__price--tba{margin:0;text-align:center;font:700 15px/1.6 'Manrope',system-ui,sans-serif;color:var(--green-800)}
+
+.featured .pcard__buy{
+  display:flex;align-items:center;justify-content:center;width:100%;min-height:48px;margin-top:16px;padding:0 20px;
+  font:700 13px/1 'Manrope',system-ui,sans-serif;letter-spacing:.16em;text-transform:uppercase;
+  color:#fff;background:var(--green-800);border:1px solid var(--green-800);border-radius:12px;
+  box-shadow:0 10px 22px -12px rgba(12,51,32,.55);cursor:pointer;
+  transition:background .2s var(--ease),transform .16s var(--ease),box-shadow .2s var(--ease);
+}
+.featured .pcard__buy:hover{background:var(--green-900);box-shadow:0 14px 26px -12px rgba(12,51,32,.6)}
+.featured .pcard__buy:active{transform:scale(.97)}
+.featured .pcard__buy:focus-visible{outline:2px solid var(--gold-500);outline-offset:3px}
+.featured .pcard__buy--ghost{color:var(--green-800);background:transparent;box-shadow:none}
+.featured .pcard__buy--ghost:hover{color:#fff;background:var(--green-800)}
+@media (max-width:749px){
+  .featured .pcard__now{font-size:24px}
+  .featured .pcard__buy{min-height:46px}
+}
+@media (prefers-reduced-motion:reduce){.featured .pcard__buy{transition:none}.featured .pcard__buy:active{transform:none}}
+
+/* Keep the last block's bottom margin inside <main>. Without this it leaks out
+   as a strip between the page and the footer, where body's fixed glows show
+   through and appear to come and go while scrolling. */
+main.main,main.main > .tl-store{display:flow-root}
