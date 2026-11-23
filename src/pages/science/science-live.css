@@ -8,7 +8,7 @@
    ══════════════════════════════════════════════════════════ */
 .sc-sec-label {
   display: block;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -276,7 +276,7 @@
   letter-spacing: 0.02em;
 }
 .sc-stat__sub {
-  font-size: 11.5px;
+  font-size: 12px;
   color: rgba(255,255,255,0.82);
   line-height: 1.4;
 }
@@ -286,7 +286,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -353,7 +353,7 @@
 
 .sc-pillar__no {
   display: block;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -370,7 +370,7 @@
   margin-top: 16px;
 }
 .sc-pillar__specs span {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -497,7 +497,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -523,7 +523,7 @@
   gap: 12px;
 }
 .sc-sim__specs div { display: flex; flex-direction: column; gap: 2px; }
-.sc-sim__specs small { font-size: 10px; color: rgba(255,255,255,0.45); letter-spacing: 0.08em; text-transform: uppercase; }
+.sc-sim__specs small { font-size: 12px; color: rgba(255,255,255,0.45); letter-spacing: 0.08em; text-transform: uppercase; }
 .sc-sim__specs b { font-size: 14px; color: var(--gold-400); }
 
 /* ══════════════════════════════════════════════════════════
@@ -613,7 +613,7 @@
   flex-wrap: wrap;
 }
 .sc-stage__num {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -624,7 +624,7 @@
   padding: 4px 10px;
 }
 .sc-stage__gate {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -641,7 +641,7 @@
   flex-wrap: wrap;
 }
 .sc-meta { display: flex; flex-direction: column; gap: 2px; }
-.sc-meta span { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-soft); }
+.sc-meta span { font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-soft); }
 .sc-meta strong { font-size: 14px; font-weight: 700; color: var(--green-800); }
 
 /* Make slot typography match iwt--row but with real content */
@@ -817,7 +817,7 @@
 }
 .sc-cert__icon svg { width: 22px; height: 22px; stroke: var(--green-800); }
 .sc-cert strong { font-size: 12px; font-weight: 700; color: var(--ink); line-height: 1.3; }
-.sc-cert span { font-size: 11px; color: var(--ink-soft); line-height: 1.4; }
+.sc-cert span { font-size: 12px; color: var(--ink-soft); line-height: 1.4; }
 
 /* ══════════════════════════════════════════════════════════
    SECTION 7 — CTA BANNER
@@ -848,7 +848,7 @@
 }
 .sc-cta__inner .slot--eyebrow-w {
   display: block;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;

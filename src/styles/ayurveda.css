@@ -259,7 +259,7 @@
 
 .ayur-brand {
   font-family: var(--f-display);
-  font-size: clamp(11.5px, 1.15vw, 14px);
+  font-size: clamp(12px, 1.15vw, 14px);
   font-weight: 800;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -343,7 +343,7 @@
 
 .ah-text {
   font-family: var(--f-body);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -388,9 +388,9 @@
     padding: 8px 12px;
   }
   .ayur-pill {
-    padding: 4px 12px;
+    padding: 5px 12px;
     margin-bottom: 6px;
-    font-size: 10px;
+    font-size: 12px;
   }
   .ayur-quote {
     font-size: 13.5px;
@@ -400,7 +400,7 @@
     margin-top: 6px;
   }
   .ayur-brand {
-    font-size: 10.5px;
+    font-size: 12px;
   }
   .ayur-tag {
     font-size: 12px;

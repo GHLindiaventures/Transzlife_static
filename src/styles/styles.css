@@ -24,7 +24,7 @@
 
 @media (max-width:989px) {
    :root {
-      --header-h: 34px
+      --header-h: 58px
    }
 }
 
@@ -558,6 +558,12 @@ hr {
    z-index: 2
 }
 
+.announcement__close::after {
+   content: "";
+   position: absolute;
+   inset: -7px;
+}
+
 @media (max-width:989px) {
    .announcement {
       height: 43px
@@ -727,7 +733,9 @@ hr {
 
    .header__burger,
    .header__search-m {
-      display: inline-flex
+      display: inline-flex;
+      min-width: 44px;
+      min-height: 44px;
    }
 
    .header__search {

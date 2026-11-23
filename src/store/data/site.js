@@ -10,7 +10,7 @@ export const SITE = {
   whatsapp: 'https://wa.me/919150394443',
   address: '6, Flat 2D, 2nd Floor, Queenscourt, Montieth Road, Egmore, Chennai 600 008, Tamil Nadu, India',
   hours: 'Mon to Sat, 10:00 am to 6:30 pm',
-  freeShippingAbove: 499,
+  freeShippingAbove: 999,
   shippingFee: 49,
   prepaidDiscount: 0.05,
   social: {

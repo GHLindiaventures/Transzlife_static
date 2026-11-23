@@ -154,7 +154,7 @@
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.35);
   font-family: var(--f-body, system-ui, sans-serif);
-  font-size: clamp(0.72rem, 0.9vw, 0.82rem);
+  font-size: clamp(0.75rem, 0.9vw, 0.82rem);
   font-weight: 700;
   letter-spacing: 0.08em;
   color: #ffffff;
@@ -481,7 +481,7 @@
 
 .blendy-variant-caption {
   font-family: var(--f-body, system-ui, sans-serif);
-  font-size: clamp(0.74rem, 0.95vw, 0.85rem);
+  font-size: clamp(0.75rem, 0.95vw, 0.85rem);
   font-weight: 600;
   letter-spacing: 0.05em;
   color: rgba(255, 255, 255, 0.85);

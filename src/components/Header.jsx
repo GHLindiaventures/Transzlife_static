@@ -43,7 +43,7 @@ export default function Header({ onBurger }) {
   const [openMega, setOpenMega] = useState(null); // tap-opened menu on touch screens
 
   useEffect(() => {
-    const onScroll = () => setStuck(window.scrollY > 200);
+    const onScroll = () => setStuck(window.scrollY > 30);
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);

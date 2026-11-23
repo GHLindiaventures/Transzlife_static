@@ -44,6 +44,7 @@
 /* small labels: nothing under 12px */
 .has-text.slot--badge{font-size:12px;letter-spacing:.08em}
 .has-text.slot--pill{font-size:12.5px}
+.benefits .benefit .slot--b-text{font-size:12.5px !important}
 .announcement:hover .announcement__track,.brands__marquee:hover{animation-play-state:paused}
 
 /* ---------------- hero ---------------- */

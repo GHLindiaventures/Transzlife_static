@@ -96,14 +96,14 @@
   padding:10px 16px 11px;border-radius:16px;pointer-events:none;transition:opacity .25s ease;
 }
 .psc-label b{font-weight:800;font-size:clamp(1.15rem,2vw,1.6rem);letter-spacing:.02em;text-transform:uppercase;line-height:1}
-.psc-label small{font-size:11.5px;font-weight:600;letter-spacing:.04em;opacity:.85}
+.psc-label small{font-size:12px;font-weight:600;letter-spacing:.04em;opacity:.85}
 .psc-label--left{left:clamp(14px,2.2vw,26px);color:var(--forest);background:rgba(255,255,255,.72);backdrop-filter:blur(8px);
   opacity:clamp(0,(var(--pos) - 10) / 12,1)}
 .psc-label--right{right:clamp(14px,2.2vw,26px);text-align:right;color:var(--forest);background:rgba(255,255,255,.75);backdrop-filter:blur(8px);
   opacity:clamp(0,(90 - var(--pos)) / 12,1)}
 .psc-concept{
   position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:3;margin:0;padding:5px 12px;border-radius:999px;
-  font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap;color:#fff;
+  font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap;color:#fff;
   background:rgba(20,40,24,.45);backdrop-filter:blur(6px);pointer-events:none;
 }
 
@@ -134,7 +134,7 @@
 .psc-herbs li{padding:7px 13px;border-radius:999px;font-size:13.5px;font-weight:650;color:var(--forest);background:rgba(255,255,255,.65);border:1px solid var(--line)}
 .psc-herbs small{font-weight:600;color:var(--faint);margin-left:3px}
 
-.psc-caption{display:none;margin:12px 0 0;text-align:center;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--sage)}
+.psc-caption{display:none;margin:12px 0 0;text-align:center;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--sage)}
 .psc-note{margin:22px 0 0;max-width:92ch;font-size:12.5px;line-height:1.55;color:var(--faint)}
 
 /* ---------- tablet ---------- */
@@ -155,7 +155,7 @@
   .psc-stage{aspect-ratio:4/3.6;border-radius:22px}
   .psc-pack{left:0;top:24%;width:50%;height:58%}
   .psc-art{left:50%;top:26%;width:50%;height:52%}
-  .psc-tag{padding:5px 10px 5px 8px;font-size:11px}
+  .psc-tag{padding:5px 10px 5px 8px;font-size:12px}
   .psc-tag:nth-child(1){top:auto;bottom:15%}
   .psc-tag:nth-child(2){top:auto;bottom:4%}
   .psc-tag:nth-child(3){display:none}
