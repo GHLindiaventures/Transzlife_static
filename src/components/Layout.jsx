@@ -97,14 +97,6 @@ export default function Layout() {
       <Footer ref={footerRef} />
 
       <BackToTop />
-
-      {/* floating "talk to us" button: opens the Tulsi chat */}
-      <button type="button" className="float-widget" onClick={openChat} aria-label="Chat with Tulsi, our wellness assistant" aria-controls="chatPanel">
-        <span className="float-widget__icon" aria-hidden="true">
-          <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"><path d="M3 4h14v9H8l-4 3v-3H3z" /></svg>
-        </span>
-        <span className="float-widget__label">Talk to us</span>
-      </button>
     </>
   );
 }

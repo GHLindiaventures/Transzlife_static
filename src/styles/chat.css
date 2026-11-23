@@ -1,27 +1,296 @@
 /* ---------- Tulsi wellness chat (src/features/chat/chat-widget.js) ----------
-   Ported from the old site (Tranz_Life_zip/src/styles/components/chat.css). The old site's colour tokens
-   and button reset are set on .chat itself so the widget looks the same without the old global styles. */
+   TranzLife botanical chat widget with floating launcher and animated welcome speech bubble. */
 .chat{
   --ground:#e9efe3;--ground-2:#dfe8d5;--panel:#ffffff;--panel-2:#f4f8ef;
   --line:rgba(31,70,35,.14);--line-strong:rgba(31,70,35,.3);
   --ink:#1f4423;--muted:#4c6648;--faint:#7c9077;
   --sage:#6f9e4c;--moss:#8cb86a;--forest:#24502a;
+  --gold-accent:#f6e3a1;
   --ease:cubic-bezier(.2,.7,.1,1);
 }
 .chat button{appearance:none;border:0;background:none;padding:0;margin:0;cursor:pointer;color:inherit}
 .chat a{text-decoration:none}
 .chat [hidden]{display:none !important}
-.chat{--f-chat:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;position:fixed;z-index:66;right:max(20px,env(safe-area-inset-right,0px));bottom:calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;align-items:flex-end;gap:14px;color:var(--ink);font-family:var(--f-chat);font-stretch:normal;font-weight:400;font-size:15.5px;line-height:1.45;letter-spacing:0;pointer-events:none}
+.chat{
+  --f-chat:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;
+  position:fixed;
+  z-index:66;
+  right:max(24px,env(safe-area-inset-right,0px));
+  bottom:calc(24px + env(safe-area-inset-bottom,0px));
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:12px;
+  color:var(--ink);
+  font-family:var(--f-chat);
+  font-stretch:normal;
+  font-weight:400;
+  font-size:15.5px;
+  line-height:1.45;
+  letter-spacing:0;
+  pointer-events:none;
+}
 .chat button,.chat textarea,.chat a{font-family:inherit;font-stretch:inherit}
 .chat>*{pointer-events:auto}
 
-.ch-fab{display:inline-flex;align-items:center;gap:10px;padding:7px 18px 7px 7px;border-radius:999px;background:var(--forest);color:#f4f8ef;font-weight:800;font-size:16px;box-shadow:0 10px 30px -8px rgba(20,50,25,.55);transition:transform .35s var(--ease),box-shadow .35s}
-.ch-fab:hover{transform:translateY(-2px);box-shadow:0 14px 34px -8px rgba(20,50,25,.6)}
-.ch-fab-ic{width:40px;height:40px;border-radius:50%;background:var(--moss);color:var(--forest);display:grid;place-items:center}
-.ch-fab-ic svg{width:22px;height:22px}
-.chat.open .ch-fab b{display:none}
-.chat.open .ch-fab{padding-right:7px}
+/* ---------- Tulsi Floating Launcher ---------- */
+.ch-launcher-wrap{
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+}
 
+.ch-fab{
+  position:relative;
+  width:58px;
+  height:58px;
+  border-radius:50%;
+  background:linear-gradient(145deg,#092e1d 0%,#155530 52%,#1b6d3e 100%);
+  color:#fbfaf6;
+  border:2px solid rgba(246,227,161,.45);
+  box-shadow:0 10px 28px -6px rgba(9,46,29,.48),0 3px 8px rgba(0,0,0,.12);
+  display:grid;
+  place-items:center;
+  cursor:pointer;
+  transition:transform .3s var(--ease),box-shadow .3s var(--ease),border-color .3s;
+  animation:tulsiPulse 4s infinite ease-in-out;
+}
+
+.ch-fab:hover{
+  transform:scale(1.06) translateY(-2px);
+  border-color:rgba(246,227,161,.9);
+  box-shadow:0 14px 34px -4px rgba(9,46,29,.6),0 0 0 6px rgba(27,109,62,.2);
+  animation-play-state:paused;
+}
+
+.ch-fab:active{
+  transform:scale(.96);
+}
+
+@keyframes tulsiPulse{
+  0%,100%{
+    transform:translateY(0);
+    box-shadow:0 10px 28px -6px rgba(9,46,29,.48),0 0 0 0 rgba(27,109,62,.45);
+  }
+  50%{
+    transform:translateY(-4px);
+    box-shadow:0 16px 32px -4px rgba(9,46,29,.55),0 0 0 10px rgba(27,109,62,0);
+  }
+}
+
+.chat.open .ch-fab{
+  animation:none;
+  background:#092e1d;
+  box-shadow:0 8px 20px rgba(0,0,0,.25);
+}
+
+/* Icons inside launcher: Leaf when closed, Close when open */
+.ch-fab-ic{
+  position:relative;
+  width:28px;
+  height:28px;
+  display:grid;
+  place-items:center;
+}
+
+.ch-fab-icon-leaf,
+.ch-fab-icon-close{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  transition:opacity .3s var(--ease),transform .35s var(--ease);
+}
+
+.ch-fab-icon-leaf{
+  color:var(--gold-accent);
+  opacity:1;
+  transform:scale(1) rotate(0deg);
+}
+
+.ch-fab-icon-close{
+  color:#fff;
+  opacity:0;
+  transform:scale(.5) rotate(-90deg);
+}
+
+.chat.open .ch-fab-icon-leaf{
+  opacity:0;
+  transform:scale(.5) rotate(90deg);
+}
+
+.chat.open .ch-fab-icon-close{
+  opacity:1;
+  transform:scale(1) rotate(0deg);
+}
+
+/* Online indicator dot */
+.ch-fab-badge{
+  position:absolute;
+  top:1px;
+  right:1px;
+  width:13px;
+  height:13px;
+  border-radius:50%;
+  background:#34d399;
+  border:2.5px solid #092e1d;
+  box-shadow:0 0 8px #34d399;
+}
+
+.chat.open .ch-fab-badge{
+  display:none;
+}
+
+/* ---------- Animated Welcome Message Bubble ---------- */
+.ch-welcome{
+  position:absolute;
+  right:calc(100% + 14px);
+  bottom:4px;
+  width:290px;
+  background:#ffffff;
+  border:1px solid rgba(22,90,50,.18);
+  border-radius:18px;
+  padding:12px 14px 13px;
+  box-shadow:0 16px 40px -10px rgba(8,38,26,.22),0 4px 12px rgba(0,0,0,.06);
+  cursor:pointer;
+  opacity:0;
+  visibility:hidden;
+  transform:scale(.85) translateX(12px);
+  transform-origin:right bottom;
+  transition:opacity .35s var(--ease),transform .4s var(--ease),visibility 0s .4s;
+  z-index:65;
+}
+
+.ch-welcome.is-visible{
+  opacity:1;
+  visibility:visible;
+  transform:scale(1) translateX(0);
+  transition:opacity .35s var(--ease),transform .4s var(--ease),visibility 0s;
+  animation:welcomePop .5s cubic-bezier(.34,1.56,.64,1);
+}
+
+.ch-welcome.is-closing{
+  opacity:0;
+  transform:scale(.88) translateX(10px);
+  pointer-events:none;
+}
+
+.chat.open .ch-welcome{
+  opacity:0 !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+
+@keyframes welcomePop{
+  0%{
+    opacity:0;
+    transform:scale(.8) translateX(16px);
+  }
+  70%{
+    opacity:1;
+    transform:scale(1.03) translateX(-2px);
+  }
+  100%{
+    opacity:1;
+    transform:scale(1) translateX(0);
+  }
+}
+
+/* Speech bubble tail pointing right toward the launcher */
+.ch-welcome-tail{
+  position:absolute;
+  right:-8px;
+  bottom:22px;
+  width:0;
+  height:0;
+  border-top:7px solid transparent;
+  border-bottom:7px solid transparent;
+  border-left:8px solid #ffffff;
+  filter:drop-shadow(2px 0 1px rgba(22,90,50,.08));
+}
+
+.ch-welcome-header{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:6px;
+}
+
+.ch-welcome-avatar{
+  position:relative;
+  width:24px;
+  height:24px;
+  border-radius:50%;
+  background:var(--moss);
+  color:var(--forest);
+  display:grid;
+  place-items:center;
+  flex-shrink:0;
+}
+
+.ch-welcome-avatar svg{
+  width:14px;
+  height:14px;
+}
+
+.ch-welcome-dot{
+  position:absolute;
+  bottom:-1px;
+  right:-1px;
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:#34d399;
+  border:1.5px solid #fff;
+}
+
+.ch-welcome-name{
+  font-size:13px;
+  font-weight:700;
+  color:var(--ink);
+  display:flex;
+  align-items:center;
+  gap:6px;
+  flex:1;
+}
+
+.ch-welcome-tag{
+  font-size:10.5px;
+  font-weight:700;
+  color:var(--forest);
+  background:rgba(22,90,50,.08);
+  padding:1px 6px;
+  border-radius:999px;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+}
+
+.ch-welcome-close{
+  display:grid;
+  place-items:center;
+  width:22px;
+  height:22px;
+  border-radius:50%;
+  color:rgba(21,21,21,.45);
+  transition:background .2s,color .2s;
+  padding:0;
+}
+
+.ch-welcome-close:hover{
+  background:rgba(21,21,21,.08);
+  color:var(--ink);
+}
+
+.ch-welcome-text{
+  margin:0;
+  font-size:13.5px;
+  line-height:1.45;
+  font-weight:600;
+  color:var(--forest);
+}
+
+/* ---------- Chat Panel (Dialog) ---------- */
 .ch-panel{width:min(390px,calc(100vw - 32px));height:min(620px,calc(100svh - 120px));display:flex;flex-direction:column;background:var(--panel-2);border:1px solid var(--line);border-radius:26px;box-shadow:0 30px 70px -20px rgba(20,45,24,.45);overflow:hidden;transform-origin:100% 100%;opacity:0;visibility:hidden;transform:translateY(16px) scale(.96);transition:opacity .3s,transform .45s var(--ease),visibility 0s .45s}
 .chat.open .ch-panel{opacity:1;visibility:visible;transform:none;transition:opacity .3s,transform .45s var(--ease),visibility 0s}
 
@@ -96,7 +365,40 @@
 .ch-note{font-size:11.5px;color:var(--faint);text-align:center;padding:8px 14px 12px}
 
 @media (max-width:620px){
-  .chat{right:max(12px,env(safe-area-inset-right,0px));bottom:calc(12px + env(safe-area-inset-bottom,0px))}
+  .chat{
+    right:max(16px,env(safe-area-inset-right,0px));
+    bottom:calc(16px + env(safe-area-inset-bottom,0px));
+  }
+  .ch-fab{
+    width:52px;
+    height:52px;
+  }
+  .ch-fab-ic{
+    width:24px;
+    height:24px;
+  }
+  .ch-welcome{
+    right:0;
+    bottom:calc(100% + 12px);
+    width:min(290px,calc(100vw - 32px));
+    transform:scale(.85) translateY(12px);
+    transform-origin:right bottom;
+  }
+  .ch-welcome.is-visible{
+    transform:scale(1) translateY(0);
+  }
+  .ch-welcome.is-closing{
+    transform:scale(.88) translateY(10px);
+  }
+  .ch-welcome-tail{
+    right:20px;
+    bottom:-8px;
+    border-left:7px solid transparent;
+    border-right:7px solid transparent;
+    border-top:8px solid #ffffff;
+    border-bottom:0;
+  }
+
   /* compact sheet: about 60% of the screen, so the page and header stay visible above it */
   .ch-panel{width:calc(100vw - 24px);height:min(62svh,540px);min-height:360px;border-radius:22px}
   .ch-head{gap:10px;padding:10px 8px 10px 12px}
@@ -120,16 +422,12 @@
 @media (prefers-reduced-motion:reduce){
   .ch-panel,.chat.open .ch-panel{transition:opacity .2s,visibility 0s}
   .ch-dots span{animation:none;opacity:.6}
+  .ch-fab{animation:none}
+  .ch-welcome{animation:none;transition:opacity .2s}
 }
 
-/* ---------- this site ---------- */
-/* the site's "Talk to us" tab opens the chat, so the old round button is not shown */
-.ch-fab{display:none !important}
-/* product photo instead of the leaf icon on product cards */
+/* ---------- product image card polish ---------- */
 .ch-prod-img{overflow:hidden;background:#fff}
 .ch-prod-img img{width:100%;height:100%;object-fit:contain;display:block}
 .ch-prod .ch-enquire{grid-column:2}
-/* hide the "Talk to us" tab while the chat panel is open */
-body.chat-open .float-widget{opacity:0;pointer-events:none;transform:translateX(100%)}
-.float-widget{transition:opacity .25s,transform .35s var(--ease,ease)}
-button.float-widget{border:0;cursor:pointer;font:inherit}
+
