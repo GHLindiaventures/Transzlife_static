@@ -58,10 +58,23 @@ export default function Hero() {
     if (!auto || held) return undefined;
     const timer = setTimeout(() => {
       setWithTransition(true);
-      setSlideIdx((prev) => prev + 1);
+      setSlideIdx((prev) => clamp(prev + 1));
     }, 6000);
     return () => clearTimeout(timer);
   }, [slideIdx, auto, held]);
+
+  const LAST = EXTENDED_SLIDES.length - 1;
+  const clamp = (n) => Math.max(0, Math.min(LAST, n)); // never move past the cloned end slides (that shows an empty green screen)
+
+  // Safety net: if the transitionend event is missed (background tab, interrupted swipe), still snap off a clone slide
+  useEffect(() => {
+    if (slideIdx !== 0 && slideIdx !== LAST) return undefined;
+    const id = setTimeout(() => {
+      setWithTransition(false);
+      setSlideIdx(slideIdx === 0 ? COUNT : 1);
+    }, 1300);
+    return () => clearTimeout(id);
+  }, [slideIdx, LAST]);
 
   // Seamless boundary wrap when transition completes on clone slides
   const onTransitionEnd = (e) => {
@@ -109,7 +122,7 @@ export default function Hero() {
         const dx = e.changedTouches[0].clientX - touchX.current;
         if (Math.abs(dx) > 50) {
           setWithTransition(true);
-          setSlideIdx((prev) => prev + (dx < 0 ? 1 : -1));
+          setSlideIdx((prev) => clamp(prev + (dx < 0 ? 1 : -1)));
         }
       }}
     >
