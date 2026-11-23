@@ -248,9 +248,8 @@ export default function ProductSlider() {
               style={{
                 '--ing-rot': `${ing.rot}deg`,
                 '--fall-delay': ing.delay,
-                width: `${ing.size}px`,
-                height: `${ing.size}px`,
-                filter: ing.blur ? `blur(${ing.blur}px)` : undefined,
+                '--ing-size': `${ing.size}px`,
+                '--ing-blur': ing.blur ? `${ing.blur}px` : '0px',
               }}
             >
               <img src={ing.src} alt="" className="blendy-item-img" />

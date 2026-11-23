@@ -236,6 +236,8 @@
   align-items: center;
   justify-content: center;
   pointer-events: none;
+  width: var(--ing-size, 80px);
+  height: var(--ing-size, 80px);
   animation: ingredientFallIn 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
   animation-delay: var(--fall-delay, 0s);
 }
@@ -269,6 +271,7 @@
   top: 14%;
   left: 12%;
   z-index: 7;
+  filter: blur(var(--ing-blur, 10px));
 }
 
 /* Zone 2: Top-Left Inner (Sharp with shadow) */
@@ -300,6 +303,7 @@
   top: 14%;
   right: 12%;
   z-index: 7;
+  filter: blur(var(--ing-blur, 10px));
 }
 
 /* Zone 6: Top-Right Inner (Sharp with shadow) */
@@ -479,7 +483,7 @@
 }
 
 /* ==========================================================
-   6. RESPONSIVE BREAKPOINTS
+   6. RESPONSIVE BREAKPOINTS (Mobile-First Polish)
    ========================================================== */
 @media (max-width: 900px) {
   .blendy-nav-meta {
@@ -500,47 +504,226 @@
     padding: 6px 8px;
   }
 
+  /* Prevent congestion by hiding inner overlapping items */
   .bzone--top-left-inner,
   .bzone--top-right-inner {
-    display: none;
+    display: none !important;
+  }
+
+  .blendy-hero-bottle {
+    height: clamp(290px, 46vh, 420px);
+  }
+
+  .blendy-word-text {
+    font-size: clamp(5.8rem, 20vw, 11rem);
+  }
+
+  .blendy-botanical-item {
+    width: clamp(56px, 8vw, 80px);
+    height: clamp(56px, 8vw, 80px);
+  }
+
+  .bzone--top-left-bokeh,
+  .bzone--top-right-bokeh {
+    width: clamp(68px, 9vw, 92px);
+    height: clamp(68px, 9vw, 92px);
+    filter: blur(5px);
+  }
+
+  .bzone--top-left-bokeh {
+    top: 14%;
+    left: 8%;
+  }
+
+  .bzone--mid-left {
+    top: 50%;
+    left: 8%;
+  }
+
+  .bzone--base-left {
+    bottom: 18%;
+    left: calc(50% - 130px);
+  }
+
+  .bzone--top-right-bokeh {
+    top: 14%;
+    right: 8%;
+  }
+
+  .bzone--mid-right {
+    top: 50%;
+    right: 8%;
+  }
+
+  .bzone--base-right {
+    bottom: 18%;
+    right: calc(50% - 130px);
   }
 }
 
 @media (max-width: 600px) {
   .blendy-hero-stage {
-    min-height: 580px;
-    height: 92vh;
+    min-height: 560px;
+    height: 100vh;
+    height: 100dvh;
   }
 
   .blendy-top-nav {
-    padding: 0 16px;
+    height: 58px;
+    padding: 0 14px;
+    justify-content: center;
   }
 
   .blendy-tab-btn {
     font-size: 0.82rem;
+    padding: 4px 6px;
   }
 
+  .blendy-nav-tabs {
+    gap: 10px;
+    padding: 4px 6px;
+  }
+
+  /* Static product bottle sized with generous breathing space */
   .blendy-hero-bottle {
-    height: clamp(280px, 46vh, 400px);
+    height: clamp(240px, 38vh, 310px);
+    filter: drop-shadow(0 14px 22px rgba(0, 0, 0, 0.22));
   }
 
+  .blendy-ground-shadow {
+    width: clamp(140px, 40vw, 180px);
+    height: 20px;
+    bottom: clamp(-16px, -2.5vh, -12px);
+  }
+
+  /* Background letters scaled to fit without clipping or overflow */
   .blendy-word-text {
-    font-size: clamp(5.5rem, 24vw, 9rem);
+    font-size: clamp(4.4rem, 18vw, 6.4rem);
   }
 
-  .bzone--top-left-bokeh,
+  /* Hide the 2 inner congested ingredients */
+  .bzone--top-left-inner,
+  .bzone--top-right-inner {
+    display: none !important;
+  }
+
+  /* 6 Perfectly Spaced, Uncrowded Botanical Zones for Mobile */
+  .blendy-botanical-item {
+    width: 48px;
+    height: 48px;
+  }
+
+  /* Zone 1: Top-Left Corner (Soft Bokeh) */
+  .bzone--top-left-bokeh {
+    top: 15%;
+    left: 4%;
+    width: 52px;
+    height: 52px;
+    filter: blur(3.5px);
+  }
+
+  /* Zone 2: Mid-Left Outer */
+  .bzone--mid-left {
+    top: 48%;
+    left: 5%;
+    width: 48px;
+    height: 48px;
+    filter: drop-shadow(6px 12px 10px rgba(0, 0, 0, 0.2));
+  }
+
+  /* Zone 3: Base-Left Herb */
+  .bzone--base-left {
+    bottom: 18%;
+    left: calc(50% - 94px);
+    width: 54px;
+    height: 54px;
+    z-index: 3;
+    filter: drop-shadow(4px 8px 8px rgba(0, 0, 0, 0.16));
+  }
+
+  /* Zone 4: Top-Right Corner (Soft Bokeh) */
   .bzone--top-right-bokeh {
-    width: 95px !important;
-    height: 95px !important;
+    top: 15%;
+    right: 4%;
+    width: 52px;
+    height: 52px;
+    filter: blur(3.5px);
   }
 
-  .bzone--mid-left,
+  /* Zone 5: Mid-Right Outer */
   .bzone--mid-right {
-    display: none;
+    top: 48%;
+    right: 5%;
+    width: 48px;
+    height: 48px;
+    filter: drop-shadow(6px 12px 10px rgba(0, 0, 0, 0.2));
+  }
+
+  /* Zone 6: Base-Right Herb */
+  .bzone--base-right {
+    bottom: 18%;
+    right: calc(50% - 94px);
+    width: 54px;
+    height: 54px;
+    z-index: 3;
+    filter: drop-shadow(4px 8px 8px rgba(0, 0, 0, 0.16));
+  }
+
+  /* Bottom Controls on Mobile */
+  .blendy-bottom-bar {
+    height: 70px;
+    padding: 0 16px;
+  }
+
+  .blendy-arrow-btn {
+    width: 38px;
+    height: 38px;
+  }
+
+  .blendy-cta-link {
+    font-size: 0.88rem;
+    letter-spacing: 0.18em;
   }
 
   .blendy-variant-caption {
     display: none;
+  }
+}
+
+/* Extra small mobile screens (<= 380px) */
+@media (max-width: 380px) {
+  .blendy-hero-bottle {
+    height: clamp(210px, 34vh, 260px);
+  }
+
+  .blendy-word-text {
+    font-size: clamp(3.6rem, 17vw, 4.8rem);
+  }
+
+  .blendy-botanical-item {
+    width: 40px;
+    height: 40px;
+  }
+
+  .bzone--top-left-bokeh,
+  .bzone--top-right-bokeh {
+    width: 44px;
+    height: 44px;
+    filter: blur(2.5px);
+  }
+
+  .bzone--base-left,
+  .bzone--base-right {
+    width: 46px;
+    height: 46px;
+  }
+
+  .bzone--base-left {
+    left: calc(50% - 82px);
+  }
+
+  .bzone--base-right {
+    right: calc(50% - 82px);
   }
 }
 
