@@ -607,6 +607,16 @@ hr {
    align-items: center
 }
 
+/* On desktop the "TranzLife" text is hidden; only the round logo shows */
+.logo__text {
+   display: none
+}
+
+/* On desktop the burger logo image is hidden (the whole burger is hidden anyway) */
+.burger__logo {
+   display: none
+}
+
 .header__burger,
 .header__search-m {
    display: none
@@ -716,6 +726,32 @@ hr {
       display: inline-flex;
       min-width: 44px;
       min-height: 44px;
+   }
+
+   /* Mobile: show the logo image inside the burger button, hide the SVG lines */
+   .burger__lines {
+      display: none
+   }
+   .burger__logo {
+      display: block;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover
+   }
+
+   /* Mobile: hide the round logo image, show "TranzLife" text */
+   .header__logo .logo__img {
+      display: none
+   }
+   .logo__text {
+      display: block;
+      font-family: var(--ff-display, 'Playfair Display', serif);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--gold-400, #c5a55a);
+      letter-spacing: 0.04em;
+      white-space: nowrap
    }
 
    .header__search {
