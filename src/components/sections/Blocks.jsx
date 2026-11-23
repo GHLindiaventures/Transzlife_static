@@ -222,7 +222,7 @@ const WC_ICONS = [
 /** Closing call to action: talk to the wellness team (contact + FAQ). */
 export function HelpCta() {
   return (
-    <section className="wc">
+    <section className="wc" style={{ backgroundImage: `url(${import.meta.env.BASE_URL}assets/photos/wellness-bg.webp)` }}>
       <div className="wc__inner">
         <div className="wc__content" data-reveal>
           <p className="wc__eyebrow">{HELP_CTA.eyebrow}</p>

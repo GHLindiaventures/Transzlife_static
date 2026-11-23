@@ -30,13 +30,13 @@
 .cmp--cutout .cmp-before .cmp-bg::before{content:"";position:absolute;inset:0;opacity:.5;
   background-image:radial-gradient(circle,rgba(196,178,140,.55) 1.2px,transparent 1.8px),radial-gradient(circle,rgba(150,140,110,.4) 1px,transparent 1.6px);
   background-size:46px 46px,29px 29px;background-position:0 0,13px 17px}
-.cmp-haze{position:absolute;inset:-10%;filter:blur(8px);
+.cmp-haze{position:absolute;inset:-10%;filter:blur(4px);
   background:radial-gradient(ellipse 45% 35% at 30% 30%,rgba(160,150,120,.22),transparent 70%),radial-gradient(ellipse 40% 30% at 75% 75%,rgba(120,110,90,.25),transparent 70%)}
 .cmp--cutout .cmp-after .cmp-bg{background:radial-gradient(ellipse 120% 95% at 50% 45%,#f7f4e3 0%,#e3efd8 46%,#b9d7a6 100%)}
 .cmp-glow{position:absolute;left:50%;top:50%;width:62%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;
   background:radial-gradient(circle,rgba(255,236,170,.75) 0%,rgba(231,198,128,.28) 38%,transparent 68%)}
 .cmp-glow::after{content:"";position:absolute;inset:14%;border-radius:50%;border:1px solid rgba(214,162,58,.35)}
-.cmp--cutout .cmp-img{inset:8%;width:84%;height:84%;object-fit:contain;filter:drop-shadow(0 18px 22px rgba(30,20,10,.28))}
+.cmp--cutout .cmp-img{inset:8%;width:84%;height:84%;object-fit:contain;filter:drop-shadow(0 12px 16px rgba(30,20,10,.22))}
 
 /* labels: "Before" is dark glass on the murky side / photo, "After" is light glass */
 .cmp .psc-label--left{color:#f3ecd8;background:rgba(28,26,20,.5)}
@@ -46,11 +46,11 @@
 @media (max-width:749px){
   .pslider__slide{grid-template-rows:56% 44%}
   .pslider__left{padding:var(--s-3) var(--s-4) var(--s-5);justify-content:center}
-  .pslider__left .media--pslider{width:min(150px,44%);border-radius:var(--r-3)}
+  .pslider__left .media--pslider{width:min(140px,40%);border-radius:var(--r-3)}
   .pslider__left .media--pslider>img{border-radius:var(--r-3)}
-  .pslider__dots{left:50%;transform:translateX(-50%);bottom:calc(44% + 10px)}
-  .pslider__next{top:28%;right:var(--s-3)}
-  .cmp--scene .cmp-img{transform:scale(1.42);transform-origin:50% 28%}
-  .cmp--cutout .cmp-img{inset:6% 10%;width:80%;height:88%}
-  .cmp .psc-knob{width:44px}
+  .pslider__dots{left:50%;transform:translateX(-50%);bottom:calc(44% + 8px)}
+  .pslider__next{top:26%;right:var(--s-3);width:40px;height:40px}
+  .cmp--scene .cmp-img{transform:scale(1.38);transform-origin:50% 28%}
+  .cmp--cutout .cmp-img{inset:8% 12%;width:76%;height:84%}
+  .cmp .psc-knob{width:40px}
 }

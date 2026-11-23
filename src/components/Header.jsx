@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { Media, Slot, ProductImg } from './ui.jsx';
 import { PRODUCTS, productUrl } from '../content/site.js';
@@ -41,6 +41,7 @@ function ShopMega({ onPick }) {
 export default function Header({ onBurger }) {
   const [stuck, setStuck] = useState(false);
   const [openMega, setOpenMega] = useState(null); // tap-opened menu on touch screens
+  const [hoverMega, setHoverMega] = useState(null); // hover-opened menu on desktop
 
   useEffect(() => {
     const onScroll = () => setStuck(window.scrollY > 30);
@@ -54,15 +55,27 @@ export default function Header({ onBurger }) {
     const onKey = (e) => {
       if (e.key !== 'Escape') return;
       setOpenMega(null);
+      setHoverMega(null);
       // also release keyboard focus from an open (focus-within) menu
       const active = document.activeElement;
       if (active && active.closest('.mega')) active.closest('.nav__item')?.querySelector('.nav__link')?.focus();
     };
-    const onDoc = (e) => { if (!e.target.closest('.nav__item')) setOpenMega(null); };
+    const onDoc = (e) => { 
+      if (!e.target.closest('.nav__item')) {
+        setOpenMega(null);
+        setHoverMega(null);
+      }
+    };
     document.addEventListener('keydown', onKey);
     document.addEventListener('click', onDoc);
     return () => { document.removeEventListener('keydown', onKey); document.removeEventListener('click', onDoc); };
   }, []);
+
+  // Close mega menu on navigation
+  useEffect(() => {
+    setHoverMega(null);
+    setOpenMega(null);
+  }, [window.location.pathname]);
 
   // touch screens: the first tap opens the menu, a second tap follows the link
   const onMegaClick = (e, key) => {
@@ -74,15 +87,38 @@ export default function Header({ onBurger }) {
     }
   };
 
+  // Desktop hover handlers
+  const hoverTimeoutRef = useRef(null);
+
+  const onNavMouseEnter = (e, key) => {
+    if (window.matchMedia('(hover:hover)').matches) {
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current);
+        hoverTimeoutRef.current = null;
+      }
+      setHoverMega(key);
+    }
+  };
+
+  const onNavMouseLeave = (e) => {
+    if (window.matchMedia('(hover:hover)').matches) {
+      hoverTimeoutRef.current = setTimeout(() => {
+        setHoverMega(null);
+      }, 150); // Small delay to allow smooth mouse movement
+    }
+  };
+
   return (
     <header className={`header${stuck ? ' is-stuck' : ''}`} id="header">
       <div className="header__inner">
         <div className="header__left">
           <button className="icon-btn header__burger" id="burger" aria-label="Open menu" type="button" onClick={onBurger}>
-            <svg width="20" height="14" viewBox="0 0 20 14" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M0 1h20M0 7h20M0 13h20" /></svg>
+            <svg className="burger__lines" width="20" height="14" viewBox="0 0 20 14" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M0 1h20M0 7h20M0 13h20" /></svg>
+            <img className="burger__logo" src={`${import.meta.env.BASE_URL}assets/logo.png`} alt="" width="36" height="36" />
           </button>
           <Link className="header__logo" to="/">
             <img className="logo__img" src={`${import.meta.env.BASE_URL}assets/logo.png`} alt="TranzLife Biosciences, home" width="36" height="36" />
+            <span className="logo__text">TranzLife</span>
           </Link>
         </div>
 
@@ -90,11 +126,16 @@ export default function Header({ onBurger }) {
           <ul className="nav__list">
             {NAV.map((item) =>
               item.mega ? (
-                <li className={`nav__item has-mega${openMega === item.mega ? ' is-open' : ''}`} key={item.label}>
-                  <Link className="nav__link" to={item.to} aria-haspopup="true" aria-expanded={openMega === item.mega} onClick={(e) => onMegaClick(e, item.mega)}>
+                <li 
+                  className={`nav__item has-mega${openMega === item.mega || hoverMega === item.mega ? ' is-open' : ''}`} 
+                  key={item.label}
+                  onMouseEnter={(e) => onNavMouseEnter(e, item.mega)}
+                  onMouseLeave={onNavMouseLeave}
+                >
+                  <Link className="nav__link" to={item.to} aria-haspopup="true" aria-expanded={openMega === item.mega || hoverMega === item.mega} onClick={(e) => onMegaClick(e, item.mega)}>
                     <span className="nav__label">{item.label}</span><Chevron />
                   </Link>
-                  <div className="mega"><ShopMega onPick={() => { setOpenMega(null); document.activeElement?.blur(); }} /></div>
+                  <div className="mega" onMouseEnter={(e) => { if (hoverTimeoutRef.current) { clearTimeout(hoverTimeoutRef.current); hoverTimeoutRef.current = null; } }} onMouseLeave={onNavMouseLeave}><ShopMega onPick={() => { setOpenMega(null); setHoverMega(null); document.activeElement?.blur(); }} /></div>
                 </li>
               ) : (
                 <li className="nav__item" key={item.label}>

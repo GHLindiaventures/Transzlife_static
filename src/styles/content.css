@@ -145,9 +145,25 @@
 /* milestone / extra text rows */
 .pmile{padding:0 var(--pad) 8px}
 
-/* Shop menu now lists tile + all six products */
-.mega__inner--shop{grid-template-columns:repeat(7,1fr);gap:20px}
+/* Shop menu now lists tile + all six products in evenly distributed grid */
+.mega__inner--shop{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 24px;
+  padding: 24px var(--pad) 36px;
+  align-items: start;
+  justify-items: center;
+}
+.mega__inner--shop .mega__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  max-width: 200px;
+}
 .mega__inner--shop .mega__caption{font-size:14px;line-height:20px}
+.mega__inner--shop .mega__tag{display:block;margin-top:4px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--green-700);opacity:.8}
 
 /* green slider slides: show the product on a white card instead of multiplying into the green */
 .pslider__slide:nth-child(even) .media--pslider{background:#fff;border-radius:28px;box-shadow:0 14px 40px rgba(8,38,26,.3)}

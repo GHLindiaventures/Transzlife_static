@@ -583,7 +583,7 @@ hr {
 
 .header.is-stuck {
    background: rgba(251, 250, 246, .96);
-   backdrop-filter: blur(10px);
+   backdrop-filter: blur(6px);
    box-shadow: 0 1px 0 rgba(21, 21, 21, .08)
 }
 
@@ -605,6 +605,16 @@ hr {
 .header__logo {
    display: flex;
    align-items: center
+}
+
+/* On desktop the "TranzLife" text is hidden; only the round logo shows */
+.logo__text {
+   display: none
+}
+
+/* On desktop the burger logo image is hidden (the whole burger is hidden anyway) */
+.burger__logo {
+   display: none
 }
 
 .header__burger,
@@ -679,14 +689,18 @@ hr {
    transform: translateY(-8px);
    transition: opacity .3s var(--ease), transform .3s var(--ease), visibility .3s;
    box-shadow: 0 20px 40px rgba(0, 0, 0, .06);
-   border-top: 1px solid rgba(21, 21, 21, .08)
+   border-top: 1px solid rgba(21, 21, 21, .08);
+   z-index: 100;
+   pointer-events: none;
 }
 
 .nav__item:hover>.mega,
-.nav__item:focus-within>.mega {
+.nav__item:focus-within>.mega,
+.nav__item.is-open>.mega {
    opacity: 1;
    visibility: visible;
-   transform: none
+   transform: none;
+   pointer-events: auto;
 }
 
 .mega__inner {
@@ -716,6 +730,32 @@ hr {
       display: inline-flex;
       min-width: 44px;
       min-height: 44px;
+   }
+
+   /* Mobile: show the logo image inside the burger button, hide the SVG lines */
+   .burger__lines {
+      display: none
+   }
+   .burger__logo {
+      display: block;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover
+   }
+
+   /* Mobile: hide the round logo image, show "TranzLife" text */
+   .header__logo .logo__img {
+      display: none
+   }
+   .logo__text {
+      display: block;
+      font-family: var(--ff-display, 'Playfair Display', serif);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--gold-400, #c5a55a);
+      letter-spacing: 0.04em;
+      white-space: nowrap
    }
 
    .header__search {
@@ -940,7 +980,7 @@ li.is-open>.drawer__row svg {
    0% {
       opacity: 0;
       transform: translateY(30px) scale(0.95);
-      filter: blur(4px);
+      filter: blur(2px);
    }
    60% {
       filter: blur(0);
@@ -963,8 +1003,8 @@ li.is-open>.drawer__row svg {
    background: rgba(255, 255, 255, 0.1);
    border: 1px solid rgba(255, 255, 255, 0.3);
    border-radius: 8px;
-   backdrop-filter: blur(10px);
-   -webkit-backdrop-filter: blur(10px);
+   backdrop-filter: blur(6px);
+   -webkit-backdrop-filter: blur(6px);
    transition: all .3s var(--ease);
    overflow: hidden;
 }
@@ -1066,28 +1106,34 @@ li.is-open>.drawer__row svg {
 
 @media (max-width:749px) {
    .hero {
-      height: 680px
+      height: 600px
    }
 
    .slot--hero-title {
       --w: 100%;
-      --h: 40px
+      --h: 36px
    }
 
    .hero__content {
       padding-top: 0;
       justify-content: flex-end;
-      padding-bottom: 72px
+      padding-bottom: 56px
    }
 
    .hero__content .link-btn {
-      padding: 14px 24px;
-      font-size: 14px;
+      padding: 12px 20px;
+      font-size: 13px;
    }
 
    /* Mobile: reduce parallax effect */
    .hero__bg {
       transform: none !important;
+   }
+
+   /* Mobile: ensure content doesn't overflow */
+   .hero__content {
+      max-width: 100%;
+      overflow: hidden;
    }
 }
 
@@ -1788,11 +1834,49 @@ li.is-open>.drawer__row svg {
    display: flex;
    flex-direction: column;
    justify-content: center;
-   padding: 86px 110px 86px 113px
+   padding: 86px 110px 86px 113px;
+   position: relative;
+   background: rgba(255, 255, 255, 0.95);
+   border-radius: 24px;
+   border: 1px solid rgba(239, 192, 74, 0.3);
+   box-shadow: 0 8px 32px rgba(15, 47, 29, 0.1);
+   overflow: hidden;
 }
 
+/* Removed animated background for better text visibility */
+
 .iwt__text .slot--iwt-title {
-   margin-left: -34px
+   margin-left: -34px;
+   color: var(--green-950);
+   text-shadow: none;
+}
+
+.iwt__text .slot--iwt-p {
+   color: var(--ink);
+   text-shadow: none;
+}
+
+.iwt__text .slot--eyebrow {
+   color: var(--green-700);
+   text-shadow: none;
+}
+
+@keyframes liquidGlassText {
+   0% {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.7), rgba(239, 192, 74, 0.3));
+      border-color: rgba(239, 192, 74, 0.3);
+      transform: translateY(0);
+   }
+   50% {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(35, 128, 73, 0.3));
+      border-color: rgba(35, 128, 73, 0.35);
+      transform: translateY(-2px);
+   }
+   100% {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.75), rgba(239, 192, 74, 0.35));
+      border-color: rgba(239, 192, 74, 0.4);
+      transform: translateY(0);
+   }
 }
 
 @media (max-width:989px) {
@@ -1817,11 +1901,11 @@ li.is-open>.drawer__row svg {
    }
 
    .iwt__text {
-      padding: 32px 16px 40px
+      padding: 24px 16px 32px
    }
 
    .slot--iwt-title {
-      --h: 127px
+      --h: 120px
    }
 }
 
@@ -1925,13 +2009,13 @@ li.is-open>.drawer__row svg {
 
 @media (max-width:749px) {
    .parallax {
-      height: 2954px
+      height: 2800px
    }
 
    .parallax__split {
       grid-template-columns: 1fr;
-      gap: 24px;
-      grid-template-rows: 1fr auto
+      gap: 20px;
+      grid-template-rows: auto 1fr
    }
 
    .parallax__split--rev .media {
@@ -1939,11 +2023,11 @@ li.is-open>.drawer__row svg {
    }
 
    .slot--par-title {
-      --h: 72px
+      --h: 64px
    }
 
    .slot--par-title-sm {
-      --h: 106px
+      --h: 96px
    }
 
    .media--par-side {
@@ -2085,11 +2169,11 @@ li.is-open>.drawer__row svg {
 
 @media (max-width:749px) {
    .bgvideo {
-      height: 460px
+      height: 400px
    }
 
    .slot--bgv-title {
-      --h: 83px
+      --h: 72px
    }
 }
 
@@ -2251,8 +2335,8 @@ li.is-open>.drawer__row svg {
    padding: 56px 64px;
    text-align: center;
    background: rgba(255, 255, 255, .65);
-   backdrop-filter: blur(22px);
-   -webkit-backdrop-filter: blur(22px);
+   backdrop-filter: blur(12px);
+   -webkit-backdrop-filter: blur(12px);
    border-radius: 28px;
    border: 1px solid rgba(255, 255, 255, .7);
    box-shadow: 0 8px 32px rgba(15, 47, 29, .12), 0 2px 8px rgba(15, 47, 29, .08)
@@ -2598,16 +2682,21 @@ li.is-open>.drawer__row svg {
 
 /* ---- Shop mega-menu: circular "view all" tile + 5 product tiles ---- */
 .mega__inner--shop {
-   gap: 32px;
+   display: grid;
+   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+   gap: 24px;
    padding: 24px var(--pad) 36px;
-   align-items: start
+   align-items: start;
+   justify-items: center
 }
 
 .mega__inner--shop .mega__card {
    display: flex;
    flex-direction: column;
    align-items: center;
-   text-align: center
+   text-align: center;
+   width: 100%;
+   max-width: 200px
 }
 
 .mega__inner--shop .media--mega {
@@ -2615,31 +2704,102 @@ li.is-open>.drawer__row svg {
    background: transparent;
    margin-bottom: 12px;
    width: 100%;
-   max-width: 230px
+   max-width: 200px
 }
 
 .mega__inner--shop .media--product {
-   background: transparent
+   background: transparent;
+   width: 100%;
+   max-width: 200px;
+   aspect-ratio: 1/1;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   margin-bottom: 12px
 }
 
 .mega__inner--shop .media--product>img {
    object-fit: contain;
-   transition: transform .5s var(--ease)
+   transition: transform .5s var(--ease);
+   max-width: 100%;
+   max-height: 100%
 }
 
 .mega__inner--shop .mega__card:hover .media--product>img {
    transform: scale(1.05)
 }
 
-.mega__inner--shop .slot--caption {
-   --w: 70%;
-   margin-inline: auto
+.mega__inner--shop .mega__caption {
+   font-size: 14px;
+   line-height: 20px;
+   text-align: center;
+   margin-top: auto;
+   width: 100%
+}
+
+.mega__inner--shop .mega__tag {
+   display: block;
+   margin-top: 4px;
+   font-size: 12px;
+   letter-spacing: .06em;
+   text-transform: uppercase;
+   color: var(--green-700);
+   opacity: .8;
+   text-align: center
+}
+
+/* Responsive adjustments for mega menu */
+@media (max-width: 1200px) {
+   .mega__inner--shop {
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 20px;
+      padding: 20px var(--pad) 28px
+   }
+   .mega__inner--shop .mega__card {
+      max-width: 180px
+   }
+   .mega__inner--shop .media--mega,
+   .mega__inner--shop .media--product,
+   .mega__inner--shop .mega__circle {
+      max-width: 180px
+   }
+}
+
+@media (max-width: 900px) {
+   .mega__inner--shop {
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 16px;
+      padding: 16px var(--pad) 24px
+   }
+   .mega__inner--shop .mega__card {
+      max-width: 160px
+   }
+   .mega__inner--shop .media--mega,
+   .mega__inner--shop .media--product,
+   .mega__inner--shop .mega__circle {
+      max-width: 160px
+   }
+   .mega__inner--shop .mega__caption {
+      font-size: 13px;
+      line-height: 18px
+   }
+}
+
+@media (max-width: 640px) {
+   .mega__inner--shop {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      padding: 16px var(--pad) 20px
+   }
+   .mega__inner--shop .mega__card {
+      max-width: none
+   }
 }
 
 .mega__circle {
    position: relative;
    width: 100%;
-   max-width: 230px;
+   max-width: 200px;
    aspect-ratio: 1/1;
    margin-bottom: 12px;
    display: flex;
