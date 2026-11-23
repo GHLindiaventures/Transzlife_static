@@ -4,3 +4,14 @@ frontend/
 .claude/
 Tranz-life/
 .vite/
+
+# Chatbot secrets and local data (never commit)
+.env
+.env.*
+!.env.example
+gemini-bot/.env
+gemini-bot/node_modules/
+/data/
+
+# Old website kept here only as a reference copy
+Tranz_Life_zip/
