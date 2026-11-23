@@ -1262,3 +1262,56 @@ html {
 @media (max-width: 989px) {
   .iwt:has(img[src*="wellness-journey"]) .iwt__media { border-radius: 0 0 clamp(24px, 6vw, 36px) clamp(24px, 6vw, 36px); }
 }
+
+/* ======================================================================
+   PERFORMANCE (scroll lag)
+   ====================================================================== */
+/* the fixed page background forced a full repaint on every scroll frame: let it scroll with the page */
+body { background-attachment: scroll; }
+
+/* hero parallax is driven by --hero-py (set in Hero.jsx); no transition, so it follows the scroll without trailing */
+.hero .hero__bg { transform: translate3d(0, var(--hero-py, 0px), 0); transition: none; will-change: transform; }
+
+/* do not lay out / paint long sections until they are close to the screen */
+.benefits, .iwt, .brands, .strip, .rich { content-visibility: auto; }
+.benefits { contain-intrinsic-size: auto 700px; }
+.iwt      { contain-intrinsic-size: auto 560px; }
+.brands   { contain-intrinsic-size: auto 260px; }
+.strip    { contain-intrinsic-size: auto 100px; }
+.rich     { contain-intrinsic-size: auto 210px; }
+
+/* backdrop blur on every card is very expensive while scrolling (each card re-blurs what moves behind it).
+   The cards already have near-opaque gradient fills, so drop the blur there and keep a lighter one on the header */
+.glass, .pcard, .benefit, .pfeat__item, .faq__item, .bcard, .testi__slide {
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+}
+.header, .header.is-stuck { -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+
+/* "Talk to Our Wellness Team" on phones: compact, the whole section fits in about one screen */
+@media (max-width: 749px) {
+  .wc__inner { min-height: 0; }
+  .wc__content { padding: 34px 20px 18px; }
+  .wc__eyebrow { margin-bottom: 8px; font-size: 12px; }
+  .wc__title { font-size: clamp(28px, 8.2vw, 34px); margin-bottom: 10px; }
+  .wc__text { font-size: 14.5px; line-height: 1.5; margin-bottom: 16px; }
+  .wc__actions { flex-wrap: nowrap; gap: 10px; margin-bottom: 16px; }
+  .wc__btn { flex: 1 1 0; min-width: 0; min-height: 46px; padding: 0 10px; font-size: 11.5px; letter-spacing: .06em; gap: 7px; white-space: nowrap; }
+  .wc__btn svg { width: 17px; height: 17px; }
+  .wc__features { flex-direction: row; align-items: flex-start; justify-content: space-between; gap: 6px; }
+  .wc__features li, .wc__features li:first-child, .wc__features li + li {
+    flex: 1 1 0; flex-direction: column; align-items: center; text-align: center; gap: 6px; padding: 0 2px; border-left: 0; white-space: normal; font-size: 12px; line-height: 1.25;
+  }
+  .wc__features svg { width: 22px; height: 22px; }
+  .wc__media { min-height: 230px; }
+}
+
+/* phone: a little taller, and a gentler curve on the picture */
+@media (max-width: 749px) {
+  .wc__content { padding: 44px 20px 24px; }
+  .wc__features { margin-bottom: 4px; }
+  .wc__media {
+    min-height: 290px;
+    border-radius: 34% 34% 0 0 / 9% 9% 0 0;                      /* was a deep 48% / 22% arch */
+    box-shadow: 0 -6px 0 0 rgba(255, 255, 255, .45), 0 -12px 0 0 rgba(232, 224, 190, .4);   /* thinner crescent rings */
+  }
+}
