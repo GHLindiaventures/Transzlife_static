@@ -213,21 +213,43 @@ export function BgVideo({ small = false, photo = BGVIDEO.photo, eyebrow = BGVIDE
   );
 }
 
-/** Closing call to action: where to get help choosing a product. */
+const WC_ICONS = [
+  /* chat bubble with dots */ <><path d="M4 5.5h16v10H12l-4.5 3.5v-3.5H4z" /><path d="M8.6 10.5h.01M12 10.5h.01M15.4 10.5h.01" /></>,
+  /* sprout */ <><path d="M12 20v-8" /><path d="M12 13c0-3.4-2.2-5.3-5.6-5.3 0 3.4 2.2 5.3 5.6 5.3z" /><path d="M12 11c0-3 2-4.8 5.2-4.8 0 3-2 4.8-5.2 4.8z" /><path d="M8 20h8" /></>,
+  /* open book */ <><path d="M3.5 5.5c3-1 5.5-.8 8.5 1 3-1.8 5.5-2 8.5-1v12c-3-1-5.5-.8-8.5 1-3-1.8-5.5-2-8.5-1z" /><path d="M12 6.5v12" /></>,
+];
+
+/** Closing call to action: talk to the wellness team (contact + FAQ). */
 export function HelpCta() {
   return (
-    <section className="news news--help">
-      <div className="news__card" data-reveal>
-        <Slot as="h2" className="slot--news-title">{HELP_CTA.title}</Slot>
-        <div className="news__leaf-icon">
-          <svg viewBox="0 0 24 24" fill="currentColor" className="news__leaf">
-            <path d="M12 2C8 6 6 11 8 15c2 4 7 4 9 2 2-2 1-7-3-9-2-1-2-6-2-6z"/>
-          </svg>
+    <section className="wc">
+      <div className="wc__inner">
+        <div className="wc__content" data-reveal>
+          <p className="wc__eyebrow">{HELP_CTA.eyebrow}</p>
+          <h2 className="wc__title">{HELP_CTA.title} <em>{HELP_CTA.titleEm}</em></h2>
+          <p className="wc__text">{HELP_CTA.text}</p>
+          <div className="wc__actions">
+            <Link className="wc__btn wc__btn--primary" to={HELP_CTA.primary.to}>
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{WC_ICONS[0]}</svg>
+              {HELP_CTA.primary.label}
+            </Link>
+            <Link className="wc__btn wc__btn--ghost" to={HELP_CTA.secondary.to}>{HELP_CTA.secondary.label}</Link>
+          </div>
+          <ul className="wc__features">
+            {HELP_CTA.features.map((f, i) => (
+              <li key={f}>
+                <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{WC_ICONS[i]}</svg>
+                <span>{f}</span>
+              </li>
+            ))}
+          </ul>
         </div>
-        <Slot as="p" className="slot--news-p">{HELP_CTA.text}</Slot>
-        <div className="news__actions">
-          <Link className="btn btn--dark" to={HELP_CTA.primary.to}><Slot className="slot--btn-sm">{HELP_CTA.primary.label}</Slot></Link>
-          <Link className="link-btn link-btn--dark" to={HELP_CTA.secondary.to}><Slot className="slot--link">{HELP_CTA.secondary.label}</Slot></Link>
+        <div className="wc__media" data-reveal>
+          <img
+            src={`${import.meta.env.BASE_URL}assets/photos/wellness-lab.webp`}
+            alt="Fresh green leaves in a glass laboratory flask and petri dish in soft morning light"
+            width="1672" height="941" loading="lazy" decoding="async"
+          />
         </div>
       </div>
     </section>
