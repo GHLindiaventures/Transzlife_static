@@ -1079,3 +1079,84 @@ html {
   .benefits .benefit .slot--b-title { grid-area: t; font-size: 12.5px; line-height: 1.2; margin: 0; }
   .benefits .benefit .slot--b-text { grid-area: p; font-size: 11.5px; line-height: 1.4; margin: 0; }
 }
+
+/* "Made in ISO 7 cleanrooms": laboratory picture, lighter tint (the picture's centre is already a calm green) */
+.bgvideo__shade { background: linear-gradient(180deg, rgba(8, 38, 26, .28), rgba(8, 38, 26, .18) 50%, rgba(8, 38, 26, .34)); }
+.bgvideo__fixed .bgvideo__bg > img { object-position: 50% 62%; }
+@media (max-width: 749px) {
+  /* phones: the picture fills the section itself (a viewport-sized fixed picture would only show the plain wall) */
+  .bgvideo__fixed { position: absolute; width: 100%; height: 100%; }
+  .bgvideo__fixed .bgvideo__bg > img { object-position: 100% 55%; }
+  .bgvideo__shade { background: linear-gradient(90deg, rgba(8, 38, 26, .55), rgba(8, 38, 26, .3)); }
+}
+
+/* ======================================================================
+   "Talk to Our Wellness Team": cream panel, serif heading, curved picture bleeding off the right edge
+   ====================================================================== */
+.wc { padding: 0; overflow: hidden; background: linear-gradient(100deg, #fbf7e8 0%, #f6f0d9 55%, #f1ebd0 100%); }
+.wc__inner { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr); align-items: stretch; min-height: clamp(440px, 34vw, 560px); max-width: none; padding: 0; gap: 0; }
+
+.wc__content { display: flex; flex-direction: column; justify-content: center; padding: clamp(40px, 5vw, 72px) clamp(20px, 3vw, 48px) clamp(40px, 5vw, 72px) clamp(24px, 6.5vw, 120px); }
+.wc__eyebrow { display: flex; align-items: center; gap: 14px; margin: 0 0 var(--s-3); font-size: 13px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--green-800); }
+.wc__eyebrow::after { content: ""; width: 44px; height: 2px; background: var(--gold-500); border-radius: 2px; }
+.wc__title { margin: 0 0 var(--s-4); font-family: "Playfair Display", Georgia, "Times New Roman", serif; font-size: clamp(36px, 4.3vw, 66px); line-height: 1.08; font-weight: 500; letter-spacing: -.005em; text-transform: none; color: #101a14; }
+.wc__title em { display: inline-block; font-style: italic; font-weight: 600; color: var(--green-800); }
+.wc__text { margin: 0 0 var(--s-5); max-width: 30em; font-size: clamp(16px, 1.3vw, 20px); line-height: 1.55; color: #1d2a22; }
+
+.wc__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 18px; margin-bottom: var(--s-5); }
+.wc__btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 54px; padding: 0 30px; border-radius: 999px; font-size: 14px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; text-decoration: none; transition: transform .35s var(--ease), box-shadow .35s var(--ease), background-color .35s var(--ease), color .35s var(--ease), border-color .35s var(--ease); }
+.wc__btn--primary { background: linear-gradient(135deg, #1d6a3d, #0f4a2a); color: #fff; box-shadow: 0 14px 26px -14px rgba(15, 47, 29, .7); }
+.wc__btn--primary:hover { transform: translateY(-3px); box-shadow: 0 20px 32px -14px rgba(15, 47, 29, .7); }
+.wc__btn--ghost { background: transparent; color: var(--green-800); border: 1.5px solid rgba(18, 74, 44, .55); }
+.wc__btn--ghost:hover { background: rgba(35, 128, 73, .08); border-color: var(--green-700); transform: translateY(-3px); }
+
+.wc__features { display: flex; flex-wrap: wrap; align-items: center; margin: 0; padding: 0; list-style: none; }
+.wc__features li { display: flex; align-items: center; gap: 10px; padding: 4px clamp(14px, 1.8vw, 26px); font-size: 15px; font-weight: 600; color: #14301f; white-space: nowrap; }
+.wc__features li:first-child { padding-left: 0; }
+.wc__features li + li { border-left: 1px solid rgba(15, 47, 29, .25); }
+.wc__features svg { color: var(--green-800); flex: 0 0 auto; }
+
+.wc__media { position: relative; min-height: 100%; border-radius: 52% 0 0 52% / 50% 0 0 50%; overflow: hidden; box-shadow: -16px 0 0 0 rgba(255, 255, 255, .5), -34px 0 0 0 rgba(232, 224, 190, .55), 0 30px 60px -30px rgba(15, 47, 29, .4); }
+.wc__media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 66% 50%; }
+.wc__media::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg, rgba(251, 247, 232, .18), rgba(251, 247, 232, 0) 40%); }
+
+@media (max-width: 989px) {
+  .wc__features li { font-size: 14px; padding-inline: 12px; }
+}
+@media (max-width: 749px) {
+  .wc__inner { grid-template-columns: 1fr; min-height: 0; }
+  .wc__content { padding: 40px 20px 28px; }
+  .wc__actions { gap: 12px; }
+  .wc__btn { flex: 1 1 auto; min-height: 52px; padding: 0 22px; }
+  .wc__features { gap: 10px 0; }
+  .wc__features li { padding: 2px 12px; font-size: 13.5px; }
+  .wc__media { min-height: 300px; border-radius: 48% 48% 0 0 / 22% 22% 0 0; box-shadow: 0 -14px 0 0 rgba(255, 255, 255, .5), 0 -28px 0 0 rgba(232, 224, 190, .5); }
+  .wc__media img { object-position: 68% 50%; }
+}
+@media (min-width: 990px) {
+  .wc__inner { grid-template-columns: minmax(0, 1.18fr) minmax(0, 1fr); }
+  .wc__features { flex-wrap: nowrap; }
+  .wc__features li { font-size: clamp(13px, 1.02vw, 15px); padding-inline: clamp(10px, 1.3vw, 22px); }
+}
+@media (max-width: 749px) {
+  .wc__features { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .wc__features li, .wc__features li:first-child { padding: 0; border-left: 0; }
+  .wc__features li + li { border-left: 0; }
+}
+
+/* "Talk to Our Wellness Team" uses the blank band above it (the logos strip ends sooner) */
+.brands { padding-bottom: var(--s-4); }
+@media (max-width: 749px) { .wc__inner { min-height: 0; } .wc__content { padding-bottom: 28px; } }
+
+/* ---------------- curtain reveal: the page is the curtain, the whole footer is uncovered beneath it ---------------- */
+.main { position: relative; z-index: 2; background-color: #fcfaf1; }
+.footer { position: relative; z-index: 1; --ftp: 1; --ftr: 0px; transform: translateY(calc((var(--ftp) - 1) * var(--ftr))); will-change: transform; }
+@media (prefers-reduced-motion: reduce) { .footer { transform: none; } }
+
+/* "Talk to Our Wellness Team": taller panel */
+.wc__inner { min-height: clamp(560px, 44vw, 720px); }
+@media (max-width: 749px) {
+  .wc__inner { min-height: 0; }
+  .wc__content { padding-top: 56px; padding-bottom: 36px; }
+  .wc__media { min-height: 380px; }
+}

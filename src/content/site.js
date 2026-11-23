@@ -188,7 +188,7 @@ export const BRANDS = {
   ],
 };
 
-export const BGVIDEO = { photo: 'mint-leaves', eyebrow: 'Quality & manufacturing', title: 'Made in ISO 7 cleanrooms under AYUSH GMP' };
+export const BGVIDEO = { photo: 'gmp-lab', eyebrow: 'Quality & manufacturing', title: 'Made in ISO 7 cleanrooms under AYUSH GMP' };
 
 export const NEWSLETTER = {
   title: 'Live naturally. Live healthier.',
@@ -199,10 +199,13 @@ export const NEWSLETTER = {
 
 /* Closing call to action on the home page. */
 export const HELP_CTA = {
-  title: 'Not sure which product is right for you?',
-  text: 'Our team in Chennai can help with ingredients, usage and orders, Monday to Saturday, 9 AM to 7 PM IST.',
-  primary: { label: 'Contact us', to: '/contact' },
-  secondary: { label: 'Read the FAQ', to: '/faq' },
+  eyebrow: 'Have questions?',
+  title: 'Talk to Our',
+  titleEm: 'Wellness Team',
+  text: 'Get personalised guidance on our products, ingredients and the right choice for your daily wellness routine.',
+  primary: { label: 'Contact Us', to: '/contact' },
+  secondary: { label: 'Explore FAQs', to: '/faq' },
+  features: ['Ask Your Questions', 'Get Expert Advice', 'Learn & Choose'],
 };
 
 /* ---------------- about ---------------- */
@@ -365,7 +368,7 @@ export const PHOTOS = {
   contactSide: 'holy-basil',
 };
 
-export const PHOTO_EXT = { 'ayurveda-ingredients': 'png', 'ayurveda-banyan': 'webp', 'wellness-journey': 'webp' }; // photos that are not .jpg
+export const PHOTO_EXT = { 'ayurveda-ingredients': 'png', 'ayurveda-banyan': 'webp', 'wellness-journey': 'webp', 'gmp-lab': 'webp' }; // photos that are not .jpg
 
 export const PHOTO_ALT = {
   ayurveda: 'Jars of powdered and dried Ayurvedic herbs being scooped with wooden spoons',
@@ -373,6 +376,7 @@ export const PHOTO_ALT = {
   'green-canopy': 'Aerial view of a dense green forest canopy',
   'ayurveda-banyan': 'Ayurvedic herbs, turmeric, amla, neem and a stone mortar on slate under an ancient banyan tree',
   'wellness-journey': 'A complete wellness journey for everyday life: six TranzLife formulations for breath, liver, women’s comfort, metabolic wellness, calm and balance',
+  'gmp-lab': 'A technician in a white coat, mask and hairnet holds up a flask of golden herbal extract in a clean laboratory, with fresh herbs and a mortar on the bench',
   'forest-leaves': 'Green leaves in a forest',
   'lab-microscope': 'Researcher working with a microscope in a laboratory',
   'lab-research': 'Scientist in safety glasses examining coloured samples in a lab',
@@ -382,7 +386,6 @@ export const PHOTO_ALT = {
   'ayurveda-ingredients': 'Tulsi leaves, ginger, cardamom, cloves and cinnamon arranged in the shape of a mortar',
   'faq-banner': 'Frequently Asked Questions and customer support',
   dill: 'Frequently Asked Questions and customer support',
-  'mint-leaves': 'Authentic Ayurvedic herbs, seeds and spices arranged in circular wooden bowls',
   'spices-grid': 'Authentic Ayurvedic herbs, seeds and spices arranged in circular wooden bowls',
   'basil-closeup': 'Fresh mint leaves',
   'explore-circle': 'Botanical crystal geometry cube with lush green foliage',
