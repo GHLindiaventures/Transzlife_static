@@ -136,6 +136,15 @@
   .pcard__off { font-size: .64rem; padding: 3px 7px; top: auto; bottom: 8px; right: 8px; }
   .pcard__format { font-size: .64rem; }
 
+  /* ---------- Mobile card scale animation ---------- */
+  .featured__track .pcard {
+    transform: scale(var(--card-scale, 1));
+    transition: transform .2s var(--ease-out);
+  }
+  .featured__track .pcard[style*="--card-scale: 1.05"] {
+    z-index: 1;
+  }
+
   /* ---------- Inner page heroes ---------- */
   .chero, .ing-hero, .shop-hero { padding-bottom: var(--s-5); }
   .chero__text, .phero__text, .ing-hero p { font-size: 1.0625rem; }

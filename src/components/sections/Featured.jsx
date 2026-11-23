@@ -74,6 +74,65 @@ function useScrollState(ref) {
   return state;
 }
 
+/** On mobile, bring the card nearest the viewport center slightly forward. */
+function useCardFront(trackRef, enabled) {
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track || !enabled) return undefined;
+
+    const mqMobile = window.matchMedia('(max-width: 749px)');
+    const mqReduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let frame = 0;
+
+    const apply = () => {
+      frame = 0;
+      const cards = track.querySelectorAll('.pcard');
+      if (!cards.length) return;
+
+      if (!mqMobile.matches || mqReduce.matches) {
+        cards.forEach((card) => card.classList.remove('is-front'));
+        return;
+      }
+
+      const viewCenter = window.innerWidth / 2;
+      let closest = null;
+      let closestDist = Infinity;
+
+      cards.forEach((card) => {
+        const rect = card.getBoundingClientRect();
+        if (rect.right < 8 || rect.left > window.innerWidth - 8) return;
+        const dist = Math.abs(rect.left + rect.width / 2 - viewCenter);
+        if (dist < closestDist) {
+          closestDist = dist;
+          closest = card;
+        }
+      });
+
+      cards.forEach((card) => {
+        card.classList.toggle('is-front', card === closest);
+      });
+    };
+
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(apply);
+    };
+
+    apply();
+    track.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    mqMobile.addEventListener('change', onScroll);
+    mqReduce.addEventListener('change', onScroll);
+    return () => {
+      if (frame) cancelAnimationFrame(frame);
+      track.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+      mqMobile.removeEventListener('change', onScroll);
+      mqReduce.removeEventListener('change', onScroll);
+      track.querySelectorAll('.pcard.is-front').forEach((card) => card.classList.remove('is-front'));
+    };
+  }, [trackRef, enabled]);
+}
+
 const Arrow = ({ dir }) => (
   <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     {dir === 'prev' ? <path d="M15 5l-7 7 7 7" /> : <path d="M9 5l7 7-7 7" />}
@@ -89,6 +148,7 @@ export default function Featured({ headline = PRODUCTS_SECTION.headline, sub = P
   const trackRef = useRef(null);
   const scroll = useScrollState(trackRef);
   const isSlider = layout === 'slider';
+  useCardFront(trackRef, isSlider);
 
   /* move by one card (card width + gap), so the row always lands on a card edge */
   const step = (dir) => {

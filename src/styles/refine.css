@@ -220,14 +220,37 @@
   .featured--grid .featured__track{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media (max-width:749px){
-  .featured{--fcard:82vw;--ftop:20px}
-  .featured .featured__track{padding-bottom:44px}
+  .featured{--fcard:82vw;--ftop:36px}
+  .featured .featured__track{padding-bottom:52px}
   .featured__arrow{width:44px;height:44px}
   .featured--grid .featured__track{grid-template-columns:minmax(0,1fr)}
+
+  /* Active product comes slightly forward; neighbours stay at rest */
+  .featured--slider .pcard{z-index:0;position:relative}
+  .featured--slider .pcard.is-front{z-index:2}
+  .featured--slider .pcard .pcard__media{
+    transform:scale(1) translateY(0);
+    transition:transform .45s var(--ease),box-shadow .45s var(--ease);
+  }
+  .featured--slider .pcard.is-front .pcard__media{
+    transform:scale(1.07) translateY(-10px);
+    box-shadow:
+      0 2px 4px rgba(20,30,20,.08),
+      0 22px 34px -14px rgba(20,35,25,.30),
+      0 54px 80px -34px rgba(20,35,25,.38);
+  }
+  .featured--slider .pcard.is-front .pcard__media::after{opacity:1;transform:translateY(12px) scaleX(1.08)}
+  .featured--slider .pcard:hover .pcard__media,
+  .featured--slider .pcard:focus-within .pcard__media{transform:scale(1) translateY(0)}
+  .featured--slider .pcard.is-front:hover .pcard__media,
+  .featured--slider .pcard.is-front:focus-within .pcard__media{transform:scale(1.07) translateY(-10px)}
 }
 @media (prefers-reduced-motion:reduce){
   .featured .pcard__media,.featured .pcard__media::after,.featured__arrow{transition:none}
   .featured .pcard:hover .pcard__media,.featured .pcard:focus-within .pcard__media{transform:none}
+  .featured--slider .pcard.is-front .pcard__media,
+  .featured--slider .pcard.is-front:hover .pcard__media,
+  .featured--slider .pcard.is-front:focus-within .pcard__media{transform:none}
 }
 .pcard__quick{text-decoration:none}
 
