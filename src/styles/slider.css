@@ -2,10 +2,11 @@
    MotionSites / Blendy Smoothie Slider Full-Page Experience
    1:1 recreation of https://www.motionsites.ai/?prompt=smoothie-slider
    - 100vw x 100vh full-page edge-to-edge coverage
-   - Single prominent product bottle floating in center
-   - Oversized backdrop typography behind bottle
-   - Multi-depth floating botanical ingredients with realistic camera bokeh blur
+   - Product image COMPLETELY STATIC in the centre without ANY movement
+   - Large background letters falling smoothly from top to bottom
+   - Floating ingredient images falling into designated positions with equal spacing
    - Smooth pastel background color interpolation
+   - Automatic 2-second transition loop
    - Top navigation tabs + Bottom arrow controls & SHOP NOW link
    - STRICTLY NO PRICES DISPLAYED
    ========================================================== */
@@ -130,6 +131,7 @@
     transform: scaleX(0.4);
     opacity: 0;
   }
+
   to {
     transform: scaleX(1);
     opacity: 1;
@@ -160,7 +162,7 @@
 }
 
 /* ==========================================================
-   2. CENTER HERO STAGE (Exact Blendy Composition)
+   2. CENTER HERO STAGE
    ========================================================== */
 .blendy-center-stage {
   position: relative;
@@ -173,16 +175,15 @@
   overflow: visible;
 }
 
-/* Giant Oversized Background Word (Behind Product) */
+/* Large Background Letters: Fall smoothly from top to bottom */
 .blendy-backdrop-word {
   position: absolute;
   top: 50%;
   left: 50%;
+  transform: translate(-50%, -50%);
   z-index: 2;
   pointer-events: none;
   user-select: none;
-  will-change: transform;
-  transition: transform 0.15s ease-out;
   text-align: center;
   width: 100%;
 }
@@ -198,21 +199,32 @@
   line-height: 0.85;
   opacity: 0.96;
   text-align: center;
-  animation: wordPopIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: lettersFallDown 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-@keyframes wordPopIn {
+/* Letters falling smoothly from top to bottom into position */
+@keyframes lettersFallDown {
   0% {
+    transform: translateY(-160px);
     opacity: 0;
-    transform: scale(0.92);
   }
-  100% {
+
+  60% {
     opacity: 0.96;
-    transform: scale(1);
+  }
+
+  100% {
+    transform: translateY(0);
+    opacity: 0.96;
   }
 }
 
-/* Floating Botanicals Layer */
+/* ==========================================================
+   3. FLOATING BOTANICAL INGREDIENTS
+   - Equal spacing and balanced distribution around the product
+   - Enter from the top and fall into their designated positions
+   - Once settled, remain visible around the product
+   ========================================================== */
 .blendy-botanicals-layer {
   position: absolute;
   inset: 0;
@@ -226,9 +238,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  will-change: transform, filter;
-  transition: transform 0.2s ease-out;
   pointer-events: none;
+  width: var(--ing-size, 80px);
+  height: var(--ing-size, 80px);
+  animation: ingredientFallIn 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--fall-delay, 0s);
 }
 
 .blendy-item-img {
@@ -238,100 +252,95 @@
   display: block;
 }
 
-/* 1. Foreground Bottom-Left (Extreme Bokeh Blur) */
-.bitem--fg-bl {
-  bottom: clamp(-40px, -4vh, -15px);
-  left: clamp(-45px, -3vw, -15px);
-  z-index: 8;
-  animation: floatDrift1 6.5s ease-in-out infinite alternate;
+/* Ingredients falling from top into designated positions */
+@keyframes ingredientFallIn {
+  0% {
+    transform: translateY(-180px) rotate(calc(var(--ing-rot, 0deg) - 15deg));
+    opacity: 0;
+  }
+
+  60% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(0) rotate(var(--ing-rot, 0deg));
+    opacity: 1;
+  }
 }
 
-/* 2. Foreground Top-Right (Extreme Bokeh Blur) */
-.bitem--fg-tr {
-  top: clamp(20px, 4vh, 48px);
-  right: clamp(15px, 3.5vw, 45px);
-  z-index: 8;
-  animation: floatDrift2 7.2s ease-in-out infinite alternate;
+/* Symmetrical, Equally-Spaced Botanical Placement Zones */
+
+/* Zone 1: Top-Left Outer (Bokeh Blur) */
+.bzone--top-left-bokeh {
+  top: 14%;
+  left: 12%;
+  z-index: 7;
+  filter: blur(var(--ing-blur, 10px));
 }
 
-/* 3. Midground Upper-Left (Sharp with realistic drop shadow) */
-.bitem--mid-tl {
+/* Zone 2: Top-Left Inner (Sharp with shadow) */
+.bzone--top-left-inner {
+  top: 25%;
+  left: 28%;
   z-index: 6;
   filter: drop-shadow(14px 22px 18px rgba(0, 0, 0, 0.22));
-  animation: floatDrift3 5.4s ease-in-out infinite alternate;
 }
 
-/* 4. Midground Mid-Left (Sharp with drop shadow) */
-.bitem--mid-ml {
+/* Zone 3: Mid-Left Outer (Sharp with shadow) */
+.bzone--mid-left {
+  top: 52%;
+  left: 16%;
   z-index: 6;
   filter: drop-shadow(14px 22px 18px rgba(0, 0, 0, 0.22));
-  animation: floatDrift1 5.8s ease-in-out infinite alternate;
 }
 
-/* 5. Base-Left Leaf (Peeking behind bottle base) */
-.bitem--base-l {
+/* Zone 4: Base-Left (Peeking behind bottle base) */
+.bzone--base-left {
+  bottom: 18%;
+  left: calc(50% - 155px);
   z-index: 3;
   filter: drop-shadow(8px 14px 12px rgba(0, 0, 0, 0.16));
-  animation: floatDrift2 6.2s ease-in-out infinite alternate;
 }
 
-/* 6. Base-Right Leaf (Peeking behind bottle base) */
-.bitem--base-r {
+/* Zone 5: Top-Right Outer (Bokeh Blur) */
+.bzone--top-right-bokeh {
+  top: 14%;
+  right: 12%;
+  z-index: 7;
+  filter: blur(var(--ing-blur, 10px));
+}
+
+/* Zone 6: Top-Right Inner (Sharp with shadow) */
+.bzone--top-right-inner {
+  top: 25%;
+  right: 28%;
+  z-index: 6;
+  filter: drop-shadow(14px 22px 18px rgba(0, 0, 0, 0.22));
+}
+
+/* Zone 7: Mid-Right Outer (Sharp with shadow) */
+.bzone--mid-right {
+  top: 52%;
+  right: 16%;
+  z-index: 6;
+  filter: drop-shadow(14px 22px 18px rgba(0, 0, 0, 0.22));
+}
+
+/* Zone 8: Base-Right (Peeking behind bottle base) */
+.bzone--base-right {
+  bottom: 18%;
+  right: calc(50% - 155px);
   z-index: 3;
   filter: drop-shadow(8px 14px 12px rgba(0, 0, 0, 0.16));
-  animation: floatDrift3 6.6s ease-in-out infinite alternate;
 }
 
-/* 7. Midground Upper-Right (Sharp with drop shadow) */
-.bitem--mid-tr {
-  z-index: 6;
-  filter: drop-shadow(14px 22px 18px rgba(0, 0, 0, 0.22));
-  animation: floatDrift2 5.9s ease-in-out infinite alternate;
-}
-
-/* 8. Midground Lower-Right (Sharp with drop shadow) */
-.bitem--mid-br {
-  z-index: 6;
-  filter: drop-shadow(14px 22px 18px rgba(0, 0, 0, 0.22));
-  animation: floatDrift1 6.3s ease-in-out infinite alternate;
-}
-
-/* 9. Midground Far-Right (Sharp with drop shadow) */
-.bitem--mid-far-r {
-  z-index: 6;
-  filter: drop-shadow(14px 22px 18px rgba(0, 0, 0, 0.22));
-  animation: floatDrift3 6.9s ease-in-out infinite alternate;
-}
-
-/* Natural 3D Ambient Float Keyframes */
-@keyframes floatDrift1 {
-  0% {
-    transform: translateY(0px) rotate(0deg);
-  }
-  100% {
-    transform: translateY(-16px) rotate(4deg);
-  }
-}
-
-@keyframes floatDrift2 {
-  0% {
-    transform: translateY(0px) rotate(0deg);
-  }
-  100% {
-    transform: translateY(-18px) rotate(-5deg);
-  }
-}
-
-@keyframes floatDrift3 {
-  0% {
-    transform: translateY(0px) rotate(0deg);
-  }
-  100% {
-    transform: translateY(-14px) rotate(3deg);
-  }
-}
-
-/* Central Levitating Product Packaging */
+/* ==========================================================
+   4. CENTRAL PRODUCT IMAGE (COMPLETELY STATIC)
+   - Fixed in its exact position throughout the animation
+   - No floating, no tilting, no rotating, no movement
+   - Clean subtle fade on change without jumps or flickering
+   ========================================================== */
 .blendy-bottle-wrap {
   position: relative;
   z-index: 4;
@@ -339,12 +348,11 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  transform-style: preserve-3d;
-  will-change: transform;
-  transition: transform 0.15s ease-out;
+  pointer-events: none;
+  /* Completely static: no transforms, no movement */
 }
 
-/* Ground Contact Levitating Shadow */
+/* Ground Contact Shadow: Static ellipse underneath bottle */
 .blendy-ground-shadow {
   position: absolute;
   bottom: clamp(-24px, -3.2vh, -16px);
@@ -357,21 +365,10 @@
   filter: blur(12px);
   z-index: 1;
   pointer-events: none;
-  animation: groundShadowFloat 4.6s ease-in-out infinite;
+  /* Completely static */
 }
 
-@keyframes groundShadowFloat {
-  0%, 100% {
-    transform: translateX(-50%) scale(1);
-    opacity: 0.85;
-  }
-  50% {
-    transform: translateX(-50%) scale(0.84);
-    opacity: 0.52;
-  }
-}
-
-/* Center Bottle Image */
+/* Center Bottle: Completely fixed in position */
 .blendy-hero-bottle {
   position: relative;
   z-index: 2;
@@ -380,33 +377,24 @@
   max-width: 86vw;
   object-fit: contain;
   display: block;
-  filter: drop-shadow(0 20px 32px rgba(0, 0, 0, 0.18));
-  animation: heroBottleFloat 4.6s ease-in-out infinite, heroBottleEntrance 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
-  will-change: transform;
+  filter: drop-shadow(0 20px 32px rgba(0, 0, 0, 0.22));
+  pointer-events: none;
+  /* Fixed in position throughout: NO movement, NO rotation, NO tilt */
+  animation: bottleStaticFade 0.28s ease both;
 }
 
-@keyframes heroBottleFloat {
-  0%, 100% {
-    transform: translateY(0px) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-16px) rotate(0.7deg);
-  }
-}
-
-@keyframes heroBottleEntrance {
+@keyframes bottleStaticFade {
   0% {
-    opacity: 0;
-    transform: translateY(-38px) scale(0.94);
+    opacity: 0.65;
   }
+
   100% {
     opacity: 1;
-    transform: translateY(0px) scale(1);
   }
 }
 
 /* ==========================================================
-   3. BOTTOM BAR (Exact Blendy Controls)
+   5. BOTTOM BAR (Exact Blendy Controls)
    ========================================================== */
 .blendy-bottom-bar {
   position: absolute;
@@ -501,7 +489,7 @@
 }
 
 /* ==========================================================
-   4. RESPONSIVE BREAKPOINTS
+   6. RESPONSIVE BREAKPOINTS (Mobile-First Polish)
    ========================================================== */
 @media (max-width: 900px) {
   .blendy-nav-meta {
@@ -522,48 +510,241 @@
     padding: 6px 8px;
   }
 
-  .bitem--mid-tl,
-  .bitem--mid-tr {
-    display: none;
+  /* Prevent congestion by hiding inner overlapping items */
+  .bzone--top-left-inner,
+  .bzone--top-right-inner {
+    display: none !important;
+  }
+
+  .blendy-hero-bottle {
+    height: clamp(290px, 46vh, 420px);
+  }
+
+  .blendy-word-text {
+    font-size: clamp(5.8rem, 20vw, 11rem);
+  }
+
+  .blendy-botanical-item {
+    width: clamp(56px, 8vw, 80px);
+    height: clamp(56px, 8vw, 80px);
+  }
+
+  .bzone--top-left-bokeh,
+  .bzone--top-right-bokeh {
+    width: clamp(68px, 9vw, 92px);
+    height: clamp(68px, 9vw, 92px);
+    filter: blur(5px);
+  }
+
+  .bzone--top-left-bokeh {
+    top: 14%;
+    left: 8%;
+  }
+
+  .bzone--mid-left {
+    top: 50%;
+    left: 8%;
+  }
+
+  .bzone--base-left {
+    bottom: 18%;
+    left: calc(50% - 130px);
+  }
+
+  .bzone--top-right-bokeh {
+    top: 14%;
+    right: 8%;
+  }
+
+  .bzone--mid-right {
+    top: 50%;
+    right: 8%;
+  }
+
+  .bzone--base-right {
+    bottom: 18%;
+    right: calc(50% - 130px);
   }
 }
 
 @media (max-width: 600px) {
   .blendy-hero-stage {
-    min-height: 580px;
-    height: 92vh;
+    min-height: 560px;
+    height: 100vh;
+    height: 100dvh;
   }
 
   .blendy-top-nav {
-    padding: 0 16px;
+    height: 58px;
+    padding: 0 14px;
+    justify-content: center;
   }
 
   .blendy-tab-btn {
     font-size: 0.82rem;
+    padding: 4px 6px;
   }
 
-  .blendy-hero-bottle {
-    height: clamp(280px, 46vh, 400px);
+  .blendy-nav-tabs {
+    gap: 10px;
+    padding: 4px 6px;
+  }
+
+  /* Center stage flex layout for mobile: clean vertical spacing */
+  .blendy-center-stage {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Large background text moved down to sit close above the product */
+  .blendy-backdrop-word {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: calc(50% - clamp(165px, 25.5vh, 205px));
+    width: 100%;
+    text-align: center;
+    z-index: 2;
+    pointer-events: none;
   }
 
   .blendy-word-text {
-    font-size: clamp(5.5rem, 24vw, 9rem);
+    display: block;
+    font-size: clamp(3.2rem, 13.5vw, 4.8rem);
+    letter-spacing: -0.02em;
+    line-height: 1;
+    opacity: 0.98;
+    text-align: center;
+    animation: lettersFallDownMobile 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 
-  .bitem--fg-bl {
-    width: 110px !important;
-    height: 110px !important;
-    filter: blur(8px) !important;
+  @keyframes lettersFallDownMobile {
+    0% {
+      transform: translateY(-50px);
+      opacity: 0;
+    }
+
+    60% {
+      opacity: 0.98;
+    }
+
+    100% {
+      transform: translateY(0);
+      opacity: 0.98;
+    }
   }
 
-  .bitem--fg-tr {
-    width: 95px !important;
-    height: 95px !important;
-    filter: blur(8px) !important;
+  /* Static product bottle positioned right below the typography with balanced gap */
+  .blendy-bottle-wrap {
+    position: relative;
+    z-index: 4;
+    margin-top: clamp(18px, 3vh, 32px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transform: none;
   }
 
-  .bitem--mid-far-r {
-    display: none;
+  .blendy-hero-bottle {
+    height: clamp(225px, 35vh, 285px);
+    max-width: 82vw;
+    filter: drop-shadow(0 14px 22px rgba(0, 0, 0, 0.22));
+  }
+
+  .blendy-ground-shadow {
+    width: clamp(130px, 38vw, 175px);
+    height: 18px;
+    bottom: clamp(-15px, -2.2vh, -10px);
+  }
+
+  /* Hide the 2 inner congested ingredients */
+  .bzone--top-left-inner,
+  .bzone--top-right-inner {
+    display: none !important;
+  }
+
+  /* 6 Perfectly Spaced, Balanced Botanical Zones for Mobile */
+  .blendy-botanical-item {
+    width: 46px;
+    height: 46px;
+  }
+
+  /* Zone 1: Upper-Left (Soft Bokeh) flanking between text & bottle */
+  .bzone--top-left-bokeh {
+    top: 22%;
+    left: 4%;
+    width: 48px;
+    height: 48px;
+    filter: blur(3px);
+  }
+
+  /* Zone 2: Mid-Left Outer flanking bottle waist */
+  .bzone--mid-left {
+    top: 53%;
+    left: 5%;
+    width: 46px;
+    height: 46px;
+    filter: drop-shadow(6px 12px 10px rgba(0, 0, 0, 0.2));
+  }
+
+  /* Zone 3: Base-Left Herb peeking behind bottle base */
+  .bzone--base-left {
+    bottom: 15%;
+    left: calc(50% - 90px);
+    width: 52px;
+    height: 52px;
+    z-index: 3;
+    filter: drop-shadow(4px 8px 8px rgba(0, 0, 0, 0.16));
+  }
+
+  /* Zone 4: Upper-Right (Soft Bokeh) flanking between text & bottle */
+  .bzone--top-right-bokeh {
+    top: 22%;
+    right: 4%;
+    width: 48px;
+    height: 48px;
+    filter: blur(3px);
+  }
+
+  /* Zone 5: Mid-Right Outer flanking bottle waist */
+  .bzone--mid-right {
+    top: 53%;
+    right: 5%;
+    width: 46px;
+    height: 46px;
+    filter: drop-shadow(6px 12px 10px rgba(0, 0, 0, 0.2));
+  }
+
+  /* Zone 6: Base-Right Herb peeking behind bottle base */
+  .bzone--base-right {
+    bottom: 15%;
+    right: calc(50% - 90px);
+    width: 52px;
+    height: 52px;
+    z-index: 3;
+    filter: drop-shadow(4px 8px 8px rgba(0, 0, 0, 0.16));
+  }
+
+  /* Bottom Controls on Mobile */
+  .blendy-bottom-bar {
+    height: 70px;
+    padding: 0 16px;
+  }
+
+  .blendy-arrow-btn {
+    width: 38px;
+    height: 38px;
+  }
+
+  .blendy-cta-link {
+    font-size: 0.88rem;
+    letter-spacing: 0.18em;
   }
 
   .blendy-variant-caption {
@@ -571,12 +752,66 @@
   }
 }
 
+/* Extra small mobile screens (<= 380px) */
+@media (max-width: 380px) {
+  .blendy-backdrop-word {
+    top: calc(50% - clamp(145px, 24vh, 175px));
+  }
+
+  .blendy-word-text {
+    font-size: clamp(2.7rem, 12vw, 3.5rem);
+  }
+
+  .blendy-bottle-wrap {
+    margin-top: clamp(14px, 2.5vh, 24px);
+  }
+
+  .blendy-hero-bottle {
+    height: clamp(200px, 31vh, 245px);
+  }
+
+  .blendy-botanical-item {
+    width: 38px;
+    height: 38px;
+  }
+
+  .bzone--top-left-bokeh,
+  .bzone--top-right-bokeh {
+    top: 21%;
+    width: 42px;
+    height: 42px;
+    filter: blur(2.5px);
+  }
+
+  .bzone--mid-left,
+  .bzone--mid-right {
+    top: 54%;
+    width: 38px;
+    height: 38px;
+  }
+
+  .bzone--base-left,
+  .bzone--base-right {
+    bottom: 13%;
+    width: 44px;
+    height: 44px;
+  }
+
+  .bzone--base-left {
+    left: calc(50% - 78px);
+  }
+
+  .bzone--base-right {
+    right: calc(50% - 78px);
+  }
+}
+
 /* Accessibility: respect user prefers-reduced-motion */
 @media (prefers-reduced-motion: reduce) {
-  .blendy-hero-bottle,
-  .blendy-ground-shadow,
+
   .blendy-botanical-item,
-  .blendy-word-text {
+  .blendy-word-text,
+  .blendy-hero-bottle {
     animation: none !important;
     transition: none !important;
   }
