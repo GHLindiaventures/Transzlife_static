@@ -58,7 +58,7 @@
   border-radius: 0;
   object-fit: contain;
   mix-blend-mode: normal;
-  filter: drop-shadow(0 6px 8px rgba(60, 38, 4, .28)) drop-shadow(0 28px 26px rgba(60, 38, 4, .34));
+  filter: drop-shadow(0 4px 6px rgba(60, 38, 4, .2)) drop-shadow(0 16px 18px rgba(60, 38, 4, .24));
   transition: transform .6s var(--ease);
 }
 
@@ -77,7 +77,7 @@
   z-index: -1;
   border-radius: 50%;
   background: radial-gradient(ellipse, rgba(40, 24, 0, .42), rgba(40, 24, 0, 0) 70%);
-  filter: blur(7px);
+  filter: blur(4px);
 }
 
 .pslider__name {
@@ -131,7 +131,7 @@
 
 .media--benefits>img {
   object-fit: contain;
-  filter: drop-shadow(0 4px 6px rgba(70, 50, 15, .2)) drop-shadow(0 26px 28px rgba(70, 50, 15, .3));
+  filter: drop-shadow(0 3px 4px rgba(70, 50, 15, .15)) drop-shadow(0 18px 20px rgba(70, 50, 15, .22));
   transition: transform .7s var(--ease);
 }
 
@@ -142,7 +142,7 @@
 .media--par-side>img[src*="ayurveda-ingredients"],
 .iwt__media img[src*="ayurveda-ingredients"] {
   object-fit: contain;
-  filter: drop-shadow(0 22px 26px rgba(40, 30, 10, .38))
+  filter: drop-shadow(0 14px 18px rgba(40, 30, 10, .28))
 }
 
 /* ---------------- cards: layered shadows and a hover lift ---------------- */
@@ -153,7 +153,7 @@
 .faq__item,
 .pdp-more__grid a,
 .testi__slide {
-  transition: transform .45s var(--ease), box-shadow .45s var(--ease), background-color .45s var(--ease), border-color .45s var(--ease), opacity .9s var(--ease);
+  transition: transform .3s var(--ease), box-shadow .3s var(--ease), background-color .3s var(--ease), border-color .3s var(--ease);
 }
 
 /* benefit / feature cards */
@@ -161,9 +161,10 @@
 .pfeat__item {
   position: relative;
   overflow: hidden;
-  box-shadow: 0 12px 30px -12px rgba(15, 47, 29, .22), 0 2px 6px rgba(15, 47, 29, .07), inset 0 1px 0 rgba(255, 255, 255, .85);
+  box-shadow: 0 8px 20px -8px rgba(15, 47, 29, .18), 0 2px 4px rgba(15, 47, 29, .05);
 }
 
+/* Light shadow effect at the background on hover */
 .benefit::before,
 .pfeat__item::before {
   /* gold-to-green accent bar that grows in on hover */
@@ -199,10 +200,23 @@
 
 .benefit:hover,
 .pfeat__item:hover {
-  transform: translateY(-8px);
+  transform: translateY(-6px);
   background-color: rgba(255, 255, 255, .88);
   border-color: rgba(224, 168, 38, .55);
-  box-shadow: 0 34px 60px -18px rgba(15, 47, 29, .32), 0 10px 22px -6px rgba(15, 47, 29, .14), inset 0 1px 0 #fff;
+  box-shadow: 0 16px 32px -12px rgba(15, 47, 29, .3), 0 4px 8px rgba(15, 47, 29, .1);
+}
+
+/* Light shadow/glow effect at the background on hover */
+.benefit:hover::after,
+.pfeat__item:hover::after {
+  opacity: 1;
+  transform: scale(1.3);
+}
+
+/* Add a subtle light glow at the background */
+.benefit:hover,
+.pfeat__item:hover {
+  background: radial-gradient(circle at 50% 50%, rgba(239, 192, 74, .15), rgba(255, 255, 255, .88) 70%);
 }
 
 .benefit:hover::before,
@@ -237,13 +251,13 @@
 
 /* product cards: product with no white box, real shadow, bigger lift */
 .pcard {
-  box-shadow: 0 16px 36px -14px rgba(15, 47, 29, .28), 0 2px 6px rgba(15, 47, 29, .07), inset 0 1px 0 rgba(255, 255, 255, .8)
+  box-shadow: 0 8px 20px -8px rgba(15, 47, 29, .22), 0 2px 4px rgba(15, 47, 29, .05);
 }
 
 .pcard:hover {
-  transform: translateY(-8px);
+  transform: translateY(-6px);
   border-color: rgba(224, 168, 38, .5);
-  box-shadow: 0 36px 64px -20px rgba(15, 47, 29, .36), 0 10px 22px -6px rgba(15, 47, 29, .14), inset 0 1px 0 #fff
+  box-shadow: 0 16px 32px -12px rgba(15, 47, 29, .3), 0 4px 8px rgba(15, 47, 29, .1);
 }
 
 .pcard__media .media--product {
@@ -251,46 +265,51 @@
 }
 
 .pcard__media .media--product>img {
-  filter: drop-shadow(0 4px 6px rgba(15, 47, 29, .18)) drop-shadow(0 18px 18px rgba(15, 47, 29, .22))
+  filter: drop-shadow(0 3px 4px rgba(15, 47, 29, .12)) drop-shadow(0 12px 14px rgba(15, 47, 29, .16))
 }
 
 /* blog cards, FAQ rows, "more" cards, testimonial */
 .bcard {
-  box-shadow: 0 14px 32px -14px rgba(15, 47, 29, .26), 0 2px 6px rgba(15, 47, 29, .06), inset 0 1px 0 rgba(255, 255, 255, .8)
+  box-shadow: 0 8px 20px -8px rgba(15, 47, 29, .2), 0 2px 4px rgba(15, 47, 29, .05);
 }
 
 .bcard:hover {
-  transform: translateY(-8px);
+  transform: translateY(-6px);
   border-color: rgba(224, 168, 38, .5);
-  box-shadow: 0 34px 60px -20px rgba(15, 47, 29, .34), 0 10px 22px -6px rgba(15, 47, 29, .12)
+  box-shadow: 0 16px 32px -12px rgba(15, 47, 29, .28), 0 4px 8px rgba(15, 47, 29, .1);
 }
 
 .faq__item {
-  box-shadow: 0 10px 26px -14px rgba(15, 47, 29, .24), inset 0 1px 0 rgba(255, 255, 255, .8)
+  box-shadow: 0 6px 16px -8px rgba(15, 47, 29, .18);
 }
 
 .faq__item:hover {
-  transform: translateY(-3px);
-  border-color: rgba(224, 168, 38, .5);
-  box-shadow: 0 22px 44px -16px rgba(15, 47, 29, .3)
+  transform: translateY(-4px);
+  border-color: rgba(224, 168, 38, .6);
+  box-shadow: 
+    0 20px 40px -15px rgba(15, 47, 29, .32),
+    0 8px 16px -8px rgba(224, 168, 38, .25),
+    0 2px 4px rgba(15, 47, 29, .1);
 }
 
 .faq__item.is-open {
-  box-shadow: 0 26px 50px -18px rgba(15, 47, 29, .34)
+  box-shadow: 
+    0 30px 60px -20px rgba(15, 47, 29, .38),
+    0 12px 24px -12px rgba(224, 168, 38, .3);
 }
 
 .pdp-more__grid a {
-  box-shadow: 0 12px 28px -14px rgba(15, 47, 29, .26)
+  box-shadow: 0 6px 16px -8px rgba(15, 47, 29, .2);
 }
 
 .pdp-more__grid a:hover {
-  transform: translateY(-8px);
+  transform: translateY(-6px);
   border-color: rgba(224, 168, 38, .5);
-  box-shadow: 0 30px 54px -18px rgba(15, 47, 29, .34)
+  box-shadow: 0 14px 28px -12px rgba(15, 47, 29, .28);
 }
 
 .pdp-more__img img {
-  filter: drop-shadow(0 12px 12px rgba(15, 47, 29, .22))
+  filter: drop-shadow(0 8px 8px rgba(15, 47, 29, .16))
 }
 
 .testi__slide.is-active:hover {
@@ -299,7 +318,7 @@
 
 /* product page: pack shadow */
 .pdp__pack img {
-  filter: drop-shadow(0 6px 8px rgba(60, 38, 4, .26)) drop-shadow(0 26px 24px rgba(60, 38, 4, .32))
+  filter: drop-shadow(0 4px 6px rgba(60, 38, 4, .18)) drop-shadow(0 18px 18px rgba(60, 38, 4, .22))
 }
 
 @media (hover:none) {
@@ -387,7 +406,7 @@ body {
 .news.news--help {
   background: url('/assets/photos/help-background.png') center/cover no-repeat;
   position: relative;
-  filter: brightness(1.1) saturate(1.1);
+  filter: brightness(1.05) saturate(1.05);
 }
 .news.news--help::before {
   content: '';
@@ -814,7 +833,7 @@ html {
   z-index: -1;
   translate: none;
   background: radial-gradient(ellipse at 45% 50%, rgba(10, 5, 0, .7) 0%, rgba(10, 5, 0, .38) 45%, rgba(10, 5, 0, 0) 72%);
-  filter: blur(3px);
+  filter: blur(2px);
 }
 
 .pslider__left .media--pslider {
@@ -1007,7 +1026,12 @@ html {
   padding: 16px clamp(20px, 2vw, 34px) 16px 16px; min-height: 0; border-radius: 999px;
   background: linear-gradient(135deg, rgba(255, 255, 255, .92), rgba(246, 243, 220, .9));
   border: 1px solid rgba(255, 255, 255, .85);
-  box-shadow: 0 14px 30px -16px rgba(15, 47, 29, .28), 0 2px 6px rgba(15, 47, 29, .06), inset 0 1px 0 #fff;
+  box-shadow: 
+    0 20px 40px -12px rgba(15, 47, 29, .35), 
+    0 8px 16px -8px rgba(15, 47, 29, .18), 
+    0 2px 4px rgba(15, 47, 29, .08),
+    inset 0 1px 0 rgba(255, 255, 255, .9),
+    inset 0 -1px 0 rgba(15, 47, 29, .05);
 }
 .benefits .benefit::before, .benefits .benefit::after { display: none; }
 .benefit__icon {
@@ -1185,7 +1209,7 @@ html {
 .wc__content::before {
   content: ""; position: absolute; z-index: -1; pointer-events: none; inset: -6% -10% -6% -14%;
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 560'%3E%3Cg fill='%230f4a2a'%3E%3Cg transform='translate(40 60) rotate(28)'%3E%3Cpath d='M0 0C60-70 190-80 290-30 230 50 90 70 0 0z'/%3E%3Cpath d='M-60 30L0 0' stroke='%230f4a2a' stroke-width='6' fill='none'/%3E%3C/g%3E%3Cg transform='translate(250 20) rotate(62)'%3E%3Cpath d='M0 0C50-60 160-70 250-25 200 45 80 60 0 0z'/%3E%3C/g%3E%3Cg transform='translate(120 250) rotate(8)'%3E%3Cpath d='M0 0C70-80 220-90 330-35 260 60 100 80 0 0z'/%3E%3C/g%3E%3Cg transform='translate(430 150) rotate(-24)'%3E%3Cpath d='M0 0C50-60 150-65 230-25 185 40 70 55 0 0z'/%3E%3C/g%3E%3Cg transform='translate(60 430) rotate(-14)'%3E%3Cpath d='M0 0C55-65 170-72 260-28 210 45 85 62 0 0z'/%3E%3C/g%3E%3Cg transform='translate(330 400) rotate(40)'%3E%3Cpath d='M0 0C48-55 140-62 215-22 172 38 66 52 0 0z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") no-repeat left center / 100% 100%;
-  opacity: .075; filter: blur(7px);
+  opacity: .075; filter: blur(4px);
   transform-origin: 20% 40%;
   animation: wcSway 16s ease-in-out infinite alternate;
 }

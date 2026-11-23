@@ -4,14 +4,14 @@
    Tune the look with the --glass-* tokens below.
    ========================================================== */
 :root {
-  --glass-blur: 18px;
+  --glass-blur: 6px;
   --glass-bg: rgba(255, 255, 255, .55);
   --glass-bg-strong: rgba(255, 255, 255, .72);
   --glass-bg-dark: rgba(8, 38, 26, .32);
   --glass-border: rgba(255, 255, 255, .65);
   --glass-border-dark: rgba(255, 255, 255, .22);
-  --glass-shadow: 0 8px 32px rgba(15, 47, 29, .12), inset 0 1px 0 rgba(255, 255, 255, .7);
-  --glass-shadow-lg: 0 18px 50px rgba(15, 47, 29, .18), inset 0 1px 0 rgba(255, 255, 255, .75);
+  --glass-shadow: 0 4px 16px rgba(15, 47, 29, .08), inset 0 1px 0 rgba(255, 255, 255, .7);
+  --glass-shadow-lg: 0 8px 24px rgba(15, 47, 29, .12), inset 0 1px 0 rgba(255, 255, 255, .75);
 }
 
 /* ---- colour glows behind the page so the blur has something to show ---- */

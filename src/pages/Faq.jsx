@@ -23,8 +23,14 @@ export default function Faq() {
     <>
       <section className="faq-hero">
         <div className="faq-hero__image">
-          <img src="/assets/photos/faq-meeting.png" alt="FAQ" />
-          <div className="faq-hero__text">FAQ</div>
+          <img src="/assets/photos/faq-laptop-banner.png" alt="FAQ Banner" />
+          <div className="faq-hero__content-wrapper">
+            <div className="faq-hero__content glass-container">
+              <h1 className="faq-hero__title">FAQ</h1>
+              <h2 className="faq-hero__subtitle">Frequently Asked Questions</h2>
+              <p className="faq-hero__text">Get technical and general answers about our products, orders, usage, and support.</p>
+            </div>
+          </div>
         </div>
       </section>
       <section className="faq">
@@ -40,7 +46,10 @@ export default function Faq() {
             display: 'flex',
             gap: '14px',
             alignItems: 'flex-start',
-            color: '#164222'
+            color: '#164222',
+            boxShadow: '0 4px 12px -8px rgba(15, 47, 29, .12)',
+            transition: 'box-shadow .3s ease, transform .3s ease',
+            cursor: 'default'
           }}>
             <AlertCircle size={22} style={{ flexShrink: 0, marginTop: '2px', color: 'var(--green-700, #1a6b3c)' }} />
             <p style={{ margin: 0, fontSize: '13.5px', lineHeight: 1.6, fontFamily: 'Manrope, sans-serif' }}>
@@ -68,7 +77,8 @@ export default function Faq() {
                   fontSize: '14.5px',
                   fontFamily: 'Manrope, sans-serif',
                   outline: 'none',
-                  boxShadow: '0 2px 10px rgba(10, 30, 20, 0.04)'
+                  boxShadow: '0 4px 12px -8px rgba(15, 47, 29, .12)',
+                  transition: 'box-shadow .3s ease, transform .3s ease, border-color .3s ease'
                 }}
               />
             </div>
@@ -91,7 +101,8 @@ export default function Faq() {
                       fontWeight: 700,
                       cursor: 'pointer',
                       transition: 'all .2s ease',
-                      fontFamily: 'Manrope, sans-serif'
+                      fontFamily: 'Manrope, sans-serif',
+                      boxShadow: active ? '0 6px 16px -8px rgba(15, 47, 29, .25), 0 2px 6px -4px rgba(224, 168, 38, .2)' : '0 4px 12px -8px rgba(15, 47, 29, .12), 0 2px 4px -4px rgba(224, 168, 38, .08)'
                     }}
                   >
                     {c.label}
