@@ -21,6 +21,7 @@ export default function Hero() {
   const [paused, setPaused] = useState(false);
   const [held, setHeld] = useState(false);
   const [reduce, setReduce] = useState(false);
+  const [scrollOffset, setScrollOffset] = useState(0);
   const slidesRef = useRef(null);
   const touchX = useRef(0);
 
@@ -31,6 +32,21 @@ export default function Hero() {
     mq.addEventListener('change', apply);
     return () => mq.removeEventListener('change', apply);
   }, []);
+
+  // Parallax scroll effect
+  useEffect(() => {
+    if (reduce) return undefined;
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      const scrollY = window.scrollY;
+      setScrollOffset(scrollY * 0.3); // subtle parallax
+    };
+    const onScroll = () => { if (!raf) raf = requestAnimationFrame(update); };
+    update();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => { window.removeEventListener('scroll', onScroll); if (raf) cancelAnimationFrame(raf); };
+  }, [reduce]);
 
   // Compute active dot (0, 1, or 2)
   const activeDot = (slideIdx - 1 + COUNT) % COUNT;
@@ -119,7 +135,7 @@ export default function Hero() {
               aria-hidden={!isCurrent}
               inert={isCurrent ? undefined : ''}
             >
-              <Media className="media--fill hero__bg" style={{ background: s.bg }}>
+              <Media className="media--fill hero__bg" style={{ background: s.bg, transform: `translateY(${scrollOffset}px)` }}>
                 <img
                   src={`${BASE}assets/${s.image}`}
                   alt={s.alt}
@@ -134,7 +150,9 @@ export default function Hero() {
               <div className="hero__content page-pad">
                 <Slot as="p" className="slot--eyebrow-w">{s.eyebrow}</Slot>
                 {/* the first slide carries the page's main heading */}
-                <Slot as={originalIndex === 0 ? 'h1' : 'h2'} className="slot--hero-title">{s.title}</Slot>
+                <Slot as={originalIndex === 0 ? 'h1' : 'h2'} className="slot--hero-title">
+                  <span className="hero__title-word">{s.title}</span>
+                </Slot>
                 <Slot as="p" className="slot--hero-sub">{s.sub}</Slot>
                 <Link className="link-btn" to={s.to}><Slot className="slot--link">{s.cta}</Slot></Link>
               </div>
