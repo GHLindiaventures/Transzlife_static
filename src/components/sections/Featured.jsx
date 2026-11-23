@@ -1,18 +1,52 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Media, Slot, ProductImg } from '../ui.jsx';
-import { PRODUCTS, PRODUCTS_SECTION, priceLabel, productUrl } from '../../content/site.js';
+import { PRODUCTS, PRODUCTS_SECTION, STORE_ID, priceLabel, productUrl, mrpOf, offOf } from '../../content/site.js';
+import { useCart } from '../../store/context/CartContext';
 
 const COUNT = PRODUCTS.length;
+const inr = (n) => `₹${n.toLocaleString('en-IN')}`;
 
-/** Price row: price + size pill. Pass no product for the empty placeholder version. */
+/** Price block: final price, struck-out MRP and discount. Pass no product for the empty placeholder version. */
 export function PriceRow({ product }) {
+  if (!product) {
+    return (
+      <div className="pcard__price">
+        <Slot className="slot--price" />
+        <Slot className="slot--pill" />
+      </div>
+    );
+  }
+  if (product.price == null) {
+    return <p className="pcard__price pcard__price--tba">{priceLabel(product)}</p>;
+  }
+  const mrp = mrpOf(product);
   return (
-    <div className="pcard__price">
-      <Slot className="slot--price">{product ? priceLabel(product) : undefined}</Slot>
-      {!product && <Slot className="slot--price" />}
-      <Slot className="slot--pill">{product ? product.size : undefined}</Slot>
-    </div>
+    <p className="pcard__price pcard__price--deal">
+      <span className="pcard__now"><span className="visually-hidden">Price </span>{inr(product.price)}</span>
+      <s className="pcard__mrp"><span className="visually-hidden">MRP </span>{inr(mrp)}</s>
+      <span className="pcard__save">{offOf(product)}% off</span>
+    </p>
+  );
+}
+
+/** Buy now: put one in the cart and go straight to checkout. */
+function BuyNow({ product, url }) {
+  const { add } = useCart();
+  const navigate = useNavigate();
+  const storeId = STORE_ID[product.id];
+  if (product.price == null || !storeId) {
+    return <Link className="pcard__buy pcard__buy--ghost" to={url}>Explore</Link>;
+  }
+  return (
+    <button
+      type="button"
+      className="pcard__buy"
+      onClick={() => { add(storeId, 1, 1, { openDrawer: false }); navigate('/checkout'); }}
+      aria-label={`Buy ${product.short} now`}
+    >
+      Buy now
+    </button>
   );
 }
 
@@ -42,7 +76,9 @@ export function ProductCard({ product }) {
       <h3 className="pcard__title">
         <Link to={url}><Slot className="slot--card-title">{product.short}</Slot></Link>
       </h3>
+      <p className="pcard__size">{product.size}</p>
       <PriceRow product={product} />
+      <BuyNow product={product} url={url} />
     </article>
   );
 }

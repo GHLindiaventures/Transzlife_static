@@ -13,6 +13,7 @@ import './styles/showcase.css';
 import './styles/product.css';
 import './styles/polish.css';
 import './styles/refine.css';
+import './styles/chat.css';
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>

@@ -184,7 +184,10 @@ export function Article() {
   if (!a) return <NotFound />;
   const concern = getConcern(a.concern);
   const products = PRODUCTS.filter((p) => p.concerns.includes(a.concern)).slice(0, 2);
-  const more = ARTICLES.filter((x) => x.id !== a.id).slice(0, 3);
+  // same-topic articles first, then the rest
+  const more = ARTICLES.filter((x) => x.id !== a.id)
+    .sort((x, y) => (y.concern === a.concern) - (x.concern === a.concern))
+    .slice(0, 3);
   return (
     <>
       <article className="article">
