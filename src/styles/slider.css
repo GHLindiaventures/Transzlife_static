@@ -1,511 +1,583 @@
 /* ==========================================================
-   Targeted Botanical Formulations: Full-Page 3-Up Blendy Showcase
-   Covers the full page (100vw x 100vh) edge-to-edge.
-   3 Vertical panels side-by-side in the exact Blendy floating 3D
-   aesthetic (floating product bottle + oversized typography behind
-   + floating botanicals with depth of field blur + soft pastel colors).
-   Smoothly slides down from top when switching sets. Zero prices.
+   MotionSites / Blendy Smoothie Slider Full-Page Experience
+   1:1 recreation of https://www.motionsites.ai/?prompt=smoothie-slider
+   - 100vw x 100vh full-page edge-to-edge coverage
+   - Single prominent product bottle floating in center
+   - Oversized backdrop typography behind bottle
+   - Multi-depth floating botanical ingredients with realistic camera bokeh blur
+   - Smooth pastel background color interpolation
+   - Top navigation tabs + Bottom arrow controls & SHOP NOW link
+   - STRICTLY NO PRICES DISPLAYED
    ========================================================== */
 
-.blendy-section {
+.blendy-hero-stage {
   position: relative;
   width: 100vw;
+  height: 100vh;
+  min-height: 640px;
+  max-height: 1080px;
   margin-left: calc(-50vw + 50%);
   margin-right: calc(-50vw + 50%);
-  min-height: 100vh;
-  height: 100vh;
-  padding: clamp(20px, 3vh, 38px) clamp(20px, 3vw, 52px) clamp(18px, 2.5vh, 32px);
+  background-color: var(--hero-bg, #bca7dc);
+  transition: background-color 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
   box-sizing: border-box;
-  background: #fdfcf9;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  overflow: hidden;
-}
-
-/* ---- Intro Header ---- */
-.blendy-intro {
-  text-align: center;
-  width: 100%;
-  max-width: 860px;
-  margin: 0 auto clamp(10px, 1.8vh, 22px);
-  padding: 0 16px;
-  flex-shrink: 0;
-}
-
-.blendy-eyebrow {
-  display: inline-block;
-  font-family: var(--f-body, system-ui, sans-serif);
-  font-size: clamp(0.72rem, 1vw, 0.8rem);
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: #2f6b3a;
-  margin-bottom: 6px;
-}
-
-.blendy-headline {
-  font-family: var(--f-head, 'Cinzel', serif);
-  font-size: clamp(1.75rem, 3vw, 2.6rem);
-  font-weight: 600;
-  line-height: 1.15;
-  letter-spacing: -0.015em;
-  color: #123320;
-  margin: 0 0 6px;
-}
-
-.blendy-sub {
-  font-size: clamp(0.85rem, 1.15vw, 0.98rem);
-  line-height: 1.5;
-  color: #55685a;
-  margin: 0 auto;
-  max-width: 640px;
-}
-
-/* ---- Full-Page Stage Viewport ---- */
-.blendy-viewport {
-  width: 100%;
-  max-width: 100%;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
   padding: 0;
-  margin: 0;
-  min-height: 0;
-}
-
-/* ---- 3-Up Vertical Panel Grid ---- */
-.blendy-trio {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: clamp(16px, 2.2vw, 32px);
-  width: 100%;
-  height: 100%;
-  align-items: stretch;
-  min-height: 0;
-}
-
-/* Downward cascading entrance animation */
-@keyframes panelCascadeDown {
-  0% {
-    opacity: 0;
-    transform: translateY(-64px) scale(0.97);
-  }
-  60% {
-    opacity: 0.9;
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-.blendy-panel {
-  position: relative;
-  height: 100%;
-  min-height: 0;
-  border-radius: clamp(24px, 2.8vw, 38px);
-  background-color: var(--bg, #c3b2db);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: clamp(24px, 3vh, 36px) clamp(18px, 2vw, 28px) clamp(20px, 2.8vh, 32px);
-  box-shadow: 0 20px 50px -14px rgba(23, 63, 36, 0.14), 0 4px 16px rgba(0, 0, 0, 0.03);
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-              box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  animation: panelCascadeDown 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
-  animation-delay: var(--delay, 0ms);
-}
-
-.blendy-panel:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 30px 64px -16px rgba(23, 63, 36, 0.24), 0 8px 22px rgba(0, 0, 0, 0.06);
-}
-
-/* ---- 1. Oversized Background Typography (Behind Product) ---- */
-.bpanel-backdrop {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2;
-  pointer-events: none;
   user-select: none;
 }
 
-.bpanel-backdrop__word {
+/* ==========================================================
+   1. TOP NAVIGATION BAR (Exact Blendy Style)
+   ========================================================== */
+.blendy-top-nav {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: clamp(64px, 8.5vh, 88px);
+  padding: 0 clamp(20px, 4vw, 56px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 20;
+  pointer-events: auto;
+}
+
+/* Brand Wordmark / Logo */
+.blendy-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.blendy-brand-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: #ffffff;
+  transition: opacity 0.2s ease;
+}
+
+.blendy-brand-link:hover {
+  opacity: 0.85;
+}
+
+.blendy-brand-text {
   font-family: var(--f-body, system-ui, -apple-system, sans-serif);
-  font-size: clamp(5rem, 11vw, 9.6rem);
+  font-size: clamp(1.15rem, 1.8vw, 1.45rem);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: #ffffff;
+  text-transform: uppercase;
+}
+
+/* Formulation Tabs */
+.blendy-nav-tabs {
+  display: flex;
+  align-items: center;
+  gap: clamp(12px, 2.5vw, 36px);
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  padding: 8px 12px;
+}
+
+.blendy-nav-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.blendy-tab-btn {
+  position: relative;
+  background: transparent;
+  border: none;
+  padding: 6px 4px;
+  font-family: var(--f-body, system-ui, -apple-system, sans-serif);
+  font-size: clamp(0.85rem, 1.1vw, 1.05rem);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.65);
+  cursor: pointer;
+  transition: color 0.25s ease, transform 0.25s ease;
+  white-space: nowrap;
+}
+
+.blendy-tab-btn:hover {
+  color: #ffffff;
+}
+
+.blendy-tab-btn.is-active {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.blendy-tab-underline {
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2.5px;
+  background: #ffffff;
+  border-radius: 2px;
+  animation: tabUnderlineIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes tabUnderlineIn {
+  from {
+    transform: scaleX(0.4);
+    opacity: 0;
+  }
+  to {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+/* Right Badge / Meta */
+.blendy-nav-meta {
+  display: flex;
+  align-items: center;
+}
+
+.blendy-pill-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  font-family: var(--f-body, system-ui, sans-serif);
+  font-size: clamp(0.72rem, 0.9vw, 0.82rem);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #ffffff;
+  text-transform: uppercase;
+}
+
+/* ==========================================================
+   2. CENTER HERO STAGE (Exact Blendy Composition)
+   ========================================================== */
+.blendy-center-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+
+/* Giant Oversized Background Word (Behind Product) */
+.blendy-backdrop-word {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 2;
+  pointer-events: none;
+  user-select: none;
+  will-change: transform;
+  transition: transform 0.15s ease-out;
+  text-align: center;
+  width: 100%;
+}
+
+.blendy-word-text {
+  display: block;
+  font-family: var(--f-body, system-ui, -apple-system, sans-serif);
+  font-size: clamp(7.5rem, 23vw, 22rem);
   font-weight: 900;
   letter-spacing: -0.04em;
   color: #ffffff;
   text-transform: uppercase;
-  line-height: 1;
-  opacity: 0.95;
-  transform: translateY(-8%);
+  line-height: 0.85;
+  opacity: 0.96;
+  text-align: center;
+  animation: wordPopIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* ---- 2. Center Hero Floating Product Bottle ---- */
-.bpanel-hero {
+@keyframes wordPopIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  100% {
+    opacity: 0.96;
+    transform: scale(1);
+  }
+}
+
+/* Floating Botanicals Layer */
+.blendy-botanicals-layer {
   position: absolute;
   inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.blendy-botanical-item {
+  position: absolute;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10;
+  will-change: transform, filter;
+  transition: transform 0.2s ease-out;
   pointer-events: none;
 }
 
-.bpanel-bottle-box {
-  position: relative;
-  height: clamp(280px, 42vh, 440px);
-  width: auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: panelBottleFloat 4.4s ease-in-out infinite;
-  pointer-events: auto;
-  text-decoration: none;
-}
-
-.bpanel-bottle {
-  height: 100%;
-  width: auto;
-  max-width: clamp(190px, 24vw, 290px);
-  object-fit: contain;
-  display: block;
-  filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.24));
-  transition: transform 0.35s ease;
-}
-
-.bpanel-bottle-box:hover .bpanel-bottle {
-  transform: scale(1.05);
-}
-
-.bpanel-base-leaf {
-  position: absolute;
-  bottom: 10px;
-  left: 32%;
-  width: clamp(70px, 9vw, 105px);
-  height: auto;
-  object-fit: contain;
-  z-index: -1;
-  transform: rotate(-22deg);
-  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.2));
-  pointer-events: none;
-}
-
-.bpanel-ground-shadow {
-  position: absolute;
-  bottom: -18px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: clamp(140px, 18vw, 220px);
-  height: 24px;
-  border-radius: 50%;
-  background: rgba(22, 28, 24, 0.34);
-  filter: blur(12px);
-  z-index: -2;
-  animation: panelShadowBreathe 4.4s ease-in-out infinite;
-}
-
-@keyframes panelBottleFloat {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-14px);
-  }
-}
-
-@keyframes panelShadowBreathe {
-  0%, 100% {
-    transform: translateX(-50%) scale(1);
-    opacity: 0.34;
-  }
-  50% {
-    transform: translateX(-50%) scale(0.86);
-    opacity: 0.2;
-  }
-}
-
-/* ---- 3. Floating 3D Ingredients with Depth of Field ---- */
-.bpanel-orbit {
-  position: absolute;
-  inset: 0;
-  z-index: 12;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.bpanel-ing {
-  position: absolute;
-  display: block;
-  user-select: none;
-}
-
-.bpanel-ing img {
+.blendy-item-img {
   width: 100%;
-  height: auto;
+  height: 100%;
   object-fit: contain;
   display: block;
 }
 
-/* Foreground Deep Bokeh */
-.bpanel-ing--fg-bl {
-  bottom: 12%;
-  left: -4%;
-  width: var(--size, 105px);
-  filter: blur(var(--blur, 8px));
-  animation: panelFloatSlow 5s ease-in-out infinite;
+/* 1. Foreground Bottom-Left (Extreme Bokeh Blur) */
+.bitem--fg-bl {
+  bottom: clamp(-40px, -4vh, -15px);
+  left: clamp(-45px, -3vw, -15px);
+  z-index: 8;
+  animation: floatDrift1 6.5s ease-in-out infinite alternate;
 }
 
-.bpanel-ing--fg-tr {
-  top: 8%;
-  right: -3%;
-  width: var(--size, 85px);
-  filter: blur(var(--blur, 6px));
-  animation: panelFloatSlow 5.5s ease-in-out infinite 0.7s;
+/* 2. Foreground Top-Right (Extreme Bokeh Blur) */
+.bitem--fg-tr {
+  top: clamp(20px, 4vh, 48px);
+  right: clamp(15px, 3.5vw, 45px);
+  z-index: 8;
+  animation: floatDrift2 7.2s ease-in-out infinite alternate;
 }
 
-/* Midground Sharp Botanicals with Drop Shadow */
-.bpanel-ing--mid-l {
-  top: 20%;
-  left: 8%;
-  width: var(--size, 58px);
-  filter: drop-shadow(0 12px 16px rgba(0, 0, 0, 0.22));
-  animation: panelFloatFast 4.2s ease-in-out infinite 0.3s;
+/* 3. Midground Upper-Left (Sharp with realistic drop shadow) */
+.bitem--mid-tl {
+  z-index: 6;
+  filter: drop-shadow(14px 22px 18px rgba(0, 0, 0, 0.22));
+  animation: floatDrift3 5.4s ease-in-out infinite alternate;
 }
 
-.bpanel-ing--mid-r {
-  bottom: 24%;
-  right: 8%;
-  width: var(--size, 62px);
-  filter: drop-shadow(0 12px 16px rgba(0, 0, 0, 0.22));
-  animation: panelFloatFast 4.5s ease-in-out infinite 1s;
+/* 4. Midground Mid-Left (Sharp with drop shadow) */
+.bitem--mid-ml {
+  z-index: 6;
+  filter: drop-shadow(14px 22px 18px rgba(0, 0, 0, 0.22));
+  animation: floatDrift1 5.8s ease-in-out infinite alternate;
 }
 
-@keyframes panelFloatSlow {
-  0%, 100% {
-    transform: translateY(0) rotate(0deg);
+/* 5. Base-Left Leaf (Peeking behind bottle base) */
+.bitem--base-l {
+  z-index: 3;
+  filter: drop-shadow(8px 14px 12px rgba(0, 0, 0, 0.16));
+  animation: floatDrift2 6.2s ease-in-out infinite alternate;
+}
+
+/* 6. Base-Right Leaf (Peeking behind bottle base) */
+.bitem--base-r {
+  z-index: 3;
+  filter: drop-shadow(8px 14px 12px rgba(0, 0, 0, 0.16));
+  animation: floatDrift3 6.6s ease-in-out infinite alternate;
+}
+
+/* 7. Midground Upper-Right (Sharp with drop shadow) */
+.bitem--mid-tr {
+  z-index: 6;
+  filter: drop-shadow(14px 22px 18px rgba(0, 0, 0, 0.22));
+  animation: floatDrift2 5.9s ease-in-out infinite alternate;
+}
+
+/* 8. Midground Lower-Right (Sharp with drop shadow) */
+.bitem--mid-br {
+  z-index: 6;
+  filter: drop-shadow(14px 22px 18px rgba(0, 0, 0, 0.22));
+  animation: floatDrift1 6.3s ease-in-out infinite alternate;
+}
+
+/* 9. Midground Far-Right (Sharp with drop shadow) */
+.bitem--mid-far-r {
+  z-index: 6;
+  filter: drop-shadow(14px 22px 18px rgba(0, 0, 0, 0.22));
+  animation: floatDrift3 6.9s ease-in-out infinite alternate;
+}
+
+/* Natural 3D Ambient Float Keyframes */
+@keyframes floatDrift1 {
+  0% {
+    transform: translateY(0px) rotate(0deg);
   }
-  50% {
+  100% {
     transform: translateY(-16px) rotate(4deg);
   }
 }
 
-@keyframes panelFloatFast {
-  0%, 100% {
-    transform: translateY(0) rotate(0deg);
+@keyframes floatDrift2 {
+  0% {
+    transform: translateY(0px) rotate(0deg);
   }
-  50% {
-    transform: translateY(-10px) rotate(-3deg);
+  100% {
+    transform: translateY(-18px) rotate(-5deg);
   }
 }
 
-/* ---- 4. Panel Footer (Title, Subtitle, Shop CTA - Zero Prices) ---- */
-.bpanel-footer {
+@keyframes floatDrift3 {
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  100% {
+    transform: translateY(-14px) rotate(3deg);
+  }
+}
+
+/* Central Levitating Product Packaging */
+.blendy-bottle-wrap {
   position: relative;
-  z-index: 20;
-  text-align: center;
-  margin-top: auto;
-  padding-top: 14px;
-}
-
-.bpanel-title {
-  font-family: var(--f-head, 'Cinzel', serif);
-  font-size: clamp(1.2rem, 1.7vw, 1.48rem);
-  font-weight: 700;
-  color: #ffffff;
-  margin: 0 0 4px;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
-}
-
-.bpanel-title a {
-  color: inherit;
-  text-decoration: none;
-  transition: opacity 0.2s ease;
-}
-
-.bpanel-title a:hover {
-  opacity: 0.85;
-}
-
-.bpanel-sub {
-  font-size: clamp(0.76rem, 1vw, 0.86rem);
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.92);
-  margin: 0 0 clamp(10px, 1.8vh, 18px);
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.14);
-}
-
-.bpanel-cta {
-  display: inline-block;
-  font-family: var(--f-body, system-ui, sans-serif);
-  font-size: clamp(0.8rem, 1.05vw, 0.92rem);
-  font-weight: 800;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: #ffffff;
-  text-decoration: none;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.75);
-  padding-bottom: 3px;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.bpanel-cta:hover {
-  border-bottom-color: #ffffff;
-  letter-spacing: 0.24em;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
-}
-
-/* ---- Controls: Prev/Next & Segmented Tabs ---- */
-.blendy-controls {
+  z-index: 4;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 16px;
-  margin-top: clamp(12px, 1.8vh, 22px);
-  flex-shrink: 0;
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: transform 0.15s ease-out;
 }
 
-.blendy-ctrl-btn {
-  width: clamp(38px, 4vh, 46px);
-  height: clamp(38px, 4vh, 46px);
+/* Ground Contact Levitating Shadow */
+.blendy-ground-shadow {
+  position: absolute;
+  bottom: clamp(-24px, -3.2vh, -16px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: clamp(180px, 22vw, 290px);
+  height: clamp(30px, 3.8vh, 46px);
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.32) 0%, rgba(0, 0, 0, 0) 72%);
   border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: #ffffff;
-  color: #123320;
-  border: 1px solid rgba(47, 107, 58, 0.16);
-  box-shadow: 0 4px 12px rgba(23, 63, 36, 0.06);
-  cursor: pointer;
-  transition: all 0.25s ease;
+  filter: blur(12px);
+  z-index: 1;
+  pointer-events: none;
+  animation: groundShadowFloat 4.6s ease-in-out infinite;
 }
 
-.blendy-ctrl-btn:hover {
-  background: #174225;
+@keyframes groundShadowFloat {
+  0%, 100% {
+    transform: translateX(-50%) scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: translateX(-50%) scale(0.84);
+    opacity: 0.52;
+  }
+}
+
+/* Center Bottle Image */
+.blendy-hero-bottle {
+  position: relative;
+  z-index: 2;
+  height: clamp(330px, 53vh, 550px);
+  width: auto;
+  max-width: 86vw;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 20px 32px rgba(0, 0, 0, 0.18));
+  animation: heroBottleFloat 4.6s ease-in-out infinite, heroBottleEntrance 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: transform;
+}
+
+@keyframes heroBottleFloat {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-16px) rotate(0.7deg);
+  }
+}
+
+@keyframes heroBottleEntrance {
+  0% {
+    opacity: 0;
+    transform: translateY(-38px) scale(0.94);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0px) scale(1);
+  }
+}
+
+/* ==========================================================
+   3. BOTTOM BAR (Exact Blendy Controls)
+   ========================================================== */
+.blendy-bottom-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: clamp(74px, 10vh, 100px);
+  padding: 0 clamp(20px, 4vw, 56px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 20;
+  pointer-events: auto;
+}
+
+/* Arrow Navigation Buttons (← and →) */
+.blendy-arrow-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(42px, 5vw, 50px);
+  height: clamp(42px, 5vw, 50px);
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   color: #ffffff;
-  border-color: #174225;
-  transform: scale(1.06);
-  box-shadow: 0 6px 18px rgba(23, 63, 36, 0.2);
+  cursor: pointer;
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 0;
 }
 
-.blendy-ctrl-btn:active {
+.blendy-arrow-btn:hover {
+  background: #ffffff;
+  color: #1a1a1a;
+  border-color: #ffffff;
+  transform: scale(1.1);
+  box-shadow: 0 10px 24px -4px rgba(0, 0, 0, 0.2);
+}
+
+.blendy-arrow-btn:active {
   transform: scale(0.96);
 }
 
-.blendy-set-tabs {
-  display: inline-flex;
+/* Center CTA Link: "SHOP NOW" */
+.blendy-center-cta {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  background: #ffffff;
-  padding: 4px;
-  border-radius: 999px;
-  border: 1px solid rgba(47, 107, 58, 0.15);
-  box-shadow: 0 4px 14px rgba(23, 63, 36, 0.05);
+  text-align: center;
+  gap: 5px;
 }
 
-.blendy-set-tab {
+.blendy-cta-link {
+  position: relative;
   display: inline-flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: clamp(6px, 1vh, 9px) clamp(14px, 1.8vw, 22px);
-  border-radius: 999px;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  font-family: inherit;
-  font-size: clamp(0.78rem, 1vw, 0.88rem);
-  font-weight: 600;
-  color: #617366;
-  transition: all 0.25s ease;
-}
-
-.blendy-set-tab__num {
-  font-size: 0.72rem;
+  text-decoration: none;
+  color: #ffffff;
+  font-family: var(--f-body, system-ui, -apple-system, sans-serif);
+  font-size: clamp(0.92rem, 1.25vw, 1.15rem);
   font-weight: 800;
-  padding: 2px 6px;
-  border-radius: 999px;
-  background: #edf3ee;
-  color: #174225;
-  transition: all 0.25s ease;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding: 4px 6px;
+  transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
-.blendy-set-tab.is-active {
-  background: #174225;
-  color: #ffffff;
-  box-shadow: 0 4px 12px rgba(23, 63, 36, 0.22);
+.blendy-cta-link:hover {
+  opacity: 0.92;
+  transform: translateY(-2px);
 }
 
-.blendy-set-tab.is-active .blendy-set-tab__num {
-  background: rgba(255, 255, 255, 0.2);
-  color: #ffffff;
+.blendy-cta-underline {
+  display: block;
+  width: 100%;
+  height: 2px;
+  background: #ffffff;
+  border-radius: 2px;
+  margin-top: 4px;
 }
 
-/* ---- Responsive Adaptations ---- */
-@media (max-width: 980px) {
-  .blendy-section {
-    height: auto;
-    min-height: 100vh;
-    padding: 48px 20px 36px;
-  }
-  .blendy-trio {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 20px;
-  }
-  .blendy-panel {
-    height: 520px;
-  }
-  .blendy-panel:nth-child(3) {
-    grid-column: 1 / -1;
-    max-width: 480px;
-    margin: 0 auto;
-    width: 100%;
-  }
+.blendy-variant-caption {
+  font-family: var(--f-body, system-ui, sans-serif);
+  font-size: clamp(0.74rem, 0.95vw, 0.85rem);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.85);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
 
-@media (max-width: 680px) {
-  .blendy-section {
-    height: auto;
-    min-height: 100vh;
-    padding: 36px 14px 28px;
-  }
-  .blendy-trio {
-    grid-template-columns: 1fr;
-    gap: 18px;
-    max-width: 400px;
-    margin: 0 auto;
-  }
-  .blendy-panel:nth-child(3) {
-    grid-column: auto;
-    max-width: none;
-  }
-  .blendy-panel {
-    height: 480px;
-  }
-  .blendy-set-tab__label {
+/* ==========================================================
+   4. RESPONSIVE BREAKPOINTS
+   ========================================================== */
+@media (max-width: 900px) {
+  .blendy-nav-meta {
     display: none;
   }
-  .blendy-set-tab {
-    padding: 6px 12px;
+
+  .blendy-top-nav {
+    justify-content: center;
+    gap: 16px;
+  }
+
+  .blendy-nav-brand {
+    display: none;
+  }
+
+  .blendy-nav-tabs {
+    gap: 14px;
+    padding: 6px 8px;
+  }
+
+  .bitem--mid-tl,
+  .bitem--mid-tr {
+    display: none;
   }
 }
 
-/* Reduced Motion Support */
+@media (max-width: 600px) {
+  .blendy-hero-stage {
+    min-height: 580px;
+    height: 92vh;
+  }
+
+  .blendy-top-nav {
+    padding: 0 16px;
+  }
+
+  .blendy-tab-btn {
+    font-size: 0.82rem;
+  }
+
+  .blendy-hero-bottle {
+    height: clamp(280px, 46vh, 400px);
+  }
+
+  .blendy-word-text {
+    font-size: clamp(5.5rem, 24vw, 9rem);
+  }
+
+  .bitem--fg-bl {
+    width: 110px !important;
+    height: 110px !important;
+    filter: blur(8px) !important;
+  }
+
+  .bitem--fg-tr {
+    width: 95px !important;
+    height: 95px !important;
+    filter: blur(8px) !important;
+  }
+
+  .bitem--mid-far-r {
+    display: none;
+  }
+
+  .blendy-variant-caption {
+    display: none;
+  }
+}
+
+/* Accessibility: respect user prefers-reduced-motion */
 @media (prefers-reduced-motion: reduce) {
-  .blendy-panel {
-    animation: panelFadeIn 0.3s ease both;
-  }
-  .bpanel-bottle-box,
-  .bpanel-ground-shadow,
-  .bpanel-ing {
-    animation: none;
-  }
-  @keyframes panelFadeIn {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
+  .blendy-hero-bottle,
+  .blendy-ground-shadow,
+  .blendy-botanical-item,
+  .blendy-word-text {
+    animation: none !important;
+    transition: none !important;
   }
 }
