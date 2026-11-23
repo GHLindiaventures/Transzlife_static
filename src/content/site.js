@@ -327,6 +327,9 @@ export const FOOTER = {
       { label: 'Sustainability', to: '/sustainability' },
       { label: 'Quality & Manufacturing', to: '/science#sc-pipeline' },
       { label: 'Certifications', to: '/science#sc-certs' },
+      { label: 'Privacy Policy', to: '/policies/privacy' },
+      { label: 'Terms & Conditions', to: '/policies/terms' },
+      { label: 'Shipping & Returns', to: '/policies/shipping' },
     ],
   },
   help: {
@@ -342,11 +345,7 @@ export const FOOTER = {
   tagline: 'Live naturally. Live healthier.',
   blurb: 'Ayurvedic, plant-based solutions for everyday wellness and good health.',
   motto: ['Wellness', 'Innovation', 'A Healthier Tomorrow'],
-  legal: [
-    { label: 'Privacy Policy', to: '/policies/privacy' },
-    { label: 'Terms & Conditions', to: '/policies/terms' },
-    { label: 'Shipping & Returns', to: '/policies/shipping' },
-  ],
+  legal: [],
 };
 
 /* Social profiles: add the real URLs to show the icons in the footer (empty = hidden). */
