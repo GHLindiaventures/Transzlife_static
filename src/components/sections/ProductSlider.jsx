@@ -2,280 +2,305 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { productUrl } from '../../content/site.js';
 
-// The 6 TranzLife Formulations recreated in the exact Blendy 3D Floating Showcase design
-const PRODUCTS_SHOWCASE = [
+// The 6 TranzLife formulations grouped into two 3-panel sets
+// Designed in the exact Blendy 3D floating visual style (no prices)
+const SETS = [
   {
-    id: 'gummies',
-    navLabel: 'PulmoClear',
-    bgWord: 'PULMO',
-    bgColor: '#c3b2db', // Soft berry lavender matching the natural berry flavour & reference
-    bottleImg: '/assets/product-4.png', // PulmoClear Gummies Jar
-    alt: 'PulmoClear™ Lung Booster Gummies',
-    tagline: 'Lung Detox & Respiratory Clarity',
-    // Floating ingredients matching Blendy composition
-    ingredients: {
-      foregroundBL: { src: '/assets/ingredients/cutout/amla.webp', name: 'Amla', blur: 10, size: 145 },
-      foregroundTR: { src: '/assets/ingredients/cutout/black-pepper.webp', name: 'Black Pepper', blur: 8, size: 110 },
-      midLeftTop: { src: '/assets/ingredients/cutout/tulsi.webp', name: 'Tulsi', size: 68 },
-      midLeftBottom: { src: '/assets/ingredients/cutout/turmeric.webp', name: 'Turmeric', size: 76 },
-      midRightTop: { src: '/assets/ingredients/cutout/licorice.webp', name: 'Mulethi', size: 78 },
-      midRightBottom: { src: '/assets/ingredients/cutout/ginger.webp', name: 'Sukku', size: 72 },
-      farRight: { src: '/assets/ingredients/cutout/long-pepper.webp', name: 'Thippili', size: 82 },
-      baseLeaf: { src: '/assets/ingredients/cutout/vasaka.webp', name: 'Vasaka Leaf', size: 95 },
-    },
+    id: 'set-1',
+    label: 'Core Daily Support',
+    products: [
+      {
+        id: 'gummies',
+        title: 'PulmoClear™',
+        sub: 'Respiratory Clarity & Lung Detox',
+        bgWord: 'PULMO',
+        bgColor: '#c3b2db', // Soft berry lavender matching natural berry flavour & Blendy reference
+        bottleImg: '/assets/product-4.png',
+        alt: 'PulmoClear™ Lung Booster Gummies',
+        ingredients: {
+          fgBL: { src: '/assets/ingredients/cutout/amla.webp', blur: 8, size: 95 },
+          fgTR: { src: '/assets/ingredients/cutout/black-pepper.webp', blur: 6, size: 75 },
+          midL: { src: '/assets/ingredients/cutout/tulsi.webp', size: 52 },
+          midR: { src: '/assets/ingredients/cutout/licorice.webp', size: 56 },
+          baseLeaf: { src: '/assets/ingredients/cutout/vasaka.webp', size: 68 },
+        },
+      },
+      {
+        id: 'liver',
+        title: 'LiverDetox™',
+        sub: 'Hepatic Protection & Digestion',
+        bgWord: 'LIVER',
+        bgColor: '#dfc8a5', // Warm golden herbal ochre
+        bottleImg: '/assets/product-5.png',
+        alt: 'LiverDetox™ Polyherbal Concoction',
+        ingredients: {
+          fgBL: { src: '/assets/ingredients/cutout/amla.webp', blur: 8, size: 95 },
+          fgTR: { src: '/assets/ingredients/cutout/kutki.webp', blur: 6, size: 75 },
+          midL: { src: '/assets/ingredients/cutout/bhumyamalaki.webp', size: 52 },
+          midR: { src: '/assets/ingredients/cutout/haritaki.webp', size: 56 },
+          baseLeaf: { src: '/assets/ingredients/cutout/bhringraj.webp', size: 68 },
+        },
+      },
+      {
+        id: 'rollon',
+        title: 'CycleRelief™',
+        sub: 'Menstrual Comfort Ritual',
+        bgWord: 'CYCLE',
+        bgColor: '#cfbde3', // Calming botanical orchid lavender
+        bottleImg: '/assets/product-1.png',
+        alt: 'CycleRelief™ Menstrual Comfort Roll-On',
+        ingredients: {
+          fgBL: { src: '/assets/ingredients/cutout/eucalyptus.webp', blur: 8, size: 95 },
+          fgTR: { src: '/assets/ingredients/cutout/dill.webp', blur: 6, size: 75 },
+          midL: { src: '/assets/ingredients/cutout/lavender.webp', size: 50 },
+          midR: { src: '/assets/ingredients/cutout/sesame.webp', size: 54 },
+          baseLeaf: { src: '/assets/ingredients/cutout/eucalyptus.webp', size: 68 },
+        },
+      },
+    ],
   },
   {
-    id: 'liver',
-    navLabel: 'Liver Booster',
-    bgWord: 'LIVER',
-    bgColor: '#dfc8a5', // Warm golden herbal amber
-    bottleImg: '/assets/product-5.png', // Liver Booster Bottle
-    alt: 'LiverDetox™ Polyherbal Concoction',
-    tagline: 'Hepatic Protection & Digestion',
-    ingredients: {
-      foregroundBL: { src: '/assets/ingredients/cutout/amla.webp', name: 'Amla', blur: 10, size: 145 },
-      foregroundTR: { src: '/assets/ingredients/cutout/kutki.webp', name: 'Kutki', blur: 8, size: 110 },
-      midLeftTop: { src: '/assets/ingredients/cutout/bhumyamalaki.webp', name: 'Bhumyamalaki', size: 70 },
-      midLeftBottom: { src: '/assets/ingredients/cutout/kalmegh.webp', name: 'Kalmegh', size: 76 },
-      midRightTop: { src: '/assets/ingredients/cutout/haritaki.webp', name: 'Milk Thistle', size: 76 },
-      midRightBottom: { src: '/assets/ingredients/cutout/punarnava.webp', name: 'Punarnava', size: 72 },
-      farRight: { src: '/assets/ingredients/cutout/daruharidra.webp', name: 'Daruharidra', size: 82 },
-      baseLeaf: { src: '/assets/ingredients/cutout/bhringraj.webp', name: 'Bhringraj', size: 92 },
-    },
-  },
-  {
-    id: 'rollon',
-    navLabel: 'CycleRelief',
-    bgWord: 'CYCLE',
-    bgColor: '#cfbde3', // Calming botanical orchid lavender
-    bottleImg: '/assets/product-1.png', // CycleRelief Roll-On
-    alt: 'CycleRelief™ Menstrual Comfort Roll-On',
-    tagline: 'Abdominal Comfort Ritual',
-    ingredients: {
-      foregroundBL: { src: '/assets/ingredients/cutout/eucalyptus.webp', name: 'Eucalyptus', blur: 10, size: 140 },
-      foregroundTR: { src: '/assets/ingredients/cutout/dill.webp', name: 'Dill', blur: 8, size: 110 },
-      midLeftTop: { src: '/assets/ingredients/cutout/lavender.webp', name: 'Lavender', size: 66 },
-      midLeftBottom: { src: '/assets/ingredients/cutout/dill.webp', name: 'Dill Seed', size: 74 },
-      midRightTop: { src: '/assets/ingredients/cutout/eucalyptus.webp', name: 'Eucalyptus', size: 76 },
-      midRightBottom: { src: '/assets/ingredients/cutout/sesame.webp', name: 'Sesame', size: 70 },
-      farRight: { src: '/assets/ingredients/cutout/lavender.webp', name: 'Lavender', size: 78 },
-      baseLeaf: { src: '/assets/ingredients/cutout/eucalyptus.webp', name: 'Eucalyptus Sprig', size: 90 },
-    },
-  },
-  {
-    id: 'energy',
-    navLabel: 'Energy Booster',
-    bgWord: 'ENERGY',
-    bgColor: '#c7b6df', // Energized royal violet
-    bottleImg: '/assets/product-2.png', // Energy Booster Bottle
-    alt: 'TranzLife Energy Booster™',
-    tagline: 'Bioactive Vitality & Stamina',
-    ingredients: {
-      foregroundBL: { src: '/assets/ingredients/cutout/echinacea.webp', name: 'Echinacea', blur: 10, size: 145 },
-      foregroundTR: { src: '/assets/ingredients/cutout/symphytum.webp', name: 'Comfrey', blur: 8, size: 110 },
-      midLeftTop: { src: '/assets/ingredients/cutout/ruta.webp', name: 'Ruta', size: 68 },
-      midLeftBottom: { src: '/assets/ingredients/cutout/calc-phos.webp', name: 'Calc-Phos', size: 74 },
-      midRightTop: { src: '/assets/ingredients/cutout/echinacea.webp', name: 'Echinacea', size: 78 },
-      midRightBottom: { src: '/assets/ingredients/cutout/hecla-lava.webp', name: 'Hecla Lava', size: 70 },
-      farRight: { src: '/assets/ingredients/cutout/symphytum.webp', name: 'Symphytum', size: 80 },
-      baseLeaf: { src: '/assets/ingredients/cutout/ruta.webp', name: 'Ruta Sprig', size: 92 },
-    },
-  },
-  {
-    id: 'reviva',
-    navLabel: 'Reviva',
-    bgWord: 'REVIVA',
-    bgColor: '#edd0b4', // Warm morning apricot peach
-    bottleImg: '/assets/product-3.png', // Reviva Roll-On
-    alt: 'Reviva™ Botanical Massage Roll-On',
-    tagline: 'Daily Vitality Self-Care Ritual',
-    ingredients: {
-      foregroundBL: { src: '/assets/ingredients/cutout/ginger.webp', name: 'Ginger', blur: 10, size: 140 },
-      foregroundTR: { src: '/assets/ingredients/cutout/dill.webp', name: 'Dill', blur: 8, size: 110 },
-      midLeftTop: { src: '/assets/ingredients/cutout/eucalyptus.webp', name: 'Eucalyptus', size: 66 },
-      midLeftBottom: { src: '/assets/ingredients/cutout/turmeric.webp', name: 'Turmeric', size: 74 },
-      midRightTop: { src: '/assets/ingredients/cutout/dill.webp', name: 'Dill', size: 76 },
-      midRightBottom: { src: '/assets/ingredients/cutout/black-turmeric.webp', name: 'Black Turmeric', size: 70 },
-      farRight: { src: '/assets/ingredients/cutout/sesame.webp', name: 'Sesame', size: 78 },
-      baseLeaf: { src: '/assets/ingredients/cutout/eucalyptus.webp', name: 'Eucalyptus Sprig', size: 90 },
-    },
-  },
-  {
-    id: 'inhaler',
-    navLabel: 'BreatheFree',
-    bgWord: 'BREATHE',
-    bgColor: '#b8ded6', // Crisp cooling peppermint teal
-    bottleImg: '/assets/product-6.png', // Pocket Inhaler
-    alt: 'Craving Control™ Aromatherapy Inhaler',
-    tagline: 'Clean Pocket Aromatherapy Pause',
-    ingredients: {
-      foregroundBL: { src: '/assets/ingredients/cutout/peppermint.webp', name: 'Peppermint', blur: 10, size: 140 },
-      foregroundTR: { src: '/assets/ingredients/cutout/black-pepper.webp', name: 'Black Pepper', blur: 8, size: 110 },
-      midLeftTop: { src: '/assets/ingredients/cutout/lavender.webp', name: 'Lavender', size: 66 },
-      midLeftBottom: { src: '/assets/ingredients/cutout/tulsi.webp', name: 'Tulsi', size: 74 },
-      midRightTop: { src: '/assets/ingredients/cutout/peppermint.webp', name: 'Peppermint', size: 76 },
-      midRightBottom: { src: '/assets/ingredients/cutout/eucalyptus.webp', name: 'Eucalyptus', size: 70 },
-      farRight: { src: '/assets/ingredients/cutout/black-pepper.webp', name: 'Black Pepper', size: 80 },
-      baseLeaf: { src: '/assets/ingredients/cutout/peppermint.webp', name: 'Peppermint Sprig', size: 90 },
-    },
+    id: 'set-2',
+    label: 'Targeted Vitality',
+    products: [
+      {
+        id: 'energy',
+        title: 'Energy Booster™',
+        sub: 'Bioactive Vitality & Stamina',
+        bgWord: 'ENERGY',
+        bgColor: '#c7b6df', // Royal energized violet
+        bottleImg: '/assets/product-2.png',
+        alt: 'TranzLife Energy Booster™',
+        ingredients: {
+          fgBL: { src: '/assets/ingredients/cutout/echinacea.webp', blur: 8, size: 95 },
+          fgTR: { src: '/assets/ingredients/cutout/symphytum.webp', blur: 6, size: 75 },
+          midL: { src: '/assets/ingredients/cutout/ruta.webp', size: 50 },
+          midR: { src: '/assets/ingredients/cutout/calc-phos.webp', size: 54 },
+          baseLeaf: { src: '/assets/ingredients/cutout/ruta.webp', size: 68 },
+        },
+      },
+      {
+        id: 'reviva',
+        title: 'Reviva™',
+        sub: 'Daily Vitality Self-Care Ritual',
+        bgWord: 'REVIVA',
+        bgColor: '#edd0b4', // Warm morning apricot peach
+        bottleImg: '/assets/product-3.png',
+        alt: 'Reviva™ Botanical Massage Roll-On',
+        ingredients: {
+          fgBL: { src: '/assets/ingredients/cutout/ginger.webp', blur: 8, size: 95 },
+          fgTR: { src: '/assets/ingredients/cutout/dill.webp', blur: 6, size: 75 },
+          midL: { src: '/assets/ingredients/cutout/turmeric.webp', size: 52 },
+          midR: { src: '/assets/ingredients/cutout/black-turmeric.webp', size: 54 },
+          baseLeaf: { src: '/assets/ingredients/cutout/eucalyptus.webp', size: 68 },
+        },
+      },
+      {
+        id: 'inhaler',
+        title: 'Craving Control™',
+        sub: 'Pocket Aromatherapy Inhaler',
+        bgWord: 'BREATHE',
+        bgColor: '#b8ded6', // Crisp cooling peppermint teal
+        bottleImg: '/assets/product-6.png',
+        alt: 'Craving Control™ Aromatherapy Inhaler',
+        ingredients: {
+          fgBL: { src: '/assets/ingredients/cutout/peppermint.webp', blur: 8, size: 95 },
+          fgTR: { src: '/assets/ingredients/cutout/black-pepper.webp', blur: 6, size: 75 },
+          midL: { src: '/assets/ingredients/cutout/lavender.webp', size: 50 },
+          midR: { src: '/assets/ingredients/cutout/tulsi.webp', size: 54 },
+          baseLeaf: { src: '/assets/ingredients/cutout/peppermint.webp', size: 68 },
+        },
+      },
+    ],
   },
 ];
 
 export default function ProductSlider() {
-  const [activeIdx, setActiveIdx] = useState(0);
+  const [setIdx, setSetIdx] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [reduceMotion, setReduceMotion] = useState(false);
   const timerRef = useRef(null);
 
-  const total = PRODUCTS_SHOWCASE.length;
-  const curr = PRODUCTS_SHOWCASE[activeIdx];
-  const url = productUrl(curr.id);
-
-  const prev = () => setActiveIdx((prev) => (prev - 1 + total) % total);
-  const next = () => setActiveIdx((prev) => (prev + 1) % total);
-
-  // Auto-advance every 5 seconds, pauses when hovered
+  // Accessibility: detect reduced motion
   useEffect(() => {
-    if (isPaused) return undefined;
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const update = () => setReduceMotion(mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, []);
+
+  // Auto-switch sets every 6 seconds, pausing on hover/focus
+  useEffect(() => {
+    if (isPaused || reduceMotion) return undefined;
     timerRef.current = setInterval(() => {
-      setActiveIdx((prev) => (prev + 1) % total);
-    }, 5500);
+      setSetIdx((prev) => (prev === 0 ? 1 : 0));
+    }, 6000);
 
     return () => clearInterval(timerRef.current);
-  }, [isPaused, total]);
+  }, [isPaused, reduceMotion]);
+
+  const activeSet = SETS[setIdx];
+
+  const prevSet = () => setSetIdx((prev) => (prev === 0 ? 1 : 0));
+  const nextSet = () => setSetIdx((prev) => (prev === 0 ? 1 : 0));
 
   return (
     <section
-      className="blendy-stage-wrap"
-      aria-label="Product Showcase"
+      className="blendy-section"
+      id="targeted-formulations"
+      aria-label="Targeted Botanical Formulations"
       onPointerEnter={() => setIsPaused(true)}
       onPointerLeave={() => setIsPaused(false)}
+      onFocusCapture={() => setIsPaused(true)}
+      onBlurCapture={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget)) {
+          setIsPaused(false);
+        }
+      }}
     >
-      <div
-        className="blendy-canvas"
-        style={{ '--bg-hue': curr.bgColor }}
-      >
-        {/* Top Navigation Bar */}
-        <header className="blendy-nav">
-          <div className="blendy-nav__brand">
-            <span className="blendy-nav__icon" aria-hidden="true">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M19 12H5M12 19l-7-7 7-7" />
-              </svg>
-            </span>
-            <span className="blendy-nav__logo">TranzLife</span>
-          </div>
+      <header className="blendy-intro container" data-reveal>
+        <p className="blendy-eyebrow">WHAT EACH FORMULA IS DESIGNED TO SUPPORT</p>
+        <h2 className="blendy-headline">Targeted Botanical Formulations</h2>
+        <p className="blendy-sub">
+          Scientifically standardized Ayurvedic extracts and bioactive botanicals. Clean, targeted formulations designed for everyday wellness.
+        </p>
+      </header>
 
-          <nav className="blendy-nav__tabs" role="tablist" aria-label="Product variants">
-            {PRODUCTS_SHOWCASE.map((p, idx) => (
-              <button
+      <div className="container blendy-viewport">
+        {/* The 3 Vertical Panoramic Panels */}
+        <div
+          className="blendy-trio"
+          key={setIdx}
+          role="region"
+          aria-live="polite"
+          aria-label={`${activeSet.label} set`}
+        >
+          {activeSet.products.map((p, k) => {
+            const url = productUrl(p.id);
+            return (
+              <article
                 key={p.id}
+                className="blendy-panel"
+                style={{
+                  '--bg': p.bgColor,
+                  '--delay': `${k * 100}ms`,
+                }}
+              >
+                {/* 1. Oversized Background Typography (Behind Product) */}
+                <div className="bpanel-backdrop" aria-hidden="true">
+                  <span className="bpanel-backdrop__word">{p.bgWord}</span>
+                </div>
+
+                {/* 2. Floating 3D Ingredients with Depth-of-Field Blur */}
+                <div className="bpanel-orbit" aria-hidden="true">
+                  {/* Foreground Blurred Bokeh Botanicals */}
+                  <div
+                    className="bpanel-ing bpanel-ing--fg-bl"
+                    style={{ '--blur': `${p.ingredients.fgBL.blur}px`, '--size': `${p.ingredients.fgBL.size}px` }}
+                  >
+                    <img src={p.ingredients.fgBL.src} alt="" />
+                  </div>
+
+                  <div
+                    className="bpanel-ing bpanel-ing--fg-tr"
+                    style={{ '--blur': `${p.ingredients.fgTR.blur}px`, '--size': `${p.ingredients.fgTR.size}px` }}
+                  >
+                    <img src={p.ingredients.fgTR.src} alt="" />
+                  </div>
+
+                  {/* Midground Sharp Botanicals with Drop Shadows */}
+                  <div
+                    className="bpanel-ing bpanel-ing--mid-l"
+                    style={{ '--size': `${p.ingredients.midL.size}px` }}
+                  >
+                    <img src={p.ingredients.midL.src} alt="" />
+                  </div>
+
+                  <div
+                    className="bpanel-ing bpanel-ing--mid-r"
+                    style={{ '--size': `${p.ingredients.midR.size}px` }}
+                  >
+                    <img src={p.ingredients.midR.src} alt="" />
+                  </div>
+                </div>
+
+                {/* 3. Center Hero Floating Product Bottle */}
+                <div className="bpanel-hero">
+                  <Link to={url} className="bpanel-bottle-box" aria-label={`View ${p.title} details`}>
+                    <img
+                      src={p.bottleImg}
+                      alt={p.alt}
+                      className="bpanel-bottle"
+                      loading="lazy"
+                    />
+                    {/* Natural Botanical Leaf at Bottle Base */}
+                    <img
+                      src={p.ingredients.baseLeaf.src}
+                      alt=""
+                      className="bpanel-base-leaf"
+                      aria-hidden="true"
+                    />
+                    {/* Elliptical Ground Shadow */}
+                    <div className="bpanel-ground-shadow" aria-hidden="true" />
+                  </Link>
+                </div>
+
+                {/* 4. Bottom Footer (Name, Subtitle, Shop CTA - Zero Prices) */}
+                <div className="bpanel-footer">
+                  <h3 className="bpanel-title">
+                    <Link to={url}>{p.title}</Link>
+                  </h3>
+                  <p className="bpanel-sub">{p.sub}</p>
+                  <Link to={url} className="bpanel-cta" aria-label={`Shop ${p.title}`}>
+                    SHOP NOW
+                  </Link>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+
+        {/* Navigation Controls: Previous / Next & Segmented Set Switcher */}
+        <div className="blendy-controls" aria-label="Formulation set controls">
+          <button
+            type="button"
+            className="blendy-ctrl-btn blendy-ctrl-btn--prev"
+            onClick={prevSet}
+            aria-label="Previous formulations set"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+          </button>
+
+          <div className="blendy-set-tabs" role="tablist" aria-label="Formulation sets">
+            {SETS.map((s, idx) => (
+              <button
+                key={s.id}
                 type="button"
                 role="tab"
-                aria-selected={activeIdx === idx}
-                className={`blendy-nav__tab ${activeIdx === idx ? 'is-active' : ''}`}
-                onClick={() => setActiveIdx(idx)}
+                aria-selected={setIdx === idx}
+                className={`blendy-set-tab ${setIdx === idx ? 'is-active' : ''}`}
+                onClick={() => setSetIdx(idx)}
               >
-                {p.navLabel}
+                <span className="blendy-set-tab__num">0{idx + 1}</span>
+                <span className="blendy-set-tab__label">{s.label}</span>
               </button>
             ))}
-          </nav>
-
-          <div className="blendy-nav__right">
-            <Link to="/shop" className="blendy-nav__link">Shop</Link>
-            <span className="blendy-nav__sep" aria-hidden="true">|</span>
-            <Link to="/science" className="blendy-nav__link">Science</Link>
           </div>
-        </header>
-
-        {/* Oversized Background Typography Behind Product */}
-        <div className="blendy-backdrop" aria-hidden="true">
-          <span className="blendy-backdrop__text" key={curr.bgWord}>
-            {curr.bgWord}
-          </span>
-        </div>
-
-        {/* Center Hero Product Bottle & Ground Shadow */}
-        <div className="blendy-hero">
-          <div className="blendy-bottle-box" key={`bottle-${curr.id}`}>
-            <img
-              src={curr.bottleImg}
-              alt={curr.alt}
-              className="blendy-bottle"
-              loading="eager"
-            />
-            {/* Green botanical leaves tucked behind bottle base */}
-            <img
-              src={curr.ingredients.baseLeaf.src}
-              alt=""
-              className="blendy-base-leaf"
-              aria-hidden="true"
-            />
-            {/* Soft Elliptical Ground Shadow */}
-            <div className="blendy-ground-shadow" aria-hidden="true" />
-          </div>
-        </div>
-
-        {/* Floating 3D Ingredients with Depth of Field & Bokeh */}
-        <div className="blendy-orbit" key={`orbit-${curr.id}`} aria-hidden="true">
-          {/* Foreground Deep-Blur (Camera Bokeh) */}
-          <div className="b-ing b-ing--fg-bl" style={{ '--blur': `${curr.ingredients.foregroundBL.blur}px`, '--size': `${curr.ingredients.foregroundBL.size}px` }}>
-            <img src={curr.ingredients.foregroundBL.src} alt="" />
-          </div>
-
-          <div className="b-ing b-ing--fg-tr" style={{ '--blur': `${curr.ingredients.foregroundTR.blur}px`, '--size': `${curr.ingredients.foregroundTR.size}px` }}>
-            <img src={curr.ingredients.foregroundTR.src} alt="" />
-          </div>
-
-          {/* Midground Sharp Orbiting Botanicals with Drop Shadows */}
-          <div className="b-ing b-ing--ml-top" style={{ '--size': `${curr.ingredients.midLeftTop.size}px` }}>
-            <img src={curr.ingredients.midLeftTop.src} alt="" />
-          </div>
-
-          <div className="b-ing b-ing--ml-bot" style={{ '--size': `${curr.ingredients.midLeftBottom.size}px` }}>
-            <img src={curr.ingredients.midLeftBottom.src} alt="" />
-          </div>
-
-          <div className="b-ing b-ing--mr-top" style={{ '--size': `${curr.ingredients.midRightTop.size}px` }}>
-            <img src={curr.ingredients.midRightTop.src} alt="" />
-          </div>
-
-          <div className="b-ing b-ing--mr-bot" style={{ '--size': `${curr.ingredients.midRightBottom.size}px` }}>
-            <img src={curr.ingredients.midRightBottom.src} alt="" />
-          </div>
-
-          <div className="b-ing b-ing--far-right" style={{ '--size': `${curr.ingredients.farRight.size}px` }}>
-            <img src={curr.ingredients.farRight.src} alt="" />
-          </div>
-        </div>
-
-        {/* Bottom Bar: Prev / Next Controls & "SHOP NOW" (Zero Prices) */}
-        <footer className="blendy-footer">
-          <button
-            type="button"
-            className="blendy-arrow blendy-arrow--prev"
-            onClick={prev}
-            aria-label="Previous product"
-          >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M19 12H5M12 19l-7-7 7-7" />
-            </svg>
-          </button>
-
-          <Link to={url} className="blendy-cta" aria-label={`Shop ${curr.alt}`}>
-            SHOP NOW
-          </Link>
 
           <button
             type="button"
-            className="blendy-arrow blendy-arrow--next"
-            onClick={next}
-            aria-label="Next product"
+            className="blendy-ctrl-btn blendy-ctrl-btn--next"
+            onClick={nextSet}
+            aria-label="Next formulations set"
           >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M5 12h14M12 5l7 7-7 7" />
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M9 18l6-6-6-6" />
             </svg>
           </button>
-        </footer>
+        </div>
       </div>
     </section>
   );
