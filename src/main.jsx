@@ -14,6 +14,7 @@ import './styles/product.css';
 import './styles/polish.css';
 import './styles/refine.css';
 import './styles/chat.css';
+import './styles/ingredients-carousel.css';
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
