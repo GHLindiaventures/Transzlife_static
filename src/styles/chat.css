@@ -15,12 +15,12 @@
   --f-chat:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;
   position:fixed;
   z-index:66;
-  right:max(24px,env(safe-area-inset-right,0px));
-  bottom:calc(24px + env(safe-area-inset-bottom,0px));
+  right:max(20px,env(safe-area-inset-right,0px));
+  top:50%;
+  transform:translateY(-50%);
   display:flex;
   flex-direction:column;
   align-items:flex-end;
-  gap:12px;
   color:var(--ink);
   font-family:var(--f-chat);
   font-stretch:normal;
@@ -53,7 +53,7 @@
   display:grid;
   place-items:center;
   cursor:pointer;
-  transition:transform .3s var(--ease),box-shadow .3s var(--ease),border-color .3s;
+  transition:transform .3s var(--ease),box-shadow .3s var(--ease),border-color .3s,opacity .25s;
   animation:tulsiPulse 4s infinite ease-in-out;
 }
 
@@ -81,8 +81,9 @@
 
 .chat.open .ch-fab{
   animation:none;
-  background:#092e1d;
-  box-shadow:0 8px 20px rgba(0,0,0,.25);
+  opacity:0;
+  pointer-events:none;
+  transform:scale(.85);
 }
 
 /* Icons inside launcher: Leaf when closed, Close when open */
@@ -146,7 +147,7 @@
 .ch-welcome{
   position:absolute;
   right:calc(100% + 14px);
-  bottom:4px;
+  top:50%;
   width:290px;
   background:#ffffff;
   border:1px solid rgba(22,90,50,.18);
@@ -156,8 +157,8 @@
   cursor:pointer;
   opacity:0;
   visibility:hidden;
-  transform:scale(.85) translateX(12px);
-  transform-origin:right bottom;
+  transform:translateY(-50%) scale(.85) translateX(12px);
+  transform-origin:right center;
   transition:opacity .35s var(--ease),transform .4s var(--ease),visibility 0s .4s;
   z-index:65;
 }
@@ -165,14 +166,14 @@
 .ch-welcome.is-visible{
   opacity:1;
   visibility:visible;
-  transform:scale(1) translateX(0);
+  transform:translateY(-50%) scale(1) translateX(0);
   transition:opacity .35s var(--ease),transform .4s var(--ease),visibility 0s;
   animation:welcomePop .5s cubic-bezier(.34,1.56,.64,1);
 }
 
 .ch-welcome.is-closing{
   opacity:0;
-  transform:scale(.88) translateX(10px);
+  transform:translateY(-50%) scale(.88) translateX(10px);
   pointer-events:none;
 }
 
@@ -185,15 +186,15 @@
 @keyframes welcomePop{
   0%{
     opacity:0;
-    transform:scale(.8) translateX(16px);
+    transform:translateY(-50%) scale(.8) translateX(16px);
   }
   70%{
     opacity:1;
-    transform:scale(1.03) translateX(-2px);
+    transform:translateY(-50%) scale(1.03) translateX(-2px);
   }
   100%{
     opacity:1;
-    transform:scale(1) translateX(0);
+    transform:translateY(-50%) scale(1) translateX(0);
   }
 }
 
@@ -201,7 +202,8 @@
 .ch-welcome-tail{
   position:absolute;
   right:-8px;
-  bottom:22px;
+  top:50%;
+  transform:translateY(-50%);
   width:0;
   height:0;
   border-top:7px solid transparent;
@@ -291,8 +293,34 @@
 }
 
 /* ---------- Chat Panel (Dialog) ---------- */
-.ch-panel{width:min(390px,calc(100vw - 32px));height:min(620px,calc(100svh - 120px));display:flex;flex-direction:column;background:var(--panel-2);border:1px solid var(--line);border-radius:26px;box-shadow:0 30px 70px -20px rgba(20,45,24,.45);overflow:hidden;transform-origin:100% 100%;opacity:0;visibility:hidden;transform:translateY(16px) scale(.96);transition:opacity .3s,transform .45s var(--ease),visibility 0s .45s}
-.chat.open .ch-panel{opacity:1;visibility:visible;transform:none;transition:opacity .3s,transform .45s var(--ease),visibility 0s}
+.ch-panel{
+  position:fixed;
+  right:max(20px,env(safe-area-inset-right,0px));
+  top:50%;
+  transform:translateY(-50%) scale(.96);
+  transform-origin:right center;
+  width:min(390px,calc(100vw - 32px));
+  height:min(600px,calc(100svh - 40px));
+  display:flex;
+  flex-direction:column;
+  background:var(--panel-2);
+  border:1px solid var(--line);
+  border-radius:26px;
+  box-shadow:0 30px 70px -20px rgba(20,45,24,.45);
+  overflow:hidden;
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  transition:opacity .3s,transform .45s var(--ease),visibility 0s .45s;
+  z-index:70;
+}
+.chat.open .ch-panel{
+  opacity:1;
+  visibility:visible;
+  pointer-events:auto;
+  transform:translateY(-50%) scale(1);
+  transition:opacity .3s,transform .45s var(--ease),visibility 0s;
+}
 
 .ch-head{display:flex;align-items:center;gap:12px;padding:14px 14px 14px 16px;background:var(--forest);color:#f4f8ef}
 .ch-head div{flex:1;min-width:0}
@@ -367,7 +395,8 @@
 @media (max-width:620px){
   .chat{
     right:max(16px,env(safe-area-inset-right,0px));
-    bottom:calc(16px + env(safe-area-inset-bottom,0px));
+    top:50%;
+    transform:translateY(-50%);
   }
   .ch-fab{
     width:52px;
@@ -378,29 +407,44 @@
     height:24px;
   }
   .ch-welcome{
-    right:0;
-    bottom:calc(100% + 12px);
-    width:min(290px,calc(100vw - 32px));
-    transform:scale(.85) translateY(12px);
-    transform-origin:right bottom;
+    right:calc(100% + 10px);
+    top:50%;
+    bottom:auto;
+    width:min(265px,calc(100vw - 86px));
+    transform:translateY(-50%) scale(.85) translateX(10px);
+    transform-origin:right center;
   }
   .ch-welcome.is-visible{
-    transform:scale(1) translateY(0);
+    transform:translateY(-50%) scale(1) translateX(0);
   }
   .ch-welcome.is-closing{
-    transform:scale(.88) translateY(10px);
+    transform:translateY(-50%) scale(.88) translateX(8px);
   }
   .ch-welcome-tail{
-    right:20px;
-    bottom:-8px;
-    border-left:7px solid transparent;
-    border-right:7px solid transparent;
-    border-top:8px solid #ffffff;
-    border-bottom:0;
+    right:-8px;
+    top:50%;
+    bottom:auto;
+    transform:translateY(-50%);
+    border-top:7px solid transparent;
+    border-bottom:7px solid transparent;
+    border-left:8px solid #ffffff;
+    border-right:0;
   }
 
-  /* compact sheet: about 60% of the screen, so the page and header stay visible above it */
-  .ch-panel{width:calc(100vw - 24px);height:min(62svh,540px);min-height:360px;border-radius:22px}
+  /* centered dialog sheet on mobile */
+  .ch-panel{
+    right:14px;
+    left:14px;
+    width:auto;
+    height:min(580px,calc(100svh - 40px));
+    min-height:360px;
+    border-radius:22px;
+    top:50%;
+    transform:translateY(-50%) scale(.96);
+  }
+  .chat.open .ch-panel{
+    transform:translateY(-50%) scale(1);
+  }
   .ch-head{gap:10px;padding:10px 8px 10px 12px}
   .ch-av.big{width:34px;height:34px}
   .ch-av.big svg{width:19px;height:19px}
