@@ -382,7 +382,23 @@ body {
 }
 
 .news {
-  background: linear-gradient(180deg, rgba(250, 240, 207, .0), rgba(250, 240, 207, .7))
+  background: linear-gradient(135deg, var(--green-100), var(--gold-100))
+}
+.news.news--help {
+  background: url('/assets/photos/help-background.png') center/cover no-repeat;
+  position: relative;
+  filter: brightness(1.1) saturate(1.1);
+}
+.news.news--help::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(12, 51, 32, 0.15) 0%, rgba(224, 168, 38, 0.1) 50%, rgba(12, 51, 32, 0.15) 100%);
+  z-index: 1;
+}
+.news.news--help > * {
+  position: relative;
+  z-index: 2;
 }
 
 .testi {
@@ -656,7 +672,8 @@ html {
 
 /* near: text moves least */
 .pslider__right .cmp-img {
-  translate: 0 calc(var(--pp) * 60px)
+  translate: 0 calc(var(--pp) * 60px);
+  will-change: transform
 }
 
 /* scene slides the other way */
@@ -683,12 +700,13 @@ html {
 
 /* extra overscan so the stronger parallax never shows the picture edge */
 .cmp--scene .cmp-img {
-  transform: scale(1.26)
+  transform: scale(1.15);
+  will-change: transform
 }
 
 @media (max-width:749px) {
   .cmp--scene .cmp-img {
-    transform: scale(1.5);
+    transform: scale(1.25);
     transform-origin: 50% 28%
   }
 }
@@ -874,4 +892,55 @@ html {
 .pslider__slide:nth-child(n) .pslider__left .media--pslider::after {
   transform: scaleX(var(--k));
   transform-origin: 50% 50%
+}
+/* ---------------- hero on phones: product picture on top, text underneath (no text over the bottles) ---------------- */
+@media (max-width: 749px) {
+  .hero { height: min(740px, calc(100svh - 112px)); min-height: 600px; }
+  .hero .hero__slide .hero__bg > img {
+    position: absolute; inset: 0 0 auto 0; width: 100%; height: 62%; max-width: none; aspect-ratio: auto;
+    object-fit: cover; object-position: 100% 62%;
+  }
+  /* the lower part blends from the picture into the slide colour, so the words sit on a calm background */
+  .hero .hero__slide--light .hero__shade {
+    background: linear-gradient(180deg, rgba(8,38,26,0) 38%, rgba(8,38,26,.55) 52%, rgba(8,38,26,.94) 64%, #0b2517 100%);
+  }
+  .hero .hero__slide--ink .hero__shade {
+    background: linear-gradient(180deg, rgba(247,239,210,0) 40%, rgba(247,239,210,.7) 56%, rgba(247,239,210,.96) 66%, #f7efd2 100%);
+  }
+  .hero .hero__shade::after { display: none; }
+  .hero .hero__content { justify-content: flex-end; padding-top: 0; padding-bottom: 76px; }
+  .hero .hero__content .slot--eyebrow-w { margin-bottom: 8px; }
+  .has-text.slot--hero-title { font-size: 28px; line-height: 1.12; max-width: 100%; margin-bottom: 10px; }
+  .hero .hero__content .slot--hero-sub { font-size: 15px; line-height: 1.5; margin-bottom: 14px; max-width: 34ch; }
+  .hero .hero__content .link-btn { align-self: flex-start; }
+}
+
+/* phone hero, flipped: words on top, product underneath */
+@media (max-width: 749px) {
+  .hero .hero__slide .hero__bg > img { inset: auto 0 0 0; height: 60%; object-position: 100% 70%; }
+  .hero .hero__slide--light .hero__shade {
+    background: linear-gradient(0deg, rgba(8,38,26,0) 0%, rgba(8,38,26,0) 56%, rgba(8,38,26,.6) 66%, rgba(8,38,26,.95) 78%, #0b2517 100%);
+  }
+  .hero .hero__slide--ink .hero__shade {
+    background: linear-gradient(0deg, rgba(247,239,210,0) 0%, rgba(247,239,210,0) 56%, rgba(247,239,210,.7) 66%, rgba(247,239,210,.96) 78%, #f7efd2 100%);
+  }
+  .hero .hero__content { justify-content: flex-start; padding-top: 30px; padding-bottom: 0; }
+}
+
+/* hero: never show an empty slide while the loop silently snaps back to the first slide */
+.hero.is-snap .hero__content > * { transition: none !important; opacity: 1 !important; transform: none !important; }
+@media (max-width: 749px) {
+  .hero .hero__bg { transform: none !important; }   /* no scroll parallax on phones: it pushes the picture out of its box */
+}
+
+/* ---------------- benefits cards on phones: every card the same size ---------------- */
+@media (max-width: 989px) {
+  .benefits__grid { align-items: stretch; }
+  .benefits__col { display: grid; grid-auto-rows: 1fr; gap: var(--s-4); }
+  .benefits .benefit { height: 100%; min-height: 150px; margin: 0; align-self: stretch; }
+}
+@media (max-width: 749px) {
+  .benefits__grid { grid-template-columns: 1fr 1fr; gap: var(--s-4) var(--s-3); }
+  .benefits__col { grid-template-rows: repeat(3, 1fr); }
+  .benefits .benefit { min-height: 172px; padding: var(--s-4) var(--s-3); }
 }

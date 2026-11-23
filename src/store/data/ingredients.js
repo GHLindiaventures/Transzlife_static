@@ -55,3 +55,28 @@ export const INGREDIENTS = [
 ];
 
 export const getIngredient = (id) => INGREDIENTS.find((i) => i.id === id);
+
+const INGREDIENT_IMG_MAP = {
+  mulethi: 'licorice',
+  sukku: 'ginger',
+  thippili: 'long-pepper',
+  jeera: 'cumin',
+  karumanjal: 'black-turmeric',
+  giloy: 'guduchi',
+  'milk-thistle': 'haritaki',
+  chelidonium: 'daruharidra',
+  lycopodium: 'punarnava',
+  'nux-vomica': 'kalmegh',
+  bryonia: 'kutki',
+  chionanthus: 'bhringraj',
+};
+
+export const getIngredientImg = (id) => {
+  const filename = INGREDIENT_IMG_MAP[id] || id;
+  return `/assets/ingredients/cutout/${filename}.webp`;
+};
+
+export const getIngredientPhoto = (id) => {
+  const filename = INGREDIENT_IMG_MAP[id] || id;
+  return `/assets/ingredients/${filename}.webp`;
+};

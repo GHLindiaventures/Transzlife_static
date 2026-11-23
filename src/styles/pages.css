@@ -22,6 +22,16 @@
   .slot--pb-title,.pbanner--about .slot--pb-title,.pbanner--dark .slot--pb-title{--h:44px;--w:240px}
 }
 
+/* ---- FAQ hero with meeting image ---- */
+.faq-hero{position:relative;width:100%;height:476px;overflow:hidden;background:#5a6e4c}
+.faq-hero__image{position:relative;width:100%;height:100%}
+.faq-hero__image img{width:100%;height:100%;object-fit:cover}
+.faq-hero__text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:67.8px;font-weight:700;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.3);letter-spacing:.1em;z-index:2}
+@media (max-width:749px){
+  .faq-hero{height:294px}
+  .faq-hero__text{font-size:41.89px}
+}
+
 /* ---- intro text ---- */
 .pintro{padding:103px var(--pad);text-align:center}
 .pintro__inner{max-width:900px;margin:0 auto}
@@ -77,8 +87,14 @@
 .featured--titled .headline{margin-bottom:32px;padding-inline:var(--pad)}
 @media (max-width:749px){.bgvideo--sm{height:400px}.bgvideo--sm .slot--bgv-title{--h:83px}.featured--titled{padding-top:56px}}
 
+/* ---- help section with background image ---- */
+.news.news--help{height:auto;min-height:520px;padding:89px var(--pad)}
+.news.news--help .news__card{width:min(776px,100%);padding:55px 55px}
+@media (max-width:989px){.news.news--help{min-height:480px}.news.news--help .news__card{padding:34px 34px}}
+@media (max-width:749px){.news.news--help{min-height:420px;padding:55px 21px}.news.news--help .news__card{padding:34px 21px}}
+
 /* ---- FAQ accordion (10 rows x 79px) ---- */
-.faq{padding:96px var(--pad)}
+.faq{padding:55px var(--pad)}
 .faq__list{max-width:890px;margin:0 auto;border-top:1px solid var(--line)}
 .faq__item{border-bottom:1px solid var(--line)}
 .faq__q{width:100%;min-height:78px;display:flex;align-items:center;gap:12px;text-align:left}
@@ -92,7 +108,7 @@
 .faq__a>div{overflow:hidden}
 .faq__item.is-open .faq__a{grid-template-rows:1fr}
 .faq__a .slot{--w:100%;--h:72px;margin:0 0 24px 36px;max-width:calc(100% - 36px)}
-@media (max-width:749px){.faq{padding:56px var(--pad)}.faq__q{min-height:64px}.slot--q{--w:70%}}
+@media (max-width:749px){.faq{padding:34px var(--pad)}.faq__q{min-height:64px}.slot--q{--w:70%}}
 
 /* ---- Blog (3-col grid, 438px cards) ---- */
 .blog{padding:40px var(--pad) 65px}

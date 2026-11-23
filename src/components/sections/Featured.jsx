@@ -1,7 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Media, Slot, ProductImg } from '../ui.jsx';
 import { PRODUCTS, PRODUCTS_SECTION, priceLabel, productUrl } from '../../content/site.js';
+
+const COUNT = PRODUCTS.length;
 
 /** Price row: price + size pill. Pass no product for the empty placeholder version. */
 export function PriceRow({ product }) {
@@ -43,35 +45,6 @@ export function ProductCard({ product }) {
       <PriceRow product={product} />
     </article>
   );
-}
-
-/** Tracks how far the row has been scrolled: drives the progress bar and enables/disables the arrows. */
-function useScrollState(ref) {
-  const [state, setState] = useState({ size: 1, offset: 0, canPrev: false, canNext: false });
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return undefined;
-    let frame = 0;
-    const update = () => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => {
-        const { scrollLeft, scrollWidth, clientWidth } = el;
-        const size = scrollWidth > 0 ? Math.min(1, clientWidth / scrollWidth) : 1;
-        const max = scrollWidth - clientWidth;
-        const offset = max > 0 ? (scrollLeft / max) * (1 - size) : 0;
-        setState({ size, offset, canPrev: scrollLeft > 2, canNext: scrollLeft < max - 2 });
-      });
-    };
-    update();
-    el.addEventListener('scroll', update, { passive: true });
-    window.addEventListener('resize', update);
-    return () => {
-      cancelAnimationFrame(frame);
-      el.removeEventListener('scroll', update);
-      window.removeEventListener('resize', update);
-    };
-  }, [ref]);
-  return state;
 }
 
 /** On mobile, bring the card nearest the viewport center slightly forward. */
@@ -141,28 +114,147 @@ const Arrow = ({ dir }) => (
 
 /**
  * All products.
- * layout="slider" (home): a sideways row with arrow buttons, a progress bar and a "View all" link.
- * layout="grid" (/products): every product at once.
+ * layout="slider" (home): an automatic, continuous, infinite-looping carousel with navigation arrows.
+ * layout="grid" (/products): every product at once in a static grid.
  */
 export default function Featured({ headline = PRODUCTS_SECTION.headline, sub = PRODUCTS_SECTION.sub, layout = 'slider' }) {
   const trackRef = useRef(null);
-  const scroll = useScrollState(trackRef);
   const isSlider = layout === 'slider';
+  const isJumpingRef = useRef(false);
   useCardFront(trackRef, isSlider);
 
-  /* move by one card (card width + gap), so the row always lands on a card edge */
-  const step = (dir) => {
+  const [activeIdx, setActiveIdx] = useState(0);
+  const [isInteracting, setIsInteracting] = useState(false);
+  const [reduce, setReduce] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const apply = () => setReduce(mq.matches);
+    apply();
+    mq.addEventListener('change', apply);
+    return () => mq.removeEventListener('change', apply);
+  }, []);
+
+  // For slider mode, render 3 sets of products so the loop wraps around infinitely and seamlessly
+  const displayProducts = isSlider
+    ? [...PRODUCTS, ...PRODUCTS, ...PRODUCTS]
+    : PRODUCTS;
+
+  const getMetrics = useCallback(() => {
+    const el = trackRef.current;
+    if (!el) return null;
+    const card = el.querySelector('.pcard');
+    if (!card) return null;
+    const style = window.getComputedStyle(el);
+    const gap = parseFloat(style.columnGap || style.gap) || 16;
+    const stepWidth = card.offsetWidth + gap;
+    const singleSetWidth = stepWidth * COUNT;
+    return { stepWidth, singleSetWidth };
+  }, []);
+
+  // Start scroll at middle set (Set 1) so user can scroll left or right indefinitely
+  useEffect(() => {
+    if (!isSlider) return;
     const el = trackRef.current;
     if (!el) return;
-    const card = el.querySelector('.pcard');
-    const gap = parseFloat(getComputedStyle(el).columnGap) || 0;
-    const by = card ? card.offsetWidth + gap : el.clientWidth * 0.8;
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const init = () => {
+      const m = getMetrics();
+      if (m && m.singleSetWidth > 0) {
+        el.scrollLeft = m.singleSetWidth;
+      }
+    };
+    init();
+    const t = setTimeout(init, 50);
+    return () => clearTimeout(t);
+  }, [isSlider, getMetrics]);
+
+  // Handle scroll events: seamless wrapping and tracking active product index
+  useEffect(() => {
+    if (!isSlider) return;
+    const el = trackRef.current;
+    if (!el) return;
+
+    let frame = 0;
+    const onScroll = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const m = getMetrics();
+        if (!m || m.singleSetWidth <= 0 || isJumpingRef.current) return;
+
+        const { scrollLeft } = el;
+        const { singleSetWidth, stepWidth } = m;
+
+        // When scrolling past the middle set into the 3rd set, wrap back silently
+        if (scrollLeft >= singleSetWidth * 2) {
+          isJumpingRef.current = true;
+          el.style.scrollBehavior = 'auto';
+          el.style.scrollSnapType = 'none';
+          el.scrollLeft -= singleSetWidth;
+          requestAnimationFrame(() => {
+            el.style.scrollBehavior = '';
+            el.style.scrollSnapType = '';
+            isJumpingRef.current = false;
+          });
+        } else if (scrollLeft < singleSetWidth * 0.5) {
+          // When scrolling backwards into the 1st set, wrap forward silently
+          isJumpingRef.current = true;
+          el.style.scrollBehavior = 'auto';
+          el.style.scrollSnapType = 'none';
+          el.scrollLeft += singleSetWidth;
+          requestAnimationFrame(() => {
+            el.style.scrollBehavior = '';
+            el.style.scrollSnapType = '';
+            isJumpingRef.current = false;
+          });
+        }
+
+        // Calculate currently centered product (0..COUNT-1)
+        const rel = ((el.scrollLeft - singleSetWidth) % singleSetWidth + singleSetWidth) % singleSetWidth;
+        const currentCard = Math.round(rel / stepWidth) % COUNT;
+        setActiveIdx(currentCard);
+      });
+    };
+
+    el.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    return () => {
+      cancelAnimationFrame(frame);
+      el.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
+  }, [isSlider, getMetrics]);
+
+  // Step helper for next/prev
+  const step = useCallback((dir) => {
+    const el = trackRef.current;
+    if (!el) return;
+    const m = getMetrics();
+    const by = m ? m.stepWidth : el.clientWidth * 0.8;
     el.scrollBy({ left: dir * by, behavior: reduce ? 'auto' : 'smooth' });
-  };
+  }, [getMetrics, reduce]);
+
+  // Automatic cycling loop (every 3.5s)
+  useEffect(() => {
+    if (!isSlider || isInteracting || reduce) return undefined;
+    const interval = setInterval(() => {
+      step(1);
+    }, 3500);
+    return () => clearInterval(interval);
+  }, [isSlider, isInteracting, reduce, step]);
 
   return (
-    <section className={`featured featured--titled featured--${layout}`} id={PRODUCTS_SECTION.id} aria-labelledby="productsHeading">
+    <section
+      className={`featured featured--titled featured--${layout}`}
+      id={PRODUCTS_SECTION.id}
+      aria-labelledby="productsHeading"
+      onMouseEnter={() => setIsInteracting(true)}
+      onMouseLeave={() => setIsInteracting(false)}
+      onFocus={() => setIsInteracting(true)}
+      onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setIsInteracting(false); }}
+      onTouchStart={() => setIsInteracting(true)}
+      onTouchEnd={() => setIsInteracting(false)}
+    >
       <div className="featured__head" data-reveal>
         <Slot as="h2" className="headline slot--headline" id="productsHeading">{headline}</Slot>
         {sub && <p className="featured__sub">{sub}</p>}
@@ -172,20 +264,44 @@ export default function Featured({ headline = PRODUCTS_SECTION.headline, sub = P
           className="featured__track"
           id="featuredTrack"
           ref={trackRef}
-          {...(isSlider ? { tabIndex: 0, role: 'region', 'aria-label': 'Products, scroll sideways for more' } : {})}
+          {...(isSlider ? { tabIndex: 0, role: 'region', 'aria-label': 'Products carousel, auto-advancing' } : {})}
         >
-          {PRODUCTS.map((p) => <ProductCard key={p.id} product={p} />)}
+          {displayProducts.map((p, i) => (
+            <ProductCard key={isSlider ? `${p.id}-${i}` : p.id} product={p} />
+          ))}
         </div>
         {isSlider && (
           <>
-            <button type="button" className="featured__arrow featured__arrow--prev" aria-label="Previous products" aria-controls="featuredTrack" disabled={!scroll.canPrev} onClick={() => step(-1)}><Arrow dir="prev" /></button>
-            <button type="button" className="featured__arrow featured__arrow--next" aria-label="Next products" aria-controls="featuredTrack" disabled={!scroll.canNext} onClick={() => step(1)}><Arrow dir="next" /></button>
+            <button
+              type="button"
+              className="featured__arrow featured__arrow--prev"
+              aria-label="Previous products"
+              aria-controls="featuredTrack"
+              onClick={() => step(-1)}
+            >
+              <Arrow dir="prev" />
+            </button>
+            <button
+              type="button"
+              className="featured__arrow featured__arrow--next"
+              aria-label="Next products"
+              aria-controls="featuredTrack"
+              onClick={() => step(1)}
+            >
+              <Arrow dir="next" />
+            </button>
           </>
         )}
       </div>
-      {isSlider && scroll.size < 1 && (
+      {isSlider && (
         <div className="featured__progress" aria-hidden="true">
-          <span style={{ width: `${scroll.size * 100}%`, left: `${scroll.offset * 100}%` }} />
+          <span
+            style={{
+              width: `${(1 / COUNT) * 100}%`,
+              left: `${(activeIdx / COUNT) * 100}%`,
+              transition: 'left 0.35s ease-out',
+            }}
+          />
         </div>
       )}
       {isSlider && (

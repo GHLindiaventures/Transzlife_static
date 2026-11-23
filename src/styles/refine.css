@@ -10,10 +10,10 @@
 #products,#sc-pipeline,#sc-certs,#roots{scroll-margin-top:calc(var(--header-h) + 12px)}
 
 /* ---------------- header: one clear Shop action instead of dead icons ---------------- */
-.header__cta{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 18px;border-radius:999px;background:var(--green-700);color:#fff;font-size:12.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;transition:background .25s var(--ease),color .25s var(--ease)}
+.header__cta{display:inline-flex;align-items:center;gap:8px;min-height:34px;padding:0 21px;border-radius:999px;background:var(--green-700);color:#fff;font-size:12.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;transition:background .25s var(--ease),color .25s var(--ease)}
 .header__cta:hover{background:var(--green-900);color:var(--gold-400)}
-@media (max-width:989px){.header__cta{min-height:36px;padding:0 14px}}
-@media (max-width:420px){.header__cta span{display:none}.header__cta{width:40px;padding:0;justify-content:center}}
+@media (max-width:989px){.header__cta{min-height:34px;padding:0 13px}}
+@media (max-width:420px){.header__cta span{display:none}.header__cta{width:34px;padding:0;justify-content:center}}
 .mega__tag{display:block;margin-top:2px;font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--green-700);opacity:.8}
 
 /* ---------------- floating "talk to us" button ---------------- */
@@ -289,8 +289,15 @@
 .brands .media--logo>img{position:static;width:100%;height:100%;object-fit:contain}
 
 /* ---------------- closing help card ---------------- */
-.news--help .news__card{display:flex;flex-direction:column;align-items:center}
+.news.news--help .news__card{display:flex;flex-direction:column;align-items:center}
+.news__leaf-icon{display:flex;justify-content:center;margin:var(--s-3,13px) 0 var(--s-2,8px)}
+.news__leaf{width:32px;height:32px;color:var(--green-700)}
 .news__actions{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:var(--s-4,21px) var(--s-5,34px)}
+.news.news--help .btn--dark{background:var(--green-700);color:#fff;border:1px solid var(--green-700)}
+.news.news--help .btn--dark:hover{background:var(--green-900);color:var(--gold-400);border-color:var(--green-900)}
+.news.news--help .link-btn--dark{color:var(--green-700)}
+.news.news--help .link-btn--dark:hover{color:var(--green-900)}
+.news.news--help .link-btn--dark::after{background:var(--gold-500)}
 @media (max-width:749px){.news__actions{flex-direction:column}.news__actions .btn{width:100%}}
 
 @media (prefers-reduced-motion:reduce){
@@ -327,3 +334,85 @@ li.is-open>.drawer__shop{display:grid}
   body:has(.tl-store .sticky-buy) .to-top{bottom:calc(84px + var(--s-6) + 12px)}
 }
 @media (min-width:750px) and (max-width:860px){body:has(.tl-store .sticky-buy) .to-top{bottom:90px}}
+
+/* ---- marquee banner: seamless continuous infinite scroll with botanical leaf separator ---- */
+.banner__marquee {
+  display: flex !important;
+  width: max-content !important;
+  will-change: transform;
+  animation: banner-scroll 36s linear infinite !important;
+}
+
+.banner__marquee-group {
+  display: flex !important;
+  align-items: center !important;
+  flex-shrink: 0 !important;
+  gap: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.banner__item {
+  display: inline-flex !important;
+  align-items: center !important;
+  flex-shrink: 0 !important;
+  white-space: nowrap !important;
+}
+
+.banner__item .slot--banner-title {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: auto !important;
+  flex: none !important;
+  display: inline-block !important;
+}
+
+.banner__leaf-wrap {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 32px !important;
+  flex-shrink: 0 !important;
+  vertical-align: middle !important;
+}
+
+.banner__leaf-icon {
+  width: 0.44em !important;
+  height: 0.44em !important;
+  min-width: 28px !important;
+  min-height: 28px !important;
+  max-width: 58px !important;
+  max-height: 58px !important;
+  color: #4ade80 !important;
+  filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 16px rgba(74, 222, 128, 0.45)) !important;
+  display: block !important;
+}
+
+@media (max-width: 989px) {
+  .banner__leaf-wrap {
+    margin: 0 22px !important;
+  }
+  .banner__leaf-icon {
+    min-width: 22px !important;
+    min-height: 22px !important;
+  }
+}
+
+@media (max-width: 749px) {
+  .banner__leaf-wrap {
+    margin: 0 16px !important;
+  }
+  .banner__leaf-icon {
+    min-width: 18px !important;
+    min-height: 18px !important;
+  }
+}
+
+@keyframes banner-scroll {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}

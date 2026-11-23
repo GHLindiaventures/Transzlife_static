@@ -23,7 +23,7 @@
 
 /* two full pictures, aligned and edge to edge (same zoom on both so they line up exactly) */
 .cmp--scene .cmp-bg{display:none}
-.cmp--scene .cmp-img{inset:0;width:100%;height:100%;object-fit:cover;object-position:center;transform:scale(1.13)}
+.cmp--scene .cmp-img{inset:0;width:100%;height:100%;object-fit:cover;object-position:center;transform:scale(1.05);will-change:transform}
 
 /* cut-out artwork: murky "before" backdrop, fresh botanical "after" backdrop */
 .cmp--cutout .cmp-before .cmp-bg{background:radial-gradient(ellipse 55% 60% at 50% 52%,rgba(120,104,78,.55),transparent 70%),radial-gradient(ellipse 120% 90% at 50% 50%,#57513f 0%,#3b3a2f 55%,#26261f 100%)}

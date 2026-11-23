@@ -5,9 +5,8 @@ import Home from './pages/Home.jsx';
 import About from './pages/About.jsx';
 import Science from './pages/Science.jsx';
 import Faq from './pages/Faq.jsx';
-import Blog from './pages/Blog.jsx';
 import Contact from './pages/Contact.jsx';
-import Products from './pages/Products.jsx';
+import Sustainability from './pages/Sustainability.jsx';
 import { CartProvider } from './store/context/CartContext';
 import { TooltipProvider } from './store/components/ui/tooltip';
 import StoreLayout, { StoreOverlays } from './store/StoreLayout.jsx';
@@ -45,10 +44,12 @@ export default function App() {
             <Route index element={<Home />} />
             <Route path="about" element={<About />} />
             <Route path="science" element={<Science />} />
+            <Route path="sustainability" element={<Sustainability />} />
             <Route path="faq" element={<Faq />} />
-            <Route path="blog" element={<Blog />} />
+            <Route path="blog" element={<Navigate to="/journal" replace />} />
             <Route path="contact" element={<Contact />} />
-            <Route path="products" element={<Products />} />
+            <Route path="products" element={<Navigate to="/shop" replace />} />
+            <Route path="certifications" element={<Navigate to="/science#sc-certs" replace />} />
             <Route path="product/:id" element={<OldProductLink />} />
             <Route element={<StoreLayout />}>
               <Route path="shop" element={page(<Shop />)} />

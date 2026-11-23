@@ -16,7 +16,7 @@ export default function CompareStage({ data }) {
   useCompare(stageRef, handleRef, NAMES);
 
   const { kind, before, after } = data;
-  const size = kind === 'scene' ? { width: 2100, height: 1000 } : { width: 1200, height: 820 };
+  const size = kind === 'scene' ? { width: 1400, height: 667 } : { width: 800, height: 547 };
   const pic = (side, cls) => (
     <img className="cmp-img" src={`${BASE}assets/${side.src}`} alt={side.alt} {...size} loading="lazy" decoding="async" draggable="false" />
   );

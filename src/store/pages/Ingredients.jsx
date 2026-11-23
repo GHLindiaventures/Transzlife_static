@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Search } from 'lucide-react';
-import { INGREDIENTS, INGREDIENT_TYPES } from '../data/ingredients';
+import { INGREDIENTS, INGREDIENT_TYPES, getIngredientImg } from '../data/ingredients';
 import { PRODUCTS } from '../data/products';
 import { Breadcrumbs, useTitle } from '../components/Common';
 
@@ -58,7 +58,24 @@ export default function Ingredients() {
         {list.map((i) => (
           <article key={i.id} id={i.id} className="ingcard" style={{ '--c': INGREDIENT_TYPES[i.type].color }}>
             <div className="ingcard__head">
-              <span className="ing__dot">{i.name.charAt(0)}</span>
+              <span className="ing__thumb" aria-hidden="true">
+                <img
+                  src={getIngredientImg(i.id)}
+                  alt={i.name}
+                  className="ing__img"
+                  loading="lazy"
+                  decoding="async"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                    if (e.currentTarget.nextElementSibling) {
+                      e.currentTarget.nextElementSibling.style.display = 'grid';
+                    }
+                  }}
+                />
+                <span className="ing__dot ing__dot--fallback" style={{ display: 'none' }}>
+                  {i.name.charAt(0)}
+                </span>
+              </span>
               <div>
                 <h2>{i.name}</h2>
                 <p>{i.alt}{i.latin && <> · <i>{i.latin}</i></>}</p>

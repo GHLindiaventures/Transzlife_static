@@ -82,7 +82,7 @@ export default function Header({ onBurger }) {
             <svg width="20" height="14" viewBox="0 0 20 14" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M0 1h20M0 7h20M0 13h20" /></svg>
           </button>
           <Link className="header__logo" to="/">
-            <img className="logo__img" src={`${import.meta.env.BASE_URL}assets/logo.png`} alt="TranzLife Biosciences, home" width="56" height="56" />
+            <img className="logo__img" src={`${import.meta.env.BASE_URL}assets/logo.png`} alt="TranzLife Biosciences, home" width="36" height="36" />
           </Link>
         </div>
 
