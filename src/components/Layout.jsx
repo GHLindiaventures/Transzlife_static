@@ -5,7 +5,6 @@ import Announcement from './Announcement.jsx';
 import Header from './Header.jsx';
 import Drawer from './Drawer.jsx';
 import Footer from './Footer.jsx';
-import BackToTop from './BackToTop.jsx';
 
 export default function Layout() {
   const { pathname, hash, key } = useLocation();
@@ -95,8 +94,6 @@ export default function Layout() {
       </main>
 
       <Footer ref={footerRef} />
-
-      <BackToTop />
     </>
   );
 }
