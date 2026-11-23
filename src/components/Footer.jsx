@@ -1,4 +1,4 @@
-import { forwardRef, useState } from 'react';
+import { forwardRef, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { BRAND, CONTACT, FOOTER, SOCIAL_LINKS } from '../content/site.js';
 import '../styles/footer.css';
@@ -126,6 +126,27 @@ function Decor() {
 
 const Footer = forwardRef(function Footer(_, ref) {
   const year = new Date().getFullYear();
+
+  // curtain reveal: the footer waits behind the page and is uncovered as the page lifts away.
+  // --ftp: 0 (the curtain's lower edge is at the bottom of the screen) to 1 (fully revealed); --ftr: how far the footer lags (px).
+  useEffect(() => {
+    const el = document.getElementById('footer');
+    const curtain = el && el.previousElementSibling;           // <main>: its lower edge is the footer's natural top
+    if (!el || !curtain || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      const vh = window.innerHeight;
+      const p = (vh - curtain.getBoundingClientRect().bottom) / vh;
+      el.style.setProperty('--ftp', Math.max(0, Math.min(1, p)).toFixed(3));
+      el.style.setProperty('--ftr', Math.round(Math.min(el.offsetHeight, vh * 0.7)) + 'px');
+    };
+    const onScroll = () => { if (!raf) raf = requestAnimationFrame(update); };
+    update();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    return () => { window.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onScroll); if (raf) cancelAnimationFrame(raf); };
+  }, []);
   return (
     <footer className="footer ft" id="footer" ref={ref}>
       <Decor />
