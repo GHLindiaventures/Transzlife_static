@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Check, Download, ShieldCheck, Truck, RotateCcw, Leaf, ArrowRight, Lock, Pill, Clock, Package, Lightbulb, Hand, Briefcase, MapPin, Sparkles, FileText, FlaskConical, Sprout } from 'lucide-react';
 import { getProduct, PRODUCTS, PACKS } from '../data/products';
+import { SITE } from '../data/site';
 import { getIngredient } from '../data/ingredients';
 import { getConcern } from '../data/concerns';
 import { ARTICLES } from '../data/articles';
@@ -127,7 +128,7 @@ export default function Product() {
             </div>
 
             <div className="pdp__trust">
-              <span><Truck size={18} /> Free shipping above ₹499</span>
+              <span><Truck size={18} /> Free shipping above ₹{SITE.freeShippingAbove}</span>
               <span><Lock size={18} /> Secure checkout</span>
               <span><RotateCcw size={18} /> Easy returns on damaged items</span>
               <span><Leaf size={18} /> Plant-based</span>

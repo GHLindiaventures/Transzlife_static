@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { ProductImg } from './ui.jsx';
-import { PRODUCTS, productUrl } from '../content/site.js';
+import { PRODUCTS, productUrl, ANNOUNCEMENTS } from '../content/site.js';
 import { NAV } from './Header.jsx';
 
 export default function Drawer({ open, onClose }) {
@@ -58,6 +58,36 @@ export default function Drawer({ open, onClose }) {
             </li>
           ))}
         </ul>
+        <div className="drawer__trust">
+          <div className="drawer__trust-title">Our Promise</div>
+          <ul className="drawer__trust-list">
+            {ANNOUNCEMENTS.map((item, idx) => (
+              <li key={idx} className="drawer__trust-item">
+                <span className="drawer__trust-icon" aria-hidden="true">
+                  {idx === 0 ? (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="1" y="3" width="15" height="13" rx="1" />
+                      <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
+                      <circle cx="5.5" cy="18.5" r="2.5" />
+                      <circle cx="18.5" cy="18.5" r="2.5" />
+                    </svg>
+                  ) : idx === 1 ? (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                      <polyline points="9 12 11 14 15 10" />
+                    </svg>
+                  ) : (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
+                      <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
+                    </svg>
+                  )}
+                </span>
+                <span className="drawer__trust-text">{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       </aside>
     </>
   );

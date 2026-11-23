@@ -14,7 +14,7 @@ import { getProduct } from '../../store/data/products.js';
 
 const API = (import.meta.env.VITE_CHAT_API || '') + '/api/chat';
 const STORE = 'tl-chat-v1';
-const WELCOME = 'Hi, I\'m Tulsi, TranzLife\'s wellness assistant 🌿 Tell me what\'s been bothering you, and I\'ll suggest the TranzLife product that may help, along with simple, natural care tips. You can also ask me about our products, prices or how to order. Type in English, Tamil or Tanglish, and I\'ll reply in simple English. I share general wellness guidance, not medical advice.';
+const WELCOME = 'Hi, I\'m Tulsi, your TranzLife wellness guide 🌿\n\nQuestions about our products? Ask me anything here! Tell me what you\'re looking for or what\'s been bothering you, and I\'ll recommend the right herbal formulation, ingredients, and simple daily care tips.\n\nYou can also ask me about prices, how to order, or dosage. Type in English, Tamil, or Tanglish, and I\'ll reply in simple English!';
 const CHIPS = ['Period cramps', 'Stressed at work', 'Dry, cracked feet', 'Always tired', 'Liver care', 'Can\'t sleep well'];
 
 // chat catalogue id -> this site's store product id (/products/<id>)
@@ -140,14 +140,18 @@ function minimize(on){
   if (!on){ scrollDown(); setTimeout(() => els.input.focus(), 250); }
 }
 
+let dismissWelcomeFn = null;
+
 function open(on){
   els.root.classList.remove('min'); els.min.setAttribute('aria-label', 'Minimize chat'); els.min.title = 'Minimize'; els.min.setAttribute('aria-expanded', true);
   els.root.classList.toggle('open', on);
   els.fab.setAttribute('aria-expanded', on);
+  els.fab.setAttribute('aria-label', on ? 'Close chat with Tulsi' : 'Open chat with Tulsi, TranzLife wellness guide');
   els.panel.setAttribute('aria-hidden', !on);
-  document.body.classList.toggle('chat-open', on);   // hides the "Talk to us" tab while the panel is up
+  document.body.classList.toggle('chat-open', on);
+  if (on && dismissWelcomeFn) dismissWelcomeFn();
   // closing: don't leave focus inside the now-hidden panel (browsers warn, and screen readers lose their place)
-  if (!on && els.panel.contains(document.activeElement)) (document.querySelector('.float-widget') || document.body).focus?.();
+  if (!on && els.panel.contains(document.activeElement)) els.fab?.focus?.();
   if (on){ scrollDown(); setTimeout(() => els.input.focus(), 250); }
 }
 
@@ -166,10 +170,10 @@ function initChat({ navigate } = {}){
   const root = document.createElement('div');
   root.className = 'chat t-cream'; root.id = 'chat';
   root.innerHTML = `
-    <section class="ch-panel" id="chatPanel" role="dialog" aria-label="Chat with Tulsi, TranzLife wellness advisor" aria-hidden="true">
+    <section class="ch-panel" id="chatPanel" role="dialog" aria-label="Chat with Tulsi, TranzLife wellness guide" aria-hidden="true">
       <header class="ch-head">
         <span class="ch-av big">${LEAF}</span>
-        <div><b>Tulsi</b><small><i></i>TranzLife wellness friend</small></div>
+        <div><b>Tulsi</b><small><i></i>TranzLife AI Wellness Guide</small></div>
         <button class="ch-new" type="button" title="Start a new chat">New chat</button>
         <button class="ch-min" type="button" aria-label="Minimize chat" title="Minimize" aria-expanded="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="ch-min-dash" d="M6 12h12"/><path class="ch-min-up" d="M6 15l6-6 6 6"/></svg></button>
         <button class="ch-x" type="button" aria-label="Close chat">×</button>
@@ -177,16 +181,98 @@ function initChat({ navigate } = {}){
       <div class="ch-list" data-lenis-prevent aria-live="polite"></div>
       <div class="ch-chips">${CHIPS.map(c => `<button type="button">${c}</button>`).join('')}</div>
       <form class="ch-form">
-        <textarea rows="1" placeholder="Tell me how you're feeling…" aria-label="Your message" maxlength="1500"></textarea>
+        <textarea rows="1" placeholder="Ask Tulsi about health, products, or ingredients…" aria-label="Your message" maxlength="1500"></textarea>
         <button class="ch-send" type="submit" aria-label="Send">${SEND}</button>
       </form>
       <p class="ch-note">General wellness tips, not medical advice. In an emergency, call 112. We count common topics anonymously to improve our products; your messages are not stored.</p>
     </section>
-    <button class="ch-fab" type="button" aria-controls="chatPanel" aria-expanded="false">
-      <span class="ch-fab-ic">${LEAF}</span><b>Ask Tulsi</b>
-    </button>`;
+    <div class="ch-launcher-wrap">
+      <aside class="ch-welcome" id="tulsiWelcome" aria-label="Tulsi welcome message">
+        <div class="ch-welcome-header">
+          <span class="ch-welcome-avatar">
+            ${LEAF}
+            <span class="ch-welcome-dot" aria-hidden="true"></span>
+          </span>
+          <span class="ch-welcome-name">Tulsi <span class="ch-welcome-tag">AI Guide</span></span>
+          <button class="ch-welcome-close" type="button" aria-label="Dismiss welcome message">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 1l10 10M11 1L1 11"/></svg>
+          </button>
+        </div>
+        <p class="ch-welcome-text">Questions about our products? Ask me anything here! 🌿</p>
+        <span class="ch-welcome-tail" aria-hidden="true"></span>
+      </aside>
+      <button class="ch-fab" type="button" aria-controls="chatPanel" aria-expanded="false" aria-label="Open chat with Tulsi, TranzLife wellness guide">
+        <span class="ch-fab-pulse" aria-hidden="true"></span>
+        <span class="ch-fab-ic">
+          <svg class="ch-fab-icon-leaf" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
+            <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
+          </svg>
+          <svg class="ch-fab-icon-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </span>
+        <span class="ch-fab-badge" aria-hidden="true" title="Tulsi is online"></span>
+      </button>
+    </div>`;
   document.body.append(root);
   els = { root, panel:$('.ch-panel', root), list:$('.ch-list', root), chips:$('.ch-chips', root), input:$('textarea', root), send:$('.ch-send', root), fab:$('.ch-fab', root) };
+
+  // Welcome bubble popup and dismiss logic
+  const welcomeEl = $('.ch-welcome', root);
+  const welcomeClose = $('.ch-welcome-close', root);
+  let welcomeTimer = null;
+  let autoDismissTimer = null;
+
+  function dismissWelcome() {
+    if (!welcomeEl) return;
+    welcomeEl.classList.remove('is-visible');
+    welcomeEl.classList.add('is-closing');
+    try { sessionStorage.setItem('tulsi_welcome_dismissed', '1'); } catch(e) {}
+    clearTimeout(welcomeTimer);
+    clearTimeout(autoDismissTimer);
+  }
+  dismissWelcomeFn = dismissWelcome;
+
+  function showWelcome() {
+    try {
+      if (sessionStorage.getItem('tulsi_welcome_dismissed')) return;
+    } catch(e) {}
+    if (root.classList.contains('open')) return;
+    if (welcomeEl) {
+      welcomeEl.classList.remove('is-closing');
+      welcomeEl.classList.add('is-visible');
+      // auto-dismiss after 9.5s of no interaction
+      autoDismissTimer = setTimeout(dismissWelcome, 9500);
+    }
+  }
+
+  // Pop up after 3.2s
+  welcomeTimer = setTimeout(showWelcome, 3200);
+
+  // Clicking the bubble opens the chat
+  welcomeEl?.addEventListener('click', (e) => {
+    if (e.target.closest('.ch-welcome-close')) return;
+    dismissWelcome();
+    if (root.classList.contains('min')) minimize(false);
+    else open(true);
+  });
+
+  // Clicking close on the bubble dismisses it without opening
+  welcomeClose?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    dismissWelcome();
+  });
+
+  // Pause auto-dismiss timer on hover
+  welcomeEl?.addEventListener('mouseenter', () => {
+    clearTimeout(autoDismissTimer);
+  });
+  welcomeEl?.addEventListener('mouseleave', () => {
+    if (welcomeEl.classList.contains('is-visible')) {
+      autoDismissTimer = setTimeout(dismissWelcome, 4500);
+    }
+  });
 
   msgs = load(); render();
   els.min = $('.ch-min', root);
