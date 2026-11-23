@@ -22,14 +22,82 @@
   .slot--pb-title,.pbanner--about .slot--pb-title,.pbanner--dark .slot--pb-title{--h:44px;--w:240px}
 }
 
-/* ---- FAQ hero with meeting image ---- */
-.faq-hero{position:relative;width:100%;height:476px;overflow:hidden;background:#5a6e4c}
+/* ---- FAQ hero with laptop/icons banner ---- */
+.faq-hero{position:relative;width:100%;height:600px;overflow:hidden;background:#5a6e4c}
 .faq-hero__image{position:relative;width:100%;height:100%}
 .faq-hero__image img{width:100%;height:100%;object-fit:cover}
-.faq-hero__text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:67.8px;font-weight:700;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.3);letter-spacing:.1em;z-index:2}
+.faq-hero__content-wrapper{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:100%;max-width:800px;padding:0 20px;z-index:2}
+.faq-hero__content.glass-container{
+  background:linear-gradient(135deg,rgba(255,255,255,.9),rgba(250,240,207,.85));
+  backdrop-filter:blur(16px) saturate(1.3);
+  -webkit-backdrop-filter:blur(16px) saturate(1.3);
+  border-radius:24px;
+  border:1px solid rgba(239,192,74,.4);
+  box-shadow:
+    0 8px 32px rgba(15,47,29,.2),
+    0 4px 16px rgba(239,192,74,.15),
+    inset 0 1px 0 rgba(255,255,255,.9),
+    inset 0 -1px 0 rgba(239,192,74,.1);
+  padding:48px 40px;
+  text-align:center;
+  position:relative;
+  overflow:hidden
+}
+
+/* Gold glow effect behind the container */
+.faq-hero__content.glass-container::before{
+  content:'';
+  position:absolute;
+  inset:-20px;
+  background:radial-gradient(circle at 30% 30%,rgba(239,192,74,.3),transparent 60%),
+              radial-gradient(circle at 70% 70%,rgba(35,128,73,.2),transparent 60%);
+  border-radius:inherit;
+  z-index:-1;
+  opacity:.6;
+  animation:glassGlow 8s ease-in-out infinite alternate
+}
+
+@keyframes glassGlow{
+  0%{opacity:.5;transform:scale(1)}
+  100%{opacity:.8;transform:scale(1.05)}
+}
+
+/* Subtle gold border animation */
+.faq-hero__content.glass-container::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  padding:2px;
+  background:linear-gradient(135deg,rgba(239,192,74,.6),rgba(35,128,73,.4),rgba(239,192,74,.6));
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;
+  mask-composite:exclude;
+  opacity:.7;
+  animation:borderRotate 6s linear infinite
+}
+
+@keyframes borderRotate{
+  0%{background:linear-gradient(0deg,rgba(239,192,74,.6),rgba(35,128,73,.4),rgba(239,192,74,.6))}
+  100%{background:linear-gradient(360deg,rgba(239,192,74,.6),rgba(35,128,73,.4),rgba(239,192,74,.6))}
+}
+.faq-hero__title{font-size:86px;font-weight:700;color:var(--green-950);text-shadow:none;letter-spacing:.08em;margin:0 0 16px 0;text-transform:uppercase}
+.faq-hero__subtitle{font-size:32px;font-weight:600;color:var(--green-800);text-shadow:none;margin:0 0 12px 0;letter-spacing:.04em}
+.faq-hero__text{font-size:16px;font-weight:400;color:var(--ink);text-shadow:none;margin:0;max-width:600px;line-height:1.5}
+@media (max-width:989px){
+  .faq-hero{height:500px}
+  .faq-hero__content.glass-container{padding:36px 32px}
+  .faq-hero__title{font-size:64px}
+  .faq-hero__subtitle{font-size:26px}
+  .faq-hero__text{font-size:14px}
+}
 @media (max-width:749px){
-  .faq-hero{height:294px}
-  .faq-hero__text{font-size:41.89px}
+  .faq-hero{height:400px}
+  .faq-hero__content.glass-container{padding:28px 24px}
+  .faq-hero__title{font-size:48px;margin-bottom:12px}
+  .faq-hero__subtitle{font-size:20px;margin-bottom:8px}
+  .faq-hero__text{font-size:13px}
 }
 
 /* ---- intro text ---- */
@@ -96,7 +164,8 @@
 /* ---- FAQ accordion (10 rows x 79px) ---- */
 .faq{padding:55px var(--pad)}
 .faq__list{max-width:890px;margin:0 auto;border-top:1px solid var(--line)}
-.faq__item{border-bottom:1px solid var(--line)}
+.faq__item{border-bottom:1px solid var(--line);transition:box-shadow .3s ease,transform .3s ease}
+.faq__item:hover{box-shadow:0 20px 40px -15px rgba(15,47,29,.32),0 8px 16px -8px rgba(224,168,38,.25);transform:translateY(-4px)}
 .faq__q{width:100%;min-height:78px;display:flex;align-items:center;gap:12px;text-align:left}
 .slot--q-num{--w:24px;--h:16px;flex:none}
 .slot--q{--w:min(520px,70%);--h:20px;flex:0 1 auto}
@@ -109,6 +178,18 @@
 .faq__item.is-open .faq__a{grid-template-rows:1fr}
 .faq__a .slot{--w:100%;--h:72px;margin:0 0 24px 36px;max-width:calc(100% - 36px)}
 @media (max-width:749px){.faq{padding:34px var(--pad)}.faq__q{min-height:64px}.slot--q{--w:70%}}
+
+/* FAQ disclaimer and controls hover effects */
+.faq__disclaimer{transition:box-shadow .3s ease,transform .3s ease}
+.faq__disclaimer:hover{box-shadow:0 12px 28px -12px rgba(15,47,29,.25),0 6px 16px -8px rgba(224,168,38,.2);transform:translateY(-2px)}
+
+/* FAQ search input hover/focus effects */
+.faq__controls input{transition:box-shadow .3s ease,transform .3s ease,border-color .3s ease}
+.faq__controls input:focus{box-shadow:0 8px 24px -12px rgba(15,47,29,.2),0 4px 12px -8px rgba(224,168,38,.15);transform:translateY(-2px);border-color:rgba(224,168,38,.4)}
+
+/* FAQ category button hover effects */
+.faq__controls button{transition:all .2s ease}
+.faq__controls button:hover:not(:disabled){box-shadow:0 8px 20px -10px rgba(15,47,29,.2),0 4px 10px -6px rgba(224,168,38,.15);transform:translateY(-2px)}
 
 /* ---- Blog (3-col grid, 438px cards) ---- */
 .blog{padding:40px var(--pad) 65px}
