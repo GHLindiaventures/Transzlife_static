@@ -127,6 +127,8 @@ export const COMPARE_INTRO = {
 
 export const BENEFITS = {
   headline: 'Why TranzLife',
+  subtitle: 'The TranzLife Difference',
+  lead: 'A thoughtful blend of nature, science and quality — creating trusted wellness solutions for everyday life.',
   items: [
     { title: 'Innovate', text: 'Research-driven formulations with a focus on efficacy and safety.' },
     { title: 'Develop', text: 'Advanced R&D and modern technology to create superior products.' },
@@ -343,7 +345,7 @@ export const SOCIAL_LINKS = { Facebook: '', X: '', Instagram: '', YouTube: '' };
 export const PHOTOS = {
   banner: 'green-canopy',
   benefits: 'ayurveda-ingredients',
-  iwt: 'ayurveda-banyan',
+  iwt: 'wellness-journey',
   parallax: 'forest-leaves',
   parallaxSide: ['lotus', 'ayurveda-ingredients'],
   exploreCircle: 'explore-circle',
@@ -354,13 +356,14 @@ export const PHOTOS = {
   contactSide: 'holy-basil',
 };
 
-export const PHOTO_EXT = { 'ayurveda-ingredients': 'png', 'ayurveda-banyan': 'webp' }; // photos that are not .jpg
+export const PHOTO_EXT = { 'ayurveda-ingredients': 'png', 'ayurveda-banyan': 'webp', 'wellness-journey': 'webp' }; // photos that are not .jpg
 
 export const PHOTO_ALT = {
   ayurveda: 'Jars of powdered and dried Ayurvedic herbs being scooped with wooden spoons',
   'green-leaves': 'Fresh green leaves in soft light',
   'green-canopy': 'Aerial view of a dense green forest canopy',
   'ayurveda-banyan': 'Ayurvedic herbs, turmeric, amla, neem and a stone mortar on slate under an ancient banyan tree',
+  'wellness-journey': 'A complete wellness journey for everyday life: six TranzLife formulations for breath, liver, women’s comfort, metabolic wellness, calm and balance',
   'forest-leaves': 'Green leaves in a forest',
   'lab-microscope': 'Researcher working with a microscope in a laboratory',
   'lab-research': 'Scientist in safety glasses examining coloured samples in a lab',

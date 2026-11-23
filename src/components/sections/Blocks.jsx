@@ -97,13 +97,27 @@ export function Banner() {
   );
 }
 
+const BENEFIT_ICONS = [
+  /* flask */ <><path d="M9 3h6M10 3v6l-5 9.2A2 2 0 0 0 6.8 21h10.4a2 2 0 0 0 1.8-2.8L14 9V3" /><path d="M7.6 15h8.8" /><path d="M12 17.5c0-1.2.8-2 2-2 0 1.2-.8 2-2 2z" /></>,
+  /* microscope */ <><path d="M6 21h12" /><path d="M9 21v-1.5a5 5 0 0 1 5-5h.5" /><path d="M9.5 3.5l3.8 1.7-2.7 6.5-3.8-1.7z" /><path d="M14.5 14.5a4 4 0 0 0 2.5-3.7" /></>,
+  /* badge check */ <><circle cx="12" cy="9" r="6" /><path d="M9.5 9l1.8 1.8L15 7.2" /><path d="M8.6 14l-1.4 7 4.8-2.6L16.8 21l-1.4-7" /></>,
+  /* sprout in hand */ <><path d="M12 12.5V8" /><path d="M12 9c0-3 2-4.6 5-4.6 0 3-2 4.6-5 4.6z" /><path d="M12 11c0-2.6-1.8-3.9-4.5-3.9 0 2.6 1.8 3.9 4.5 3.9z" /><path d="M3.5 17.5c2 0 3-1 5-1h4c1.2 0 1.6 1.2.5 1.6H10" /><path d="M13 16.8l5-2.6c1-.5 2.1.6 1.3 1.5L15 20.5H8l-4.5-2" /></>,
+  /* mortar + leaf */ <><path d="M4 12h16a8 8 0 0 1-16 0z" /><path d="M14 11l4.2-6.2" /><path d="M7.5 9c0-2.2 1.6-3.4 3.8-3.4 0 2.2-1.6 3.4-3.8 3.4z" /><path d="M9 20.5h6" /></>,
+  /* shield check */ <><path d="M12 3l7 3v5.2c0 4.8-3.2 8.3-7 9.8-3.8-1.5-7-5-7-9.8V6z" /><path d="M8.8 12l2.2 2.2 4.2-4.6" /></>,
+];
+
 export function Benefits() {
-  const col = (items, right) => (
+  const col = (items, offset, right) => (
     <div className={`benefits__col${right ? ' benefits__col--right' : ''}`}>
-      {items.map((b) => (
+      {items.map((b, i) => (
         <div className="benefit" data-reveal key={b.title}>
-          <Slot as="h3" className="slot--b-title">{b.title}</Slot>
-          <Slot as="p" className="slot--b-text">{b.text}</Slot>
+          <span className="benefit__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">{BENEFIT_ICONS[offset + i]}</svg>
+          </span>
+          <div className="benefit__body">
+            <Slot as="h3" className="slot--b-title">{b.title}</Slot>
+            <Slot as="p" className="slot--b-text">{b.text}</Slot>
+          </div>
         </div>
       ))}
     </div>
@@ -111,11 +125,17 @@ export function Benefits() {
   return (
     <section className="benefits">
       <div className="benefits__inner page-pad--lg">
-        <Slot as="h2" className="headline slot--headline" data-reveal>{BENEFITS.headline}</Slot>
+        <div className="benefits__head" data-reveal>
+          <Slot as="h2" className="headline slot--headline">{BENEFITS.headline}</Slot>
+          <Slot as="p" className="benefits__sub">{BENEFITS.subtitle}</Slot>
+          <Slot as="p" className="benefits__lead">{BENEFITS.lead}</Slot>
+        </div>
         <div className="benefits__grid">
-          {col(BENEFITS.items.slice(0, 3), false)}
-          <div className="benefits__center"><Media className="media--benefits" photo={PHOTOS.benefits} data-reveal /></div>
-          {col(BENEFITS.items.slice(3), true)}
+          {col(BENEFITS.items.slice(0, 3), 0, false)}
+          <div className="benefits__center">
+            <div className="benefits__orb" role="img" aria-label="Tulsi, ginger, cloves, cinnamon and a wooden mortar on a stone" style={{ backgroundImage: `url(${import.meta.env.BASE_URL}assets/photos/why-tranzlife.webp)` }} data-reveal />
+          </div>
+          {col(BENEFITS.items.slice(3), 3, true)}
         </div>
       </div>
     </section>
