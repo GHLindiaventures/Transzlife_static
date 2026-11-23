@@ -131,6 +131,7 @@
     transform: scaleX(0.4);
     opacity: 0;
   }
+
   to {
     transform: scaleX(1);
     opacity: 1;
@@ -207,9 +208,11 @@
     transform: translateY(-160px);
     opacity: 0;
   }
+
   60% {
     opacity: 0.96;
   }
+
   100% {
     transform: translateY(0);
     opacity: 0.96;
@@ -255,9 +258,11 @@
     transform: translateY(-180px) rotate(calc(var(--ing-rot, 0deg) - 15deg));
     opacity: 0;
   }
+
   60% {
     opacity: 1;
   }
+
   100% {
     transform: translateY(0) rotate(var(--ing-rot, 0deg));
     opacity: 1;
@@ -382,6 +387,7 @@
   0% {
     opacity: 0.65;
   }
+
   100% {
     opacity: 1;
   }
@@ -595,15 +601,16 @@
     justify-content: center;
   }
 
-  /* Large background text positioned cleanly at the TOP above product */
+  /* Large background text moved down to sit close above the product */
   .blendy-backdrop-word {
     position: absolute;
-    top: clamp(64px, 10.5vh, 88px);
     left: 50%;
     transform: translateX(-50%);
+    top: calc(50% - clamp(165px, 25.5vh, 205px));
     width: 100%;
     text-align: center;
     z-index: 2;
+    pointer-events: none;
   }
 
   .blendy-word-text {
@@ -618,23 +625,25 @@
 
   @keyframes lettersFallDownMobile {
     0% {
-      transform: translateY(-60px);
+      transform: translateY(-50px);
       opacity: 0;
     }
+
     60% {
       opacity: 0.98;
     }
+
     100% {
       transform: translateY(0);
       opacity: 0.98;
     }
   }
 
-  /* Static product bottle positioned below the typography without overlap */
+  /* Static product bottle positioned right below the typography with balanced gap */
   .blendy-bottle-wrap {
     position: relative;
     z-index: 4;
-    margin-top: clamp(48px, 10vh, 76px);
+    margin-top: clamp(18px, 3vh, 32px);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -643,8 +652,8 @@
   }
 
   .blendy-hero-bottle {
-    height: clamp(215px, 34vh, 280px);
-    max-width: 80vw;
+    height: clamp(225px, 35vh, 285px);
+    max-width: 82vw;
     filter: drop-shadow(0 14px 22px rgba(0, 0, 0, 0.22));
   }
 
@@ -746,19 +755,19 @@
 /* Extra small mobile screens (<= 380px) */
 @media (max-width: 380px) {
   .blendy-backdrop-word {
-    top: clamp(58px, 9.5vh, 72px);
+    top: calc(50% - clamp(145px, 24vh, 175px));
   }
 
   .blendy-word-text {
-    font-size: clamp(2.8rem, 12.5vw, 3.6rem);
+    font-size: clamp(2.7rem, 12vw, 3.5rem);
   }
 
   .blendy-bottle-wrap {
-    margin-top: clamp(38px, 8vh, 52px);
+    margin-top: clamp(14px, 2.5vh, 24px);
   }
 
   .blendy-hero-bottle {
-    height: clamp(195px, 30vh, 235px);
+    height: clamp(200px, 31vh, 245px);
   }
 
   .blendy-botanical-item {
@@ -799,6 +808,7 @@
 
 /* Accessibility: respect user prefers-reduced-motion */
 @media (prefers-reduced-motion: reduce) {
+
   .blendy-botanical-item,
   .blendy-word-text,
   .blendy-hero-bottle {
