@@ -38,9 +38,10 @@
   --split-rev:1.618fr 1fr;   /* wide | narrow */
 
   --pad:34px;
+  --announcement-h:34px;
   --header-h:55px;
 }
-@media (max-width:989px){:root{--header-h:58px}}
+@media (max-width:989px){:root{--announcement-h:34px;--header-h:58px}}
 @media (max-width:749px){:root{--pad:21px}}
 
 body{line-height:var(--lh);font-size:var(--fs-0)}
@@ -52,8 +53,8 @@ body{line-height:var(--lh);font-size:var(--fs-0)}
 .faq .slot.has-text:is(span){line-height:var(--lh-h)}
 
 /* ---------------- chrome: announcement, header, nav ---------------- */
-.announcement{height:34px}
-@media (max-width:989px){.announcement{height:34px}.announcement__close{top:2px}}
+.announcement{height:var(--announcement-h,34px)}
+@media (max-width:989px){.announcement{height:var(--announcement-h,34px)}}
 .announcement .has-text.slot--announce{font-size:var(--fs--1);line-height:1}
 .nav__link{font-size:var(--fs--1);padding:0 var(--s-4);letter-spacing:.12em}
 .nav__link::after{left:var(--s-4);right:var(--s-4)}

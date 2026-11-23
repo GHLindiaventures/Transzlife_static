@@ -18,12 +18,14 @@
    --line: rgba(21, 21, 21, .75);
    --font: 'Syne', sans-serif;
    --pad: 34px;
+   --announcement-h: 34px;
    --header-h: 55px;
    --ease: cubic-bezier(.22, .61, .36, 1);
 }
 
 @media (max-width:989px) {
    :root {
+      --announcement-h: 34px;
       --header-h: 58px
    }
 }
@@ -519,11 +521,13 @@ hr {
 }
 
 /* ==========================================================
-   Announcement bar — 35px desktop / 43px mobile
+   Announcement bar — 34px sticky
    ========================================================== */
 .announcement {
-   position: relative;
-   height: 35px;
+   position: sticky;
+   top: 0;
+   z-index: 55;
+   height: var(--announcement-h, 34px);
    background: var(--accent);
    color: #fff;
    overflow: hidden;
@@ -544,33 +548,9 @@ hr {
    align-items: center
 }
 
-.announcement__close {
-   position: absolute;
-   right: 5px;
-   top: 2.5px;
-   width: 30px;
-   height: 30px;
-   display: flex;
-   align-items: center;
-   justify-content: center;
-   color: #fff;
-   background: var(--accent);
-   z-index: 2
-}
-
-.announcement__close::after {
-   content: "";
-   position: absolute;
-   inset: -7px;
-}
-
 @media (max-width:989px) {
    .announcement {
-      height: 43px
-   }
-
-   .announcement__close {
-      top: 6.5px
+      height: var(--announcement-h, 34px)
    }
 }
 
@@ -594,7 +574,7 @@ hr {
 
 .header {
    position: sticky;
-   top: 0;
+   top: var(--announcement-h, 34px);
    z-index: 50;
    height: var(--header-h);
    transition: background-color .3s, box-shadow .3s, transform .4s var(--ease);
