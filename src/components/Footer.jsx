@@ -33,10 +33,21 @@ const COLUMN_ICONS = { Products: 'leaf', Company: 'building', Help: 'help' };
 const tel = (n) => `tel:${n.replace(/[^\d+]/g, '')}`;
 
 function LinkColumn({ title, links, chevrons }) {
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
     <nav className="ft-col" aria-label={title}>
-      <h2 className="ft-col__head"><Icon name={COLUMN_ICONS[title] || 'leaf'} size={24} /> {title}</h2>
-      <ul>
+      <button
+        className="ft-col__head"
+        onClick={() => setIsOpen(!isOpen)}
+        aria-expanded={isOpen}
+        aria-controls={`ft-col-${title.toLowerCase()}`}
+      >
+        <Icon name={COLUMN_ICONS[title] || 'leaf'} size={24} />
+        <span>{title}</span>
+        <Icon name="chevron" size={16} className={`ft-col__chev ${isOpen ? 'ft-col__chev--open' : ''}`} />
+      </button>
+      <ul id={`ft-col-${title.toLowerCase()}`} className={`ft-col__list ${isOpen ? 'ft-col__list--open' : ''}`}>
         {links.map((l) => (
           <li key={l.label}>
             <Link to={l.to}>
@@ -201,9 +212,11 @@ const Footer = forwardRef(function Footer(_, ref) {
           <p className="ft-bottom__motto">
             {FOOTER.motto.map((m, i) => <span key={m}>{i > 0 && <i aria-hidden="true">•</i>}{m}</span>)}
           </p>
-          <nav className="ft-bottom__links" aria-label="Legal">
-            {FOOTER.legal.map((l) => <Link key={l.label} to={l.to}>{l.label}</Link>)}
-          </nav>
+          {FOOTER.legal.length > 0 && (
+            <nav className="ft-bottom__links" aria-label="Legal">
+              {FOOTER.legal.map((l) => <Link key={l.label} to={l.to}>{l.label}</Link>)}
+            </nav>
+          )}
         </div>
         <p className="ft-disclaimer">{BRAND.disclaimer}</p>
       </div>
