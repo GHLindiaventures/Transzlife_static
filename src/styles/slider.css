@@ -1,5 +1,6 @@
 /* ==========================================================
-   Targeted Botanical Formulations: 3-Up Vertical Blendy Showcase
+   Targeted Botanical Formulations: Full-Page 3-Up Blendy Showcase
+   Covers the full page (100vw x 100vh) edge-to-edge.
    3 Vertical panels side-by-side in the exact Blendy floating 3D
    aesthetic (floating product bottle + oversized typography behind
    + floating botanicals with depth of field blur + soft pastel colors).
@@ -8,61 +9,81 @@
 
 .blendy-section {
   position: relative;
-  padding: clamp(56px, 7vw, 96px) 0 clamp(64px, 8vw, 104px);
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
+  min-height: 100vh;
+  height: 100vh;
+  padding: clamp(20px, 3vh, 38px) clamp(20px, 3vw, 52px) clamp(18px, 2.5vh, 32px);
+  box-sizing: border-box;
   background: #fdfcf9;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   overflow: hidden;
 }
 
 /* ---- Intro Header ---- */
 .blendy-intro {
   text-align: center;
-  max-width: 780px;
-  margin: 0 auto clamp(36px, 4.5vw, 54px);
-  padding: 0 20px;
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto clamp(10px, 1.8vh, 22px);
+  padding: 0 16px;
+  flex-shrink: 0;
 }
 
 .blendy-eyebrow {
   display: inline-block;
   font-family: var(--f-body, system-ui, sans-serif);
-  font-size: 0.76rem;
+  font-size: clamp(0.72rem, 1vw, 0.8rem);
   font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: #2f6b3a;
-  margin-bottom: 12px;
+  margin-bottom: 6px;
 }
 
 .blendy-headline {
   font-family: var(--f-head, 'Cinzel', serif);
-  font-size: clamp(1.9rem, 3.8vw, 2.75rem);
+  font-size: clamp(1.75rem, 3vw, 2.6rem);
   font-weight: 600;
-  line-height: 1.18;
+  line-height: 1.15;
   letter-spacing: -0.015em;
   color: #123320;
-  margin: 0 0 12px;
+  margin: 0 0 6px;
 }
 
 .blendy-sub {
-  font-size: clamp(0.92rem, 1.4vw, 1.05rem);
-  line-height: 1.6;
+  font-size: clamp(0.85rem, 1.15vw, 0.98rem);
+  line-height: 1.5;
   color: #55685a;
   margin: 0 auto;
-  max-width: 600px;
+  max-width: 640px;
 }
 
-/* ---- Stage Viewport ---- */
+/* ---- Full-Page Stage Viewport ---- */
 .blendy-viewport {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 20px;
+  width: 100%;
+  max-width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
+  min-height: 0;
 }
 
 /* ---- 3-Up Vertical Panel Grid ---- */
 .blendy-trio {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: clamp(16px, 2.2vw, 28px);
+  gap: clamp(16px, 2.2vw, 32px);
+  width: 100%;
+  height: 100%;
   align-items: stretch;
+  min-height: 0;
 }
 
 /* Downward cascading entrance animation */
@@ -82,15 +103,16 @@
 
 .blendy-panel {
   position: relative;
-  height: clamp(520px, 68vh, 620px);
-  border-radius: clamp(24px, 3vw, 36px);
+  height: 100%;
+  min-height: 0;
+  border-radius: clamp(24px, 2.8vw, 38px);
   background-color: var(--bg, #c3b2db);
   overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 32px 20px 28px;
-  box-shadow: 0 18px 46px -12px rgba(23, 63, 36, 0.12), 0 3px 12px rgba(0, 0, 0, 0.03);
+  padding: clamp(24px, 3vh, 36px) clamp(18px, 2vw, 28px) clamp(20px, 2.8vh, 32px);
+  box-shadow: 0 20px 50px -14px rgba(23, 63, 36, 0.14), 0 4px 16px rgba(0, 0, 0, 0.03);
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
               box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   animation: panelCascadeDown 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -99,7 +121,7 @@
 
 .blendy-panel:hover {
   transform: translateY(-8px);
-  box-shadow: 0 28px 56px -14px rgba(23, 63, 36, 0.22), 0 6px 18px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 30px 64px -16px rgba(23, 63, 36, 0.24), 0 8px 22px rgba(0, 0, 0, 0.06);
 }
 
 /* ---- 1. Oversized Background Typography (Behind Product) ---- */
@@ -116,14 +138,14 @@
 
 .bpanel-backdrop__word {
   font-family: var(--f-body, system-ui, -apple-system, sans-serif);
-  font-size: clamp(4.5rem, 9.8vw, 7.8rem);
+  font-size: clamp(5rem, 11vw, 9.6rem);
   font-weight: 900;
   letter-spacing: -0.04em;
   color: #ffffff;
   text-transform: uppercase;
   line-height: 1;
   opacity: 0.95;
-  transform: translateY(-10%);
+  transform: translateY(-8%);
 }
 
 /* ---- 2. Center Hero Floating Product Bottle ---- */
@@ -139,7 +161,7 @@
 
 .bpanel-bottle-box {
   position: relative;
-  height: clamp(260px, 36vh, 340px);
+  height: clamp(280px, 42vh, 440px);
   width: auto;
   display: flex;
   align-items: center;
@@ -152,10 +174,10 @@
 .bpanel-bottle {
   height: 100%;
   width: auto;
-  max-width: clamp(170px, 22vw, 240px);
+  max-width: clamp(190px, 24vw, 290px);
   object-fit: contain;
   display: block;
-  filter: drop-shadow(0 16px 24px rgba(0, 0, 0, 0.22));
+  filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.24));
   transition: transform 0.35s ease;
 }
 
@@ -165,27 +187,27 @@
 
 .bpanel-base-leaf {
   position: absolute;
-  bottom: 8px;
+  bottom: 10px;
   left: 32%;
-  width: clamp(60px, 8vw, 85px);
+  width: clamp(70px, 9vw, 105px);
   height: auto;
   object-fit: contain;
   z-index: -1;
   transform: rotate(-22deg);
-  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.18));
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.2));
   pointer-events: none;
 }
 
 .bpanel-ground-shadow {
   position: absolute;
-  bottom: -16px;
+  bottom: -18px;
   left: 50%;
   transform: translateX(-50%);
-  width: clamp(120px, 15vw, 175px);
-  height: 22px;
+  width: clamp(140px, 18vw, 220px);
+  height: 24px;
   border-radius: 50%;
-  background: rgba(22, 28, 24, 0.32);
-  filter: blur(10px);
+  background: rgba(22, 28, 24, 0.34);
+  filter: blur(12px);
   z-index: -2;
   animation: panelShadowBreathe 4.4s ease-in-out infinite;
 }
@@ -195,14 +217,14 @@
     transform: translateY(0);
   }
   50% {
-    transform: translateY(-12px);
+    transform: translateY(-14px);
   }
 }
 
 @keyframes panelShadowBreathe {
   0%, 100% {
     transform: translateX(-50%) scale(1);
-    opacity: 0.32;
+    opacity: 0.34;
   }
   50% {
     transform: translateX(-50%) scale(0.86);
@@ -236,7 +258,7 @@
 .bpanel-ing--fg-bl {
   bottom: 12%;
   left: -4%;
-  width: var(--size, 95px);
+  width: var(--size, 105px);
   filter: blur(var(--blur, 8px));
   animation: panelFloatSlow 5s ease-in-out infinite;
 }
@@ -244,25 +266,25 @@
 .bpanel-ing--fg-tr {
   top: 8%;
   right: -3%;
-  width: var(--size, 75px);
+  width: var(--size, 85px);
   filter: blur(var(--blur, 6px));
   animation: panelFloatSlow 5.5s ease-in-out infinite 0.7s;
 }
 
 /* Midground Sharp Botanicals with Drop Shadow */
 .bpanel-ing--mid-l {
-  top: 22%;
+  top: 20%;
   left: 8%;
-  width: var(--size, 52px);
-  filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.22));
+  width: var(--size, 58px);
+  filter: drop-shadow(0 12px 16px rgba(0, 0, 0, 0.22));
   animation: panelFloatFast 4.2s ease-in-out infinite 0.3s;
 }
 
 .bpanel-ing--mid-r {
-  bottom: 26%;
+  bottom: 24%;
   right: 8%;
-  width: var(--size, 56px);
-  filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.22));
+  width: var(--size, 62px);
+  filter: drop-shadow(0 12px 16px rgba(0, 0, 0, 0.22));
   animation: panelFloatFast 4.5s ease-in-out infinite 1s;
 }
 
@@ -271,7 +293,7 @@
     transform: translateY(0) rotate(0deg);
   }
   50% {
-    transform: translateY(-14px) rotate(4deg);
+    transform: translateY(-16px) rotate(4deg);
   }
 }
 
@@ -280,7 +302,7 @@
     transform: translateY(0) rotate(0deg);
   }
   50% {
-    transform: translateY(-8px) rotate(-3deg);
+    transform: translateY(-10px) rotate(-3deg);
   }
 }
 
@@ -290,12 +312,12 @@
   z-index: 20;
   text-align: center;
   margin-top: auto;
-  padding-top: 18px;
+  padding-top: 14px;
 }
 
 .bpanel-title {
   font-family: var(--f-head, 'Cinzel', serif);
-  font-size: clamp(1.15rem, 1.55vw, 1.35rem);
+  font-size: clamp(1.2rem, 1.7vw, 1.48rem);
   font-weight: 700;
   color: #ffffff;
   margin: 0 0 4px;
@@ -313,19 +335,19 @@
 }
 
 .bpanel-sub {
-  font-size: 0.78rem;
+  font-size: clamp(0.76rem, 1vw, 0.86rem);
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.9);
-  margin: 0 0 16px;
+  color: rgba(255, 255, 255, 0.92);
+  margin: 0 0 clamp(10px, 1.8vh, 18px);
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.14);
 }
 
 .bpanel-cta {
   display: inline-block;
   font-family: var(--f-body, system-ui, sans-serif);
-  font-size: 0.82rem;
+  font-size: clamp(0.8rem, 1.05vw, 0.92rem);
   font-weight: 800;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: #ffffff;
   text-decoration: none;
@@ -336,7 +358,7 @@
 
 .bpanel-cta:hover {
   border-bottom-color: #ffffff;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.24em;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
 }
 
@@ -346,12 +368,13 @@
   align-items: center;
   justify-content: center;
   gap: 16px;
-  margin-top: clamp(32px, 4.5vw, 48px);
+  margin-top: clamp(12px, 1.8vh, 22px);
+  flex-shrink: 0;
 }
 
 .blendy-ctrl-btn {
-  width: 44px;
-  height: 44px;
+  width: clamp(38px, 4vh, 46px);
+  height: clamp(38px, 4vh, 46px);
   border-radius: 50%;
   display: grid;
   place-items: center;
@@ -379,7 +402,7 @@
   display: inline-flex;
   align-items: center;
   background: #ffffff;
-  padding: 5px;
+  padding: 4px;
   border-radius: 999px;
   border: 1px solid rgba(47, 107, 58, 0.15);
   box-shadow: 0 4px 14px rgba(23, 63, 36, 0.05);
@@ -389,13 +412,13 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 18px;
+  padding: clamp(6px, 1vh, 9px) clamp(14px, 1.8vw, 22px);
   border-radius: 999px;
   border: none;
   background: transparent;
   cursor: pointer;
   font-family: inherit;
-  font-size: 0.84rem;
+  font-size: clamp(0.78rem, 1vw, 0.88rem);
   font-weight: 600;
   color: #617366;
   transition: all 0.25s ease;
@@ -424,9 +447,17 @@
 
 /* ---- Responsive Adaptations ---- */
 @media (max-width: 980px) {
+  .blendy-section {
+    height: auto;
+    min-height: 100vh;
+    padding: 48px 20px 36px;
+  }
   .blendy-trio {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 20px;
+  }
+  .blendy-panel {
+    height: 520px;
   }
   .blendy-panel:nth-child(3) {
     grid-column: 1 / -1;
@@ -437,10 +468,15 @@
 }
 
 @media (max-width: 680px) {
+  .blendy-section {
+    height: auto;
+    min-height: 100vh;
+    padding: 36px 14px 28px;
+  }
   .blendy-trio {
     grid-template-columns: 1fr;
     gap: 18px;
-    max-width: 380px;
+    max-width: 400px;
     margin: 0 auto;
   }
   .blendy-panel:nth-child(3) {
@@ -454,7 +490,7 @@
     display: none;
   }
   .blendy-set-tab {
-    padding: 8px 14px;
+    padding: 6px 12px;
   }
 }
 
