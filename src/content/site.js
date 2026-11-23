@@ -121,8 +121,8 @@ export const BANNER = { words: ['Nature meets science', 'Rooted in Ayurveda'], c
 
 export const COMPARE_INTRO = {
   eyebrow: 'What each formula is designed to support',
-  title: 'Drag to compare',
-  note: 'Conceptual illustrations, not clinical results. Individual experience varies.',
+  title: 'Targeted Botanical Formulations',
+  note: 'Standardized Ayurvedic extracts & bioactive botanicals. Individual experience varies.',
 };
 
 export const BENEFITS = {
