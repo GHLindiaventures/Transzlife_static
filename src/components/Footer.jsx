@@ -151,6 +151,12 @@ const Footer = forwardRef(function Footer(_, ref) {
       const p = (vh - curtain.getBoundingClientRect().bottom) / vh;
       el.style.setProperty('--ftp', Math.max(0, Math.min(1, p)).toFixed(3));
       el.style.setProperty('--ftr', Math.round(Math.min(el.offsetHeight, vh * 0.7)) + 'px');
+      // fixed footer: when the whole footer fits on the screen it stays put at the bottom and the page slides over it
+      const h = el.offsetHeight;
+      const fixed = h > 0 && h <= vh;
+      const root = document.documentElement;
+      root.classList.toggle('ft-fixed', fixed);
+      root.style.setProperty('--ft-h', h + 'px');
     };
     const onScroll = () => { if (!raf) raf = requestAnimationFrame(update); };
     update();

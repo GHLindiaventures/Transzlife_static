@@ -1314,3 +1314,17 @@ body { background-attachment: scroll; }
     box-shadow: 0 -6px 0 0 rgba(255, 255, 255, .45), 0 -12px 0 0 rgba(232, 224, 190, .4);   /* thinner crescent rings */
   }
 }
+
+/* ======================================================================
+   FIXED FOOTER: when the whole footer fits on the screen it stays fixed at the bottom,
+   and the page (<main>, opaque) slides over it. Taller footers keep the lagging curtain reveal.
+   ====================================================================== */
+html.ft-fixed .footer { position: fixed; left: 0; right: 0; bottom: 0; z-index: 0; transform: none; will-change: auto; }
+html.ft-fixed .main { margin-bottom: var(--ft-h, 0px); }
+
+/* a slightly lower footer on desktop so it fits one screen */
+@media (min-width: 990px) {
+  .footer .ft-decor { height: clamp(96px, 8vw, 140px); }
+  .footer .ft-body { padding-top: clamp(20px, 2.4vw, 36px); padding-bottom: 18px; }
+  .footer .ft-grid { row-gap: 20px; }
+}
