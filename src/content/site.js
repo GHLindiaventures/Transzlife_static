@@ -86,6 +86,15 @@ export const productUrl = (id) => (STORE_ID[id] ? `/products/${STORE_ID[id]}` : 
 
 export const priceLabel = (p) => (p.price == null ? 'Price to be announced' : `₹${p.price}`);
 
+/* Card pricing: `price` is what the customer pays. The struck-out MRP is the price
+   marked up by MRP_MARKUP, rounded up to the next ₹10 and ending in 9 (649 → 819). */
+export const MRP_MARKUP = 0.25;
+export const mrpOf = (p) => (p.price == null ? null : Math.ceil((p.price * (1 + MRP_MARKUP)) / 10) * 10 - 1);
+export const offOf = (p) => {
+  const mrp = mrpOf(p);
+  return mrp ? Math.round((1 - p.price / mrp) * 100) : 0;
+};
+
 export const ANNOUNCEMENTS = [
   'Free delivery on orders over ₹999',
   'Government Recognized & Certified',
@@ -318,6 +327,9 @@ export const FOOTER = {
       { label: 'Sustainability', to: '/sustainability' },
       { label: 'Quality & Manufacturing', to: '/science#sc-pipeline' },
       { label: 'Certifications', to: '/science#sc-certs' },
+      { label: 'Privacy Policy', to: '/policies/privacy' },
+      { label: 'Terms & Conditions', to: '/policies/terms' },
+      { label: 'Shipping & Returns', to: '/policies/shipping' },
     ],
   },
   help: {
@@ -333,11 +345,7 @@ export const FOOTER = {
   tagline: 'Live naturally. Live healthier.',
   blurb: 'Ayurvedic, plant-based solutions for everyday wellness and good health.',
   motto: ['Wellness', 'Innovation', 'A Healthier Tomorrow'],
-  legal: [
-    { label: 'Privacy Policy', to: '/policies/privacy' },
-    { label: 'Terms & Conditions', to: '/policies/terms' },
-    { label: 'Shipping & Returns', to: '/policies/shipping' },
-  ],
+  legal: [],
 };
 
 /* Social profiles: add the real URLs to show the icons in the footer (empty = hidden). */

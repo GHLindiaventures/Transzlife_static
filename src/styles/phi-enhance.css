@@ -1,0 +1,912 @@
+/* ==========================================================
+   PHI-ENHANCE  —  Golden Ratio (φ = 1.618) Visual Refinement Layer
+   Loaded after refine.css. Polishes proportions, whitespace, type
+   hierarchy and rhythm across every page of TranzLife without
+   touching brand colours, images or functional behaviour.
+
+   Design principles applied:
+   • Type scale: each step = previous × √φ ≈ 1.272 (already in golden.css)
+   • Spacing: Fibonacci sequence 5/8/13/21/34/55/89/144 (--s-1 … --s-8)
+   • Layouts: 61.8 / 38.2 split wherever two-column sections appear
+   • Line-heights: 1.618 body · 1.236 headings · 1.1 display (--lh / --lh-h / --lh-d)
+   • Breathing room: every section gets at minimum --s-6 (55px) top/bottom
+   ========================================================== */
+
+/* ----------------------------------------------------------------
+   0. Smooth rendering globals
+   ---------------------------------------------------------------- */
+html { text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
+
+* { box-sizing: border-box; }
+
+/* ----------------------------------------------------------------
+   1. HEADER & NAVIGATION — tighter, crisper proportions
+   ---------------------------------------------------------------- */
+
+/* Logo + links should feel balanced with the golden CTA button */
+.header__inner {
+  align-items: center;
+  min-height: var(--header-h);           /* 55px — Fibonacci */
+}
+
+/* Nav links: comfortable clickable height using --s-7 (89px) touch row */
+.nav__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;                      /* --s-5 */
+  font-weight: 600;
+  letter-spacing: .11em;
+}
+
+/* CTA button: golden proportions already in refine.css; just ensure height */
+.header__cta {
+  min-height: 34px;                      /* --s-5 */
+  letter-spacing: .13em;
+}
+
+/* Announcement bar — stays at --s-5 (34px): phi^0 × golden unit */
+.announcement { font-weight: 700; }
+
+/* ----------------------------------------------------------------
+   2. HERO SECTION — golden height + richer type hierarchy
+   ---------------------------------------------------------------- */
+
+/* Hero height: clamp between --s-8 × phi (233px) and 61.8 vh */
+.hero {
+  height: clamp(520px, min(62vw, 100svh - 89px), 800px);
+  /* 62 ≈ 61.8%; using 100svh minus header (55px) + announcement (34px) = 89px */
+}
+
+/* Hero title: dominant, display line-height */
+.has-text.slot--hero-title {
+  font-size: clamp(var(--fs-3), 4.2vw, var(--fs-5));  /* 32px → 53px */
+  line-height: var(--lh-d);             /* 1.1 */
+  letter-spacing: .02em;
+  max-width: 14em;
+  margin-bottom: var(--s-3);            /* 13px */
+}
+
+/* Hero sub: readable, light, proportional to title */
+.has-text.slot--hero-sub {
+  font-size: clamp(var(--fs-0), 1.4vw, var(--fs-1));  /* 16px → 20px */
+  line-height: var(--lh);               /* 1.618 */
+  max-width: 24em;
+  margin-bottom: var(--s-4);            /* 21px */
+  font-weight: 400;
+}
+
+/* Hero eyebrow: tiny label above the title */
+.has-text.slot--eyebrow-w {
+  font-size: var(--fs--1);              /* 12.6px */
+  letter-spacing: .18em;
+  margin-bottom: var(--s-3);            /* 13px */
+  opacity: .92;
+}
+
+/* Navigation dots: spaced using --s-2 (8px) */
+.hero__dots { gap: var(--s-2); }
+
+/* ----------------------------------------------------------------
+   3. RICH TEXT HEADLINE — large display statement
+   ---------------------------------------------------------------- */
+
+.rich {
+  padding: var(--s-7) var(--pad) var(--s-5);  /* 89px top / 34px bottom */
+}
+
+.has-text.slot--rich {
+  font-size: clamp(var(--fs-3), 5.5vw, var(--fs-6));  /* 32px → 68px */
+  line-height: var(--lh-d);             /* 1.1 */
+  letter-spacing: .01em;
+  max-width: 20em;
+  margin: 0 auto;
+}
+
+@media (max-width: 989px) {
+  .has-text.slot--rich { font-size: clamp(var(--fs-2), 5vw, var(--fs-4)); }
+}
+@media (max-width: 749px) {
+  .rich { padding: var(--s-6) var(--pad) var(--s-4); }
+  .has-text.slot--rich { font-size: var(--fs-2); line-height: 1.2; }
+}
+
+/* ----------------------------------------------------------------
+   4. FEATURED PRODUCTS — card spacing & proportions
+   ---------------------------------------------------------------- */
+
+/* Section breathing room */
+.featured { padding-block: var(--s-5) var(--s-7); }   /* 34px / 89px */
+
+/* Section headline */
+.featured__head { margin-bottom: var(--s-3); }         /* 13px */
+
+.featured__sub {
+  font-size: var(--fs-0);               /* 16px */
+  line-height: var(--lh);               /* 1.618 */
+  max-width: 36em;
+  margin: var(--s-2) auto 0;            /* 8px */
+  color: var(--ink-soft);
+}
+
+/* Product cards: square media frame, generous bottom padding */
+.featured .pcard__title { padding-top: var(--s-3); }   /* 13px */
+.featured .pcard__price--deal { margin-bottom: var(--s-2); } /* 8px */
+
+/* "View all" link: golden margin above */
+.featured__all { margin-top: var(--s-5); }              /* 34px */
+
+/* Grid variant: consistent gutters */
+.featured--grid .featured__track {
+  row-gap: var(--s-6);                  /* 55px between rows */
+}
+
+/* ----------------------------------------------------------------
+   5. MARQUEE BANNER — tighter scroll cadence
+   ---------------------------------------------------------------- */
+
+/* Banner section: deep forest panel; keep the gold line at bottom */
+.banner__inner {
+  padding-block: var(--s-5);            /* 34px */
+}
+
+/* Marquee title: very large, display line-height */
+.has-text.slot--banner-title {
+  font-size: clamp(var(--fs-5), 10vw, var(--fs-8));   /* 53px → 110px */
+  line-height: var(--lh-d);             /* 1.1 */
+  letter-spacing: .02em;
+}
+
+@media (max-width: 989px) {
+  .has-text.slot--banner-title { font-size: clamp(var(--fs-4), 9vw, var(--fs-6)); }
+}
+@media (max-width: 749px) {
+  .has-text.slot--banner-title { font-size: clamp(var(--fs-3), 9vw, var(--fs-5)); }
+}
+
+/* ----------------------------------------------------------------
+   6. BENEFITS — golden three-column grid (1 : φ : 1)
+   ---------------------------------------------------------------- */
+
+/* Section padding using Fibonacci */
+.benefits__inner {
+  padding-block: var(--s-7);            /* 89px each side */
+  padding-inline: var(--pad);
+}
+
+/* Headline above benefits */
+.benefits .headline {
+  font-size: clamp(var(--fs-1), 2.4vw, var(--fs-3));
+  line-height: var(--lh-h);
+  margin-bottom: var(--s-6);            /* 55px */
+}
+
+/* Benefit cards: internal padding tuned to Fibonacci */
+.benefit, .pfeat__item {
+  padding: var(--s-4) var(--s-4);       /* 21px */
+  border-radius: var(--r-3);            /* 21px */
+}
+
+/* Benefit title */
+.has-text.slot--b-title {
+  font-size: clamp(var(--fs-0), 1.5vw, var(--fs-1));
+  line-height: var(--lh-h);
+  margin-bottom: var(--s-2);            /* 8px */
+}
+
+/* Benefit body */
+.has-text.slot--b-text {
+  font-size: var(--fs-0);               /* 16px */
+  line-height: var(--lh);               /* 1.618 */
+}
+
+@media (max-width: 989px) {
+  .benefits__inner { padding-block: var(--s-6); }
+}
+@media (max-width: 749px) {
+  .benefits__inner { padding-block: var(--s-5); }
+  .has-text.slot--b-title { font-size: var(--fs-0); }
+  .has-text.slot--b-text  { font-size: var(--fs--1); }
+}
+
+/* ----------------------------------------------------------------
+   7. PRODUCT SLIDER — panel : image = 1 : φ
+   ---------------------------------------------------------------- */
+
+/* Left panel: 38.2% → information; right: 61.8% → photography */
+.pslider__slide { grid-template-columns: var(--split); }
+
+.pslider__left {
+  padding: var(--s-6) var(--s-5) var(--s-7) var(--s-5);  /* 55/34/89/34 */
+}
+
+/* Large product title: display treatment */
+.has-text.slot--pslider-title {
+  font-size: clamp(var(--fs-3), 5vw, var(--fs-6));   /* 33px → 68px */
+  line-height: var(--lh-d);             /* 1.1 */
+  letter-spacing: .02em;
+}
+
+/* Subtitle copy */
+.pslider__title .has-text.slot--pslider-text {
+  font-size: var(--fs-0);               /* 16px */
+  line-height: var(--lh);               /* 1.618 */
+  margin-top: var(--s-3);               /* 13px */
+  max-width: 28em;
+  opacity: .88;
+}
+
+@media (max-width: 989px) {
+  .has-text.slot--pslider-title { font-size: clamp(var(--fs-2), 4.5vw, var(--fs-4)); }
+}
+@media (max-width: 749px) {
+  .pslider__slide { grid-template-columns: 1fr; }
+  .has-text.slot--pslider-title { font-size: var(--fs-2); }
+  .pslider__title .has-text.slot--pslider-text { font-size: var(--fs--1); }
+}
+
+/* ----------------------------------------------------------------
+   8. IMAGE-WITH-TEXT ROWS — φ : 1 split, golden padding
+   ---------------------------------------------------------------- */
+
+/* Image side: φ portion (61.8%) */
+.iwt { grid-template-columns: var(--split-rev); }      /* 1.618fr 1fr */
+.iwt--row.iwt--rev, .iwt.iwt--rev { grid-template-columns: var(--split); }
+
+/* Text padding: generous but not excessive */
+.iwt__text,
+.iwt--row .iwt__text,
+.iwt--row.iwt--rev .iwt__text {
+  padding: var(--s-7) var(--s-6);       /* 89px / 55px */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* IWT heading: large, uppercase, display */
+.has-text.slot--iwt-title {
+  font-size: clamp(var(--fs-3), 5vw, var(--fs-5));   /* 33px → 53px */
+  line-height: var(--lh-d);
+  margin-bottom: var(--s-4);            /* 21px */
+}
+
+/* IWT body: readable with golden line-height */
+.has-text.slot--iwt-p {
+  font-size: clamp(var(--fs--1), 1.1vw, var(--fs-0));
+  line-height: var(--lh);               /* 1.618 */
+  margin-bottom: var(--s-3);            /* 13px */
+}
+
+@media (max-width: 1190px) {
+  .has-text.slot--iwt-title { font-size: var(--fs-4); }
+}
+@media (max-width: 989px) {
+  .iwt__text, .iwt--row .iwt__text, .iwt--row.iwt--rev .iwt__text {
+    padding: var(--s-5) var(--s-5);     /* 34px each */
+  }
+}
+@media (max-width: 749px) {
+  .iwt, .iwt--row.iwt--rev, .iwt.iwt--rev { grid-template-columns: 1fr; }
+  .iwt__text, .iwt--row .iwt__text, .iwt--row.iwt--rev .iwt__text {
+    padding: var(--s-5) var(--pad) var(--s-6);
+  }
+  .iwt__media { aspect-ratio: 1.618 / 1; }
+  .has-text.slot--iwt-title { font-size: var(--fs-3); }
+}
+
+/* ----------------------------------------------------------------
+   9. PARALLAX / PINNED SCROLL — phi-proportioned layout
+   ---------------------------------------------------------------- */
+
+.parallax__split {
+  grid-template-columns: var(--split-rev);             /* 1.618fr 1fr */
+  gap: var(--s-6);                       /* 55px */
+  padding-block: var(--s-6);             /* 55px */
+}
+.parallax__split--rev { grid-template-columns: var(--split); }
+
+/* Large parallax heading */
+.has-text.slot--par-title {
+  font-size: clamp(var(--fs-4), 7vw, var(--fs-7));    /* 42px → 86px */
+  line-height: var(--lh-d);
+  margin-bottom: var(--s-4);             /* 21px */
+}
+
+/* Smaller parallax sub-heading */
+.has-text.slot--par-title-sm {
+  font-size: clamp(var(--fs-2), 4vw, var(--fs-4));    /* 26px → 42px */
+  line-height: var(--lh-d);
+  margin-bottom: var(--s-3);             /* 13px */
+}
+
+/* Parallax body: golden line-height */
+.has-text.slot--par-p, .has-text.slot--par-p-sm {
+  font-size: var(--fs-0);               /* 16px */
+  line-height: var(--lh);               /* 1.618 */
+  max-width: 28em;
+}
+
+/* Text block: comfortable internal padding */
+.parallax__split-text {
+  padding: var(--s-5) var(--s-5);       /* 34px */
+  border-radius: var(--r-3);            /* 21px */
+}
+
+@media (max-width: 989px) {
+  .has-text.slot--par-title   { font-size: var(--fs-5); }
+  .has-text.slot--par-title-sm{ font-size: var(--fs-3); }
+  .parallax__split            { gap: var(--s-5); }
+}
+@media (max-width: 749px) {
+  .parallax__split, .parallax__split--rev { grid-template-columns: 1fr; gap: var(--s-4); }
+  .has-text.slot--par-title   { font-size: var(--fs-3); }
+  .has-text.slot--par-title-sm{ font-size: var(--fs-2); }
+  .parallax__split-text       { padding: var(--s-4); }
+}
+
+/* ----------------------------------------------------------------
+   10. BACKGROUND VIDEO / SHOWCASE — text legibility over imagery
+   ---------------------------------------------------------------- */
+
+/* Generous centering */
+.bgvideo__inner {
+  padding: var(--s-7) var(--pad);        /* 89px */
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-4);                       /* 21px */
+}
+
+/* Large showcase headline */
+.has-text.slot--bgv-title {
+  font-size: clamp(var(--fs-3), 5.5vw, var(--fs-5)); /* 33px → 53px */
+  line-height: var(--lh-d);             /* 1.1 */
+  letter-spacing: .02em;
+  max-width: 20em;
+  text-shadow: 0 2px 24px rgba(0,0,0,.7), 0 1px 6px rgba(0,0,0,.8);
+}
+
+.bgvideo--sm .has-text.slot--bgv-title {
+  font-size: clamp(var(--fs-2), 4vw, var(--fs-4));
+}
+
+.bgvideo__inner .slot--eyebrow-w {
+  margin-bottom: var(--s-3);            /* 13px */
+  letter-spacing: .18em;
+}
+
+@media (max-width: 749px) {
+  .bgvideo__inner { padding: var(--s-6) var(--pad); }
+  .has-text.slot--bgv-title { font-size: var(--fs-2); }
+}
+
+/* ----------------------------------------------------------------
+   11. BRANDS / TRUST LOGOS — balanced marquee rhythm
+   ---------------------------------------------------------------- */
+
+.brands {
+  padding-block: var(--s-7) var(--s-6); /* 89px / 55px */
+  overflow: hidden;
+}
+
+/* Logo tiles: consistent proportion (golden rectangle approximation) */
+.media--logo {
+  width: calc(var(--s-8) * 1);          /* 144px */
+  height: calc(var(--s-7) * 1);         /* 89px */
+  border-radius: var(--r-2);            /* 13px */
+  flex-shrink: 0;
+}
+
+@media (max-width: 749px) {
+  .brands { padding-block: var(--s-6) var(--s-5); }
+  .media--logo { width: 89px; height: 55px; }
+}
+
+/* ----------------------------------------------------------------
+   12. TESTIMONIALS — generous slide spacing
+   ---------------------------------------------------------------- */
+
+.testi {
+  padding-block: var(--s-7) var(--s-6); /* 89px / 55px */
+}
+
+.testi__slide {
+  padding: var(--s-5) var(--s-6);       /* 34px / 55px */
+  border-radius: var(--r-4);            /* 34px */
+  max-width: 760px;
+  margin-inline: auto;
+}
+
+/* Quote: large, golden body line-height */
+.has-text.slot--quote {
+  font-size: clamp(var(--fs-1), 2.5vw, var(--fs-3)); /* 20px → 33px */
+  line-height: var(--lh);               /* 1.618 */
+  font-style: italic;
+}
+
+/* Reviewer name */
+.has-text.slot--name {
+  font-size: var(--fs-0);               /* 16px */
+  margin-top: var(--s-4);               /* 21px */
+  opacity: .72;
+}
+
+.testi__nav { gap: var(--s-4); margin-top: var(--s-5); }   /* 21px / 34px */
+.media--avatar { width: var(--s-7); height: var(--s-7); }  /* 89px × 89px */
+
+@media (max-width: 749px) {
+  .testi { padding-block: var(--s-6) var(--s-5); }
+  .testi__slide { padding: var(--s-4); }
+  .has-text.slot--quote { font-size: var(--fs-1); }
+}
+
+/* ----------------------------------------------------------------
+   13. NEWSLETTER / HELP CTA — card proportions
+   ---------------------------------------------------------------- */
+
+/* Help section padding */
+.news.news--help {
+  padding-block: var(--s-8);            /* 144px */
+}
+
+/* Card dimensions tuned: width at ~38.2% shorter than banner width */
+.news.news--help .news__card {
+  width: min(805px, 100%);
+  padding: var(--s-7) var(--s-7);       /* 89px each */
+  border-radius: var(--r-4);            /* 34px */
+}
+
+.has-text.slot--news-title {
+  font-size: clamp(var(--fs-2), 3.5vw, var(--fs-4)); /* 26px → 42px */
+  line-height: var(--lh-d);
+  margin-bottom: var(--s-3);            /* 13px */
+}
+
+.has-text.slot--news-p {
+  font-size: var(--fs-0);
+  line-height: var(--lh);
+  margin-bottom: var(--s-4);            /* 21px */
+}
+
+/* Input and send button: 55px height = --s-6, Fibonacci */
+.news__field input {
+  height: var(--s-6);                   /* 55px */
+  border-radius: var(--r-2);            /* 13px */
+  padding-inline: var(--s-4);           /* 21px */
+  font-size: var(--fs-0);
+}
+
+.news__send {
+  height: var(--s-6);                   /* 55px */
+  border-radius: var(--r-2);
+  min-width: calc(var(--s-8) * 1);      /* 144px */
+}
+
+@media (max-width: 989px) {
+  .news.news--help .news__card { padding: var(--s-5) var(--s-5); }
+}
+@media (max-width: 749px) {
+  .news.news--help { padding-block: var(--s-7); }
+  .news.news--help .news__card { padding: var(--s-5) var(--s-4); }
+  .has-text.slot--news-title { font-size: var(--fs-2); }
+}
+
+/* ----------------------------------------------------------------
+   14. INNER PAGE BANNERS — phi² aspect ratio
+   ---------------------------------------------------------------- */
+
+/* Standard inner banner: φ² : 1 (2.618 wide for every 1 tall) */
+.pbanner {
+  height: auto;
+  aspect-ratio: 2.618 / 1;
+  min-height: 300px;
+  max-height: 82svh;
+}
+
+/* Taller banners for About / Science: φ^1.5 ≈ 2.058 */
+.pbanner--about,
+.pbanner--dark {
+  aspect-ratio: 2.058 / 1;
+}
+
+/* Banner page title: very large, centered */
+.has-text.slot--pb-title {
+  font-size: clamp(var(--fs-3), 6vw, var(--fs-6));   /* 33px → 68px */
+  line-height: var(--lh-d);
+  letter-spacing: .02em;
+}
+
+@media (max-width: 989px) {
+  .pbanner, .pbanner--about, .pbanner--dark {
+    aspect-ratio: 1.618 / 1;
+    min-height: 280px;
+  }
+  .has-text.slot--pb-title { font-size: var(--fs-5); }
+}
+@media (max-width: 749px) {
+  .pbanner, .pbanner--about, .pbanner--dark {
+    aspect-ratio: auto;
+    min-height: 233px;                 /* --s-8 ≈ Fibonacci */
+  }
+  .has-text.slot--pb-title { font-size: var(--fs-3); }
+}
+
+/* ----------------------------------------------------------------
+   15. PAGE INTRO (pintro) — centred, balanced padding
+   ---------------------------------------------------------------- */
+
+.pintro {
+  padding: var(--s-7) var(--pad);       /* 89px */
+  text-align: center;
+}
+
+.pintro--title-only {
+  padding: var(--s-6) var(--pad);       /* 55px */
+}
+
+/* Intro title */
+.has-text.slot--i-title {
+  font-size: clamp(var(--fs-2), 3.5vw, var(--fs-4)); /* 26px → 42px */
+  line-height: var(--lh-d);
+  margin-bottom: var(--s-4);            /* 21px */
+  max-width: 760px;
+  margin-inline: auto;
+}
+
+/* Intro body */
+.has-text.slot--i-text {
+  font-size: clamp(var(--fs-0), 1.2vw, var(--fs-1)); /* 16px → 20px */
+  line-height: var(--lh);               /* 1.618 */
+  max-width: 32em;
+  margin-inline: auto;
+}
+
+@media (max-width: 749px) {
+  .pintro { padding: var(--s-6) var(--pad); }
+  .has-text.slot--i-title { font-size: var(--fs-2); }
+  .has-text.slot--i-text  { font-size: var(--fs-0); }
+}
+
+/* ----------------------------------------------------------------
+   16. FEATURES (pfeat) — icon + title + text columns
+   ---------------------------------------------------------------- */
+
+.pfeat {
+  padding: var(--s-7) var(--pad);       /* 89px */
+}
+
+.pfeat--plain {
+  padding: var(--s-6) var(--pad);       /* 55px */
+}
+
+/* Feature icon: Fibonacci square (55px × 55px) */
+.media--icon {
+  width: var(--s-6);                    /* 55px */
+  height: var(--s-6);
+  margin-bottom: var(--s-3);            /* 13px */
+  border-radius: 50%;
+}
+
+/* Feature heading: larger than body, smaller than section heading */
+.pfeat .has-text.slot--b-title {
+  font-size: clamp(var(--fs-0), 1.5vw, var(--fs-1));  /* 16px → 20px */
+  line-height: var(--lh-h);
+  margin-bottom: var(--s-2);            /* 8px */
+}
+
+.pfeat__grid { gap: var(--s-5); }      /* 34px */
+
+@media (max-width: 989px) { .pfeat__grid { gap: var(--s-5) var(--s-4); } }
+@media (max-width: 749px) {
+  .pfeat { padding: var(--s-6) var(--pad); }
+  .pfeat__grid { gap: var(--s-4) var(--s-3); }
+}
+
+/* ----------------------------------------------------------------
+   17. FAQ PAGE — accordion with Fibonacci rhythm
+   ---------------------------------------------------------------- */
+
+.faq {
+  padding: var(--s-7) var(--pad);       /* 89px top/bottom */
+}
+
+/* FAQ list max-width: golden within content area */
+.faq__list { max-width: 890px; }
+
+/* Each item: comfortable row height */
+.faq__item {
+  margin-bottom: var(--s-3);            /* 13px */
+  padding-inline: var(--s-4);           /* 21px */
+  border-radius: var(--r-3);            /* 21px */
+}
+
+/* Question row */
+.faq__q {
+  min-height: var(--s-6);               /* 55px — Fibonacci */
+  gap: var(--s-3);                      /* 13px */
+  padding-block: var(--s-3);            /* 13px */
+}
+
+/* Number label */
+.faq .has-text.slot--q-num {
+  font-size: var(--fs-0);               /* 16px */
+  width: var(--s-5);                    /* 34px */
+  flex-shrink: 0;
+}
+
+/* Question text */
+.faq .has-text.slot--q {
+  font-size: var(--fs-0);               /* 16px */
+  line-height: var(--lh-h);             /* 1.236 */
+  letter-spacing: .02em;
+}
+
+/* Answer text */
+.faq__a .has-text.slot,
+.faq .faq__a .has-text.slot {
+  font-size: var(--fs-0);               /* 16px */
+  line-height: var(--lh);               /* 1.618 */
+  margin: 0 0 var(--s-4) var(--s-5);   /* 21px / 34px */
+  max-width: calc(100% - var(--s-5));
+}
+
+@media (max-width: 749px) {
+  .faq { padding: var(--s-6) var(--pad); }
+  .faq__item { padding-inline: var(--s-3); }
+  .faq__q { min-height: calc(var(--s-5) + var(--s-2)); }   /* 42px ≈ 34+8 */
+}
+
+/* ----------------------------------------------------------------
+   18. BLOG CARDS — golden media ratio
+   ---------------------------------------------------------------- */
+
+.blog {
+  padding: var(--s-5) var(--pad) var(--s-7); /* 34 / 89 */
+}
+
+/* Blog card media: φ : 1 aspect ratio */
+.bcard__media {
+  aspect-ratio: 1.618 / 1;              /* exact golden rectangle */
+  border-radius: var(--r-2);            /* 13px */
+  margin-bottom: var(--s-3);            /* 13px */
+  overflow: hidden;
+}
+
+/* Card title */
+.has-text.slot--bc-title {
+  font-size: clamp(var(--fs-0), 1.5vw, var(--fs-1)); /* 16px → 20px */
+  line-height: var(--lh-h);             /* 1.236 */
+  margin-bottom: var(--s-2);            /* 8px */
+}
+
+/* Card meta */
+.has-text.slot--bc-meta {
+  font-size: var(--fs--1);              /* 12.6px */
+  letter-spacing: .06em;
+  margin-bottom: var(--s-2);            /* 8px */
+}
+
+.blog .headline { margin-bottom: var(--s-5); }   /* 34px */
+
+@media (max-width: 749px) {
+  .blog { padding-bottom: var(--s-6); }
+  .blog__grid { gap: var(--s-5); }     /* 34px between cards */
+}
+
+/* ----------------------------------------------------------------
+   19. CONTACT PAGE — 3:2 form/info split + golden field heights
+   ---------------------------------------------------------------- */
+
+/* Hero: 62vh = golden proportion of viewport */
+.ct-hero {
+  min-height: clamp(400px, 62vh, 620px);
+}
+
+/* Main grid: 3fr : 2fr ≈ 60 : 40 = golden approximation */
+.ct-main {
+  grid-template-columns: 3fr 2fr;
+  gap: var(--s-6);                       /* 55px */
+  padding-block: var(--s-7) var(--s-8);  /* 89px / 144px */
+}
+
+/* Form fields: comfortable 48px height ≈ 34px × 1.414 */
+.ct-field input:not([type=checkbox]):not([type=radio]),
+.ct-field select {
+  min-height: calc(var(--s-5) + var(--s-2)); /* 42px */
+}
+.ct-field textarea { min-height: calc(var(--s-7) * 1.236); /* ~110px */ }
+
+/* Submit button: 55px = --s-6 Fibonacci */
+.ct-submit { min-height: var(--s-6); }  /* 55px */
+
+@media (max-width: 989px) {
+  .ct-main { grid-template-columns: 1fr; gap: var(--s-5); }
+}
+
+/* ----------------------------------------------------------------
+   20. FOOTER — maintained φ-column layout
+   ---------------------------------------------------------------- */
+
+/* Three equal nav columns + one φ-wide content card */
+.footer__cols {
+  grid-template-columns: 1fr 1fr 1fr 1.618fr;
+  gap: var(--s-5);                       /* 34px */
+}
+
+.footer__inner {
+  padding-top: var(--s-8);               /* 144px */
+}
+
+/* Footer link: readable, comfortable line-height */
+.footer .has-text.slot--f-link {
+  font-size: var(--fs-0);               /* 16px */
+  line-height: var(--lh);               /* 1.618 */
+}
+
+/* Footer address */
+.footer .has-text.slot--f-address {
+  font-size: var(--fs-0);
+  line-height: var(--lh);
+  margin-bottom: var(--s-3);            /* 13px */
+}
+
+/* Footer column heading */
+.footer .has-text.slot--f-head {
+  font-size: var(--fs--1);             /* 12.6px */
+  letter-spacing: .18em;
+  margin-bottom: var(--s-4);           /* 21px */
+}
+
+/* Social icons: circle size = --s-5 (34px) */
+.footer__social { gap: var(--s-3); margin-top: var(--s-6); }
+.footer__copy   { margin-top: var(--s-6); gap: var(--s-3); }
+
+@media (max-width: 989px) {
+  .footer__cols { grid-template-columns: 1fr 1fr; }
+}
+
+/* ----------------------------------------------------------------
+   21. BUTTONS & INTERACTIVE ELEMENTS
+   ---------------------------------------------------------------- */
+
+/* Primary button: Fibonacci minimum height */
+.btn {
+  min-height: var(--s-6);               /* 55px */
+  padding: var(--s-3) var(--s-4);       /* 13px / 21px */
+  border-radius: var(--r-2);            /* 13px */
+  font-size: var(--fs--1);              /* 12.6px */
+  letter-spacing: .15em;
+}
+
+/* Small button variant */
+.btn--sm {
+  min-height: var(--s-5);               /* 34px */
+  padding: var(--s-2) var(--s-3);       /* 8px / 13px */
+  border-radius: var(--r-1);            /* 8px */
+}
+
+/* Float widget: golden pill */
+.float-widget {
+  height: var(--s-6);                   /* 55px */
+  border-radius: var(--s-6) 0 0 var(--s-6);
+  padding-inline: var(--s-4) var(--s-3); /* 21px / 13px */
+}
+
+/* ----------------------------------------------------------------
+   22. DROPDOWN / MEGA MENU — contained, comfortable
+   ---------------------------------------------------------------- */
+
+.dropdown {
+  border-radius: 0 0 var(--r-3) var(--r-3); /* 21px */
+  padding: var(--s-2);                       /* 8px */
+}
+
+.dropdown a {
+  padding: var(--s-3) var(--s-3);           /* 13px */
+  border-radius: var(--r-2);                /* 13px */
+  gap: var(--s-4);                          /* 21px */
+}
+
+.mega__inner {
+  gap: var(--s-4);                           /* 21px */
+  padding: var(--s-3) var(--pad) var(--s-5);
+}
+
+/* ----------------------------------------------------------------
+   23. SECTION SEPARATORS — thin gold line = brand accent
+   ---------------------------------------------------------------- */
+
+.sep {
+  height: 4px;
+  background: linear-gradient(90deg, transparent, var(--gold-500), transparent);
+  margin: 0 var(--pad);
+  border: none;
+  border-radius: 2px;
+  opacity: .5;
+}
+
+/* ----------------------------------------------------------------
+   24. CARD DETAILS — consistent radius scale
+   ---------------------------------------------------------------- */
+
+/* Product cards: gentle 20px radius ≈ between --r-3 (21px) and --r-2 (13px) */
+.pcard { border-radius: var(--r-3); }
+.pcard__media { border-radius: var(--r-2); }
+
+/* Blog cards */
+.bcard { border-radius: var(--r-3); }
+
+/* Testimonial slides */
+.testi__slide { border-radius: var(--r-4); }  /* 34px */
+
+/* ----------------------------------------------------------------
+   25. MISCELLANEOUS PROPORTIONAL REFINEMENTS
+   ---------------------------------------------------------------- */
+
+/* Strip / ticker: Fibonacci text size */
+.has-text.slot--strip {
+  font-size: clamp(var(--fs-0), 1.8vw, var(--fs-1));
+  line-height: var(--lh-h);
+  letter-spacing: .04em;
+}
+
+/* Scroll-reveal: starts closer to final position for snappier feel */
+[data-reveal]:not(.is-in) {
+  opacity: 0;
+  transform: translateY(var(--s-3));    /* 13px: subtle */
+  transition: opacity .55s var(--ease), transform .55s var(--ease);
+}
+[data-reveal].is-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* Stagger reveal for lists of cards */
+.pfeat__grid [data-reveal]:nth-child(2):not(.is-in) { transition-delay: .08s; }
+.pfeat__grid [data-reveal]:nth-child(3):not(.is-in) { transition-delay: .16s; }
+.pfeat__grid [data-reveal]:nth-child(4):not(.is-in) { transition-delay: .24s; }
+
+/* ----------------------------------------------------------------
+   26. RESPONSIVE GUTTERS — container max-widths
+   ---------------------------------------------------------------- */
+
+/* Wide screens: scale up --pad proportionally */
+@media (min-width: 1400px) {
+  :root { --pad: 55px; }                /* --s-6 */
+}
+@media (min-width: 1800px) {
+  :root { --pad: 89px; }                /* --s-7 */
+}
+
+/* Tablet */
+@media (max-width: 989px) {
+  :root { --pad: 34px; }                /* --s-5 */
+}
+
+/* Mobile */
+@media (max-width: 749px) {
+  :root { --pad: 21px; }                /* --s-4 */
+}
+
+/* ----------------------------------------------------------------
+   27. FOCUS & ACCESSIBILITY — golden outline
+   ---------------------------------------------------------------- */
+:focus-visible {
+  outline: 2px solid var(--gold-500);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* ----------------------------------------------------------------
+   28. PRINT — keep brand visible on paper
+   ---------------------------------------------------------------- */
+@media print {
+  :root {
+    --bg: #fff;
+    --ink: #000;
+    --green-700: #1a6b3c;
+    --gold-500: #e0a826;
+  }
+  .header, .footer, .float-widget, .to-top { display: none; }
+  .hero { height: auto; min-height: 0; }
+}

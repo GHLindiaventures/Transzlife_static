@@ -1,5 +1,5 @@
 import { useId, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { MapPin, Phone, Mail, Clock, Send, PhoneCall, Headset, Navigation, MessageCircle, Plus, Check, ArrowLeft } from 'lucide-react';
 import { CONTACT, PHOTOS, PRODUCTS, PHOTO_EXT } from '../content/site.js';
 import '../styles/contact.css';
@@ -38,7 +38,9 @@ function validate(v) {
 
 /* ---------------- enquiry form ---------------- */
 function EnquiryForm() {
-  const [v, setV] = useState(EMPTY);
+  // "Contact our team" in the Tulsi chat arrives with a starter message
+  const { state } = useLocation();
+  const [v, setV] = useState(() => ({ ...EMPTY, message: state?.chatMessage || '' }));
   const [errors, setErrors] = useState({});
   const [status, setStatus] = useState('idle'); // idle | sending | sent | handoff
   const id = useId();

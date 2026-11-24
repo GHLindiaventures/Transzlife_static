@@ -259,7 +259,7 @@
 
 .ayur-brand {
   font-family: var(--f-display);
-  font-size: clamp(11.5px, 1.15vw, 14px);
+  font-size: clamp(12px, 1.15vw, 14px);
   font-weight: 800;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -337,13 +337,20 @@
 }
 
 @keyframes ahWheel {
-  0% { transform: translateY(0); opacity: 1; }
-  100% { transform: translateY(12px); opacity: 0; }
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(12px);
+    opacity: 0;
+  }
 }
 
 .ah-text {
   font-family: var(--f-body);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -359,15 +366,18 @@
     width: min(340px, 86vw);
     justify-content: center;
   }
+
   .ayur-content {
     width: 80%;
     max-height: 72%;
     padding: 10px 16px;
   }
+
   .ayur-quote {
     font-size: clamp(14px, 2vw, 17.5px);
     line-height: 1.55;
   }
+
   .ayur-sign {
     margin-top: 10px;
     gap: 8px;
@@ -378,33 +388,41 @@
   .ayur-seq {
     height: 240vh;
   }
+
   .ayur-power-overlay {
     top: 22%;
     width: min(290px, 88vw);
   }
+
   .ayur-content {
     width: 86%;
     max-height: 78%;
     padding: 8px 12px;
   }
+
   .ayur-pill {
-    padding: 4px 12px;
+    padding: 5px 12px;
     margin-bottom: 6px;
-    font-size: 10px;
+    font-size: 12px;
   }
+
   .ayur-quote {
     font-size: 13.5px;
     line-height: 1.48;
   }
+
   .ayur-sign {
     margin-top: 6px;
   }
+
   .ayur-brand {
-    font-size: 10.5px;
+    font-size: 12px;
   }
+
   .ayur-tag {
     font-size: 12px;
   }
+
   .ayur-hint {
     bottom: 12px;
   }

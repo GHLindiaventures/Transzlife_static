@@ -50,7 +50,9 @@ export default function Parallax() {
 
   // scroll-linked parallax
   useEffect(() => {
-    const onScroll = () => {
+    let raf = 0;
+    const run = () => {
+      raf = 0;
       const sec = sectionRef.current, st = stickyRef.current, bg = bgRef.current;
       if (!sec || !st || !bg) return;
       const total = sec.offsetHeight - st.offsetHeight;
@@ -60,10 +62,11 @@ export default function Parallax() {
       st.style.setProperty('--sp', (p * 3 - idx).toFixed(3)); // progress inside the current scene, 0..1
       bg.style.transform = `scale(${1.18 - p * 0.12}) translateY(${p * -5}%)`;
     };
-    onScroll();
+    run();
+    const onScroll = () => { if (!raf) raf = requestAnimationFrame(run); };   // at most once per frame
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onScroll);
-    return () => { window.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onScroll); };
+    return () => { window.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onScroll); if (raf) cancelAnimationFrame(raf); };
   }, []);
 
   const cls = (n) => `parallax__scene${scene === n ? ' is-active' : ''}`;

@@ -21,7 +21,6 @@ export default function Hero() {
   const [paused, setPaused] = useState(false);
   const [held, setHeld] = useState(false);
   const [reduce, setReduce] = useState(false);
-  const [scrollOffset, setScrollOffset] = useState(0);
   const slidesRef = useRef(null);
   const touchX = useRef(0);
 
@@ -33,19 +32,24 @@ export default function Hero() {
     return () => mq.removeEventListener('change', apply);
   }, []);
 
-  // Parallax scroll effect
+  // Parallax scroll effect. Written straight to a CSS variable (no React state), and only while the hero is on screen,
+  // so scrolling never re-renders the five slides.
   useEffect(() => {
     if (reduce) return undefined;
+    const hero = document.getElementById('hero');
+    if (!hero) return undefined;
     let raf = 0;
+    let visible = true;
     const update = () => {
       raf = 0;
-      const scrollY = window.scrollY;
-      setScrollOffset(scrollY * 0.3); // subtle parallax
+      hero.style.setProperty('--hero-py', `${(window.scrollY * 0.3).toFixed(1)}px`);
     };
-    const onScroll = () => { if (!raf) raf = requestAnimationFrame(update); };
+    const onScroll = () => { if (visible && !raf) raf = requestAnimationFrame(update); };
+    const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting; if (visible) onScroll(); }, { rootMargin: '80px' });
+    io.observe(hero);
     update();
     window.addEventListener('scroll', onScroll, { passive: true });
-    return () => { window.removeEventListener('scroll', onScroll); if (raf) cancelAnimationFrame(raf); };
+    return () => { io.disconnect(); window.removeEventListener('scroll', onScroll); if (raf) cancelAnimationFrame(raf); };
   }, [reduce]);
 
   // Compute active dot (0, 1, or 2)
@@ -148,7 +152,7 @@ export default function Hero() {
               aria-hidden={!isCurrent}
               inert={isCurrent ? undefined : ''}
             >
-              <Media className="media--fill hero__bg" style={{ background: s.bg, transform: `translateY(${scrollOffset}px)` }}>
+              <Media className="media--fill hero__bg" style={{ background: s.bg }}>
                 <img
                   src={`${BASE}assets/${s.image}`}
                   alt={s.alt}

@@ -4,14 +4,14 @@
    Tune the look with the --glass-* tokens below.
    ========================================================== */
 :root {
-  --glass-blur: 18px;
+  --glass-blur: 6px;
   --glass-bg: rgba(255, 255, 255, .55);
   --glass-bg-strong: rgba(255, 255, 255, .72);
   --glass-bg-dark: rgba(8, 38, 26, .32);
   --glass-border: rgba(255, 255, 255, .65);
   --glass-border-dark: rgba(255, 255, 255, .22);
-  --glass-shadow: 0 8px 32px rgba(15, 47, 29, .12), inset 0 1px 0 rgba(255, 255, 255, .7);
-  --glass-shadow-lg: 0 18px 50px rgba(15, 47, 29, .18), inset 0 1px 0 rgba(255, 255, 255, .75);
+  --glass-shadow: 0 4px 16px rgba(15, 47, 29, .08), inset 0 1px 0 rgba(255, 255, 255, .7);
+  --glass-shadow-lg: 0 8px 24px rgba(15, 47, 29, .12), inset 0 1px 0 rgba(255, 255, 255, .75);
 }
 
 /* ---- colour glows behind the page so the blur has something to show ---- */
@@ -657,14 +657,15 @@
   transition: transform .35s var(--ease), box-shadow .35s var(--ease);
 }
 
-.header__logo:hover .logo__img {
-  transform: scale(1.06) rotate(-3deg);
-  box-shadow: 0 6px 20px rgba(15, 47, 29, .25), 0 0 0 2px var(--gold-500)
+@media (min-width:990px) {
+  .header__logo:hover .logo__img {
+    transform: scale(1.06) rotate(-3deg);
+    box-shadow: 0 6px 20px rgba(15, 47, 29, .25), 0 0 0 2px var(--gold-500)
+  }
 }
 
 @media (max-width:989px) {
   .logo__img {
-    width: 36px;
-    height: 36px
+    display: none
   }
 }

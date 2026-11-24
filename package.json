@@ -3,12 +3,18 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
+  "engines": {
+    "node": ">=22.9"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build && node scripts/copy-dist.js",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "node --env-file-if-exists=.env server/index.js",
+    "gemini-bot": "cd gemini-bot && npm start"
   },
   "dependencies": {
+    "@google/genai": "^3.6.1",
     "@tailwindcss/vite": "^4.3.5",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

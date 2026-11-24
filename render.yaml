@@ -1,10 +1,36 @@
+# Render Blueprint: the website + Tulsi chat API from one Node web service.
+#   build: installs dependencies and builds the React site into dist/
+#   start: `npm start` runs server/index.js, which serves dist/ (with SPA fallback
+#          to index.html) and the chat API (/api/chat, /api/health) on Render's $PORT.
+#
+# The old static-site service cannot be converted to a web service, so this blueprint
+# creates a NEW service (different name). Point your domain at it once it is live,
+# then delete the old static site.
 services:
   - type: web
-    name: transzlife-static
-    env: static
-    buildCommand: npm run build
-    staticPublishPath: ./dist
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
+    name: transzlife-web
+    runtime: node
+    plan: free                      # free instances sleep when idle (~1 min cold start); use starter or above to avoid that
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      # `npm start` uses node --env-file-if-exists, which needs Node 22.9+
+      - key: NODE_VERSION
+        value: "22"
+      # ---- Gemini (primary) ----
+      # Up to 4 keys, comma-separated. Render asks for the value when you create the
+      # service from this blueprint; it is never stored in git.
+      - key: GEMINI_API_KEYS
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-3.5-flash-lite
+      # ---- Ollama (fallback) ----
+      # Render cannot run Ollama. Leave this empty and the chat uses Gemini only;
+      # when all keys are out of quota visitors see "can't connect" until it refreshes.
+      # To keep the fallback, run Ollama elsewhere (e.g. your PC behind a Cloudflare
+      # tunnel) and put its public URL here.
+      - key: OLLAMA_URL
+        sync: false
+      - key: CHAT_MODEL
+        value: gemma2:9b

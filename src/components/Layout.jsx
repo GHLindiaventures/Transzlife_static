@@ -1,10 +1,10 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { initChat, openChat } from '../features/chat/chat-widget.js';
 import Announcement from './Announcement.jsx';
 import Header from './Header.jsx';
 import Drawer from './Drawer.jsx';
 import Footer from './Footer.jsx';
-import BackToTop from './BackToTop.jsx';
 
 export default function Layout() {
   const { pathname, hash, key } = useLocation();
@@ -12,6 +12,10 @@ export default function Layout() {
   const mainRef = useRef(null);
   const footerRef = useRef(null);
   const lastPath = useRef(pathname);
+  const navigate = useNavigate();
+
+  // Tulsi chat (Gemini first, Ollama fallback on the server). Mounted once; safe under StrictMode.
+  useEffect(() => { initChat({ navigate }); }, [navigate]);
 
   // new page -> start at the top (or at the #section the link points to), close the drawer
   useEffect(() => {
@@ -90,18 +94,6 @@ export default function Layout() {
       </main>
 
       <Footer ref={footerRef} />
-
-      <BackToTop />
-
-      {/* floating "talk to us" button (replace the link with a live chat once one is set up) */}
-      {pathname !== '/contact' && (
-        <Link className="float-widget" to="/contact" aria-label="Contact us">
-          <span className="float-widget__icon" aria-hidden="true">
-            <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"><path d="M3 4h14v9H8l-4 3v-3H3z" /></svg>
-          </span>
-          <span className="float-widget__label">Talk to us</span>
-        </Link>
-      )}
     </>
   );
 }
