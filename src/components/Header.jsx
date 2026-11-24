@@ -113,10 +113,16 @@ export default function Header({ onBurger }) {
       <div className="header__inner">
         <div className="header__left">
           <button className="icon-btn header__burger" id="burger" aria-label="Open menu" type="button" onClick={onBurger}>
-            <svg width="20" height="14" viewBox="0 0 20 14" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M0 1h20M0 7h20M0 13h20" /></svg>
+            <svg className="burger__lines" width="20" height="14" viewBox="0 0 20 14" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M0 1h20M0 7h20M0 13h20" /></svg>
+            <img className="burger__logo" src={`${import.meta.env.BASE_URL}assets/logo.png`} alt="" width="36" height="36" />
           </button>
-          <Link className="header__logo" to="/">
+          <Link className="header__logo" to="/" aria-label="TranzLife Biosciences, home">
             <img className="logo__img" src={`${import.meta.env.BASE_URL}assets/logo.png`} alt="TranzLife Biosciences, home" width="36" height="36" />
+            {/* mobile wordmark: same as the footer logo (leaf over the "z") */}
+            <span className="logo__text" aria-hidden="true">
+              <span className="logo__word">Tran<span className="logo__z">z<svg viewBox="0 0 64 40" aria-hidden="true"><path d="M4 36C14 12 34 4 60 4 52 26 30 38 4 36z" /><path d="M4 36 38 16" /></svg></span>Life</span>
+              <sup>®</sup>
+            </span>
           </Link>
         </div>
 
@@ -147,9 +153,8 @@ export default function Header({ onBurger }) {
         </nav>
 
         <div className="header__right">
-          <Link className="header__cta" to={SHOP_URL}>
-            <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><path d="M3 6h14l-1 13H4L3 6z" /><path d="M7 8V5a3 3 0 016 0v3" /></svg>
-            <span>Shop</span>
+          <Link className="header__cta header__cta--icon" to={SHOP_URL} aria-label="Shop">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" /><path d="M3 6h18" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>
           </Link>
           <CartButton />
         </div>
@@ -163,7 +168,7 @@ function CartButton() {
   const { count, setOpen } = useCart();
   return (
     <button type="button" className="icon-btn header__cart" onClick={() => setOpen(true)} aria-label={`Cart, ${count} item${count === 1 ? '' : 's'}`}>
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" /><path d="M3 6h18" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" /><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" /></svg>
       {count > 0 && <span className="header__cart-count">{count}</span>}
     </button>
   );

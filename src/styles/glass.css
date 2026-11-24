@@ -657,14 +657,15 @@
   transition: transform .35s var(--ease), box-shadow .35s var(--ease);
 }
 
-.header__logo:hover .logo__img {
-  transform: scale(1.06) rotate(-3deg);
-  box-shadow: 0 6px 20px rgba(15, 47, 29, .25), 0 0 0 2px var(--gold-500)
+@media (min-width:990px) {
+  .header__logo:hover .logo__img {
+    transform: scale(1.06) rotate(-3deg);
+    box-shadow: 0 6px 20px rgba(15, 47, 29, .25), 0 0 0 2px var(--gold-500)
+  }
 }
 
 @media (max-width:989px) {
   .logo__img {
-    width: 36px;
-    height: 36px
+    display: none
   }
 }

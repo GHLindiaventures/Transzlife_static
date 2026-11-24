@@ -10,10 +10,12 @@
 #products,#sc-pipeline,#sc-certs,#roots{scroll-margin-top:calc(var(--header-h) + var(--announcement-h, 34px) + 12px)}
 
 /* ---------------- header: one clear Shop action instead of dead icons ---------------- */
-.header__cta{display:inline-flex;align-items:center;gap:8px;min-height:34px;padding:0 21px;border-radius:999px;background:var(--green-700);color:#fff;font-size:12.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;transition:background .25s var(--ease),color .25s var(--ease)}
+.header__cta{display:inline-flex;align-items:center;gap:8px;min-height:32px;padding:0 16px;border-radius:999px;background:var(--green-700);color:#fff;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;transition:background .25s var(--ease),color .25s var(--ease)}
 .header__cta:hover{background:var(--green-900);color:var(--gold-400)}
-@media (max-width:989px){.header__cta{min-height:34px;padding:0 13px}}
-@media (max-width:420px){.header__cta span{display:none}.header__cta{width:34px;padding:0;justify-content:center}}
+.header__cta--icon{padding:0;min-height:40px;min-width:40px;background:var(--green-700);color:#fff;border-radius:50%;justify-content:center}
+.header__cta--icon:hover{background:var(--green-900);color:var(--gold-400)}
+@media (max-width:989px){.header__cta--icon{display:inline-flex;min-height:36px;min-width:36px}}
+@media (max-width:420px){.header__cta span{display:none}.header__cta{width:32px;padding:0;justify-content:center}}
 .mega__tag{display:block;margin-top:2px;font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--green-700);opacity:.8}
 
 /* ---------------- footer ---------------- */

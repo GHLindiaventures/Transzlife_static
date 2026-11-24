@@ -4,6 +4,7 @@ import { Search } from 'lucide-react';
 import { INGREDIENTS, INGREDIENT_TYPES, getIngredientImg } from '../data/ingredients';
 import { PRODUCTS } from '../data/products';
 import { Breadcrumbs, useTitle } from '../components/Common';
+import IngredientCarousel from '../../components/IngredientCarousel';
 
 export default function Ingredients() {
   useTitle('Ingredient library');
@@ -32,17 +33,14 @@ export default function Ingredients() {
 
   return (
     <>
-      <section className="ing-hero">
-        <div className="container ing-hero__inner">
-          <div>
-            <Breadcrumbs items={[['Ingredients']]} />
-            <h1>The ingredient library</h1>
-            <p>Every herb, oil and nutrient we use, what it is, where it comes from and how it has traditionally been used. Complete transparency, ingredient by ingredient.</p>
-          </div>
-          <img src="/img/about/roots.webp" alt="Fresh herbs with a mortar and pestle" />
-        </div>
-      </section>
-      <section className="container ing-tools">
+      <div className="container ing-breadcrumb-wrap" style={{ paddingTop: '20px', paddingBottom: '4px' }}>
+        <Breadcrumbs items={[['Ingredients']]} />
+      </div>
+
+      {/* 3D Botanical Ingredient Carousel Showcase */}
+      <IngredientCarousel />
+
+      <section className="container ing-tools" id="directory">
         <div className="tabs">
           <button className={!type ? 'is-active' : ''} onClick={() => setType('')}>All ({INGREDIENTS.length})</button>
           {Object.entries(INGREDIENT_TYPES).map(([k, v]) => (

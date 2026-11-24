@@ -969,8 +969,7 @@ html {
   :root { --header-h: 58px; }
   .header__inner { align-items: center; }
   .header__logo { top: 50%; transform: translate(-50%, -50%); }
-  .header__logo .logo__img { width: 40px; height: 40px; }
-  .header__right { gap: 6px; }
+  .burger__logo { width: 40px; height: 40px; }
 }
 
 /* "Our story" panel: the wellness-journey illustration is shown whole (not cropped) on its own paper colour */
