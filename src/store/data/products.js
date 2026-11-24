@@ -1,7 +1,8 @@
 // TranzLife product catalogue.
 // Wording follows the "Tranzlife Products - KT" product study: wellness-support
-// language only, no cure / treatment claims. PRICES ARE PLACEHOLDERS until the
-// client shares the approved MRP list.
+// language only, no cure / treatment claims. Prices are the client's MRPs (24 Nov 2026), sold at
+// MRP; BreatheFree is still a placeholder (not in the client's list). Checkout charges the prices in
+// the database (admin > Products), which were set to these by migration 004.
 
 export const PRODUCTS = [
   {
@@ -10,16 +11,16 @@ export const PRODUCTS = [
     short: 'PulmoClear Gummies',
     tagline: 'Ayurvedic botanicals for everyday respiratory wellness',
     format: 'Gummies',
-    size: '60 Gummies',
-    price: 549,
-    mrp: 699,
+    size: '30 Gummies',
+    price: 200,
+    mrp: 200,
     badge: 'New',
     accent: '#1f6b34',
     tint: '#eaf4e6',
     concerns: ['respiratory', 'quit-smoking'],
     images: ['/img/p/pulmoclear.webp', '/img/p/pulmoclear-jar.webp'],
     brochure: '/brochures/pulmoclear.pdf',
-    highlights: ['9 Ayurvedic botanicals', 'Vitamin C, D3 & Zinc', 'Natural berry flavour', '60 gummies per pack'],
+    highlights: ['9 Ayurvedic botanicals', 'Vitamin C, D3 & Zinc', 'Natural berry flavour', '30 gummies per pack'],
     summary:
       'A botanical respiratory wellness supplement that brings together traditional Ayurvedic herbs and essential micronutrients in a tasty berry gummy.',
     description: [
@@ -69,9 +70,9 @@ export const PRODUCTS = [
     short: 'Liver Booster',
     tagline: 'Polyherbal liquid for liver and digestive wellness',
     format: 'Herbal Liquid',
-    size: '200 ml',
-    price: 649,
-    mrp: 799,
+    size: '500 ml',
+    price: 900,
+    mrp: 900,
     badge: 'Bestseller',
     accent: '#7a3b12',
     tint: '#f6efe6',
@@ -118,7 +119,7 @@ export const PRODUCTS = [
       ['What is the dosage?', '10 ml twice daily after meals, or as advised by a healthcare professional. Always check the pack label.'],
       ['Can it cure fatty liver?', 'No. It is not a cure for fatty liver. If you have fatty liver or raised liver enzymes, please follow your doctor’s advice.'],
       ['I already have a liver condition. Can I use it?', 'Please consult a qualified healthcare professional before use.'],
-      ['What size is the pack?', '200 ml.'],
+      ['What size is the pack?', '500 ml.'],
     ],
   },
   {
@@ -129,7 +130,7 @@ export const PRODUCTS = [
     format: 'Roll-On',
     size: '8 ml',
     price: 299,
-    mrp: 349,
+    mrp: 299,
     badge: 'For Her',
     accent: '#6b2d8c',
     tint: '#f3ebf8',
@@ -186,15 +187,15 @@ export const PRODUCTS = [
     tagline: 'Botanical massage roll-on for everyday vitality',
     format: 'Massage Roll-On',
     size: '50 ml',
-    price: 399,
-    mrp: 499,
+    price: 699,
+    mrp: 699,
     badge: null,
     accent: '#e0701a',
     tint: '#fdf1e5',
     concerns: ['blood-sugar'],
     images: ['/img/p/reviva.webp'],
     brochure: '/brochures/reviva.pdf',
-    highlights: ['Dill & Eucalyptus oils', 'Gentle massage roll-on', 'Plant-based, skin friendly', 'Pocket-friendly 50 ml'],
+    highlights: ['Suitable for people with diabetes', 'Dill & Eucalyptus oils', 'Gentle massage roll-on', 'Plant-based, skin friendly'],
     summary:
       'A refreshing botanical massage roll-on with Dill and Eucalyptus essential oils, made for a calm daily self-care ritual and everyday vitality.',
     description: [
@@ -245,7 +246,7 @@ export const PRODUCTS = [
     format: 'Oral Liquid',
     size: '500 ml',
     price: 1850,
-    mrp: 2199,
+    mrp: 1850,
     badge: 'Bestseller',
     accent: '#5b2a6e',
     tint: '#f4ecf6',

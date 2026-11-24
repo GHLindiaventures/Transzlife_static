@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Media, Slot, ProductImg } from '../ui.jsx';
 import { PRODUCTS, PRODUCTS_SECTION, STORE_ID, priceLabel, productUrl, mrpOf, offOf } from '../../content/site.js';
-import { useCart } from '../../store/context/CartContext';
+import { setBuyNow, BUY_NOW_URL } from '../../store/lib/checkoutIntent';
 
 const COUNT = PRODUCTS.length;
 const inr = (n) => `₹${n.toLocaleString('en-IN')}`;
@@ -21,18 +21,25 @@ export function PriceRow({ product }) {
     return <p className="pcard__price pcard__price--tba">{priceLabel(product)}</p>;
   }
   const mrp = mrpOf(product);
+  const off = offOf(product);
+  if (!off) {
+    return (
+      <p className="pcard__price">
+        <span className="pcard__now"><span className="visually-hidden">Price </span>MRP {inr(product.price)}</span>
+      </p>
+    );
+  }
   return (
     <p className="pcard__price pcard__price--deal">
       <span className="pcard__now"><span className="visually-hidden">Price </span>{inr(product.price)}</span>
       <s className="pcard__mrp"><span className="visually-hidden">MRP </span>{inr(mrp)}</s>
-      <span className="pcard__save">{offOf(product)}% off</span>
+      <span className="pcard__save">{off}% off</span>
     </p>
   );
 }
 
-/** Buy now: put one in the cart and go straight to checkout. */
+/** Buy now (like Amazon): just this item, straight to checkout (sign-in first if needed). The cart is untouched. */
 function BuyNow({ product, url }) {
-  const { add } = useCart();
   const navigate = useNavigate();
   const storeId = STORE_ID[product.id];
   if (product.price == null || !storeId) {
@@ -42,7 +49,7 @@ function BuyNow({ product, url }) {
     <button
       type="button"
       className="pcard__buy"
-      onClick={() => { add(storeId, 1, 1, { openDrawer: false }); navigate('/checkout'); }}
+      onClick={() => { setBuyNow({ id: storeId, pack: 1, qty: 1 }); navigate(BUY_NOW_URL); }}
       aria-label={`Buy ${product.short} now`}
     >
       Buy now

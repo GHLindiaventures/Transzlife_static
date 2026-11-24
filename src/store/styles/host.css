@@ -9,6 +9,25 @@
   color: var(--green-900)
 }
 
+/* header account button (signed in: small green dot) */
+.header__account {
+  position: relative;
+  display: grid;
+  place-items: center;
+  color: var(--green-900)
+}
+
+.header__account-dot {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green-700, #2e7d4f);
+  border: 1.5px solid #fff
+}
+
 .header__cart-count {
   position: absolute;
   top: 2px;

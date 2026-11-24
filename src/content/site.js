@@ -18,7 +18,7 @@ export const BRAND = {
   license: 'Manufacturing Lic. TN/AYU/24/1234',
   copyright: '© 2026 TranzLife Biosciences',
   disclaimer:
-    'We don’t cure. We care. TranzLife products support everyday well-being and are not intended to treat or cure any disease.',
+    'TranzLife products are plant-based wellness products and are not intended to diagnose, treat, cure or prevent any disease. Consult your doctor before use if you are pregnant, nursing or managing a health condition.',
 };
 
 /* Product photos live in /public/assets (product-N.jpg). `photo` = N. */
@@ -27,7 +27,7 @@ export const PRODUCTS = [
     id: 'gummies',
     showcase: 'assets/products/showcase-gummies.jpg',
     compare: { kind: "cutout", before: { src: "illustrations/lungs-before.webp", label: "Before", sub: "Everyday pollutants", alt: "Illustration of discoloured lungs burdened by everyday pollutants" }, after: { src: "illustrations/lungs.webp", label: "After", sub: "Supported with Lung Booster", alt: "Illustration of healthy, clear lungs" } }, photo: 4, ingredients: ['Vasaka 100mg', 'Tulsi 100mg', 'Mulethi 100mg', 'Turmeric 80mg', 'Giloy 80mg', 'Vitamin C 40mg', 'Zinc 5mg'], dosage: 'Adults: 2 gummies twice daily after meals', name: 'PulmoClear™ Lung Booster Gummies', short: 'PulmoClear™', tag: 'Lung Detox',
-    price: 549, size: '60 Gummies',
+    price: 200, size: '30 Gummies',
     desc: '100% Ayurvedic Lung Booster & Craving Control Gummies for heavy smokers. Detoxifies, cleanses, and strengthens respiratory health with Vasaka, Tulsi, Mulethi, Vitamin C & Zinc. Natural Berry Flavour.',
     story: { title: 'Lung Detox', text: 'Standardized Vasaka, Tulsi, Mulethi & Vitamin C in berry gummies to help heavy smokers control cravings and cleanse airways.', note: 'Breathe Freely · Live Fully' },
   },
@@ -35,7 +35,7 @@ export const PRODUCTS = [
     id: 'liver',
     showcase: 'assets/products/showcase-liver.jpg',
     compare: { kind: "cutout", before: { src: "illustrations/liver-before.webp", label: "Before", sub: "Everyday strain", alt: "Illustration of a dull, mottled liver under everyday strain" }, after: { src: "illustrations/liver-botanical.webp", label: "After", sub: "Supported with Liver Booster", alt: "Illustration of a smooth, healthy liver" } }, photo: 5, ingredients: ['Bhumyamalaki 500mg', 'Kalmegh 400mg', 'Kutki 400mg', 'Punarnava 300mg', 'Bhringraj 300mg', 'Daruharidra 200mg'], dosage: 'Adults: 10 ml (2 tsp) twice daily after meals', name: 'LiverDetox™ Polyherbal Concoction', short: 'LiverDetox™', tag: 'Liver Booster',
-    price: 649, size: '500 ml Classical Concoction',
+    price: 900, size: '500 ml Classical Concoction',
     desc: '100% Ayurvedic Liver Booster. Detoxifies, protects, and rejuvenates liver parenchyma cells with 11 classical botanicals including Bhumyamalaki, Kalmegh, Kutki, Punarnava, and Daruharidra.',
     story: { title: 'Liver Booster', text: '500 ml classical polyherbal concoction of Bhumyamalaki, Kalmegh, Kutki & Punarnava to detoxify, protect and rejuvenate.', note: 'Classical Ayurvedic Wisdom' },
   },
@@ -43,7 +43,7 @@ export const PRODUCTS = [
     id: 'rollon',
     showcase: 'assets/products/showcase-rollon.jpg',
     compare: { kind: "scene", before: { src: "illustrations/cycle-before.webp", label: "Before", sub: "Uneasy days", alt: "Illustration of a young woman holding her stomach, looking uncomfortable" }, after: { src: "illustrations/cycle.webp", label: "After", sub: "With the CycleRelief ritual", alt: "Illustration of the same young woman smiling and relaxed" } }, photo: 1, ingredients: ['Dill essential oil', 'Eucalyptus essential oil', '100% plant-based', 'Non-greasy formula'], dosage: 'Roll gently around the belly button every morning on an empty stomach', name: 'CycleRelief™ Menstrual Comfort Roll-On', short: 'CycleRelief™', tag: 'Period Relief',
-    price: 399, size: '50 ml Roll-On',
+    price: 299, size: '8 ml Roll-On',
     desc: '100% natural plant-based formula that eases menstrual cramps, soothes abdominal discomfort, and relaxes tense pelvic muscles with pure Dill and Eucalyptus essential oils. Fast-absorbing and non-greasy.',
     story: { title: 'Cycle Relief', text: 'Fast-absorbing Dill and Eucalyptus essential oils to ease menstrual cramps and soothe abdominal discomfort naturally.', note: 'Nature’s Care Every Cycle' },
   },
@@ -51,15 +51,15 @@ export const PRODUCTS = [
     id: 'reviva',
     showcase: 'assets/products/showcase-reviva.jpg',
     compare: { kind: "scene", before: { src: "illustrations/reviva-before.webp", label: "Before", sub: "A heavy start", alt: "A tired man sitting on the edge of his bed in dim morning light, rubbing his neck" }, after: { src: "illustrations/reviva.webp", label: "After", sub: "With the Reviva ritual", alt: "The same man refreshed and smiling in warm sunlight, holding a roll-on bottle" } }, photo: 3, ingredients: ['Dill essential oil', 'Eucalyptus essential oil', 'Massage roll-on', 'External use'], dosage: 'Apply a small amount to intact skin and massage gently', name: 'Reviva™ Roll-On', short: 'Reviva™', tag: 'Botanical Massage Roll-On',
-    price: 399, size: '50 ml Massage Roll-On',
-    desc: 'Botanical massage roll-on for an everyday wellness and vitality ritual. A practical massage roll-on designed to complement a daily self-care routine with a refreshing topical application.',
-    story: { title: 'Wellness & Vitality', text: 'Botanical massage roll-on with Dill and Eucalyptus essential oils, for an everyday wellness and vitality ritual.', note: 'Massage Roll-On · 50 ml' },
+    price: 699, size: '50 ml Massage Roll-On',
+    desc: 'Botanical massage roll-on for an everyday wellness and vitality ritual, suitable for people with diabetes as part of their daily care routine. A refreshing topical application that complements, and never replaces, prescribed medicines and glucose monitoring.',
+    story: { title: 'Wellness & Vitality', text: 'Botanical massage roll-on with Dill and Eucalyptus essential oils, for an everyday wellness and vitality ritual. Suitable for people with diabetes.', note: 'Massage Roll-On · 50 ml' },
   },
   {
     id: 'energy',
     showcase: 'assets/products/showcase-energy.jpg',
     photo: 2, ingredients: ['Ruta graveolens (Q)', 'Hecla lava (3X)', 'Symphytum officinale (Q)', 'Calcarea phosphorica (8X)', 'Echinacea angustifolia (Q)'], dosage: '7.5 ml twice daily, or as advised by a healthcare professional', name: 'TranzLife Energy Booster™', short: 'Energy Booster™', tag: 'Energy & Vitality',
-    price: null, size: '500 ml Oral Liquid',
+    price: 1850, size: '500 ml Oral Liquid',
     desc: 'Herbal & bioactive wellness formulation. A convenient oral liquid designed to complement an active lifestyle and everyday wellness routine.',
     story: { title: 'Energy & Vitality', text: 'A convenient oral liquid designed to complement an active lifestyle and everyday wellness routine.', note: 'Oral Liquid · 500 ml' },
   },
@@ -86,13 +86,13 @@ export const productUrl = (id) => (STORE_ID[id] ? `/products/${STORE_ID[id]}` : 
 
 export const priceLabel = (p) => (p.price == null ? 'Price to be announced' : `₹${p.price}`);
 
-/* Card pricing: `price` is what the customer pays. The struck-out MRP is the price
-   marked up by MRP_MARKUP, rounded up to the next ₹10 and ending in 9 (649 → 819). */
-export const MRP_MARKUP = 0.25;
-export const mrpOf = (p) => (p.price == null ? null : Math.ceil((p.price * (1 + MRP_MARKUP)) / 10) * 10 - 1);
+/* Card pricing: `price` is what the customer pays; `mrp` is the printed MRP (defaults to the price).
+   A struck-out MRP and "% off" only show when the price is actually below the MRP: never sell
+   above, or advertise an MRP higher than, the one printed on the pack. */
+export const mrpOf = (p) => (p.price == null ? null : Math.max(p.mrp ?? p.price, p.price));
 export const offOf = (p) => {
   const mrp = mrpOf(p);
-  return mrp ? Math.round((1 - p.price / mrp) * 100) : 0;
+  return mrp && mrp > p.price ? Math.round((1 - p.price / mrp) * 100) : 0;
 };
 
 export const ANNOUNCEMENTS = [

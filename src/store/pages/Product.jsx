@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { setBuyNow, BUY_NOW_URL } from '../lib/checkoutIntent';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Check, Download, ShieldCheck, Truck, RotateCcw, Leaf, ArrowRight, Lock, Pill, Clock, Package, Lightbulb, Hand, Briefcase, MapPin, Sparkles, FileText, FlaskConical, Sprout } from 'lucide-react';
 import { getProduct, PRODUCTS, PACKS } from '../data/products';
@@ -124,7 +125,7 @@ export default function Product() {
             <div className="pdp__buy">
               <QtyStepper value={qty} onChange={(v) => setQty(Math.max(1, v))} />
               <button className="btn btn--lg btn--grow btn--ghost" onClick={() => add(p.id, qty, pack)}>Add to cart</button>
-              <button className="btn btn--lg btn--grow" onClick={() => { add(p.id, qty, pack, { openDrawer: false }); navigate('/checkout'); }}>Buy now</button>
+              <button className="btn btn--lg btn--grow" onClick={() => { setBuyNow({ id: p.id, pack, qty }); navigate(BUY_NOW_URL); }}>Buy now</button>
             </div>
 
             <div className="pdp__trust">

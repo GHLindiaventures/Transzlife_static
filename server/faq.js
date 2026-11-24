@@ -105,7 +105,7 @@ const FAQ = [
   { id:'expiry', match:/\b(expiry|expire\w*|expiration|shelf\s*life|best\s*before|manufactur\w*\s*date|mfg|batch)\b/i,
     answer:() => ({ text:`The expiry date and batch details are printed on each pack. Once opened, the Liver Booster should be kept in the refrigerator. ${ASK_WA.replace('For that, please', 'For a specific batch, please')}` }) },
   { id:'lasts', match:/\b(how\s*(long|many\s*days|many\s*weeks)\s*(will|does|would|can)\s*(one|a|the|1)?\s*(bottle|pack|box|unit|piece)|(bottle|pack|box)\s*(lasts?|is\s*enough)|how\s*many\s*days\s*(supply|course))/i,
-    answer:() => ({ text:'At the label serving:\n- **Liver Booster** (200 ml, 10 ml twice daily): about 10 days\n- **Energy Booster** (500 ml, 7.5 ml twice daily): about a month (around 33 days)\n- **PulmoClear Gummies** (60 gummies): depends on the serving on the pack label\n- **CycleRelief** (8 ml) and **Reviva** (50 ml) roll-ons: depends on how often you use them' }) },
+    answer:() => ({ text:'At the label serving:\n- **Liver Booster** (500 ml, 10 ml twice daily): about 25 days\n- **Energy Booster** (500 ml, 7.5 ml twice daily): about a month (around 33 days)\n- **PulmoClear Gummies** (30 gummies): depends on the serving on the pack label\n- **CycleRelief** (8 ml) and **Reviva** (50 ml) roll-ons: depends on how often you use them' }) },
 
   // ---------- lifestyle goals ----------
   { id:'gym', match:/\b(gym|work\s*-?\s*out|exercise|fitness|sports?|athlete|running|cycling|body\s*building|muscle\s*gain|stamina\s*for)\b/i,
