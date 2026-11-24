@@ -606,15 +606,14 @@ hr {
 .header__logo {
    display: flex;
    align-items: center;
-   position: absolute;
-   left: 50%;
-   transform: translateX(-50%);
+   position: static;
+   transform: none;
    transition: transform .35s var(--ease)
 }
 
 @media (min-width:990px) {
   .header__logo:hover {
-    transform: translateX(-50%) scale(1.02)
+    transform: scale(1.02)
   }
 }
 
@@ -653,7 +652,9 @@ hr {
 .nav__list {
    display: flex;
    align-items: center;
-   gap: 0
+   justify-content: center;
+   gap: 0;
+   width: 100%
 }
 
 .nav__item {
@@ -771,6 +772,18 @@ hr {
 
    .header__left {
       position: static
+   }
+
+   /* Mobile: center the wordmark in the header */
+   .header__logo {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 2
+   }
+   .header__logo:hover {
+      transform: translate(-50%, -50%) scale(1.02)
    }
 
    .header__logo .logo__img {
