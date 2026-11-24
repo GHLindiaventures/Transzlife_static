@@ -5,6 +5,7 @@ import { SITE } from '../data/site';
 import { ARTICLES, getArticle } from '../data/articles';
 import { getConcern } from '../data/concerns';
 import { PRODUCTS } from '../data/products';
+import { useCatalog } from '../lib/catalog';
 import ProductCard from '../components/ProductCard';
 import { Accordion, Breadcrumbs, CertStrip, PageHero, Reveal, SectionHead, useTitle } from '../components/Common';
 import { fmtDate } from '../utils/format';
@@ -18,6 +19,7 @@ const RESEARCH = [
 ];
 
 export function Science() {
+  useCatalog();
   useTitle('Our science');
   const steps = [
     [Sprout, 'Botanical selection', 'We start from classical Ayurvedic, Siddha and traditional texts, choosing herbs with a long history of use for each wellness goal.'],
@@ -80,6 +82,7 @@ export function Science() {
 
 /* ---------------- About ---------------- */
 export function About() {
+  useCatalog();
   useTitle('About us');
   const values = [
     [Leaf, 'Rooted in nature', 'Botanicals first, always.'],
@@ -131,6 +134,7 @@ export function About() {
 
 /* ---------------- Journal ---------------- */
 export function Journal() {
+  useCatalog();
   useTitle('Wellness journal');
   const [cat, setCat] = useState('');
   const cats = [...new Set(ARTICLES.map((a) => a.category))];
@@ -178,6 +182,7 @@ export function Journal() {
 }
 
 export function Article() {
+  useCatalog();
   const { id } = useParams();
   const a = getArticle(id);
   useTitle(a?.title);
@@ -255,6 +260,7 @@ const FAQ_GROUPS = [
 ];
 
 export function Faq() {
+  useCatalog();
   useTitle('FAQs');
   return (
     <>
@@ -279,6 +285,7 @@ export function Faq() {
 
 /* ---------------- Contact ---------------- */
 export function Contact() {
+  useCatalog();
   useTitle('Contact us');
   const [sent, setSent] = useState(false);
   const endpoint = import.meta.env.VITE_CONTACT_ENDPOINT;
@@ -354,6 +361,7 @@ const POLICIES = {
 };
 
 export function Policy() {
+  useCatalog();
   const { id } = useParams();
   const pol = POLICIES[id];
   useTitle(pol?.[0]);

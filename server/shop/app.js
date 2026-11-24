@@ -10,6 +10,8 @@ import { createNotifier } from './notify.js';
 import { createOrders } from './orders.js';
 import shopRoutes from './routes.js';
 import adminRoutes from '../admin/routes.js';
+import catalogPublic from './catalog.js';
+import { writeOffExpired } from './batches.js';
 
 const UNSAFE = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
@@ -55,7 +57,7 @@ export async function buildShopApp({ env = process.env, db, fastifyOptions = {},
   app.addHook('preHandler', auth.loadCustomer);
   app.addHook('onSend', async (req, reply, payload) => {
     if (req.url.startsWith('/api/')) {
-      reply.header('Cache-Control', 'no-store');
+      if (!reply.getHeader('Cache-Control')) reply.header('Cache-Control', 'no-store');
       reply.header('X-Content-Type-Options', 'nosniff');
       reply.header('Referrer-Policy', 'strict-origin-when-cross-origin');
     }
@@ -64,9 +66,13 @@ export async function buildShopApp({ env = process.env, db, fastifyOptions = {},
 
   await app.register(shopRoutes, { db, auth, orders, razorpay, notifier, log });
   await app.register(adminRoutes, { db, razorpay, twilio, notifier, auth: { mode: auth.mode }, log, env });
+  await app.register(catalogPublic, { db });
 
   // free stock held by payments that were never completed
-  const sweep = setInterval(() => orders.releaseExpired().catch((e) => log.error(e, '[orders] sweep failed')), 5 * 60_000);
+  const sweep = setInterval(() => {
+    orders.releaseExpired().catch((e) => log.error(e, '[orders] sweep failed'));
+    writeOffExpired(db, log).catch((e) => log.error(e, '[batches] expiry sweep failed'));
+  }, 5 * 60_000);
   sweep.unref();
   app.addHook('onClose', async () => { clearInterval(sweep); await db.close?.(); });
 

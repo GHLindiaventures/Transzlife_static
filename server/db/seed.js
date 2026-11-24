@@ -21,6 +21,23 @@ export async function seed(db, log = console) {
         await t.query(`INSERT INTO stock_movements (product_id, change, reason) VALUES ($1,$2,'seed')`, [p.id, SEED_STOCK]);
       }
     }
+    // product content + built-in photos: copied once, so later edits in the dashboard are kept
+    for (const [i, p] of PRODUCTS.entries()) {
+      const content = {
+        highlights: p.highlights || [], summary: p.summary || '', description: p.description || [], benefits: p.benefits || [],
+        ingredients: p.ingredients || [], routine: p.routine || [], howToUse: p.howToUse || [], whoFor: p.whoFor || [],
+        precautions: p.precautions || [], faqs: p.faqs || [], brochure: p.brochure || null,
+      };
+      const r = await t.query(
+        `UPDATE products SET short = $2, tagline = $3, badge = $4, accent = $5, tint = $6, concerns = $7, sort_order = $8, content = $9
+          WHERE id = $1 AND content = '{}'::jsonb`,
+        [p.id, p.short ?? null, p.tagline ?? null, p.badge ?? null, p.accent ?? null, p.tint ?? null, p.concerns || [], (i + 1) * 10, JSON.stringify(content)]);
+      if ((r.affectedRows ?? r.rowCount) && !(await t.query('SELECT 1 FROM product_media WHERE product_id = $1 LIMIT 1', [p.id])).rows.length) {
+        for (const [k, url] of (p.images || []).entries()) {
+          await t.query('INSERT INTO product_media (product_id, url, alt, sort) VALUES ($1,$2,$3,$4)', [p.id, url, p.name, k]);
+        }
+      }
+    }
     for (const k of PACKS) {
       await t.query('INSERT INTO pack_options (qty, label, discount_pct) VALUES ($1,$2,$3) ON CONFLICT DO NOTHING',
         [k.qty, k.label, k.off * 100]);

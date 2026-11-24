@@ -5,6 +5,7 @@ import { useTitle } from '../components/Common';
 import { useAuth, safeNext } from '../context/AuthContext';
 import { getBuyNow } from '../lib/checkoutIntent';
 import { getProduct } from '../data/products';
+import { useCatalog } from '../lib/catalog';
 import { api } from '../lib/api';
 import '../styles/account.css';
 
@@ -15,6 +16,7 @@ import '../styles/account.css';
  * exactly where it left off.
  */
 export default function Login() {
+  useCatalog();
   const [params] = useSearchParams();
   const next = safeNext(params.get('next'), '/account');
   const toCheckout = next.startsWith('/checkout');

@@ -6,6 +6,7 @@
 //   paid / COD    -> on_hand -= units, reserved -= units   (stock_committed = true)
 //   abandoned     -> reserved -= units           (after PAYMENT_WINDOW_MIN)
 import { quote, ONLINE_METHODS, PricingError } from './pricing.js';
+import { allocateFefo } from './batches.js';
 
 export const PAYMENT_WINDOW_MIN = 30;
 
@@ -26,6 +27,7 @@ async function commitStock(t, order, ref) {
       [product_id, units, order.status === 'pending_payment']);
     await t.query(`INSERT INTO stock_movements (product_id, change, reason, ref) VALUES ($1,$2,'sale',$3)`, [product_id, -units, ref]);
   }
+  await allocateFefo(t, order.id);     // which batch each unit came from (soonest expiry first)
   await t.query('UPDATE orders SET stock_committed = true WHERE id = $1', [order.id]);
 }
 

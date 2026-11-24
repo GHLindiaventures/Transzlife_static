@@ -3,6 +3,7 @@ import { setBuyNow, BUY_NOW_URL } from '../lib/checkoutIntent';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Check, Download, ShieldCheck, Truck, RotateCcw, Leaf, ArrowRight, Lock, Pill, Clock, Package, Lightbulb, Hand, Briefcase, MapPin, Sparkles, FileText, FlaskConical, Sprout } from 'lucide-react';
 import { getProduct, PRODUCTS, PACKS } from '../data/products';
+import { useCatalog } from '../lib/catalog';
 import { SITE } from '../data/site';
 import { getIngredient } from '../data/ingredients';
 import { getConcern } from '../data/concerns';
@@ -44,6 +45,7 @@ function Gallery({ p, children }) {
 }
 
 export default function Product() {
+  const catalogV = useCatalog();
   const { id } = useParams();
   const p = getProduct(id);
   const { add } = useCart();
@@ -61,7 +63,8 @@ export default function Product() {
   }, [p?.id]);
   const summary = useMemo(() => summarise(reviews), [reviews]);
 
-  if (!p) return <NotFound />;
+  // a product added in the dashboard arrives with the live catalogue: wait for it before saying "not found"
+  if (!p) return catalogV === 0 ? <div className="page-loading" aria-busy="true" /> : <NotFound />;
 
   const unit = packPrice(p, pack);
   const mrp = packMrp(p, pack);
@@ -124,8 +127,14 @@ export default function Product() {
 
             <div className="pdp__buy">
               <QtyStepper value={qty} onChange={(v) => setQty(Math.max(1, v))} />
-              <button className="btn btn--lg btn--grow btn--ghost" onClick={() => add(p.id, qty, pack)}>Add to cart</button>
-              <button className="btn btn--lg btn--grow" onClick={() => { setBuyNow({ id: p.id, pack, qty }); navigate(BUY_NOW_URL); }}>Buy now</button>
+              {p.stock === 'out' ? (
+                <button className="btn btn--lg btn--grow" disabled aria-disabled="true">Out of stock</button>
+              ) : (
+                <>
+                  <button className="btn btn--lg btn--grow btn--ghost" onClick={() => add(p.id, qty, pack)}>Add to cart</button>
+                  <button className="btn btn--lg btn--grow" onClick={() => { setBuyNow({ id: p.id, pack, qty }); navigate(BUY_NOW_URL); }}>Buy now</button>
+                </>
+              )}
             </div>
 
             <div className="pdp__trust">
@@ -262,7 +271,7 @@ export default function Product() {
       <div className="sticky-buy">
         <img src={p.images[0]} alt="" />
         <span><strong>{p.short}</strong><small>{inr(unit)}</small></span>
-        <button className="btn" onClick={() => add(p.id, qty, pack)}>Add to cart</button>
+        <button className="btn" disabled={p.stock === 'out'} onClick={() => add(p.id, qty, pack)}>{p.stock === 'out' ? 'Out of stock' : 'Add to cart'}</button>
       </div>
     </div>
   );

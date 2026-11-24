@@ -1,11 +1,13 @@
 import { useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { PRODUCTS, FORMATS } from '../data/products';
+import { useCatalog } from '../lib/catalog';
 import { CONCERNS } from '../data/concerns';
 import ProductCard from '../components/ProductCard';
 import { Breadcrumbs, TrustRow, useTitle } from '../components/Common';
 
 export default function Shop() {
+  useCatalog();
   useTitle('Shop all products');
   const [params, setParams] = useSearchParams();
   const q = params.get('q') || '';

@@ -367,3 +367,26 @@ export const PACKS = [
 ];
 
 export const FORMATS = [...new Set(PRODUCTS.map((p) => p.format))];
+
+// ---- Live catalogue -------------------------------------------------------
+// The list above shows instantly; the database version (GET /api/products, managed in the admin
+// dashboard) replaces it in place once loaded. Pages call useCatalog() (src/store/lib/catalog.js)
+// so they re-render with the live data: prices, photos, copy, stock and new products.
+const listeners = new Set();
+let version = 0;
+export const subscribeCatalog = (fn) => { listeners.add(fn); return () => listeners.delete(fn); };
+export const catalogVersion = () => version;
+/** The live catalogue could not be loaded: keep the built-in list, but stop waiting for it. */
+export function markCatalogSettled() {
+  if (version > 0) return;
+  version = 1;
+  listeners.forEach((fn) => fn(version));
+}
+
+export function replaceCatalog(list) {
+  if (!Array.isArray(list) || !list.length) return;
+  PRODUCTS.splice(0, PRODUCTS.length, ...list);
+  FORMATS.splice(0, FORMATS.length, ...new Set(list.map((p) => p.format).filter(Boolean)));
+  version += 1;
+  listeners.forEach((fn) => fn(version));
+}

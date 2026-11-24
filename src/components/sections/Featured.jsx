@@ -3,12 +3,22 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Media, Slot, ProductImg } from '../ui.jsx';
 import { PRODUCTS, PRODUCTS_SECTION, STORE_ID, priceLabel, productUrl, mrpOf, offOf } from '../../content/site.js';
 import { setBuyNow, BUY_NOW_URL } from '../../store/lib/checkoutIntent';
+import { getProduct as getStoreProduct } from '../../store/data/products';
+import { useCatalog } from '../../store/lib/catalog';
+
+/** Homepage card data + the live price, MRP and stock from the shop catalogue. */
+const withLive = (product) => {
+  const live = product && STORE_ID[product.id] && getStoreProduct(STORE_ID[product.id]);
+  return live ? { ...product, price: live.price, mrp: live.mrp, stock: live.stock } : product;
+};
 
 const COUNT = PRODUCTS.length;
 const inr = (n) => `₹${n.toLocaleString('en-IN')}`;
 
 /** Price block: final price, struck-out MRP and discount. Pass no product for the empty placeholder version. */
-export function PriceRow({ product }) {
+export function PriceRow({ product: base }) {
+  useCatalog();
+  const product = withLive(base);
   if (!product) {
     return (
       <div className="pcard__price">
@@ -39,7 +49,9 @@ export function PriceRow({ product }) {
 }
 
 /** Buy now (like Amazon): just this item, straight to checkout (sign-in first if needed). The cart is untouched. */
-function BuyNow({ product, url }) {
+function BuyNow({ product: base, url }) {
+  useCatalog();
+  const product = withLive(base);
   const navigate = useNavigate();
   const storeId = STORE_ID[product.id];
   if (product.price == null || !storeId) {

@@ -3,10 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { X, Minus, Plus, Trash2, Truck, ShoppingBag } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { PRODUCTS } from '../data/products';
+import { useCatalog } from '../lib/catalog';
 import { SITE } from '../data/site';
 import { inr } from '../utils/format';
 
 export function QtyStepper({ value, onChange, small }) {
+  useCatalog();
   return (
     <div className={`qty ${small ? 'qty--sm' : ''}`}>
       <button type="button" onClick={() => onChange(value - 1)} aria-label="Decrease quantity"><Minus size={14} /></button>
@@ -17,6 +19,7 @@ export function QtyStepper({ value, onChange, small }) {
 }
 
 export function FreeShipBar({ toFree, subtotal }) {
+  useCatalog();
   const pct = Math.min(100, (subtotal / SITE.freeShippingAbove) * 100);
   return (
     <div className="shipbar">
@@ -27,6 +30,7 @@ export function FreeShipBar({ toFree, subtotal }) {
 }
 
 export default function CartDrawer() {
+  useCatalog();
   const { open, setOpen, detailed, subtotal, savings, count, setQty, remove, toFree, add, lines } = useCart();
   const navigate = useNavigate();
 

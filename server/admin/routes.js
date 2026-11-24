@@ -6,6 +6,9 @@ import { z } from 'zod';
 import { createAdminAuth, ROLES, permsOf } from './auth.js';
 import { hashPassword, verifyPassword, tempPassword, checkPasswordStrength, newTotpSecret, totpUri, verifyTotp } from './crypto.js';
 import { loadSettings } from '../shop/pricing.js';
+import reportRoutes, { STAGES } from './reports.js';
+import catalogRoutes from './catalog.js';
+import { restoreStock } from '../shop/batches.js';
 
 const PAGE = 25;
 
@@ -137,7 +140,8 @@ export default async function adminRoutes(app, { db, razorpay, twilio, notifier,
   // ======================================================================
   function orderFilters(q) {
     const where = [], params = [];
-    if (q.status && q.status !== 'all') { params.push(q.status); where.push(`o.status = $${params.length}`); }
+    if (q.stage && STAGES[q.stage]) { params.push(STAGES[q.stage]); where.push(`o.status = ANY($${params.length})`); }
+    else if (q.status && q.status !== 'all') { params.push(q.status); where.push(`o.status = $${params.length}`); }
     if (q.payment && q.payment !== 'all') { params.push(q.payment); where.push(`o.payment_method = $${params.length}`); }
     if (q.from) { params.push(q.from); where.push(`o.created_at >= $${params.length}::date`); }
     if (q.to) { params.push(q.to); where.push(`o.created_at < $${params.length}::date + 1`); }
@@ -155,7 +159,9 @@ export default async function adminRoutes(app, { db, razorpay, twilio, notifier,
     const total = Number((await db.query(`SELECT COUNT(*) AS n FROM orders o JOIN customers c ON c.id = o.customer_id ${f.sql}`, f.params)).rows[0].n);
     const rows = (await db.query(`
       SELECT o.order_number, o.status, o.payment_status, o.payment_method, o.total, o.created_at,
-             c.name AS customer, c.phone, (SELECT SUM(qty) FROM order_items i WHERE i.order_id = o.id) AS items
+             c.name AS customer, c.phone, o.ship_address->>'city' AS city, o.ship_address->>'state' AS state,
+             (SELECT SUM(qty) FROM order_items i WHERE i.order_id = o.id) AS items,
+             (SELECT string_agg(i.name, ', ') FROM order_items i WHERE i.order_id = o.id) AS products
         FROM orders o JOIN customers c ON c.id = o.customer_id ${f.sql}
        ORDER BY o.created_at DESC LIMIT ${PAGE} OFFSET ${(page - 1) * PAGE}`, f.params)).rows;
     return { rows: rows.map((r) => ({ ...r, items: Number(r.items) })), total, page, pages: Math.max(1, Math.ceil(total / PAGE)) };
@@ -216,26 +222,27 @@ export default async function adminRoutes(app, { db, razorpay, twilio, notifier,
   });
 
   async function returnStock(t, order, reason) {
-    const units = (await t.query('SELECT product_id, SUM(pack * qty)::int AS units FROM order_items WHERE order_id = $1 GROUP BY product_id', [order.id])).rows;
-    for (const { product_id, units: n } of units) {
-      if (order.stock_committed) {
-        await t.query('UPDATE inventory SET on_hand = on_hand + $2 WHERE product_id = $1', [product_id, n]);
-        await t.query('INSERT INTO stock_movements (product_id, change, reason, ref) VALUES ($1,$2,$3,$4)', [product_id, n, reason, order.order_number]);
-      } else {
+    if (order.stock_committed) {
+      await restoreStock(t, order, reason);          // back into the same batches (expired ones are not resold)
+    } else {
+      const units = (await t.query('SELECT product_id, SUM(pack * qty)::int AS units FROM order_items WHERE order_id = $1 GROUP BY product_id', [order.id])).rows;
+      for (const { product_id, units: n } of units) {
         await t.query('UPDATE inventory SET reserved = GREATEST(reserved - $2, 0) WHERE product_id = $1', [product_id, n]);
       }
     }
     await t.query('UPDATE orders SET stock_committed = false WHERE id = $1', [order.id]);
   }
 
-  app.post('/api/admin/orders/:number/status', G('orders.edit'), async (req, reply) => {
-    const body = parse(z.object({
-      status: z.enum(Object.keys(FLOW)),
-      note: z.string().trim().max(500).optional().default(''),
-      restock: z.boolean().optional().default(true),
-    }), req.body, reply); if (!body) return;
+  const statusBody = z.object({
+    status: z.enum(Object.keys(FLOW)),
+    note: z.string().trim().max(500).optional().default(''),
+    restock: z.boolean().optional().default(true),
+  });
+
+  /** Moves one order to a new status (same rules for single and bulk changes). Notifies the customer. */
+  async function changeStatus(req, number, body) {
     const result = await db.tx(async (t) => {
-      const o = await loadOrder(t.query, req.params.number, true);
+      const o = await loadOrder(t.query, number, true);
       if (!o) throw fail('Order not found.', 404);
       if (!(FLOW[o.status] || []).includes(body.status)) throw fail(`An order that is "${o.status}" cannot be moved to "${body.status}".`, 409);
       if (body.status === 'cancelled' && !body.note) throw fail('Give a reason for cancelling.');
@@ -256,7 +263,23 @@ export default async function adminRoutes(app, { db, razorpay, twilio, notifier,
       return { id: o.id, from: o.status, paid: o.payment_status === 'paid' && o.payment_method !== 'cod' };
     });
     notifier?.notify(result.id, body.status, body.status === 'shipped' ? body.note : undefined);
-    return { ok: true, refundSuggested: body.status === 'cancelled' && result.paid };
+    return { refundSuggested: body.status === 'cancelled' && result.paid };
+  }
+
+  app.post('/api/admin/orders/:number/status', G('orders.edit'), async (req, reply) => {
+    const body = parse(statusBody, req.body, reply); if (!body) return;
+    return { ok: true, ...(await changeStatus(req, req.params.number, body)) };
+  });
+
+  // Bulk: move several orders at once. Each order is its own transaction; one failure doesn't stop the rest.
+  app.post('/api/admin/orders/bulk-status', G('orders.edit'), async (req, reply) => {
+    const body = parse(statusBody.extend({ numbers: z.array(z.string().max(20)).min(1).max(100) }), req.body, reply); if (!body) return;
+    const results = [];
+    for (const number of [...new Set(body.numbers)]) {
+      try { results.push({ number, ok: true, ...(await changeStatus(req, number, body)) }); }
+      catch (e) { results.push({ number, ok: false, error: e.status && e.status < 500 ? e.message : 'Something went wrong.' }); }
+    }
+    return { results, done: results.filter((r) => r.ok).length, failed: results.filter((r) => !r.ok).length };
   });
 
   app.post('/api/admin/orders/:number/note', G('orders.note'), async (req, reply) => {
@@ -305,43 +328,7 @@ export default async function adminRoutes(app, { db, razorpay, twilio, notifier,
   // ======================================================================
   // Products and stock
   // ======================================================================
-  app.get('/api/admin/products', G('view'), async () => ({
-    products: (await db.query(`
-      SELECT p.id, p.name, p.format, p.size, p.price, p.mrp, p.gst_rate, p.hsn_code, p.active, p.updated_at,
-             i.on_hand, i.reserved, i.on_hand - i.reserved AS available, i.low_stock_at,
-             (SELECT COALESCE(SUM(oi.pack * oi.qty), 0) FROM order_items oi JOIN orders o ON o.id = oi.order_id
-               WHERE oi.product_id = p.id AND o.status NOT IN ('pending_payment','cancelled') AND o.created_at > now() - interval '30 days')::int AS sold_30d
-        FROM products p LEFT JOIN inventory i ON i.product_id = p.id ORDER BY p.name`)).rows.map((p) => ({ ...p, gst_rate: p.gst_rate == null ? null : Number(p.gst_rate) })),
-  }));
-
-  app.patch('/api/admin/products/:id', G('products.edit'), async (req, reply) => {
-    const body = parse(z.object({
-      name: z.string().trim().min(2).max(120).optional(),
-      price: z.number().int().min(100, 'Price must be at least ₹1.').max(10_000_000).optional(),
-      mrp: z.number().int().min(100).max(10_000_000).optional(),
-      active: z.boolean().optional(),
-      gstRate: z.number().min(0).max(28).nullable().optional(),
-      hsnCode: z.string().trim().regex(/^\d{4,8}$/, 'HSN code is 4 to 8 digits.').nullable().optional().or(z.literal('')),
-      lowStockAt: z.number().int().min(0).max(100000).optional(),
-    }), req.body, reply); if (!body) return;
-    return db.tx(async (t) => {
-      const p = (await t.query('SELECT p.*, i.low_stock_at FROM products p LEFT JOIN inventory i ON i.product_id = p.id WHERE p.id = $1 FOR UPDATE OF p', [req.params.id])).rows[0];
-      if (!p) throw fail('Product not found.', 404);
-      const next = {
-        name: body.name ?? p.name, price: body.price ?? p.price, mrp: body.mrp ?? p.mrp, active: body.active ?? p.active,
-        gst_rate: body.gstRate === undefined ? p.gst_rate : body.gstRate,
-        hsn_code: body.hsnCode === undefined ? p.hsn_code : (body.hsnCode || null),
-      };
-      if (next.price > next.mrp) throw fail('Price cannot be more than the MRP.');
-      await t.query(`UPDATE products SET name = $2, price = $3, mrp = $4, active = $5, gst_rate = $6, hsn_code = $7, updated_at = now() WHERE id = $1`,
-        [p.id, next.name, next.price, next.mrp, next.active, next.gst_rate, next.hsn_code]);
-      if (body.lowStockAt !== undefined) await t.query('UPDATE inventory SET low_stock_at = $2 WHERE product_id = $1', [p.id, body.lowStockAt]);
-      const before = { name: p.name, price: p.price, mrp: p.mrp, active: p.active, gst_rate: p.gst_rate == null ? null : Number(p.gst_rate), hsn_code: p.hsn_code, low_stock_at: p.low_stock_at };
-      const after = { ...next, gst_rate: next.gst_rate == null ? null : Number(next.gst_rate), low_stock_at: body.lowStockAt ?? p.low_stock_at };
-      await audit(t.query, req, 'product.update', 'product', p.id, before, after);
-      return { ok: true };
-    });
-  });
+  // product list, detail, create and edit live in catalog.js
 
   // add (restock, or negative to write off) or set the counted stock
   app.post('/api/admin/products/:id/stock', G('stock.edit'), async (req, reply) => {
@@ -540,11 +527,15 @@ export default async function adminRoutes(app, { db, razorpay, twilio, notifier,
     return { rows, total, page, pages: Math.max(1, Math.ceil(total / PAGE)) };
   });
 
+  await reportRoutes(app, { db, G, parse, env });
+  await catalogRoutes(app, { db, G, parse, audit, env, log });
+
   app.setErrorHandler((err, req, reply) => {
     if (err.status && err.status < 500) return reply.code(err.status).send({ error: err.message, code: err.code || 'error' });
     if (err.statusCode === 429) return reply.code(429).send({ error: 'Too many requests. Please wait a moment and try again.', code: 'rate_limited' });
     if (err.statusCode && err.statusCode < 500) return reply.code(err.statusCode).send({ error: 'Invalid request.', code: 'invalid' });
     if (err.status === 502) return reply.code(502).send({ error: err.message, code: 'provider_error' });
+    if (err.status === 503) return reply.code(503).send({ error: err.message, code: 'unavailable' });
     log.error({ err, url: req.url }, '[admin] request failed');
     return reply.code(500).send({ error: 'Something went wrong on our side. Please try again.', code: 'server_error' });
   });

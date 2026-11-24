@@ -83,3 +83,70 @@ export function useAction() {
   }, []);
   return { busy, error, notice, run, setError, setNotice };
 }
+
+// ---- Botanical Ledger helpers -------------------------------------------------
+
+/** ₹48.2k / ₹1.2L style for KPI tiles and chart axes (Indian lakh/crore). */
+export const rsCompact = (paise) => {
+  const v = Number(paise || 0) / 100;
+  if (v >= 1e7) return `₹${(v / 1e7).toFixed(v >= 1e8 ? 0 : 1)}Cr`;
+  if (v >= 1e5) return `₹${(v / 1e5).toFixed(v >= 1e6 ? 0 : 1)}L`;
+  if (v >= 1e3) return `₹${(v / 1e3).toFixed(v >= 1e4 ? 0 : 1)}k`;
+  return `₹${Math.round(v)}`;
+};
+
+/** Light / dark theme, remembered per browser; follows the system the first time. */
+export function useTheme() {
+  const read = () => {
+    try { const t = localStorage.getItem('tl-admin-theme'); if (t === 'light' || t === 'dark') return t; } catch { /* ignore */ }
+    return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  };
+  const [theme, setTheme] = useState(read);
+  useEffect(() => {
+    try { localStorage.setItem('tl-admin-theme', theme); } catch { /* ignore */ }
+    document.body.classList.toggle('adm-dark', theme === 'dark');
+  }, [theme]);
+  return [theme, () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))];
+}
+
+/** Chart colours come from the theme's CSS tokens (validated for colour-blind safety in both themes). */
+export function useChartColors(theme) {
+  const [c, setC] = useState({ c1: '#1f6b3c', c2: '#b8840f', prev: '#a39f93', grid: '#ebe5d7', muted: '#6b7568' });
+  useEffect(() => {
+    const el = document.querySelector('.adm');
+    if (!el) return;
+    const s = getComputedStyle(el), v = (n) => s.getPropertyValue(n).trim();
+    setC({ c1: v('--c1'), c2: v('--c2'), prev: v('--c-prev'), grid: v('--grid'), muted: v('--muted') });
+  }, [theme]);
+  return c;
+}
+
+/** "▲ 12%" vs the previous period. `invert` for numbers where down is good. */
+export function Delta({ now, before, invert = false }) {
+  if (!before && !now) return <span className="adm-delta is-flat">no change</span>;
+  if (!before) return <span className="adm-delta is-up">new</span>;
+  const pct = Math.round(((now - before) / before) * 100);
+  if (pct === 0) return <span className="adm-delta is-flat">± 0%</span>;
+  const good = invert ? pct < 0 : pct > 0;
+  return <span className={`adm-delta ${good ? 'is-up' : 'is-down'}`} title="Compared with the previous period">{pct > 0 ? '▲' : '▼'} {Math.abs(pct)}%</span>;
+}
+
+/** Tiny trend line for a KPI tile (decorative: the number beside it is the value). */
+export function Sparkline({ values = [], color = 'var(--c1)' }) {
+  if (values.length < 2) return <svg className="adm-spark" aria-hidden="true" />;
+  const w = 120, h = 34, max = Math.max(...values, 1), min = Math.min(...values, 0);
+  const pts = values.map((v, i) => `${(i / (values.length - 1)) * w},${h - 3 - ((v - min) / (max - min || 1)) * (h - 6)}`);
+  return (
+    <svg className="adm-spark" viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" aria-hidden="true">
+      <polyline points={`0,${h} ${pts.join(' ')} ${w},${h}`} fill={color} opacity=".1" stroke="none" />
+      <polyline points={pts.join(' ')} fill="none" stroke={color} strokeWidth="2" vectorEffect="non-scaling-stroke" strokeLinejoin="round" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function Empty({ icon: I, title, children }) {
+  return <div className="adm-empty">{I && <I size={34} strokeWidth={1.4} />}<strong>{title}</strong>{children && <span>{children}</span>}</div>;
+}
+
+/** Initials for the avatar circle. */
+export const initials = (name = '') => name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join('') || '?';

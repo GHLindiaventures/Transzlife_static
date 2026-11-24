@@ -226,3 +226,55 @@ test('dashboard numbers', async () => {
   assert.ok(d.periods.month_orders >= 2);
   assert.ok(d.recent.length >= 3);
 });
+
+test('overview: KPIs vs previous period, trend, pipeline, best sellers, attention', async () => {
+  const o = (await call('owner', 'GET', '/api/admin/overview?range=30d')).body;
+  assert.equal(o.range, '30d');
+  assert.equal(o.trend.length, 30);
+  assert.ok(o.current.orders >= 2 && o.current.revenue > 0);
+  assert.equal(o.current.aov, Math.round(o.current.revenue / o.current.orders));
+  assert.equal(o.previous.orders, 0, 'nothing in the previous 30 days');
+  assert.equal(o.trend.reduce((s, p) => s + p.orders, 0), o.current.orders, 'trend adds up to the KPI');
+  assert.ok(o.best.length >= 1 && o.best[0].revenue >= o.best.at(-1).revenue);
+  assert.ok(o.payments.cod.orders >= 1);
+  assert.ok(Array.isArray(o.attention));
+  const today = (await call('owner', 'GET', '/api/admin/overview?range=today')).body;
+  assert.equal(today.trend.length, 24);
+  assert.match(today.trend[0].label, /^\d\d:00$/);
+});
+
+test('stage counts, bulk status change, packing slips, search', async () => {
+  const mk = async (k) => (await call('cust2', 'POST', '/api/checkout/place', { items: [{ id: 'cyclerelief-roll-on', pack: 1, qty: 1 }], paymentMethod: 'cod', idempotencyKey: `bulk-order-${k}`,
+    address: { name: 'Bulk Test', phone: '9822233344', line1: '1 Mill Road', city: 'Coimbatore', state: 'Tamil Nadu', pin: '641001' } })).body.order.number;
+  await call('cust2', 'POST', '/api/auth/otp/request', { phone: '9822233344' });
+  await call('cust2', 'POST', '/api/auth/otp/verify', { phone: '9822233344', code: sms.codeFor('9822233344') });
+  await call('cust2', 'PATCH', '/api/account', { name: 'Bulk Test' });
+  const [a, b] = [await mk(1), await mk(2)];
+
+  const before = (await call('owner', 'GET', '/api/admin/orders/counts')).body.counts;
+  assert.ok(before.to_pack >= 2);
+  const tab = (await call('owner', 'GET', '/api/admin/orders?stage=to_pack')).body.rows;
+  assert.ok(tab.every((r) => r.status === 'confirmed') && tab.some((r) => r.order_number === a));
+  assert.equal(tab.find((r) => r.order_number === a).city, 'Coimbatore');
+
+  const bulk = (await call('owner', 'POST', '/api/admin/orders/bulk-status', { numbers: [a, b, 'TZL-999999'], status: 'packed' })).body;
+  assert.equal(bulk.done, 2);
+  assert.equal(bulk.failed, 1);
+  assert.match(bulk.results.find((r) => r.number === 'TZL-999999').error, /not found/i);
+  const after = (await call('owner', 'GET', '/api/admin/orders/counts')).body.counts;
+  assert.equal(after.ready_to_ship, before.ready_to_ship + 2);
+  assert.equal((await call('sup', 'POST', '/api/admin/orders/bulk-status', { numbers: [a], status: 'shipped' })).status, 401, 'support (deactivated earlier) cannot');
+
+  const slips = (await call('owner', 'GET', `/api/admin/orders/slips?numbers=${a},${b}`)).body.slips;
+  assert.equal(slips.length, 2);
+  assert.equal(slips[0].address.city, 'Coimbatore');
+  assert.equal(slips[0].items[0].qty, 1);
+
+  const s = (await call('owner', 'GET', '/api/admin/search?q=coimbatore')).body;
+  assert.ok(Array.isArray(s.orders));
+  const byPhone = (await call('owner', 'GET', '/api/admin/search?q=98222')).body;
+  assert.ok(byPhone.customers.some((c) => c.name === 'Bulk Test'));
+  const byProduct = (await call('owner', 'GET', '/api/admin/search?q=cycle')).body;
+  assert.equal(byProduct.products[0].id, 'cyclerelief-roll-on');
+  assert.equal((await call('owner', 'GET', '/api/admin/search?q=x')).status, 400, 'at least 2 characters');
+});
