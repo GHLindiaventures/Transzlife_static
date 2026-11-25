@@ -102,6 +102,7 @@ test('search engines: robots.txt keeps private pages out, sitemap lists live pro
   assert.equal(map.statusCode, 200);
   assert.match(map.headers['content-type'], /xml/);
   assert.match(map.body, /<loc>http:\/\/shop\.example\/products\/liver-booster<\/loc><lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/);
-  assert.match(map.body, /\/concerns\/liver</); assert.match(map.body, /\/journal\/liver-the-silent-worker</); assert.match(map.body, /\/policies\/privacy</);
+  assert.match(map.body, /\/concerns\/liver</); assert.match(map.body, /\/blogs\/liver-the-silent-worker</); assert.match(map.body, /\/blogs\/quit-smoking-naturally-herbal-ayurvedic</);
+  assert.ok(!/\/journal\/|\/science</.test(map.body), 'redirected pages are not listed'); assert.match(map.body, /\/policies\/privacy</);
   assert.ok(!/admin|checkout|account/.test(map.body));
 });

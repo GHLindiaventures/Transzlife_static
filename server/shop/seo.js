@@ -5,7 +5,8 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
-const STATIC_PAGES = ['/', '/shop', '/about', '/science', '/sustainability', '/faq', '/contact', '/concerns', '/ingredients', '/journal',
+// /science is switched off and /journal moved to /blogs (both redirect), so neither is listed
+const STATIC_PAGES = ['/', '/shop', '/about', '/sustainability', '/faq', '/contact', '/concerns', '/ingredients', '/blogs',
   '/policies/privacy', '/policies/terms', '/policies/shipping'];
 const PRIVATE = ['/admin', '/api/', '/account', '/cart', '/checkout', '/login', '/order/'];
 
@@ -20,7 +21,7 @@ const xml = (s) => String(s).replace(/[<>&'"]/g, (c) => ({ '<': '&lt;', '>': '&g
 
 export default async function seoRoutes(app, { db, env }) {
   const concerns = idsFrom('concerns.js');
-  const articles = idsFrom('articles.js');
+  const articles = [...idsFrom('blogArticles.js'), ...idsFrom('articles.js')];   // the Blogs page shows both
   // the public address: SITE_URL when set (production), otherwise the address this request came to
   const base = (req) => String(env.SITE_URL || `${req.protocol}://${req.headers['x-forwarded-host'] || req.headers.host}`).replace(/\/$/, '');
 
@@ -35,7 +36,7 @@ export default async function seoRoutes(app, { db, env }) {
       ...STATIC_PAGES.map((path) => ({ path })),
       ...products.map((p) => ({ path: `/products/${p.id}`, lastmod: new Date(p.updated_at).toISOString().slice(0, 10) })),
       ...concerns.map((id) => ({ path: `/concerns/${id}` })),
-      ...articles.map((id) => ({ path: `/journal/${id}` })),
+      ...articles.map((id) => ({ path: `/blogs/${id}` })),
     ];
     const root = base(req);
     reply.header('Content-Type', 'application/xml; charset=utf-8').header('Cache-Control', 'public, max-age=3600');
