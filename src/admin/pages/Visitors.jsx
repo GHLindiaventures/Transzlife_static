@@ -2,14 +2,13 @@
 // carts they leave behind. Data comes from the site's own first-party tracking (no mock data):
 // numbers start from the day tracking went live. Orders and revenue come from real orders.
 import { useEffect, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { ResponsiveContainer, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { Send, ShoppingCart, Users } from 'lucide-react';
 import { api } from '../../store/lib/api';
-import { Delta, Empty, ErrorBox, Loading, Notice, PageHead, Pager, can, d, dt, rs, rsCompact, useAction, useAdmin, useApi, useChartColors, STATUS } from '../ui';
+import { Delta, Empty, ErrorBox, Loading, Notice, PageHead, Pager, RangePicker, can, d, dt, rs, rsCompact, useAction, useAdmin, useApi, useChartColors, useRange, STATUS } from '../ui';
 import { BarList, ChartCard, Tip } from './Analytics';
 
-const RANGES = [['today', 'Today'], ['7d', '7 days'], ['30d', '30 days'], ['90d', '90 days'], ['custom', 'Custom']];
 const pct = (v) => `${(v * 100).toFixed(v > 0 && v < 0.1 ? 1 : 0)}%`;
 const today = () => new Date(Date.now() + 5.5 * 3600e3).toISOString().slice(0, 10);
 const SOURCE_LABEL = { direct: 'Direct / typed in', share: 'Shared links', google: 'Google search', bing: 'Bing search', instagram: 'Instagram', facebook: 'Facebook', whatsapp: 'WhatsApp', youtube: 'YouTube', x: 'X (Twitter)' };
@@ -20,29 +19,14 @@ const STATUS_ORDER = ['pending_payment', 'confirmed', 'packed', 'shipped', 'out_
 export default function Visitors() {
   const { theme } = useAdmin();
   const colors = useChartColors(theme);
-  const [params, setParams] = useSearchParams();
-  const range = params.get('range') || '30d';
-  const [from, setFrom] = useState(params.get('from') || today());
-  const [to, setTo] = useState(params.get('to') || today());
-  const qs = range === 'custom' ? `range=custom&from=${params.get('from') || today()}&to=${params.get('to') || today()}` : `range=${range}`;
-  const { data, error, loading } = useApi(`/api/admin/traffic?${qs}`);
-  const pick = (r) => setParams(r === 'custom' ? { range: r, from, to } : { range: r });
+  const rng = useRange();
+  const { data, error, loading } = useApi(`/api/admin/traffic?${rng.qs}`);
 
   return (
     <>
       <PageHead title="Visitors & engagement" sub="Real visits to the website, compared with the period before. Staff and bots are not counted.">
-        <div className="adm-seg" role="group" aria-label="Period">
-          {RANGES.map(([k, l]) => <button key={k} className={range === k ? 'is-on' : ''} aria-pressed={range === k} onClick={() => pick(k)}>{l}</button>)}
-        </div>
+        <RangePicker value={rng} />
       </PageHead>
-      {range === 'custom' && (
-        <form className="adm-filters" onSubmit={(e) => { e.preventDefault(); setParams({ range: 'custom', from, to }); }}>
-          <label className="adm-inline">From <input type="date" value={from} max={to} onChange={(e) => setFrom(e.target.value)} required /></label>
-          <label className="adm-inline">To <input type="date" value={to} min={from} max={today()} onChange={(e) => setTo(e.target.value)} required /></label>
-          <button className="adm-btn is-sm">Apply</button>
-          <span className="adm-muted">Up to 366 days.</span>
-        </form>
-      )}
       <RightNow />
       <ErrorBox>{error}</ErrorBox>
       {!data ? <Loading /> : (
@@ -51,22 +35,22 @@ export default function Visitors() {
             <Notice>No visits recorded in this period yet. Tracking only counts real visitors from the day it went live; there is no sample data.</Notice>
           )}
           <Kpis t={data} />
-          <div className="adm-grid2" style={{ marginBottom: 18 }}>
+          <div className="adm-grid2" style={{ marginBottom: 20 }}>
             <Trend t={data} colors={colors} />
             <Funnel t={data} />
           </div>
-          <div className="adm-grid2" style={{ marginBottom: 18 }}>
+          <div className="adm-grid2" style={{ marginBottom: 20 }}>
             <OrdersChart t={data} colors={colors} />
             <OrderStatuses t={data} />
           </div>
           <Sources t={data} />
-          <div className="adm-grid3" style={{ marginBottom: 18 }}>
+          <div className="adm-grid3" style={{ marginBottom: 20 }}>
             <BarList title="Most viewed pages" sub="Page views" rows={data.pages.map((p) => ({ key: p.path, label: pageName(p.path), value: p.views, text: `${p.views} · ${p.visitors} visitors` }))} />
             <BarList title="Where visits start" sub="Landing page · left after one page" rows={data.landing.map((p) => ({ key: p.path, label: pageName(p.path), value: p.visits, text: `${p.visits} · ${pct(p.bounceRate)}` }))} />
             <Devices t={data} />
           </div>
           <ProductTable t={data} />
-          <div className="adm-grid2" style={{ marginBottom: 18 }}>
+          <div className="adm-grid2" style={{ marginBottom: 20 }}>
             <Interested t={data} />
             <Engagement t={data} />
           </div>
@@ -83,7 +67,7 @@ function RightNow() {
   useEffect(() => { const t = setInterval(reload, 15_000); return () => clearInterval(t); }, [reload]);
   if (!data) return null;
   return (
-    <section className="adm-card" style={{ marginBottom: 18 }}>
+    <section className="adm-card" style={{ marginBottom: 20 }}>
       <div className="adm-card__head">
         <div><h2 className="adm-h2"><span className="adm-livedot" aria-hidden="true" /> Right now</h2>
           <p className="adm-muted">Browsers active in the last 90 seconds (each counted once, however many tabs). Updates every 15 seconds.</p></div>
@@ -220,7 +204,7 @@ function OrderStatuses({ t }) {
 
 function Sources({ t }) {
   return (
-    <section className="adm-card is-flush" style={{ marginBottom: 18 }}>
+    <section className="adm-card is-flush" style={{ marginBottom: 20 }}>
       <div className="adm-pad" style={{ paddingBottom: 0 }}><h2 className="adm-h2">Where visitors come from</h2>
         <p className="adm-muted">Add <code>?utm_source=instagram&amp;utm_campaign=diwali</code> to links in ads and posts to see each campaign here.</p></div>
       {t.sources.length === 0 ? <Empty title="No visits in this period" /> : (
@@ -269,7 +253,7 @@ function Devices({ t }) {
 
 function ProductTable({ t }) {
   return (
-    <section className="adm-card is-flush" style={{ marginBottom: 18 }}>
+    <section className="adm-card is-flush" style={{ marginBottom: 20 }}>
       <div className="adm-pad" style={{ paddingBottom: 0 }}><h2 className="adm-h2">Product interest</h2>
         <p className="adm-muted">From first look to order. Low "viewed → cart" means the product page isn't convincing; views while out of stock are lost sales.</p></div>
       <div className="adm-tablewrap">

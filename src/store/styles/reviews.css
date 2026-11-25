@@ -24,3 +24,12 @@
 }
 .tl-store:not(#tl-a):not(#tl-b) .pcard__rating strong { color: var(--ink); font-variant-numeric: tabular-nums; }
 .tl-store:not(#tl-a):not(#tl-b) .pcard__rating:hover span { text-decoration: underline; }
+
+/* running offer on the product page (OfferTimer.jsx) */
+.tl-store:not(#tl-a):not(#tl-b) .offer-timer {
+  display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 8px 0 2px; padding: 6px 12px; border-radius: 999px;
+  background: #fdf0e6; color: #8a3a0c; font-size: .9rem; font-weight: 600;
+}
+.tl-store:not(#tl-a):not(#tl-b) .offer-timer strong { color: #6b2a06; }
+.tl-store:not(#tl-a):not(#tl-b) .offer-timer.is-over { background: var(--line, #eee); color: var(--text-2); }
+.tl-store:not(#tl-a):not(#tl-b) .offer-timer__clock { font-variant-numeric: tabular-nums; font-weight: 800; letter-spacing: .02em; }

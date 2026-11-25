@@ -2,6 +2,9 @@
 // prices, pack discounts, prepaid discount and shipping all come from the database here.
 // Rounding matches the site (src/store/context/CartContext.jsx): pack prices and the prepaid
 // discount are rounded to whole rupees, so the numbers customers saw are the numbers they pay.
+// Running offers (server/shop/offers.js) lower the selling price first; packs and prepaid apply on top.
+
+import { activeOffers, effectivePrice } from './offers.js';
 
 export const ONLINE_METHODS = ['upi', 'card', 'netbanking'];
 export const PAYMENT_METHODS = [...ONLINE_METHODS, 'cod'];
@@ -40,16 +43,21 @@ export async function quote(q, items, paymentMethod) {
     `SELECT p.id, p.name, p.size, p.price, p.mrp, p.active, i.on_hand - i.reserved AS available
        FROM products p LEFT JOIN inventory i ON i.product_id = p.id WHERE p.id = ANY($1)`, [ids])).rows.map((r) => [r.id, r]));
   const packs = new Map((await q('SELECT qty, discount_pct FROM pack_options')).rows.map((r) => [Number(r.qty), Number(r.discount_pct)]));
+  const offers = await activeOffers(q);
 
   const priced = lines.map((l) => {
     const p = products.get(l.id);
     if (!p || !p.active) throw new PricingError('One of the products is no longer available.', 'unavailable');
     if (!packs.has(l.pack)) throw new PricingError('That pack size is not available.');
     const off = packs.get(l.pack) / 100;
-    const unit = toPaise(rupees(p.price) * l.pack * (1 - off));
+    const eff = effectivePrice(p, offers);
+    const unit = toPaise(rupees(eff.price) * l.pack * (1 - off));
+    const listUnit = toPaise(rupees(eff.regular) * l.pack * (1 - off));       // same pack at the regular price
     const unitMrp = p.mrp * l.pack;
     return { id: l.id, name: p.name, size: p.size, pack: l.pack, qty: l.qty, units: l.pack * l.qty,
-      unit, unitMrp, total: unit * l.qty, mrpTotal: unitMrp * l.qty, available: Number(p.available ?? 0) };
+      unit, unitMrp, total: unit * l.qty, mrpTotal: unitMrp * l.qty, available: Number(p.available ?? 0),
+      listUnit, offerId: eff.offer?.id ?? null, offerName: eff.offer?.name ?? null,
+      offerSaving: (listUnit - unit) * l.qty, packSaving: (eff.price * l.pack - unit) * l.qty };
   });
 
   // stock check across lines of the same product

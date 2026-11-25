@@ -372,7 +372,7 @@ export function PrintSlips() {
   const { data, error } = useApi(numbers ? `/api/admin/orders/slips?numbers=${encodeURIComponent(numbers)}` : null);
   return (
     <div className="adm-content" style={{ maxWidth: 820, margin: '0 auto' }}>
-      <div className="adm-row no-print" style={{ marginBottom: 18 }}>
+      <div className="adm-row no-print" style={{ marginBottom: 20 }}>
         <button className="adm-link" onClick={() => navigate(-1)}><ArrowLeft size={15} /> Back</button>
         <button className="adm-btn" onClick={() => window.print()} disabled={!data}><Printer size={16} /> Print {data ? `${data.slips.length} slip${data.slips.length === 1 ? '' : 's'}` : ''}</button>
       </div>

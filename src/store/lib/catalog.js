@@ -1,7 +1,8 @@
 // Live catalogue: loads the database version of the products once, and lets components re-render
 // when it arrives. Falls back silently to the built-in list if the API is unreachable.
 import { useSyncExternalStore } from 'react';
-import { subscribeCatalog, catalogVersion, replaceCatalog, markCatalogSettled } from '../data/products';
+import { subscribeCatalog, catalogVersion, replaceCatalog, markCatalogSettled, PACKS } from '../data/products';
+import { SITE } from '../data/site';
 import { replaceIngredients } from '../data/ingredients';
 
 let loading = null;
@@ -10,6 +11,9 @@ export function loadCatalog() {
   // products and the ingredient library arrive together, then pages re-render once
   loading ??= Promise.all([get('/api/products'), get('/api/ingredients')]).then(([p, i]) => {
     if (i?.ingredients?.length) replaceIngredients(i.ingredients);
+    // pack discounts and shipping / prepaid rules as set in the dashboard
+    if (Array.isArray(p?.packs) && p.packs.length) PACKS.splice(0, PACKS.length, ...p.packs);
+    if (p?.shop) Object.assign(SITE, p.shop);
     if (p?.products?.length) replaceCatalog(p.products); else markCatalogSettled();
   });
   return loading;

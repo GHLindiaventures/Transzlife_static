@@ -28,7 +28,7 @@ export default function ProductCard({ product: p }) {
   return (
     <article className="pcard" style={{ '--p-accent': p.accent, '--tint': p.tint }}>
       <Link to={`/products/${p.id}`} className="pcard__media" aria-label={p.name}>
-        {p.badge && <span className="pcard__badge">{p.badge}</span>}
+        {p.badge && <span className="pcard__badge" style={p.badgeStyle ? { background: p.badgeStyle.bg, color: p.badgeStyle.fg } : undefined}>{p.badge}</span>}
         {off > 0 && <span className="pcard__off">{off}% off</span>}
         <img src={p.images[0]} alt={p.name} loading="lazy" className="pcard__img" />
         {p.images[1] && <img src={p.images[1]} alt="" loading="lazy" className="pcard__img pcard__img--alt" />}

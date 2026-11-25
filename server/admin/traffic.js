@@ -6,39 +6,18 @@
 // "Visitors" are browsers that accepted analytics; page views also count visitors who did not
 // (anonymously). Orders and revenue always come from the orders table.
 import { z } from 'zod';
+import { resolveRange } from './range.js';
 
 const IST = `'Asia/Kolkata'`;
 const COUNTED = `o.status NOT IN ('pending_payment', 'cancelled')`;
-export const TRANGES = { today: 1, '7d': 7, '30d': 30, '90d': 90 };
 const num = (v) => Number(v || 0);
-const ymd = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 const PAGE = 25;
 
 export default async function trafficRoutes(app, { db, G, parse, audit, reminders }) {
-  /** Current window + the same length just before it. Custom ranges are whole IST days, max 366. */
+  /** Current window + the same length just before it (shared ranges, server/admin/range.js). */
   async function window(q) {
-    let range = TRANGES[q.range] || q.range === 'custom' ? q.range : '30d';
-    if (range === 'custom') {
-      const f = ymd.safeParse(q.from), t = ymd.safeParse(q.to);
-      if (!f.success || !t.success || q.from > q.to) range = '30d';
-      else {
-        const b = (await db.query(`
-          SELECT ($1::date)::timestamp AT TIME ZONE ${IST} AS cur_from,
-                 LEAST(($2::date + 1)::timestamp AT TIME ZONE ${IST}, now()) AS cur_to,
-                 ($2::date - $1::date + 1) AS days`, [q.from, q.to])).rows[0];
-        if (num(b.days) > 366) range = '30d';
-        else {
-          const p = (await db.query(`SELECT $1::timestamptz - make_interval(days => $2) AS prev_from`, [b.cur_from, num(b.days)])).rows[0];
-          return { range, days: num(b.days), from: b.cur_from, to: b.cur_to, prevFrom: p.prev_from, prevTo: b.cur_from, fromDate: q.from, toDate: q.to };
-        }
-      }
-    }
-    const days = TRANGES[range];
-    const b = (await db.query(`
-      SELECT (date_trunc('day', now() AT TIME ZONE ${IST}) - make_interval(days => $1 - 1)) AT TIME ZONE ${IST} AS cur_from, now() AS cur_to,
-             (date_trunc('day', now() AT TIME ZONE ${IST}) - make_interval(days => 2 * $1 - 1)) AT TIME ZONE ${IST} AS prev_from,
-             now() - make_interval(days => $1) AS prev_to`, [days])).rows[0];
-    return { range, days, from: b.cur_from, to: b.cur_to, prevFrom: b.prev_from, prevTo: b.prev_to };
+    const r = await resolveRange(db, q);
+    return { range: r.key, days: r.days, from: r.from, to: r.to, prevFrom: r.prevFrom, prevTo: r.prevTo, fromDate: r.fromDate, toDate: r.toDate };
   }
 
   async function kpis(from, to) {

@@ -3,6 +3,7 @@ import { api } from '../../store/lib/api';
 import { ErrorBox, Loading, Notice, PageHead, Pager, can, dt, rs, toPaise, useAction, useAdmin, useApi } from '../ui';
 
 const ACTIONS = {
+  'product.pricing': 'Changed price or badge', 'offer.create': 'Created offer', 'offer.update': 'Changed offer', 'offer.delete': 'Deleted offer', 'settings.packs': 'Changed pack discounts',
   'review.approve': 'Published review', 'review.reject': 'Rejected review', 'review.remove': 'Removed review', 'review.reply': 'Replied to review',
   'customer.cart_reminder': 'Sent cart reminder', 'customer.reorder_reminder': 'Sent refill reminder',
   'staff.login': 'Signed in', 'staff.password_change': 'Changed own password', 'staff.2fa_enabled': 'Turned on 2FA',

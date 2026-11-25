@@ -63,8 +63,18 @@ export function createOrders({ db, razorpay, log, notifier }) {
           q.subtotal, q.discount, q.shipping, q.tax, q.total, paymentMethod, status, online ? 'pending' : 'cod_pending'])).rows[0];
       for (const l of q.lines) {
         await t.query(
-          `INSERT INTO order_items (order_id, product_id, name, size, pack, qty, unit_price, unit_mrp, line_total)
-           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`, [order.id, l.id, l.name, l.size, l.pack, l.qty, l.unit, l.unitMrp, l.total]);
+          `INSERT INTO order_items (order_id, product_id, name, size, pack, qty, unit_price, unit_mrp, line_total, list_price, offer_id)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`, [order.id, l.id, l.name, l.size, l.pack, l.qty, l.unit, l.unitMrp, l.total, l.listUnit, l.offerId]);
+      }
+      // every rupee of discount, by source (offer / pack / prepaid), for the discount reports
+      const saved = new Map();
+      for (const l of q.lines) {
+        if (l.offerSaving > 0) { const k = `offer:${l.offerId}`; saved.set(k, { kind: 'offer', ref: l.offerId, label: l.offerName, amount: (saved.get(k)?.amount || 0) + l.offerSaving }); }
+        if (l.packSaving > 0) { const k = `pack:${l.pack}`; saved.set(k, { kind: 'pack', ref: String(l.pack), label: `Pack of ${l.pack}`, amount: (saved.get(k)?.amount || 0) + l.packSaving }); }
+      }
+      if (q.discount > 0) saved.set('prepaid', { kind: 'prepaid', ref: null, label: 'Prepaid discount', amount: q.discount });
+      for (const d of saved.values()) {
+        await t.query('INSERT INTO order_discounts (order_id, kind, ref_id, label, amount) VALUES ($1,$2,$3,$4,$5)', [order.id, d.kind, d.ref, d.label, d.amount]);
       }
       await addEvent(t, order.id, null, status, 'customer', online ? 'Order placed, awaiting payment' : 'Order placed (cash on delivery)');
       if (!online) { await commitStock(t, { ...order, status: 'pending_payment' }, orderNumber); order.stock_committed = true; }

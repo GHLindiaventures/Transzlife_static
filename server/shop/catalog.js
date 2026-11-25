@@ -1,15 +1,23 @@
 // Public catalogue for the shop: GET /api/products. Same shape as src/store/data/products.js
 // (prices in rupees), so the site can swap the database version in without changing its pages.
-// Stock is shown only as in / low / out, never exact numbers.
+// Stock is shown only as in / low / out, never exact numbers. `price` is what the customer pays now
+// (a running offer included); `mrp` is the printed MRP (the struck-through price); badges follow the
+// truth rules in offers.js. Pack discounts and shop settings come along so the site can't disagree
+// with the checkout.
+import { activeOffers, autoBadgeFacts, effectivePrice, resolveBadge } from './offers.js';
+import { loadSettings } from './pricing.js';
 
 export const SOLD_MIN = 5;
 
-export function toPublic(p, media, batch = null) {
+export function toPublic(p, media, batch = null, { eff = null, badge = null } = {}) {
   const c = p.content || {};
+  eff ??= { price: Math.min(p.price, p.mrp), regular: Math.min(p.price, p.mrp), offer: null };
   const available = Number(p.available ?? 0);
   return {
     id: p.id, name: p.name, short: p.short || p.name, tagline: p.tagline || '', format: p.format || '', size: p.size || '',
-    price: p.price / 100, mrp: p.mrp / 100, badge: p.badge || null, accent: p.accent || '#1f6b3c', tint: p.tint || '#eef4ea',
+    price: eff.price / 100, mrp: p.mrp / 100, regularPrice: eff.regular / 100,
+    offer: eff.offer ? { id: eff.offer.id, name: eff.offer.name, kind: eff.offer.kind, endsAt: eff.offer.ends_at, showCountdown: eff.offer.show_countdown } : null,
+    badge: badge?.text || null, badgeKey: badge?.key || null, badgeStyle: badge ? { bg: badge.bg, fg: badge.fg } : null, accent: p.accent || '#1f6b3c', tint: p.tint || '#eef4ea',
     concerns: p.concerns || [],
     images: media.length ? media.map((m) => m.url) : ['/assets/logo.png'],      // no photo yet: brand logo
     brochure: c.brochure || null,
@@ -37,7 +45,11 @@ export async function loadCatalog(q, { includeInactive = false } = {}) {
   const batches = (await q(`SELECT DISTINCT ON (product_id) product_id, mfg_date, expiry_date FROM batches
                              WHERE qty_remaining > 0 AND written_off_at IS NULL AND expiry_date > (now() AT TIME ZONE 'Asia/Kolkata')::date
                              ORDER BY product_id, expiry_date, created_at`)).rows;
-  return products.map((p) => toPublic(p, media.filter((m) => m.product_id === p.id), batches.find((b) => b.product_id === p.id)));
+  const [offers, facts] = [await activeOffers(q), await autoBadgeFacts(q)];
+  return products.map((p) => {
+    const eff = effectivePrice(p, offers);
+    return toPublic(p, media.filter((m) => m.product_id === p.id), batches.find((b) => b.product_id === p.id), { eff, badge: resolveBadge(p, eff.offer, facts) });
+  });
 }
 
 /** Ingredient library for the site (photos fall back to the built-in ones when none was uploaded). */
@@ -49,7 +61,14 @@ export async function loadIngredients(q) {
 export default async function catalogPublic(app, { db }) {
   app.get('/api/products', async (req, reply) => {
     reply.header('Cache-Control', 'no-cache');                     // small list: always fresh, so staff edits show at once
-    return { products: await loadCatalog(db.query) };
+    const settings = await loadSettings(db.query);
+    const packs = (await db.query('SELECT qty, label, discount_pct FROM pack_options ORDER BY qty')).rows
+      .map((k) => ({ qty: Number(k.qty), label: k.label, off: Number(k.discount_pct) / 100, ...(Number(k.discount_pct) > 0 ? { tag: `Save ${Number(k.discount_pct)}%` } : {}) }));
+    if (packs.length > 1) { const best = packs.reduce((a, b) => (b.off > a.off ? b : a)); if (best.off > 0) best.tag = 'Best value'; }
+    return {
+      products: await loadCatalog(db.query), packs,
+      shop: { freeShippingAbove: settings.free_shipping_above / 100, shippingFee: settings.shipping_fee / 100, prepaidDiscount: (settings.prepaid_discount_pct || 0) / 100 },
+    };
   });
   app.get('/api/ingredients', async (req, reply) => {
     reply.header('Cache-Control', 'no-cache');
