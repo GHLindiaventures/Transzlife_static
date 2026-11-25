@@ -16,6 +16,7 @@ import trafficRoutes from './traffic.js';
 import adminReviewRoutes from './reviews.js';
 import offerRoutes from './offers.js';
 import contentAdminRoutes from './content.js';
+import discountRoutes from './discounts.js';
 import { refreshRating } from '../shop/reviews.js';
 import { restoreStock } from '../shop/batches.js';
 
@@ -546,6 +547,7 @@ export default async function adminRoutes(app, { db, razorpay, twilio, notifier,
   await adminReviewRoutes(app, { db, G, parse, audit, env, log, presence });
   await offerRoutes(app, { db, G, parse, audit });
   await contentAdminRoutes(app, { db, G, parse, audit });
+  await discountRoutes(app, { db, G });
 
   app.setErrorHandler((err, req, reply) => {
     if (err.status && err.status < 500) return reply.code(err.status).send({ error: err.message, code: err.code || 'error' });

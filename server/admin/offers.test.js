@@ -147,3 +147,19 @@ test('shared date ranges work on every report', async () => {
   }
   assert.equal((await call('GET', '/api/admin/overview?range=custom&from=2026-02-30&to=x')).body.range, '30d', 'bad dates fall back');
 });
+
+test('discount report: every rupee by source, offer results and lift, packs, campaigns', async () => {
+  const r = await call('GET', '/api/admin/discounts?range=7d');
+  assert.equal(r.status, 200, JSON.stringify(r.body).slice(0, 300));
+  const d = r.body;
+  assert.equal(d.current.byKind.offer, 26600); assert.equal(d.current.byKind.pack, 5600);
+  assert.equal(d.current.given, 32200);
+  assert.equal(d.current.gross, d.current.revenue + d.current.given);
+  const diwali = d.offers.find((o) => o.name === 'Diwali offer');
+  assert.equal(diwali.orders, 1); assert.equal(diwali.given, 26600); assert.equal(diwali.revenue, 106200);
+  assert.ok(Math.abs(diwali.perRupee - 106200 / 26600) < 1e-9);
+  assert.equal(diwali.unitsPerDayBefore, 0); assert.equal(diwali.lift, null, 'no sales before: no lift claimed');
+  assert.deepEqual(d.packs.find((k) => k.pack === 2), { pack: 2, orders: 1, units: 2, revenue: 106200, given: 5600 });
+  assert.ok(d.series.reduce((s, x) => s + x.discount, 0) === 32200);
+  assert.ok(Array.isArray(d.campaigns));
+});
