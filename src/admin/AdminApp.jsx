@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import {
   Home, Package, Boxes, Users, CreditCard, UserCog, History, Settings, LogOut, Menu, X, ShieldCheck,
-  Search, Bell, Moon, Sun, MoreHorizontal, ArrowRight, User, CheckCircle2,
+  Search, Bell, Moon, Sun, MoreHorizontal, ArrowRight, User, CheckCircle2, Undo2, BarChart3,
 } from 'lucide-react';
 import { api } from '../store/lib/api';
 import { AdminContext, can, ErrorBox, initials, rs, useAdmin, useTheme, STATUS } from './ui';
@@ -14,6 +14,8 @@ import Products from './pages/Products';
 import ProductEditor from './pages/ProductEditor';
 import { CustomerList, CustomerDetail } from './pages/Customers';
 import Payments from './pages/Payments';
+import Returns from './pages/Returns';
+import Analytics from './pages/Analytics';
 import Staff from './pages/Staff';
 import { Activity, SettingsPage } from './pages/System';
 import './admin.css';
@@ -60,6 +62,8 @@ export default function AdminApp() {
                     <Route path="customers" element={<CustomerList />} />
                     <Route path="customers/:id" element={<CustomerDetail />} />
                     <Route path="payments" element={<Payments />} />
+                    <Route path="returns" element={<Returns />} />
+                    <Route path="analytics" element={<Analytics />} />
                     {can(staff, 'staff') && <Route path="staff" element={<Staff />} />}
                     <Route path="activity" element={<Activity />} />
                     <Route path="settings" element={<SettingsPage />} />
@@ -76,11 +80,11 @@ export default function AdminApp() {
 
 /** Live counts for the sidebar badges and the bell (refreshed every minute and on page change). */
 function useLive() {
-  const [live, setLive] = useState({ counts: {}, alerts: [] });
+  const [live, setLive] = useState({ counts: {}, alerts: [], returns: 0 });
   const location = useLocation();
   const load = useCallback(() => {
-    Promise.all([api('/api/admin/orders/counts'), api('/api/admin/alerts')])
-      .then(([c, a]) => setLive({ counts: c.counts, alerts: a.items })).catch(() => {});
+    Promise.all([api('/api/admin/orders/counts'), api('/api/admin/alerts'), api('/api/admin/returns/counts')])
+      .then(([c, a, r]) => setLive({ counts: c.counts, alerts: a.items, returns: r.counts.open })).catch(() => {});
   }, []);
   useEffect(() => { load(); const t = setInterval(load, 60_000); return () => clearInterval(t); }, [load]);
   useEffect(() => { load(); }, [location.pathname, load]);
@@ -110,8 +114,9 @@ function Shell({ children }) {
 
   const groups = [
     [null, [['/admin', 'Home', Home, { end: true }]]],
-    ['Sell', [['/admin/orders', 'Orders', Package, { count: toPack, title: `${toPack} to pack` }], ['/admin/payments', 'Payments', CreditCard]]],
+    ['Sell', [['/admin/orders', 'Orders', Package, { count: toPack, title: `${toPack} to pack` }], ['/admin/returns', 'Returns', Undo2, { count: live.returns, title: `${live.returns} open returns` }], ['/admin/payments', 'Payments', CreditCard]]],
     ['Catalog', [['/admin/products', 'Products & stock', Boxes]]],
+    ['Insights', [['/admin/analytics', 'Analytics', BarChart3]]],
     ['People', [['/admin/customers', 'Customers', Users], can(staff, 'staff') && ['/admin/staff', 'Staff', UserCog]]],
     ['Account', [['/admin/activity', 'Activity log', History], ['/admin/settings', 'Settings', Settings]]],
   ];
@@ -212,7 +217,7 @@ function CommandPalette({ onClose }) {
   const [active, setActive] = useState(0);
   const pages = [
     ['Home', '/admin', Home], ['Orders', '/admin/orders', Package], ['Orders to pack', '/admin/orders?stage=to_pack', Package],
-    ['Products & stock', '/admin/products', Boxes], ['Customers', '/admin/customers', Users], ['Payments', '/admin/payments', CreditCard],
+    ['Products & stock', '/admin/products', Boxes], ['Customers', '/admin/customers', Users], ['Returns', '/admin/returns', Undo2], ['Analytics', '/admin/analytics', BarChart3], ['Payments', '/admin/payments', CreditCard],
     can(staff, 'staff') && ['Staff', '/admin/staff', UserCog], ['Activity log', '/admin/activity', History], ['Settings', '/admin/settings', Settings],
   ].filter(Boolean);
 

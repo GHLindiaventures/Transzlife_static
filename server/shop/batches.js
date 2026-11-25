@@ -58,6 +58,31 @@ export async function restoreStock(t, order, reason) {
   return restored;
 }
 
+/**
+ * Puts some units of ONE order item back on sale (a return inspected as resellable). Units go back
+ * into the batches they came from (skipping expired / written-off ones), the rest into un-batched
+ * stock. Returns how many units went back on sale.
+ */
+export async function restockItemUnits(t, orderItemId, units, ref) {
+  const item = (await t.query('SELECT product_id FROM order_items WHERE id = $1', [orderItemId])).rows[0];
+  let left = units, toBatches = 0;
+  const allocs = (await t.query(
+    `SELECT a.batch_id, a.qty FROM order_item_batches a JOIN batches b ON b.id = a.batch_id
+      WHERE a.order_item_id = $1 AND b.written_off_at IS NULL AND b.expiry_date > ${TODAY_IST}
+      ORDER BY b.expiry_date DESC`, [orderItemId])).rows;
+  for (const a of allocs) {
+    if (left <= 0) break;
+    const n = Math.min(left, a.qty);
+    await t.query('UPDATE batches SET qty_remaining = qty_remaining + $2 WHERE id = $1', [a.batch_id, n]);
+    if (n === a.qty) await t.query('DELETE FROM order_item_batches WHERE order_item_id = $1 AND batch_id = $2', [orderItemId, a.batch_id]);
+    else await t.query('UPDATE order_item_batches SET qty = qty - $3 WHERE order_item_id = $1 AND batch_id = $2', [orderItemId, a.batch_id, n]);
+    left -= n; toBatches += n;
+  }
+  await t.query('UPDATE inventory SET on_hand = on_hand + $2 WHERE product_id = $1', [item.product_id, units]);
+  await t.query(`INSERT INTO stock_movements (product_id, change, reason, ref) VALUES ($1,$2,'return',$3)`, [item.product_id, units, ref]);
+  return units;
+}
+
 /** Takes batches that reached their expiry date out of stock. Safe to run often. Returns the batches written off. */
 export async function writeOffExpired(db, log) {
   const due = (await db.query(

@@ -249,7 +249,7 @@ body.adm-body.adm-dark { background: #0d1410; }
 .adm-tip i { width: 10px; height: 3px; border-radius: 2px; background: var(--c1); display: inline-block; margin-right: 6px; }
 .adm-tip i.is-prev { background: var(--c-prev); }
 .adm-bars { display: grid; gap: 12px; }
-.adm-barrow { display: grid; grid-template-columns: minmax(90px, 140px) 1fr auto; align-items: center; gap: 12px; font-size: 13.5px; }
+.adm-barrow { display: grid; grid-template-columns: minmax(90px, 190px) 1fr auto; align-items: center; gap: 12px; font-size: 13.5px; }
 .adm-barrow > span:first-child { font-weight: 600; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .adm-bartrack { height: 10px; border-radius: 0 6px 6px 0; background: var(--bg-2); overflow: hidden; }
 .adm-bartrack i { display: block; height: 100%; border-radius: 0 4px 4px 0; background: var(--c1); min-width: 3px; transition: width .4s ease; }
@@ -490,3 +490,18 @@ body.adm-body.adm-dark { background: #0d1410; }
   .adm-pgrid { grid-template-columns: 1fr 1fr; gap: 10px; }
   .adm-pcard__body { padding: 10px 12px 12px; } .adm-pcard__price { font-size: 17px; }
 }
+
+/* ---- phase 3: returns, customers, analytics ---- */
+.adm-kpis.is-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.adm-kpis.is-6 .adm-kpi strong { font-size: 26px; }
+.adm-kpis.is-6 .adm-kpi__label { flex-direction: column; align-items: flex-start; gap: 6px; }
+.adm-legend i.is-sq { width: 10px; height: 10px; border: 0; border-radius: 3px; }
+.adm-avatar.is-sm { width: 34px; height: 34px; font-size: 12.5px; }
+.adm-avatar.is-lg { width: 60px; height: 60px; font: 600 22px/1 var(--f-display); }
+.adm-list li > svg { vertical-align: -2px; margin-right: 6px; color: var(--muted); }
+.adm-menu { position: relative; }
+.adm-menu > summary { list-style: none; cursor: pointer; }
+.adm-menu > summary::-webkit-details-marker { display: none; }
+.adm-menu[open] > summary { border-color: var(--brand); }
+@media (max-width: 1180px) { .adm-kpis.is-6 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 760px) { .adm-kpis.is-6 { grid-template-columns: 1fr 1fr; } }

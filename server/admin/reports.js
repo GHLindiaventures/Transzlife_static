@@ -59,7 +59,10 @@ export default async function reportRoutes(app, { db, G, parse, env }) {
     const later = expiring.filter((e) => e.days > 30);
     add('expiring_90', later.length, later.length === 1 ? 'batch expires within 90 days' : 'batches expire within 90 days', '/admin/products?filter=expiring', 'warn',
       later.map((e) => `${e.name.replace(/^TranzLife /, '')} ${e.batch_no} (${e.days} days)`).join(' · '));
-    add('returns', num(o.returns_week), 'returned this week', '/admin/orders?stage=returns', 'warn');
+    const ret = (await db.query(`SELECT COUNT(*) FILTER (WHERE status = 'requested') AS requested, COUNT(*) FILTER (WHERE status = 'received') AS received FROM returns`)).rows[0];
+    add('returns_received', num(ret.received), num(ret.received) === 1 ? 'return received, needs a decision' : 'returns received, need a decision', '/admin/returns?status=received', 'warn');
+    add('returns_requested', num(ret.requested), num(ret.requested) === 1 ? 'return on its way back' : 'returns on their way back', '/admin/returns?status=requested', 'info');
+    add('returns', num(o.returns_week), 'returned to us this week', '/admin/orders?stage=returns', 'muted');
     add('awaiting_payment', num(o.awaiting_payment), 'awaiting online payment', '/admin/orders?stage=awaiting_payment', 'muted');
     add('failed_messages', failed, failed === 1 ? 'customer message failed' : 'customer messages failed', '/admin/settings', 'warn');
     return items;

@@ -8,6 +8,9 @@ import { hashPassword, verifyPassword, tempPassword, checkPasswordStrength, newT
 import { loadSettings } from '../shop/pricing.js';
 import reportRoutes, { STAGES } from './reports.js';
 import catalogRoutes from './catalog.js';
+import returnRoutes from './returns.js';
+import analyticsRoutes from './analytics.js';
+import customerRoutes from './customers.js';
 import { restoreStock } from '../shop/batches.js';
 
 const PAGE = 25;
@@ -292,37 +295,42 @@ export default async function adminRoutes(app, { db, razorpay, twilio, notifier,
   });
 
   // Refund: through Razorpay for online payments; recorded as a manual refund for COD (paid back by hand).
-  app.post('/api/admin/orders/:number/refund', { ...G('refunds'), ...tight(20) }, async (req, reply) => {
-    const body = parse(z.object({
-      amount: z.number().int().positive().optional(),       // paise; default = everything not yet refunded
-      reason: z.string().trim().min(3, 'Give a reason for the refund.').max(300),
-    }), req.body, reply); if (!body) return;
-    const o = await loadOrder(db.query, req.params.number);
-    if (!o) return reply.code(404).send({ error: 'Order not found.' });
+  /** Refunds (part of) a paid order: Razorpay for online payments, a manual record for COD. */
+  async function issueRefund(req, number, { amount: wanted, reason }) {
+    const o = await loadOrder(db.query, number);
+    if (!o) throw fail('Order not found.', 404);
     if (!['paid', 'partially_refunded'].includes(o.payment_status)) throw fail('Only paid orders can be refunded.', 409);
     const done = Number((await db.query(`SELECT COALESCE(SUM(amount), 0) AS n FROM refunds WHERE order_id = $1 AND status <> 'failed'`, [o.id])).rows[0].n);
     const left = o.total - done;
-    const amount = body.amount ?? left;
-    if (amount > left) throw fail(`At most ₹${(left / 100).toFixed(2)} can still be refunded.`);
+    const amount = wanted ?? left;
+    if (amount <= 0 || amount > left) throw fail(`At most ₹${(left / 100).toFixed(2)} can still be refunded.`);
 
     let method = 'manual', providerRefundId = null, status = 'processed', paymentId = null, raw = null;
     if (o.payment_method !== 'cod') {
       const pay = (await db.query(`SELECT id, provider_payment_id FROM payments WHERE order_id = $1 AND status = 'paid' ORDER BY created_at DESC LIMIT 1`, [o.id])).rows[0];
       if (!pay?.provider_payment_id) throw fail('No captured Razorpay payment found for this order.', 409);
-      const r = await razorpay.refund(pay.provider_payment_id, { amount, notes: { order_number: o.order_number, reason: body.reason.slice(0, 200) } });
+      const r = await razorpay.refund(pay.provider_payment_id, { amount, notes: { order_number: o.order_number, reason: reason.slice(0, 200) } });
       method = 'razorpay'; providerRefundId = r.id; status = r.status === 'processed' ? 'processed' : 'pending'; paymentId = pay.id; raw = r;
     }
     await db.tx(async (t) => {
       await t.query(
         `INSERT INTO refunds (order_id, payment_id, amount, reason, method, provider_refund_id, status, staff_id, raw) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
-        [o.id, paymentId, amount, body.reason, method, providerRefundId, status, req.staff.id, raw ? JSON.stringify(raw) : null]);
+        [o.id, paymentId, amount, reason, method, providerRefundId, status, req.staff.id, raw ? JSON.stringify(raw) : null]);
       const full = done + amount >= o.total;
       await t.query(`UPDATE orders SET payment_status = $2, updated_at = now() WHERE id = $1`, [o.id, full ? 'refunded' : 'partially_refunded']);
       await t.query('INSERT INTO order_events (order_id, from_status, to_status, note, actor) VALUES ($1,$2,$3,$4,$5)',
-        [o.id, o.status, o.status, `Refund ₹${(amount / 100).toFixed(2)} (${method}): ${body.reason}`, `staff:${req.staff.email}`]);
-      await audit(t.query, req, 'order.refund', 'order', o.order_number, { refunded: done }, { amount, method, reason: body.reason, providerRefundId });
+        [o.id, o.status, o.status, `Refund ₹${(amount / 100).toFixed(2)} (${method}): ${reason}`, `staff:${req.staff.email}`]);
+      await audit(t.query, req, 'order.refund', 'order', o.order_number, { refunded: done }, { amount, method, reason, providerRefundId });
     });
-    return { ok: true, amount, method, status };
+    return { amount, method, status };
+  }
+
+  app.post('/api/admin/orders/:number/refund', { ...G('refunds'), ...tight(20) }, async (req, reply) => {
+    const body = parse(z.object({
+      amount: z.number().int().positive().optional(),       // paise; default = everything not yet refunded
+      reason: z.string().trim().min(3, 'Give a reason for the refund.').max(300),
+    }), req.body, reply); if (!body) return;
+    return { ok: true, ...(await issueRefund(req, req.params.number, body)) };
   });
 
   // ======================================================================
@@ -360,31 +368,7 @@ export default async function adminRoutes(app, { db, razorpay, twilio, notifier,
   // ======================================================================
   // Customers
   // ======================================================================
-  app.get('/api/admin/customers', G('view'), async (req) => {
-    const page = pageOf(req.query);
-    const params = [];
-    let where = 'WHERE c.deleted_at IS NULL';
-    if (req.query.q) { params.push(like(String(req.query.q).trim().slice(0, 80))); where += ` AND (c.name ILIKE $1 OR c.phone ILIKE $1 OR c.email ILIKE $1)`; }
-    const total = Number((await db.query(`SELECT COUNT(*) AS n FROM customers c ${where}`, params)).rows[0].n);
-    const rows = (await db.query(`
-      SELECT c.id, c.name, c.phone, c.email, c.created_at, c.last_login_at,
-             COUNT(o.id) FILTER (WHERE o.status NOT IN ('pending_payment','cancelled')) AS orders,
-             COALESCE(SUM(o.total) FILTER (WHERE o.status NOT IN ('pending_payment','cancelled')), 0)::bigint AS spent
-        FROM customers c LEFT JOIN orders o ON o.customer_id = c.id ${where}
-       GROUP BY c.id ORDER BY c.created_at DESC LIMIT ${PAGE} OFFSET ${(page - 1) * PAGE}`, params)).rows;
-    return { rows: rows.map((r) => ({ ...r, orders: Number(r.orders), spent: Number(r.spent) })), total, page, pages: Math.max(1, Math.ceil(total / PAGE)) };
-  });
-
-  app.get('/api/admin/customers/:id', G('view'), async (req, reply) => {
-    const id = parse(z.string().uuid(), req.params.id, reply); if (!id) return;
-    const c = (await db.query('SELECT id, name, phone, email, created_at, last_login_at, deleted_at FROM customers WHERE id = $1', [id])).rows[0];
-    if (!c) return reply.code(404).send({ error: 'Customer not found.' });
-    const [orders, addresses] = await Promise.all([
-      db.query('SELECT order_number, status, payment_method, total, created_at FROM orders WHERE customer_id = $1 ORDER BY created_at DESC', [id]),
-      db.query('SELECT name, phone, line1, line2, city, state, pin, is_default FROM addresses WHERE customer_id = $1 ORDER BY is_default DESC, created_at DESC', [id]),
-    ]);
-    return { customer: c, orders: orders.rows, addresses: addresses.rows };
-  });
+  // customer list, profile and notes live in customers.js
 
   // Data deletion request (India DPDP Act): remove personal details from the account. Orders stay
   // (tax records must be kept) but are no longer linked to a name, email or saved address.
@@ -529,6 +513,9 @@ export default async function adminRoutes(app, { db, razorpay, twilio, notifier,
 
   await reportRoutes(app, { db, G, parse, env });
   await catalogRoutes(app, { db, G, parse, audit, env, log });
+  await returnRoutes(app, { db, G, parse, audit, issueRefund, loadOrder });
+  await analyticsRoutes(app, { db, G });
+  await customerRoutes(app, { db, G, parse, audit });
 
   app.setErrorHandler((err, req, reply) => {
     if (err.status && err.status < 500) return reply.code(err.status).send({ error: err.message, code: err.code || 'error' });

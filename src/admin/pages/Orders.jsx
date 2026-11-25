@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { Download, Printer, ArrowLeft, X, Search, ExternalLink, Truck, PackageCheck, PackageOpen } from 'lucide-react';
+import { Download, Printer, ArrowLeft, X, Search, ExternalLink, Truck, PackageCheck, PackageOpen, Undo2 } from 'lucide-react';
+import { StartReturn } from './Returns';
 import { api } from '../../store/lib/api';
 import { Badge, Empty, ErrorBox, Loading, METHOD, Notice, PAYSTATUS, PageHead, Pager, STATUS, can, dt, rs, toPaise, useAction, useAdmin, useApi } from '../ui';
 
@@ -236,6 +237,8 @@ export function OrderDetail() {
   const act = useAction();
   const [refund, setRefund] = useState({ amount: '', reason: '' });
   const [staffNote, setStaffNote] = useState(null);
+  const [returning, setReturning] = useState(false);
+  const navigate = useNavigate();
 
   if (error) return <ErrorBox>{error}</ErrorBox>;
   if (!data) return <Loading />;
@@ -261,8 +264,10 @@ export function OrderDetail() {
       <Link to="/admin/orders" className="adm-link adm-back no-print"><ArrowLeft size={15} /> Orders</Link>
       <PageHead title={`Order ${o.number}`} sub={`Placed ${dt(o.createdAt)}`}>
         <Badge value={o.status} /> <Badge map={PAYSTATUS} value={o.paymentStatus} />
+        {o.status === 'delivered' && can(staff, 'orders.edit') && <button className="adm-btn is-ghost no-print" onClick={() => setReturning(true)}><Undo2 size={16} /> Start a return</button>}
         <Link className="adm-btn is-ghost no-print" to={`/admin/orders/print?numbers=${o.number}`}><Printer size={16} /> Packing slip</Link>
       </PageHead>
+      {returning && <StartReturn number={o.number} onClose={() => setReturning(false)} onCreated={(r) => navigate(`/admin/returns?id=${r.id}`)} />}
       <ErrorBox>{act.error}</ErrorBox>
       <Notice>{act.notice}</Notice>
 

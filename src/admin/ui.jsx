@@ -122,7 +122,13 @@ export function useChartColors(theme) {
 }
 
 /** "▲ 12%" vs the previous period. `invert` for numbers where down is good. */
-export function Delta({ now, before, invert = false }) {
+export function Delta({ now, before, invert = false, points = false }) {
+  if (points) {                       // rates (0..1): show the change in percentage points
+    const pts = Math.round((now - before) * 100);
+    if (pts === 0) return <span className="adm-delta is-flat">± 0 pts</span>;
+    const good = invert ? pts < 0 : pts > 0;
+    return <span className={`adm-delta ${good ? 'is-up' : 'is-down'}`} title="Change in percentage points vs the previous period">{pts > 0 ? '▲' : '▼'} {Math.abs(pts)} pts</span>;
+  }
   if (!before && !now) return <span className="adm-delta is-flat">no change</span>;
   if (!before) return <span className="adm-delta is-up">new</span>;
   const pct = Math.round(((now - before) / before) * 100);
