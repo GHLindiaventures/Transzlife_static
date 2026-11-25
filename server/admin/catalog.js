@@ -1,7 +1,6 @@
 // Admin catalogue: products (content, label declarations, visibility), photos, batches & expiry,
 // completeness score. Prices in paise. Every change is audited.
 import { z } from 'zod';
-import { INGREDIENTS } from '../../src/store/data/ingredients.js';
 import { createMedia, MAX_UPLOAD_MB } from '../shop/media.js';
 import { TODAY_IST } from '../shop/batches.js';
 
@@ -121,10 +120,6 @@ export default async function catalogRoutes(app, { db, G, parse, audit, env, log
     if (!full) return reply.code(404).send({ error: 'Product not found.' });
     return full;
   });
-
-  app.get('/api/admin/ingredients', G('view'), async () => ({
-    ingredients: INGREDIENTS.map((i) => ({ id: i.id, name: i.name, latin: i.latin || '', part: i.part || '', type: i.type || '' })),
-  }));
 
   // New product: starts hidden (not on sale) until it's ready
   app.post('/api/admin/products', G('products.edit'), async (req, reply) => {

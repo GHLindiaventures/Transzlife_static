@@ -2,13 +2,16 @@
 // when it arrives. Falls back silently to the built-in list if the API is unreachable.
 import { useSyncExternalStore } from 'react';
 import { subscribeCatalog, catalogVersion, replaceCatalog, markCatalogSettled } from '../data/products';
+import { replaceIngredients } from '../data/ingredients';
 
 let loading = null;
 export function loadCatalog() {
-  loading ??= fetch('/api/products', { credentials: 'same-origin' })
-    .then((r) => (r.ok ? r.json() : null))
-    .then((d) => { if (d?.products?.length) replaceCatalog(d.products); else markCatalogSettled(); })
-    .catch(() => markCatalogSettled());
+  const get = (url) => fetch(url, { credentials: 'same-origin' }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+  // products and the ingredient library arrive together, then pages re-render once
+  loading ??= Promise.all([get('/api/products'), get('/api/ingredients')]).then(([p, i]) => {
+    if (i?.ingredients?.length) replaceIngredients(i.ingredients);
+    if (p?.products?.length) replaceCatalog(p.products); else markCatalogSettled();
+  });
   return loading;
 }
 

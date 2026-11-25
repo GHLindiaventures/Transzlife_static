@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import {
   Home, Package, Boxes, Users, CreditCard, UserCog, History, Settings, LogOut, Menu, X, ShieldCheck,
-  Search, Bell, Moon, Sun, MoreHorizontal, ArrowRight, User, CheckCircle2, Undo2, BarChart3,
+  Search, Bell, Moon, Sun, MoreHorizontal, ArrowRight, User, CheckCircle2, Undo2, BarChart3, Sprout, ShieldCheck as Shield,
 } from 'lucide-react';
 import { api } from '../store/lib/api';
 import { AdminContext, can, ErrorBox, initials, rs, useAdmin, useTheme, STATUS } from './ui';
@@ -16,6 +16,8 @@ import { CustomerList, CustomerDetail } from './pages/Customers';
 import Payments from './pages/Payments';
 import Returns from './pages/Returns';
 import Analytics from './pages/Analytics';
+import Ingredients from './pages/Ingredients';
+import Compliance from './pages/Compliance';
 import Staff from './pages/Staff';
 import { Activity, SettingsPage } from './pages/System';
 import './admin.css';
@@ -64,6 +66,8 @@ export default function AdminApp() {
                     <Route path="payments" element={<Payments />} />
                     <Route path="returns" element={<Returns />} />
                     <Route path="analytics" element={<Analytics />} />
+                    <Route path="ingredients" element={<Ingredients />} />
+                    <Route path="compliance" element={<Compliance />} />
                     {can(staff, 'staff') && <Route path="staff" element={<Staff />} />}
                     <Route path="activity" element={<Activity />} />
                     <Route path="settings" element={<SettingsPage />} />
@@ -115,7 +119,7 @@ function Shell({ children }) {
   const groups = [
     [null, [['/admin', 'Home', Home, { end: true }]]],
     ['Sell', [['/admin/orders', 'Orders', Package, { count: toPack, title: `${toPack} to pack` }], ['/admin/returns', 'Returns', Undo2, { count: live.returns, title: `${live.returns} open returns` }], ['/admin/payments', 'Payments', CreditCard]]],
-    ['Catalog', [['/admin/products', 'Products & stock', Boxes]]],
+    ['Catalog', [['/admin/products', 'Products & stock', Boxes], ['/admin/ingredients', 'Ingredients', Sprout], ['/admin/compliance', 'Licences & certificates', Shield]]],
     ['Insights', [['/admin/analytics', 'Analytics', BarChart3]]],
     ['People', [['/admin/customers', 'Customers', Users], can(staff, 'staff') && ['/admin/staff', 'Staff', UserCog]]],
     ['Account', [['/admin/activity', 'Activity log', History], ['/admin/settings', 'Settings', Settings]]],
@@ -217,7 +221,7 @@ function CommandPalette({ onClose }) {
   const [active, setActive] = useState(0);
   const pages = [
     ['Home', '/admin', Home], ['Orders', '/admin/orders', Package], ['Orders to pack', '/admin/orders?stage=to_pack', Package],
-    ['Products & stock', '/admin/products', Boxes], ['Customers', '/admin/customers', Users], ['Returns', '/admin/returns', Undo2], ['Analytics', '/admin/analytics', BarChart3], ['Payments', '/admin/payments', CreditCard],
+    ['Products & stock', '/admin/products', Boxes], ['Customers', '/admin/customers', Users], ['Returns', '/admin/returns', Undo2], ['Analytics', '/admin/analytics', BarChart3], ['Ingredients', '/admin/ingredients', Sprout], ['Licences & certificates', '/admin/compliance', Shield], ['Payments', '/admin/payments', CreditCard],
     can(staff, 'staff') && ['Staff', '/admin/staff', UserCog], ['Activity log', '/admin/activity', History], ['Settings', '/admin/settings', Settings],
   ].filter(Boolean);
 

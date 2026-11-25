@@ -4,6 +4,7 @@
 // NOTE: prices are the site's placeholders until the client sends the approved list.
 import { PRODUCTS, PACKS } from '../../src/store/data/products.js';
 import { SITE } from '../../src/store/data/site.js';
+import { INGREDIENTS } from '../../src/store/data/ingredients.js';
 
 const SEED_STOCK = 100;   // placeholder opening stock per product
 
@@ -37,6 +38,12 @@ export async function seed(db, log = console) {
           await t.query('INSERT INTO product_media (product_id, url, alt, sort) VALUES ($1,$2,$3,$4)', [p.id, url, p.name, k]);
         }
       }
+    }
+    // ingredient library: copied once; later edits in the dashboard are kept
+    for (const [i, g] of INGREDIENTS.entries()) {
+      await t.query(
+        `INSERT INTO ingredients (id, name, alt, latin, type, part, note, sort_order) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT (id) DO NOTHING`,
+        [g.id, g.name, g.alt ?? null, g.latin ?? null, g.type || 'herb', g.part ?? null, g.note ?? null, (i + 1) * 10]);
     }
     for (const k of PACKS) {
       await t.query('INSERT INTO pack_options (qty, label, discount_pct) VALUES ($1,$2,$3) ON CONFLICT DO NOTHING',

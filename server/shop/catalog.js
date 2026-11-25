@@ -2,7 +2,7 @@
 // (prices in rupees), so the site can swap the database version in without changing its pages.
 // Stock is shown only as in / low / out, never exact numbers.
 
-export function toPublic(p, media) {
+export function toPublic(p, media, batch = null) {
   const c = p.content || {};
   const available = Number(p.available ?? 0);
   return {
@@ -15,6 +15,8 @@ export function toPublic(p, media) {
     ingredients: c.ingredients || [], routine: c.routine || [], howToUse: c.howToUse || [], whoFor: c.whoFor || [],
     precautions: c.precautions || [], faqs: c.faqs || [],
     compliance: p.compliance || {},
+    // the batch a customer receives next (soonest expiry still in stock): shown as "Use before"
+    batch: batch ? { mfg: batch.mfg_date, expiry: batch.expiry_date } : null,
     stock: available <= 0 ? 'out' : available <= (p.low_stock_at ?? 10) ? 'low' : 'in',
   };
 }
@@ -25,13 +27,26 @@ export async function loadCatalog(q, { includeInactive = false } = {}) {
       FROM products p LEFT JOIN inventory i ON i.product_id = p.id
      ${includeInactive ? '' : 'WHERE p.active'} ORDER BY p.sort_order, p.name`)).rows;
   const media = (await q('SELECT product_id, url, thumb_url, alt FROM product_media ORDER BY sort, created_at')).rows;
-  return products.map((p) => toPublic(p, media.filter((m) => m.product_id === p.id)));
+  const batches = (await q(`SELECT DISTINCT ON (product_id) product_id, mfg_date, expiry_date FROM batches
+                             WHERE qty_remaining > 0 AND written_off_at IS NULL AND expiry_date > (now() AT TIME ZONE 'Asia/Kolkata')::date
+                             ORDER BY product_id, expiry_date, created_at`)).rows;
+  return products.map((p) => toPublic(p, media.filter((m) => m.product_id === p.id), batches.find((b) => b.product_id === p.id)));
+}
+
+/** Ingredient library for the site (photos fall back to the built-in ones when none was uploaded). */
+export async function loadIngredients(q) {
+  return (await q('SELECT id, name, alt, latin, type, part, note, photo_url FROM ingredients WHERE active ORDER BY sort_order, name')).rows
+    .map((g) => ({ id: g.id, name: g.name, alt: g.alt || '', latin: g.latin || '', type: g.type, part: g.part || '', note: g.note || '', ...(g.photo_url ? { photoUrl: g.photo_url } : {}) }));
 }
 
 export default async function catalogPublic(app, { db }) {
   app.get('/api/products', async (req, reply) => {
     reply.header('Cache-Control', 'no-cache');                     // small list: always fresh, so staff edits show at once
     return { products: await loadCatalog(db.query) };
+  });
+  app.get('/api/ingredients', async (req, reply) => {
+    reply.header('Cache-Control', 'no-cache');
+    return { ingredients: await loadIngredients(db.query) };
   });
   app.get('/api/products/:id', async (req, reply) => {
     const one = (await loadCatalog(db.query)).find((p) => p.id === req.params.id);

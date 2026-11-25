@@ -505,3 +505,16 @@ body.adm-body.adm-dark { background: #0d1410; }
 .adm-menu[open] > summary { border-color: var(--brand); }
 @media (max-width: 1180px) { .adm-kpis.is-6 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 760px) { .adm-kpis.is-6 { grid-template-columns: 1fr 1fr; } }
+
+/* ---- phase 4: ingredients, compliance ---- */
+.adm-igrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; }
+.adm-icard { display: grid; gap: 4px; justify-items: start; text-align: left; padding: 12px 14px 14px; border-radius: var(--r); border: 1px solid var(--line); background: var(--card); box-shadow: var(--shadow); cursor: pointer; color: var(--ink); transition: border-color .15s, transform .15s; }
+.adm-icard:hover { border-color: var(--brand); transform: translateY(-2px); }
+.adm-icard.is-hidden { opacity: .6; }
+.adm-icard__img { width: 100%; aspect-ratio: 4 / 3; display: grid; place-items: center; border-radius: 12px; background: var(--card-2); margin-bottom: 6px; overflow: hidden; }
+.adm-icard__img img { max-width: 80%; max-height: 80%; object-fit: contain; }
+.adm-icard strong { font-size: 14.5px; }
+.adm-icard__foot { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 2px; }
+.adm-iphoto { display: grid; grid-template-columns: 120px 1fr; gap: 14px; align-items: center; }
+.adm-iphoto img { width: 120px; height: 120px; object-fit: contain; border-radius: 12px; background: var(--card-2); padding: 8px; }
+@media (max-width: 760px) { .adm-igrid { grid-template-columns: 1fr 1fr; gap: 10px; } }

@@ -5,6 +5,7 @@
 import { randomUUID } from 'node:crypto';
 
 export const MEDIA_BUCKET = 'product-media';
+export const DOCS_BUCKET = 'documents';     // private
 export const MAX_UPLOAD_MB = 10;
 const TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
 
@@ -32,7 +33,7 @@ export function createMedia(env = process.env, { log = console } = {}) {
   }
 
   /** Resizes and stores one uploaded photo. Returns { url, thumbUrl, key, width, height }. */
-  async function uploadProductImage(productId, buffer, contentType) {
+  async function uploadProductImage(productId, buffer, contentType, folder = 'products') {
     if (!enabled) throw Object.assign(new Error('Photo storage is not set up (run `neon deploy` and set the AWS_* settings).'), { status: 503 });
     if (!TYPES.has(contentType)) throw Object.assign(new Error('Upload a JPG, PNG or WebP photo.'), { status: 400 });
     const { default: sharp } = await import('sharp');
@@ -49,7 +50,7 @@ export function createMedia(env = process.env, { log = console } = {}) {
     const thumb = await img.clone().resize({ width: 480, height: 480, fit: 'inside', withoutEnlargement: true }).webp({ quality: 78 }).toBuffer();
     const id = randomUUID();
     const safe = String(productId).replace(/[^a-z0-9-]/g, '');
-    const key = `products/${safe}/${id}.webp`, thumbKey = `products/${safe}/${id}-480.webp`;
+    const key = `${folder}/${safe}/${id}.webp`, thumbKey = `${folder}/${safe}/${id}-480.webp`;
     await put(key, full.data, 'image/webp');
     await put(thumbKey, thumb, 'image/webp');
     return { key, url: publicUrl(key), thumbUrl: publicUrl(thumbKey), width: full.info.width, height: full.info.height };
@@ -64,5 +65,31 @@ export function createMedia(env = process.env, { log = console } = {}) {
     }
   }
 
-  return { enabled, uploadProductImage, remove, publicUrl };
+  // ---- private documents (licences, certificates): never public, streamed to signed-in staff ----
+  const DOC_TYPES = { 'application/pdf': 'pdf', 'image/jpeg': 'jpg', 'image/png': 'png' };
+  async function putDocument(buffer, contentType) {
+    if (!enabled) throw Object.assign(new Error('Document storage is not set up (run `neon deploy` and set the AWS_* settings).'), { status: 503 });
+    const ext = DOC_TYPES[contentType];
+    if (!ext) throw Object.assign(new Error('Upload a PDF, JPG or PNG file.'), { status: 400 });
+    // check the file really is what it says (first bytes), not just the header
+    const sig = buffer.subarray(0, 4).toString('hex');
+    const okSig = ext === 'pdf' ? sig === '25504446' : ext === 'png' ? sig === '89504e47' : sig.startsWith('ffd8ff');
+    if (!okSig) throw Object.assign(new Error('That file does not look like a real PDF or image.'), { status: 400 });
+    const { PutObjectCommand } = await import('@aws-sdk/client-s3');
+    const key = `certificates/${randomUUID()}.${ext}`;
+    await (await s3()).send(new PutObjectCommand({ Bucket: DOCS_BUCKET, Key: key, Body: buffer, ContentType: contentType, CacheControl: 'private, no-store' }));
+    return key;
+  }
+  async function getDocument(key) {
+    const { GetObjectCommand } = await import('@aws-sdk/client-s3');
+    const r = await (await s3()).send(new GetObjectCommand({ Bucket: DOCS_BUCKET, Key: key }));
+    return { body: Buffer.from(await r.Body.transformToByteArray()), contentType: r.ContentType || 'application/octet-stream' };
+  }
+  async function removeDocument(key) {
+    if (!enabled || !key) return;
+    const { DeleteObjectCommand } = await import('@aws-sdk/client-s3');
+    await (await s3()).send(new DeleteObjectCommand({ Bucket: DOCS_BUCKET, Key: key })).catch((e) => log.warn?.(`[media] delete ${key}: ${e.message}`));
+  }
+
+  return { enabled, uploadProductImage, remove, publicUrl, putDocument, getDocument, removeDocument };
 }

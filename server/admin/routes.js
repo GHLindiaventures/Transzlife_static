@@ -11,6 +11,7 @@ import catalogRoutes from './catalog.js';
 import returnRoutes from './returns.js';
 import analyticsRoutes from './analytics.js';
 import customerRoutes from './customers.js';
+import complianceRoutes from './compliance.js';
 import { restoreStock } from '../shop/batches.js';
 
 const PAGE = 25;
@@ -516,6 +517,7 @@ export default async function adminRoutes(app, { db, razorpay, twilio, notifier,
   await returnRoutes(app, { db, G, parse, audit, issueRefund, loadOrder });
   await analyticsRoutes(app, { db, G });
   await customerRoutes(app, { db, G, parse, audit });
+  await complianceRoutes(app, { db, G, parse, audit, env, log });
 
   app.setErrorHandler((err, req, reply) => {
     if (err.status && err.status < 500) return reply.code(err.status).send({ error: err.message, code: err.code || 'error' });

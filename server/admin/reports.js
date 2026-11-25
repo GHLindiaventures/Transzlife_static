@@ -53,6 +53,11 @@ export default async function reportRoutes(app, { db, G, parse, env }) {
     const out = stock.filter((s) => s.available <= 0), low = stock.filter((s) => s.available > 0);
     add('out_of_stock', out.length, out.length === 1 ? 'product out of stock' : 'products out of stock', '/admin/products?filter=out', 'bad', out.map((s) => s.name).join(', '));
     add('low_stock', low.length, low.length === 1 ? 'product running low' : 'products running low', '/admin/products?filter=low', 'warn', low.map((s) => `${s.name} (${s.available})`).join(', '));
+    const certs = (await db.query(`SELECT name, expires_on - (now() AT TIME ZONE 'Asia/Kolkata')::date AS days FROM certificates
+                                     WHERE expires_on IS NOT NULL AND expires_on - (now() AT TIME ZONE 'Asia/Kolkata')::date <= 60 ORDER BY expires_on`)).rows;
+    const expiredCerts = certs.filter((c) => c.days < 0), dueCerts = certs.filter((c) => c.days >= 0);
+    add('certs_expired', expiredCerts.length, expiredCerts.length === 1 ? 'licence or certificate has expired' : 'licences or certificates have expired', '/admin/compliance', 'bad', expiredCerts.map((c) => c.name).join(' · '));
+    add('certs_due', dueCerts.length, dueCerts.length === 1 ? 'licence or certificate expires within 60 days' : 'licences or certificates expire within 60 days', '/admin/compliance', 'warn', dueCerts.map((c) => `${c.name} (${c.days} days)`).join(' · '));
     const soon = expiring.filter((e) => e.days <= 30);
     add('expiring_30', soon.length, soon.length === 1 ? 'batch expires within 30 days' : 'batches expire within 30 days', '/admin/products?filter=expiring', 'bad',
       soon.map((e) => `${e.name.replace(/^TranzLife /, '')} ${e.batch_no}: ${e.qty_remaining} left, ${e.days} days`).join(' · '));

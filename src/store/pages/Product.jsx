@@ -17,6 +17,7 @@ import { listReviews, summarise } from '../data/reviewStore';
 import { RatingLine, GalleryActions } from '../components/pdp/ProductActions';
 import { IngredientGrid, UseTabs, FaqList, FaqHelp } from '../components/pdp/Sections';
 import Reviews from '../components/pdp/Reviews';
+import ProductInfo from '../components/pdp/ProductInfo';
 import { inr, pctOff } from '../utils/format';
 import NotFound from './NotFound';
 
@@ -215,6 +216,8 @@ export default function Product() {
           <UseTabs p={p} />
         </div>
       </section>
+
+      <ProductInfo p={p} />
 
       <section className="section">
         <div className="container faq-home">

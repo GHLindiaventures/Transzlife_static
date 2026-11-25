@@ -71,12 +71,22 @@ const INGREDIENT_IMG_MAP = {
   chionanthus: 'bhringraj',
 };
 
+// a photo uploaded in the admin dashboard wins over the built-in one
 export const getIngredientImg = (id) => {
+  const uploaded = getIngredient(id)?.photoUrl;
+  if (uploaded) return uploaded;
   const filename = INGREDIENT_IMG_MAP[id] || id;
   return `/assets/ingredients/cutout/${filename}.webp`;
 };
 
 export const getIngredientPhoto = (id) => {
+  const uploaded = getIngredient(id)?.photoUrl;
+  if (uploaded) return uploaded;
   const filename = INGREDIENT_IMG_MAP[id] || id;
   return `/assets/ingredients/${filename}.webp`;
 };
+
+/** Live library from the database (GET /api/ingredients), replacing the built-in list in place. */
+export function replaceIngredients(list) {
+  if (Array.isArray(list) && list.length) INGREDIENTS.splice(0, INGREDIENTS.length, ...list);
+}

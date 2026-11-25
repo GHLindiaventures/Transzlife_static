@@ -23,6 +23,9 @@ export async function createDb(env = process.env, { log = console, memory = fals
   let db;
   if (env.DATABASE_URL) {
     const { default: pg } = await import('pg');
+    // calendar dates (expiry, manufacturing, licence dates) stay plain 'YYYY-MM-DD' strings, so they
+    // never shift by a day between the server's and the browser's time zones
+    pg.types.setTypeParser(1082, (v) => v);
     // Neon URLs say sslmode=require. Pin verify-full (check the server certificate), which is what
     // pg does today; pg v9 would otherwise downgrade "require" to encryption without verification.
     const connectionString = env.DATABASE_URL.replace(/([?&])sslmode=(prefer|require|verify-ca)\b/, '$1sslmode=verify-full');
