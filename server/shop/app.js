@@ -2,7 +2,7 @@
 import Fastify from 'fastify';
 import cookie from '@fastify/cookie';
 import rateLimit from '@fastify/rate-limit';
-import { createDb } from '../db/index.js';
+import { createDb, isHosted } from '../db/index.js';
 import { createAuth } from './auth.js';
 import { createRazorpay } from './razorpay.js';
 import { createTwilio } from './twilio.js';
@@ -17,6 +17,7 @@ import { createReminders } from './reminders.js';
 import reviewRoutes from './reviews.js';
 import contentRoutes from './content.js';
 import opsWebhooks, { createOps } from './ops.js';
+import seoRoutes from './seo.js';
 import presenceRoutes, { createPresence } from './presence.js';
 
 const UNSAFE = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
@@ -29,6 +30,7 @@ export async function buildShopApp({ env = process.env, db, fastifyOptions = {},
     ...fastifyOptions,
   });
   const log = app.log;
+  const hosted = isHosted(env);
   db ??= await createDb(env, { log });
   const razorpay = createRazorpay(env);
   const twilio = createTwilio(env, { log });
@@ -65,6 +67,7 @@ export async function buildShopApp({ env = process.env, db, fastifyOptions = {},
 
   app.addHook('preHandler', auth.loadCustomer);
   app.addHook('onSend', async (req, reply, payload) => {
+    if (hosted) reply.header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');   // HTTPS only
     if (req.url.startsWith('/api/')) {
       if (!reply.getHeader('Cache-Control')) reply.header('Cache-Control', 'no-store');
       reply.header('X-Content-Type-Options', 'nosniff');
@@ -80,6 +83,7 @@ export async function buildShopApp({ env = process.env, db, fastifyOptions = {},
   await app.register(presenceRoutes, { presence });
   await app.register(contentRoutes, { db });
   await app.register(opsWebhooks, { ops, env, log });
+  await app.register(seoRoutes, { db, env });
   await app.register(catalogPublic, { db });
 
   // free stock held by payments that were never completed

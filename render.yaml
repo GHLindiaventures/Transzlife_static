@@ -76,3 +76,15 @@ services:
         value: "off"
       - key: SITE_URL
         sync: false
+      # The site's own address(es), comma-separated: only these may send changes to the API (cross-site protection)
+      - key: SITE_ORIGIN
+        sync: false
+      # Neon Object Storage (product photos, review photos, licence documents): `neon env pull` on the production branch
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_ENDPOINT_URL_S3
+        sync: false
+      - key: AWS_REGION
+        value: ap-southeast-1

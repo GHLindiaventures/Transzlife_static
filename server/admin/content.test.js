@@ -92,3 +92,16 @@ test('homepage: order, hide, headings and products per section', async () => {
   const log = (await call('GET', '/api/admin/audit?entity=content')).body.rows;
   assert.ok(log.some((r) => r.action === 'content.home'));
 });
+
+test('search engines: robots.txt keeps private pages out, sitemap lists live products and pages', async () => {
+  const robots = await app.inject({ method: 'GET', url: '/robots.txt', headers: { host: 'shop.example' } });
+  assert.equal(robots.statusCode, 200);
+  for (const p of ['/admin', '/checkout', '/account', '/api/']) assert.match(robots.body, new RegExp(`Disallow: ${p}`));
+  assert.match(robots.body, /Sitemap: http:\/\/shop\.example\/sitemap\.xml/);
+  const map = await app.inject({ method: 'GET', url: '/sitemap.xml', headers: { host: 'shop.example' } });
+  assert.equal(map.statusCode, 200);
+  assert.match(map.headers['content-type'], /xml/);
+  assert.match(map.body, /<loc>http:\/\/shop\.example\/products\/liver-booster<\/loc><lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/);
+  assert.match(map.body, /\/concerns\/liver</); assert.match(map.body, /\/journal\/liver-the-silent-worker</); assert.match(map.body, /\/policies\/privacy</);
+  assert.ok(!/admin|checkout|account/.test(map.body));
+});
