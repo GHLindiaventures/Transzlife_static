@@ -10,6 +10,7 @@
     "dev": "vite",
     "build": "vite build && node scripts/copy-dist.js",
     "preview": "vite preview",
+    "gallery": "node scripts/gallery/build-gallery.mjs",
     "start": "node --env-file-if-exists=.env server/index.js",
     "gemini-bot": "cd gemini-bot && npm start"
   },

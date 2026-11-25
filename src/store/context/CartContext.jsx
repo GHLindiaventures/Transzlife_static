@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
-import { getProduct, PACKS } from '../data/products';
+import { getProduct, onSale, PACKS } from '../data/products';
 import { SITE } from '../data/site';
 
 const CartContext = createContext(null);
@@ -9,7 +9,7 @@ function load() {
   try {
     const raw = localStorage.getItem(KEY);
     const parsed = raw ? JSON.parse(raw) : [];
-    return Array.isArray(parsed) ? parsed.filter((l) => getProduct(l.id)) : [];
+    return Array.isArray(parsed) ? parsed.filter((l) => onSale(getProduct(l.id))) : [];
   } catch {
     return [];
   }
@@ -35,6 +35,7 @@ export function CartProvider({ children }) {
   }, [lines]);
 
   const add = useCallback((id, qty = 1, pack = 1, { openDrawer = true } = {}) => {
+    if (!onSale(getProduct(id))) return; // no confirmed price yet
     setLines((prev) => {
       const key = `${id}:${pack}`;
       const found = prev.find((l) => l.key === key);

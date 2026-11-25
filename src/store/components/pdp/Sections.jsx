@@ -7,7 +7,7 @@ import { INGREDIENT_TYPES, getIngredientImg } from '../../data/ingredients';
 const SHOW = 6; // ingredients shown on phones before "show all"
 
 /** Key ingredients: compact 2-up tiles on phones (first 6, then "show all"), 4-up on desktop. */
-export function IngredientGrid({ ings }) {
+export function IngredientGrid({ ings, amounts }) {
   const [all, setAll] = useState(false);
   const extra = ings.length - SHOW;
   return (
@@ -42,7 +42,9 @@ export function IngredientGrid({ ings }) {
                       <strong>{ing.name}</strong>
                       <small>{ing.alt}</small>
                     </span>
-                    <span className="ing2__type" style={{ '--c': t.color }} title={t.label}>{t.label.split(' ')[0]}</span>
+                    {amounts?.[ing.id]
+                      ? <span className="ing2__type ing2__amt" style={{ '--c': t.color }} title="Amount per serving, as printed on the pack">{amounts[ing.id]}</span>
+                      : <span className="ing2__type" style={{ '--c': t.color }} title={t.label}>{t.label.split(' ')[0]}</span>}
                   </Link>
                 </TooltipTrigger>
                 <TooltipContent side="top" sideOffset={8} className="tip">{ing.note}</TooltipContent>

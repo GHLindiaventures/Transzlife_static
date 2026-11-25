@@ -330,19 +330,20 @@ export default function Featured({ headline = PRODUCTS_SECTION.headline, sub = P
         )}
       </div>
       {isSlider && (
-        <div className="featured__progress" aria-hidden="true">
-          <span
-            style={{
-              width: `${(1 / COUNT) * 100}%`,
-              left: `${(activeIdx / COUNT) * 100}%`,
-              transition: 'left 0.35s ease-out',
-            }}
-          />
-        </div>
-      )}
-      {isSlider && (
-        <div className="featured__all">
-          <Link className="link-btn link-btn--dark" to="/products"><Slot className="slot--link">View all</Slot></Link>
+        /* progress line and "View all" share one row inside the carousel frame */
+        <div className="featured__foot">
+          <div className="featured__progress" aria-hidden="true">
+            <span
+              style={{
+                width: `${(1 / COUNT) * 100}%`,
+                left: `${(activeIdx / COUNT) * 100}%`,
+                transition: 'left 0.35s ease-out',
+              }}
+            />
+          </div>
+          <div className="featured__all">
+            <Link className="link-btn link-btn--dark" to="/products"><Slot className="slot--link">View all</Slot></Link>
+          </div>
         </div>
       )}
     </section>
