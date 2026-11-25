@@ -89,7 +89,7 @@ function Kpis({ a }) {
   );
 }
 
-function ChartCard({ title, sub, legend, table, children }) {
+export function ChartCard({ title, sub, legend, table, children }) {
   const [asTable, setAsTable] = useState(false);
   return (
     <section className="adm-card">
@@ -103,7 +103,7 @@ function ChartCard({ title, sub, legend, table, children }) {
   );
 }
 
-const Tip = ({ active, payload, label, rows }) => {
+export const Tip = ({ active, payload, label, rows }) => {
   if (!active || !payload?.length) return null;
   const d = payload[0].payload;
   return <div className="adm-tip"><b>{label}</b>{rows(d).map(([name, v, color]) => <div key={name}><span>{color && <i style={{ background: color }} />}{name}</span><strong>{v}</strong></div>)}</div>;
@@ -176,7 +176,7 @@ function Products({ a }) {
   );
 }
 
-function BarList({ title, sub, rows, empty = 'No data in this period.', muted }) {
+export function BarList({ title, sub, rows, empty = 'No data in this period.', muted }) {
   const max = Math.max(1, ...rows.map((r) => r.value));
   return (
     <section className="adm-card">

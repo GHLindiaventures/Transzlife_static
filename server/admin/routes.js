@@ -12,6 +12,9 @@ import returnRoutes from './returns.js';
 import analyticsRoutes from './analytics.js';
 import customerRoutes from './customers.js';
 import complianceRoutes from './compliance.js';
+import trafficRoutes from './traffic.js';
+import adminReviewRoutes from './reviews.js';
+import { refreshRating } from '../shop/reviews.js';
 import { restoreStock } from '../shop/batches.js';
 
 const PAGE = 25;
@@ -39,7 +42,7 @@ const like = (s) => `%${String(s).replace(/[%_\\]/g, (c) => '\\' + c)}%`;
 const staffOut = (s) => ({ id: s.id, email: s.email, name: s.name, role: s.role, mustChangePassword: s.must_change_password,
   totpEnabled: s.totp_enabled, permissions: permsOf(s.role) });
 
-export default async function adminRoutes(app, { db, razorpay, twilio, notifier, auth: authInfo, log, env }) {
+export default async function adminRoutes(app, { db, razorpay, twilio, notifier, reminders, presence, auth: authInfo, log, env }) {
   const auth = createAdminAuth({ db, env });
   const G = (perm, opts) => ({ preHandler: auth.guard(perm, opts) });
   const tight = (max) => ({ config: { rateLimit: { max, timeWindow: '15 minutes' } } });
@@ -382,6 +385,16 @@ export default async function adminRoutes(app, { db, razorpay, twilio, notifier,
       await t.query(`UPDATE customers SET name = 'Deleted customer', email = NULL, phone = 'deleted:' || id::text, marketing_consent = false, deleted_at = now() WHERE id = $1`, [id]);
       await t.query('DELETE FROM addresses WHERE customer_id = $1', [id]);
       await t.query('DELETE FROM sessions WHERE customer_id = $1', [id]);
+      // browsing history, carts, wishlist and reminders go too (visits / events / carts cascade from visitors)
+      await t.query('DELETE FROM events WHERE customer_id = $1', [id]);
+      await t.query('DELETE FROM visitors WHERE customer_id = $1', [id]);
+      await t.query('DELETE FROM carts WHERE customer_id = $1', [id]);
+      await t.query('DELETE FROM wishlists WHERE customer_id = $1', [id]);
+      await t.query('DELETE FROM marketing_messages WHERE customer_id = $1', [id]);
+      // their reviews go too (photos are removed from the reviews; ratings are recalculated)
+      const reviewed = (await t.query('DELETE FROM reviews WHERE customer_id = $1 RETURNING product_id', [id])).rows;
+      await t.query('DELETE FROM review_media WHERE customer_id = $1', [id]);
+      for (const r of reviewed) await refreshRating(t.query, r.product_id);
       await audit(t.query, req, 'customer.delete', 'customer', id, { phone: c.phone.replace(/\d(?=\d{4})/g, '•') }, null);
       return { ok: true };
     });
@@ -480,9 +493,17 @@ export default async function adminRoutes(app, { db, razorpay, twilio, notifier,
       free_shipping_above: z.number().int().min(0).max(10_000_000).optional(),   // paise
       shipping_fee: z.number().int().min(0).max(1_000_000).optional(),           // paise
       prepaid_discount_pct: z.number().min(0).max(50).optional(),
+      reminders_cart: z.boolean().optional(),
+      reminders_reorder: z.boolean().optional(),
+      cart_reminder_hours: z.number().int().min(1).max(72).optional(),
+      reorder_days: z.number().int().min(7).max(120).optional(),
+      review_requests: z.boolean().optional(),
+      review_request_days: z.number().int().min(2).max(60).optional(),
     }), req.body, reply); if (!body) return;
     const before = await loadSettings(db.query);
-    for (const [k, v] of Object.entries(body)) await db.query('UPDATE settings SET value = $2 WHERE key = $1', [k, JSON.stringify(v)]);
+    for (const [k, v] of Object.entries(body)) {
+      await db.query('INSERT INTO settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value', [k, JSON.stringify(v)]);
+    }
     await audit(db.query, req, 'settings.update', 'settings', null, Object.fromEntries(Object.keys(body).map((k) => [k, before[k]])), body);
     return { settings: await loadSettings(db.query) };
   });
@@ -494,6 +515,7 @@ export default async function adminRoutes(app, { db, razorpay, twilio, notifier,
     twilio: await twilio.status(),
     signInCodes: authInfo.mode,
     orderMessages: notifier.channel,
+    reminders: reminders?.channel ?? 'off',
     razorpay: razorpay.enabled,
   }));
 
@@ -518,6 +540,8 @@ export default async function adminRoutes(app, { db, razorpay, twilio, notifier,
   await analyticsRoutes(app, { db, G });
   await customerRoutes(app, { db, G, parse, audit });
   await complianceRoutes(app, { db, G, parse, audit, env, log });
+  await trafficRoutes(app, { db, G, parse, audit, reminders });
+  await adminReviewRoutes(app, { db, G, parse, audit, env, log, presence });
 
   app.setErrorHandler((err, req, reply) => {
     if (err.status && err.status < 500) return reply.code(err.status).send({ error: err.message, code: err.code || 'error' });

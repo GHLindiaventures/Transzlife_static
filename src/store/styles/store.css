@@ -65,7 +65,7 @@
 .tl-store:not(#tl-a):not(#tl-b) a { color: inherit; text-decoration: none; }
 .tl-store:not(#tl-a):not(#tl-b) button { font: inherit; color: inherit; cursor: pointer; background: none; border: 0; padding: 0; }
 .tl-store:not(#tl-a):not(#tl-b) input, .tl-store:not(#tl-a):not(#tl-b) select, .tl-store:not(#tl-a):not(#tl-b) textarea { font: inherit; color: inherit; }
-.tl-store:not(#tl-a):not(#tl-b) h1, .tl-store:not(#tl-a):not(#tl-b) h2, .tl-store:not(#tl-a):not(#tl-b) h3, .tl-store:not(#tl-a):not(#tl-b) h4 { font-family: var(--f-head); font-weight: 600; line-height: 1.128; margin: 0 0 .382em; color: var(--forest); letter-spacing: -.012em; }
+.tl-store:not(#tl-a):not(#tl-b) h1, .tl-store:not(#tl-a):not(#tl-b) h2, .tl-store:not(#tl-a):not(#tl-b) h3, .tl-store:not(#tl-a):not(#tl-b) h4 { font-family: var(--f-head); font-weight: 500; font-optical-sizing: auto; line-height: 1.128; margin: 0 0 .382em; color: var(--forest); letter-spacing: -.012em; }
 /* φ scale, fluid between the step below and the step itself */
 .tl-store:not(#tl-a):not(#tl-b) h1 { font-size: clamp(var(--t-xl), 5vw, var(--t-3xl)); }
 .tl-store:not(#tl-a):not(#tl-b) h2 { font-size: clamp(var(--t-lg), 3.4vw, var(--t-2xl)); }
@@ -1832,3 +1832,21 @@
   .tl-store:not(#tl-a):not(#tl-b) .read2:hover { transform: none; }
   .tl-store:not(#tl-a):not(#tl-b) .read2:hover .read2__img img { transform: none; }
 }
+
+/* ---- Price display: smaller raised ₹, lining equal-width digits, honest offers ---- */
+.tl-store:not(#tl-a):not(#tl-b) .money { font-variant-numeric: lining-nums tabular-nums; white-space: nowrap; }
+.tl-store:not(#tl-a):not(#tl-b) .money__sym { font-family: var(--f-body); font-size: .6em; font-weight: 600; vertical-align: .45em; margin-right: .1em; letter-spacing: 0; }
+.tl-store:not(#tl-a):not(#tl-b) .price strong { font-family: var(--f-head); font-weight: 500; font-size: 1.25rem; letter-spacing: -.01em; }
+.tl-store:not(#tl-a):not(#tl-b) .price s .money__sym { vertical-align: baseline; font-size: 1em; margin: 0; }
+.tl-store:not(#tl-a):not(#tl-b) .pcard__pricing { display: grid; gap: 2px; min-width: 0; }
+.tl-store:not(#tl-a):not(#tl-b) .pcard__deal { margin: 0; font-size: .74rem; line-height: 1.35; color: var(--text-2); }
+.tl-store:not(#tl-a):not(#tl-b) .pcard__deal .money { font-weight: 700; color: var(--forest); }
+.tl-store:not(#tl-a):not(#tl-b) .pcard__deal .money__sym { font-size: 1em; vertical-align: baseline; margin: 0; }
+.tl-store:not(#tl-a):not(#tl-b) .pdp__price strong { font-weight: 450; font-size: 2.3rem; letter-spacing: -.015em; line-height: 1; }
+.tl-store:not(#tl-a):not(#tl-b) .pdp__tax:has(+ .pdp__prepaid) { margin-bottom: 10px; }
+.tl-store:not(#tl-a):not(#tl-b) .pdp__prepaid { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; margin: 0 0 18px; padding: 10px 14px; border-radius: 12px; background: var(--leaf-soft); color: var(--forest); font-size: .95rem; font-weight: 700; }
+.tl-store:not(#tl-a):not(#tl-b) .pdp__prepaid .money__sym { font-size: 1em; vertical-align: baseline; margin: 0; }
+.tl-store:not(#tl-a):not(#tl-b) .pdp__prepaid > span:not(.money) { font-size: .8rem; font-weight: 500; color: var(--text-2); }
+.tl-store:not(#tl-a):not(#tl-b) .pack span .money__sym { font-size: .7em; vertical-align: .3em; }
+.tl-store:not(#tl-a):not(#tl-b) .pack__save { font-style: normal; font-size: .72rem; font-weight: 700; color: var(--forest-2); }
+.tl-store:not(#tl-a):not(#tl-b) .cart__prepaid { margin: 0 0 8px; padding: 8px 12px; border-radius: 10px; background: var(--leaf-soft); color: var(--forest); font-size: .84rem; }

@@ -3,6 +3,8 @@ import { api } from '../../store/lib/api';
 import { ErrorBox, Loading, Notice, PageHead, Pager, can, dt, rs, toPaise, useAction, useAdmin, useApi } from '../ui';
 
 const ACTIONS = {
+  'review.approve': 'Published review', 'review.reject': 'Rejected review', 'review.remove': 'Removed review', 'review.reply': 'Replied to review',
+  'customer.cart_reminder': 'Sent cart reminder', 'customer.reorder_reminder': 'Sent refill reminder',
   'staff.login': 'Signed in', 'staff.password_change': 'Changed own password', 'staff.2fa_enabled': 'Turned on 2FA',
   'staff.create': 'Added staff member', 'staff.update': 'Changed staff member', 'staff.reset_password': 'Reset staff password', 'staff.reset_2fa': 'Reset staff 2FA',
   'order.status': 'Changed order status', 'order.refund': 'Refunded order', 'order.note': 'Edited order note', 'orders.export': 'Exported orders (CSV)',
@@ -87,6 +89,7 @@ export function SettingsPage() {
             </form>
           )}
         </section>
+        <Reminders s={s} owner={owner} reload={reload} />
         <section className="adm-card">
           <h2 className="adm-h2">Your password</h2>
           <form className="adm-form" onSubmit={changePw}>
@@ -100,6 +103,38 @@ export function SettingsPage() {
         </section>
       </div>
     </>
+  );
+}
+
+/** Automatic cart / refill reminders (only to customers who agreed; 9 am to 9 pm India time). */
+function Reminders({ s, owner, reload }) {
+  const act = useAction();
+  const { data } = useApi('/api/admin/integrations');
+  const save = async (e) => {
+    e.preventDefault();
+    const f = Object.fromEntries(new FormData(e.currentTarget));
+    const body = { reminders_cart: f.cart === 'on', reminders_reorder: f.reorder === 'on', cart_reminder_hours: Number(f.hours), reorder_days: Number(f.days),
+      review_requests: f.review === 'on', review_request_days: Number(f.rdays) };
+    if (await act.run(() => api('/api/admin/settings', { method: 'PATCH', body }), 'Reminder settings saved.')) reload();
+  };
+  return (
+    <section className="adm-card">
+      <h2 className="adm-h2">Cart, refill & review reminders</h2>
+      {!s ? <Loading /> : (
+        <form className="adm-form" onSubmit={save}>
+          <p className="adm-muted">Sent by {data?.reminders === 'whatsapp' ? 'WhatsApp' : data?.reminders === 'sms' ? 'SMS' : 'SMS / WhatsApp (not set up yet)'} only to customers who ticked
+            "Remind me" at checkout or in their account, between 9 am and 9 pm, at most once per cart or order. Staff can also send one from Visitors & carts or a customer's page.</p>
+          <label className="adm-check"><input type="checkbox" name="cart" defaultChecked={!!s.reminders_cart} disabled={!owner} /> Remind signed-in customers about items left in their cart</label>
+          <label>…after this many hours without an order<input name="hours" type="number" min="1" max="72" step="1" defaultValue={s.cart_reminder_hours ?? 4} disabled={!owner} required /></label>
+          <label className="adm-check"><input type="checkbox" name="reorder" defaultChecked={!!s.reminders_reorder} disabled={!owner} /> Refill reminder after their last order</label>
+          <label>…this many days after the order (how long a pack lasts)<input name="days" type="number" min="7" max="120" step="1" defaultValue={s.reorder_days ?? 30} disabled={!owner} required /></label>
+          <label className="adm-check"><input type="checkbox" name="review" defaultChecked={!!s.review_requests} disabled={!owner} /> Ask for a review after delivery (products not yet reviewed)</label>
+          <label>…this many days after delivery<input name="rdays" type="number" min="2" max="60" step="1" defaultValue={s.review_request_days ?? 7} disabled={!owner} required /></label>
+          <ErrorBox>{act.error}</ErrorBox><Notice>{act.notice}</Notice>
+          {owner ? <button className="adm-btn" disabled={act.busy}>Save</button> : <p className="adm-muted">Only an owner can change these.</p>}
+        </form>
+      )}
+    </section>
   );
 }
 

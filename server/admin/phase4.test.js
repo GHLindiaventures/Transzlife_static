@@ -33,7 +33,7 @@ after(async () => { await app.close(); });
 
 test('ingredient library: seeded from the site, edit, hide, add, delete rules', async () => {
   const pub = (await call('GET', '/api/ingredients', undefined, '')).body.ingredients;
-  assert.equal(pub.length, 34);
+  assert.equal(pub.length, 35);   // per the client product document (Nov 2026)
   assert.equal(pub.find((g) => g.id === 'tulsi').latin, 'Ocimum sanctum');
   const admin = (await call('GET', '/api/admin/ingredients')).body.ingredients;
   assert.ok(admin.find((g) => g.id === 'tulsi').used_in.some((p) => p.id === 'pulmoclear-gummies'), 'shows which products use it');

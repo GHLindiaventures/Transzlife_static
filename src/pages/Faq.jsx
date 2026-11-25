@@ -142,7 +142,7 @@ export default function Faq() {
                       }}
                     >
                       <Slot className="slot--q-num" style={{ fontWeight: 800, color: 'var(--green-700, #1a6b3c)' }}>{`${i + 1}.`}</Slot>
-                      <Slot className="slot--q" style={{ fontFamily: 'Syne, sans-serif', fontSize: '15px', fontWeight: 700, color: 'var(--green-950, #08261a)', flex: 1 }}>{item.q}</Slot>
+                      <Slot className="slot--q" style={{ fontFamily: 'Manrope, system-ui, sans-serif', fontSize: '15px', fontWeight: 700, color: 'var(--green-950, #08261a)', flex: 1 }}>{item.q}</Slot>
                       <span className="faq__plus" aria-hidden="true" style={{ fontSize: '20px', fontWeight: 300, color: 'var(--green-700, #1a6b3c)' }}></span>
                     </button>
                     {isOpen && (

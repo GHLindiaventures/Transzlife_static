@@ -1,5 +1,6 @@
 import { forwardRef, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { openConsent } from '../store/lib/track.js';
 import { BRAND, CONTACT, FOOTER, SOCIAL_LINKS } from '../content/site.js';
 import '../styles/footer.css';
 
@@ -215,6 +216,7 @@ const Footer = forwardRef(function Footer(_, ref) {
           {FOOTER.legal.length > 0 && (
             <nav className="ft-bottom__links" aria-label="Legal">
               {FOOTER.legal.map((l) => <Link key={l.label} to={l.to}>{l.label}</Link>)}
+              <button type="button" className="ft-privacy-btn" onClick={openConsent}>Privacy choices</button>
             </nav>
           )}
         </div>

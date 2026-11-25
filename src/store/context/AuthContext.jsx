@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { api } from '../lib/api';
+import { mergeWishlist } from '../lib/wishlist';
 
 /** Who is signed in. `customer` is null when signed out; `ready` is false until the first check. */
 const AuthContext = createContext(null);
@@ -22,6 +23,10 @@ export function AuthProvider({ children }) {
   }, []);
 
   useEffect(() => { refresh(); }, [refresh]);
+
+  // signed in (on load or just now): bring this browser's favourites into the account
+  const signedInPhone = customer?.phone;
+  useEffect(() => { if (signedInPhone) mergeWishlist(); }, [signedInPhone]);
 
   const logout = useCallback(async () => {
     try { await api('/api/auth/logout', { method: 'POST', body: {} }); } catch { /* signed out locally anyway */ }

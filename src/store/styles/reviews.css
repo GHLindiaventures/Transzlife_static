@@ -1,0 +1,26 @@
+/* Verified reviews additions (Reviews.jsx, ProductCard.jsx). Same selector prefix as store.css. */
+.tl-store:not(#tl-a):not(#tl-b) .rv-card__date { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+.tl-store:not(#tl-a):not(#tl-b) .rv-verified { display: inline-flex; align-items: center; gap: 4px; color: var(--forest); font-weight: 700; }
+.tl-store:not(#tl-a):not(#tl-b) .rv-reply {
+  display: flex; gap: 10px; margin: 12px 0 4px; padding: 10px 12px; border-radius: 12px;
+  background: var(--leaf-soft, #eef4ea); color: var(--text); font-size: .9rem;
+}
+.tl-store:not(#tl-a):not(#tl-b) .rv-reply svg { flex: none; margin-top: 2px; color: var(--forest); }
+.tl-store:not(#tl-a):not(#tl-b) .rv-reply strong { display: block; font-size: .82rem; color: var(--forest); }
+.tl-store:not(#tl-a):not(#tl-b) .rv-reply p { margin: 2px 0 0; }
+.tl-store:not(#tl-a):not(#tl-b) .rv-pending {
+  display: flex; align-items: center; gap: 8px; margin: 0 0 18px; padding: 10px 14px; border-radius: 12px;
+  background: #fdf6e3; color: #6b4e0e; font-weight: 600; font-size: .92rem;
+}
+.tl-store:not(#tl-a):not(#tl-b) .rv-note { margin: 0; font-size: .9rem; color: var(--text-2); }
+.tl-store:not(#tl-a):not(#tl-b) .rv-prev__busy { display: grid; place-items: center; width: 100%; height: 100%; color: var(--forest); }
+.tl-store:not(#tl-a):not(#tl-b) .spin { animation: rv-spin 1s linear infinite; }
+@keyframes rv-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .tl-store:not(#tl-a):not(#tl-b) .spin { animation: none; } }
+
+/* product card rating */
+.tl-store:not(#tl-a):not(#tl-b) .pcard__rating {
+  display: inline-flex; align-items: center; gap: 5px; margin: 2px 0 4px; font-size: .82rem; color: var(--text-2); text-decoration: none;
+}
+.tl-store:not(#tl-a):not(#tl-b) .pcard__rating strong { color: var(--ink); font-variant-numeric: tabular-nums; }
+.tl-store:not(#tl-a):not(#tl-b) .pcard__rating:hover span { text-decoration: underline; }

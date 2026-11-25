@@ -4,9 +4,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import {
   Home, Package, Boxes, Users, CreditCard, UserCog, History, Settings, LogOut, Menu, X, ShieldCheck,
-  Search, Bell, Moon, Sun, MoreHorizontal, ArrowRight, User, CheckCircle2, Undo2, BarChart3, Sprout, ShieldCheck as Shield,
+  Search, Bell, Moon, Sun, MoreHorizontal, Activity as ActivityIcon, ArrowRight, User, CheckCircle2, Undo2, BarChart3, Sprout, Star, ShieldCheck as Shield,
 } from 'lucide-react';
 import { api } from '../store/lib/api';
+import { markStaffBrowser } from '../store/lib/track';
 import { AdminContext, can, ErrorBox, initials, rs, useAdmin, useTheme, STATUS } from './ui';
 import Dashboard from './pages/Dashboard';
 import { OrderList, OrderDetail, PrintSlips } from './pages/Orders';
@@ -16,6 +17,8 @@ import { CustomerList, CustomerDetail } from './pages/Customers';
 import Payments from './pages/Payments';
 import Returns from './pages/Returns';
 import Analytics from './pages/Analytics';
+import Visitors from './pages/Visitors';
+import ReviewsAdmin from './pages/ReviewsAdmin';
 import Ingredients from './pages/Ingredients';
 import Compliance from './pages/Compliance';
 import Staff from './pages/Staff';
@@ -26,7 +29,7 @@ export default function AdminApp() {
   const [staff, setStaff] = useState(undefined);       // undefined = checking, null = signed out
   const [theme, toggleTheme] = useTheme();
   const refresh = useCallback(async () => {
-    try { const r = await api('/api/admin/auth/me'); setStaff(r.staff); return r.staff; }
+    try { const r = await api('/api/admin/auth/me'); setStaff(r.staff); if (r.staff) markStaffBrowser(); return r.staff; }
     catch { setStaff(null); return null; }
   }, []);
   const logout = useCallback(async () => {
@@ -66,6 +69,8 @@ export default function AdminApp() {
                     <Route path="payments" element={<Payments />} />
                     <Route path="returns" element={<Returns />} />
                     <Route path="analytics" element={<Analytics />} />
+                    <Route path="visitors" element={<Visitors />} />
+                    <Route path="reviews" element={<ReviewsAdmin />} />
                     <Route path="ingredients" element={<Ingredients />} />
                     <Route path="compliance" element={<Compliance />} />
                     {can(staff, 'staff') && <Route path="staff" element={<Staff />} />}
@@ -84,11 +89,11 @@ export default function AdminApp() {
 
 /** Live counts for the sidebar badges and the bell (refreshed every minute and on page change). */
 function useLive() {
-  const [live, setLive] = useState({ counts: {}, alerts: [], returns: 0 });
+  const [live, setLive] = useState({ counts: {}, alerts: [], returns: 0, reviews: 0 });
   const location = useLocation();
   const load = useCallback(() => {
-    Promise.all([api('/api/admin/orders/counts'), api('/api/admin/alerts'), api('/api/admin/returns/counts')])
-      .then(([c, a, r]) => setLive({ counts: c.counts, alerts: a.items, returns: r.counts.open })).catch(() => {});
+    Promise.all([api('/api/admin/orders/counts'), api('/api/admin/alerts'), api('/api/admin/returns/counts'), api('/api/admin/reviews/counts')])
+      .then(([c, a, r, v]) => setLive({ counts: c.counts, alerts: a.items, returns: r.counts.open, reviews: v.pending })).catch(() => {});
   }, []);
   useEffect(() => { load(); const t = setInterval(load, 60_000); return () => clearInterval(t); }, [load]);
   useEffect(() => { load(); }, [location.pathname, load]);
@@ -119,8 +124,8 @@ function Shell({ children }) {
   const groups = [
     [null, [['/admin', 'Home', Home, { end: true }]]],
     ['Sell', [['/admin/orders', 'Orders', Package, { count: toPack, title: `${toPack} to pack` }], ['/admin/returns', 'Returns', Undo2, { count: live.returns, title: `${live.returns} open returns` }], ['/admin/payments', 'Payments', CreditCard]]],
-    ['Catalog', [['/admin/products', 'Products & stock', Boxes], ['/admin/ingredients', 'Ingredients', Sprout], ['/admin/compliance', 'Licences & certificates', Shield]]],
-    ['Insights', [['/admin/analytics', 'Analytics', BarChart3]]],
+    ['Catalog', [['/admin/products', 'Products & stock', Boxes], ['/admin/reviews', 'Reviews', Star, { count: live.reviews, title: `${live.reviews} waiting for a check` }], ['/admin/ingredients', 'Ingredients', Sprout], ['/admin/compliance', 'Licences & certificates', Shield]]],
+    ['Insights', [['/admin/analytics', 'Sales analytics', BarChart3], ['/admin/visitors', 'Visitors & carts', ActivityIcon]]],
     ['People', [['/admin/customers', 'Customers', Users], can(staff, 'staff') && ['/admin/staff', 'Staff', UserCog]]],
     ['Account', [['/admin/activity', 'Activity log', History], ['/admin/settings', 'Settings', Settings]]],
   ];

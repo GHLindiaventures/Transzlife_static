@@ -134,7 +134,7 @@ export function createAuth({ db, env, log, twilio }) {
     const token = req.cookies?.[SESSION_COOKIE];
     if (!token || token.length > 100) return;
     const row = (await db.query(
-      `SELECT s.id AS session_id, s.last_seen_at, c.id, c.phone, c.name, c.email
+      `SELECT s.id AS session_id, s.last_seen_at, c.id, c.phone, c.name, c.email, c.marketing_consent
          FROM sessions s JOIN customers c ON c.id = s.customer_id
         WHERE s.token_hash = $1 AND s.expires_at > now()`, [sha256(token)])).rows[0];
     if (!row) return;

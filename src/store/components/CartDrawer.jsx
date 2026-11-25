@@ -5,7 +5,7 @@ import { useCart } from '../context/CartContext';
 import { PRODUCTS } from '../data/products';
 import { useCatalog } from '../lib/catalog';
 import { SITE } from '../data/site';
-import { inr } from '../utils/format';
+import { inr, prepaidSaving } from '../utils/format';
 
 export function QtyStepper({ value, onChange, small }) {
   useCatalog();
@@ -23,7 +23,7 @@ export function FreeShipBar({ toFree, subtotal }) {
   const pct = Math.min(100, (subtotal / SITE.freeShippingAbove) * 100);
   return (
     <div className="shipbar">
-      <p><Truck size={16} /> {toFree > 0 ? <>Add <strong>{inr(toFree)}</strong> more for <strong>free shipping</strong></> : <>You have unlocked <strong>free shipping</strong></>}</p>
+      <p><Truck size={16} /> {toFree > 0 ? <>Add <strong>{inr(toFree)}</strong> more for <strong>free shipping</strong></> : <>You've unlocked <strong>free shipping</strong></>}</p>
       <div className="shipbar__track"><span style={{ width: `${pct}%` }} /></div>
     </div>
   );
@@ -98,6 +98,9 @@ export default function CartDrawer() {
             <div className="cart__foot">
               {savings > 0 && <p className="cart__save">You save {inr(savings)} on this order</p>}
               <div className="cart__total"><span>Subtotal</span><strong>{inr(subtotal)}</strong></div>
+              {SITE.prepaidDiscount > 0 && prepaidSaving(subtotal, SITE.prepaidDiscount) > 0 && (
+                <p className="cart__prepaid">Pay online at checkout and save another <strong>{inr(prepaidSaving(subtotal, SITE.prepaidDiscount))}</strong></p>
+              )}
               <small>Taxes included. Shipping calculated at checkout.</small>
               <button className="btn btn--block btn--lg" onClick={() => { setOpen(false); navigate('/checkout'); }}>Checkout securely</button>
               <button className="link-btn" onClick={() => { setOpen(false); navigate('/cart'); }}>View full cart</button>

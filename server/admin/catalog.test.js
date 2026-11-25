@@ -39,7 +39,7 @@ test('public catalogue: content copied from the site, prices in rupees, no exact
   assert.equal(r.headers['cache-control'], 'no-cache');
   const liver = r.body.products.find((p) => p.id === 'liver-booster');
   assert.equal(liver.price, 900);
-  assert.ok(liver.faqs.length >= 3 && liver.ingredients.includes('milk-thistle'));
+  assert.ok(liver.faqs.length >= 3 && liver.ingredients.includes('daruharidra'));
   assert.deepEqual(liver.images, ['/img/p/liver.webp']);
   assert.equal(liver.stock, 'in');
   assert.equal(liver.available, undefined, 'exact stock is never public');

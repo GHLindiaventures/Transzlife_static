@@ -52,7 +52,7 @@
   position: relative;
   margin: clamp(4px, 0.8vh, 10px) 0;
   will-change: transform, opacity;}
-.it-plain{font-family: 'Cormorant Garamond', Georgia, serif;
+.it-plain{font-family: 'Fraunces', Georgia, serif;
   font-size: clamp(2.2rem, 5.2vw, 5.2rem);
   font-weight: 500;
   font-style: normal;
@@ -61,7 +61,7 @@
   vertical-align: baseline;}
 .it-word.it-roots{position: relative;
   display: inline-block;
-  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-family: 'Fraunces', Georgia, serif;
   font-style: italic;
   font-weight: 600;
   font-size: clamp(2.3rem, 5.4vw, 5.5rem);
@@ -94,7 +94,7 @@
   filter: drop-shadow(0 2px 8px rgba(62, 148, 79, 0.28));
   animation: leafSway 7s ease-in-out infinite alternate;
   vertical-align: middle;}
-.it-nature-text{font-family: 'Cormorant Garamond', Georgia, serif;
+.it-nature-text{font-family: 'Fraunces', Georgia, serif;
   font-size: clamp(2.5rem, 6.2vw, 6.4rem);
   font-weight: 700;
   font-style: italic;
@@ -160,7 +160,7 @@
   font-size: clamp(16px, 1.8vw, 24px);
   filter: drop-shadow(0 0 8px rgba(46, 184, 128, 0.6));
   animation: sciSparkPulse 2.8s ease-in-out infinite;}
-.it-comma{font-family: 'Cormorant Garamond', Georgia, serif;
+.it-comma{font-family: 'Fraunces', Georgia, serif;
   font-size: 1.05em;
   color: #1a3c20;
   margin-left: 2px;
@@ -188,7 +188,7 @@
   position: relative;
   margin-top: clamp(4px, 1vh, 12px);
   padding: 0 clamp(8px, 1.5vw, 18px);}
-.it-fl-text{font-family: 'Cormorant Garamond', Georgia, serif;
+.it-fl-text{font-family: 'Fraunces', Georgia, serif;
   font-style: italic;
   font-weight: 700;
   font-size: clamp(2.8rem, 6.8vw, 7.2rem);

@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Heart, Share2, Check } from 'lucide-react';
 import Stars from './Stars';
-import { getFavourites, toggleFavourite } from '../../data/reviewStore';
+import { getFavourites } from '../../data/reviewStore';
+import { toggleWishlist } from '../../lib/wishlist';
+import { shareUrl, track } from '../../lib/track';
+import { useAuth } from '../../context/AuthContext';
 
 /** Rating line under the product name: stars, average, count. Jumps to the reviews section. */
 export function RatingLine({ summary }) {
@@ -40,19 +43,22 @@ export function GalleryActions({ product }) {
     return () => clearTimeout(t);
   }, [flash]);
 
-  const onFav = () => {
-    const on = toggleFavourite(product.id);
+  const { customer } = useAuth();
+  const onFav = async () => {
+    const on = await toggleWishlist(product.id, !!customer);
     setFav(on);
     if (on) { setPop(true); setTimeout(() => setPop(false), 600); }
     setFlash(on ? 'Saved to your favourites' : 'Removed from favourites');
   };
 
   const onShare = async () => {
-    const url = window.location.href;
+    // ?ref=share lets us count visits that arrive through shared links
+    const url = shareUrl();
     const data = { title: product.name, text: `${product.name}: ${product.tagline}`, url };
     try {
-      if (navigator.share) { await navigator.share(data); return; }
+      if (navigator.share) { await navigator.share(data); track('share', { pid: product.id, method: 'native' }); return; }
       await navigator.clipboard.writeText(url);
+      track('share', { pid: product.id, method: 'copy_link' });
       setFlash('Link copied');
     } catch (err) {
       if (err?.name !== 'AbortError') setFlash('Could not share. Copy the link from the address bar.');

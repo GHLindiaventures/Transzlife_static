@@ -15,7 +15,7 @@
   --shadow: 0 1px 2px rgba(40, 35, 20, .05), 0 6px 18px -10px rgba(40, 35, 20, .18);
   --shadow-lg: 0 24px 60px -20px rgba(15, 40, 26, .35);
   --r: 16px; --r-sm: 10px;
-  --f-display: "Fraunces", "Cormorant Garamond", Georgia, serif;
+  --f-display: "Fraunces", Georgia, serif;
   --f-ui: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
   color-scheme: light;
   min-height: 100vh; background: var(--bg); color: var(--ink);
@@ -518,3 +518,6 @@ body.adm-body.adm-dark { background: #0d1410; }
 .adm-iphoto { display: grid; grid-template-columns: 120px 1fr; gap: 14px; align-items: center; }
 .adm-iphoto img { width: 120px; height: 120px; object-fit: contain; border-radius: 12px; background: var(--card-2); padding: 8px; }
 @media (max-width: 760px) { .adm-igrid { grid-template-columns: 1fr 1fr; gap: 10px; } }
+
+/* live indicator dot (Visitors > Right now) */
+.adm-livedot { display: inline-block; width: 9px; height: 9px; margin-right: 6px; border-radius: 50%; background: #2f9e57; box-shadow: 0 0 0 4px rgba(47, 158, 87, .18); vertical-align: 1px; }

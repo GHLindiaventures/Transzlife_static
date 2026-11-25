@@ -17,6 +17,7 @@
 //   POST   /api/webhooks/razorpay           Razorpay -> payment captured / failed
 import { z } from 'zod';
 import { PAYMENT_METHODS, quote, PricingError } from './pricing.js';
+import { attributeOrder } from './track.js';
 
 const phone = z.string().trim().regex(/^[6-9]\d{9}$/, 'Enter a valid 10-digit mobile number.');
 const item = z.object({ id: z.string().min(1).max(80), pack: z.number().int().min(1).max(12), qty: z.number().int().min(1).max(10) });
@@ -40,7 +41,7 @@ function parse(schema, data, reply) {
   return null;
 }
 
-const customerOut = (c) => c && { phone: c.phone, name: c.name, email: c.email };
+const customerOut = (c) => c && { phone: c.phone, name: c.name, email: c.email, marketingConsent: !!c.marketing_consent };
 
 export default async function shopRoutes(app, { db, auth, orders, razorpay, notifier, log }) {
   const signedIn = { preHandler: auth.requireCustomer };
@@ -73,10 +74,14 @@ export default async function shopRoutes(app, { db, auth, orders, razorpay, noti
     const body = parse(z.object({
       name: z.string().trim().min(2, 'Enter your full name.').max(80),
       email: z.union([email, z.literal('')]).optional(),
+      marketingConsent: z.boolean().optional(),
     }), req.body, reply); if (!body) return;
     const c = (await db.query(
-      `UPDATE customers SET name = $2, email = COALESCE(NULLIF($3, ''), email), updated_at = now() WHERE id = $1 RETURNING phone, name, email`,
-      [req.customer.id, body.name, body.email ?? ''])).rows[0];
+      `UPDATE customers SET name = $2, email = COALESCE(NULLIF($3, ''), email), updated_at = now(),
+              marketing_consent = COALESCE($4, marketing_consent),
+              marketing_consent_at = CASE WHEN $4 IS NULL THEN marketing_consent_at ELSE now() END
+        WHERE id = $1 RETURNING phone, name, email, marketing_consent`,
+      [req.customer.id, body.name, body.email ?? '', body.marketingConsent ?? null])).rows[0];
     return { customer: customerOut(c) };
   });
 
@@ -104,6 +109,8 @@ export default async function shopRoutes(app, { db, auth, orders, razorpay, noti
       email: z.union([email, z.literal('')]).optional(),
       saveAddress: z.boolean().optional().default(true),
       idempotencyKey: z.string().min(8).max(64),
+      marketingConsent: z.boolean().optional(),
+      track: z.object({ v: z.string().uuid(), s: z.string().uuid().optional() }).optional(),
     }), req.body, reply); if (!body) return;
     if (body.paymentMethod !== 'cod' && !razorpay.enabled) {
       return reply.code(400).send({ error: 'Online payments are not available yet. Please choose Cash on delivery.', code: 'payments_off' });
@@ -116,6 +123,10 @@ export default async function shopRoutes(app, { db, auth, orders, razorpay, noti
       // remember the email and (first time, or new) address for next time
       if (contactEmail && !c.email) await db.query('UPDATE customers SET email = $2 WHERE id = $1 AND email IS NULL', [c.id, contactEmail]);
       if (body.saveAddress) await saveAddress(c.id, body.address);
+      if (body.marketingConsent !== undefined) {
+        await db.query('UPDATE customers SET marketing_consent = $2, marketing_consent_at = now() WHERE id = $1', [c.id, body.marketingConsent]);
+      }
+      await attributeOrder(db, order, c.id, body.track).catch((e) => log?.warn?.(`[track] attribution failed: ${e.message}`));
       if (order.status === 'confirmed') notifier?.notify(order.id, 'confirmed');    // cash on delivery
     }
     const payment = order.status === 'pending_payment' ? await orders.startPayment(order, c) : null;

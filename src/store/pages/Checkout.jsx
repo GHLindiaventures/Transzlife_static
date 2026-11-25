@@ -10,6 +10,7 @@ import { getProduct } from '../data/products';
 import { useAuth } from '../context/AuthContext';
 import { api, newIdempotencyKey } from '../lib/api';
 import { getBuyNow, clearBuyNow } from '../lib/checkoutIntent';
+import { track, trackIds } from '../lib/track';
 import '../styles/account.css';
 
 function Summary({ compact, extra }) {
@@ -193,6 +194,9 @@ export function Checkout() {
   const [pending, setPending] = useState(null);     // { order, payment } when payment was interrupted
   const idemKey = useRef(newIdempotencyKey());
 
+  // funnel: reached checkout (once per visit to this page)
+  useEffect(() => { if (items.length) track('begin_checkout', { items: items.length, buyNow: !!buyNow }); }, []);   // eslint-disable-line react-hooks/exhaustive-deps
+
   // available payment methods + saved addresses
   useEffect(() => {
     api('/api/shop/config').then((c) => { setConfig(c); setPay((p) => p ?? (c.razorpay ? 'upi' : 'cod')); })
@@ -222,10 +226,11 @@ export function Checkout() {
   const runPayment = useCallback(async (order, payment) => {
     try {
       const result = await payWithRazorpay(payment, order.paymentMethod, order.number);
-      if (!result) { setPending({ order, payment }); setBusy(false); return; }
+      if (!result) { track('payment_failed', { method: order.paymentMethod, reason: 'closed' }); setPending({ order, payment }); setBusy(false); return; }
       const v = await api('/api/checkout/verify', { method: 'POST', body: { orderNumber: order.number, ...result } });
       finish(v.order);
     } catch (e) {
+      track('payment_failed', { method: order.paymentMethod, reason: 'error' });
       setError(e.message);
       setPending({ order, payment });
       setBusy(false);
@@ -253,10 +258,15 @@ export function Checkout() {
       ? { name: savedAddr.name, phone: savedAddr.phone, line1: savedAddr.line1, line2: savedAddr.line2 || '', city: savedAddr.city, state: savedAddr.state, pin: savedAddr.pin }
       : { name: form.name, phone: form.phone, line1: form.line1, line2: form.line2 || '', city: form.city, state: form.state, pin: form.pin };
     setBusy(true);
+    track('place_order_click', { method: pay });
     try {
       const r = await api('/api/checkout/place', {
         method: 'POST',
-        body: { items, paymentMethod: pay, address, email: form.email || '', saveAddress: !savedAddr, idempotencyKey: idemKey.current },
+        body: {
+          items, paymentMethod: pay, address, email: form.email || '', saveAddress: !savedAddr, idempotencyKey: idemKey.current,
+          ...(customer.marketingConsent ? {} : { marketingConsent: form.reminders === 'on' }),
+          track: trackIds(),
+        },
       });
       if (!r.payment) { finish(r.order); return; }          // cash on delivery
       await runPayment(r.order, r.payment);
@@ -305,6 +315,9 @@ export function Checkout() {
             <legend><span className="step-n">1</span> Contact</legend>
             <p className="auth-signed">Signed in as <strong>{customer.name}</strong> · +91 {customer.phone}</p>
             <label>Email for order updates{customer.email ? '' : ' (optional)'}<input name="email" type="email" autoComplete="email" defaultValue={customer.email || ''} /></label>
+            {!customer.marketingConsent && (
+              <label className="check-opt"><input type="checkbox" name="reminders" /> <span>Remind me on WhatsApp / SMS when it's time to restock, or if I leave items in my cart. <small>Optional. Stop any time.</small></span></label>
+            )}
           </fieldset>
 
           <fieldset className="form" disabled={!!pending}>
@@ -353,7 +366,7 @@ export function Checkout() {
                 const off = !!config && !methods.includes(id);
                 return (
                   <label key={id} className={`payopt ${pay === id ? 'is-active' : ''} ${off ? 'is-off' : ''}`}>
-                    <input type="radio" name="pay" value={id} checked={pay === id} disabled={off} onChange={() => setPay(id)} />
+                    <input type="radio" name="pay" value={id} checked={pay === id} disabled={off} onChange={() => { setPay(id); track('checkout_payment', { method: id }); }} />
                     <I size={22} strokeWidth={1.6} />
                     <span><strong>{label}</strong><small>{off ? 'Coming soon' : sub}</small></span>
                     {pre && !off && quote?.prepaidDiscountPct > 0 && <em>{quote.prepaidDiscountPct}% off</em>}

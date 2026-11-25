@@ -56,11 +56,34 @@ export default async function customerRoutes(app, { db, G, parse, audit }) {
                  WHERE o.customer_id = $1 ORDER BY n.created_at DESC LIMIT 20`, [id]),
       db.query(`SELECT COALESCE(SUM(r.amount), 0)::bigint AS n FROM refunds r JOIN orders o ON o.id = r.order_id WHERE o.customer_id = $1 AND r.status <> 'failed'`, [id]),
     ]);
+    // browsing (only from browsers that accepted analytics), wishlist, open cart, reminders
+    const [visits, timeline, wishlist, cart, reminders, consent, settings] = await Promise.all([
+      db.query(`SELECT COUNT(*) AS visits, MIN(started_at) AS first_seen, MAX(last_at) AS last_seen, COALESCE(SUM(pages), 0) AS pages,
+                       (ARRAY_AGG(device ORDER BY started_at DESC))[1] AS device, (ARRAY_AGG(source ORDER BY started_at))[1] AS first_source
+                  FROM visits WHERE customer_id = $1`, [id]),
+      db.query(`SELECT e.name, e.path, e.product_id, p.name AS product, e.props, e.created_at FROM events e LEFT JOIN products p ON p.id = e.product_id
+                 WHERE e.customer_id = $1 AND (e.name <> 'page_view' OR e.product_id IS NOT NULL) ORDER BY e.created_at DESC LIMIT 30`, [id]),
+      db.query('SELECT w.product_id AS id, p.name, w.created_at FROM wishlists w JOIN products p ON p.id = w.product_id WHERE w.customer_id = $1 ORDER BY w.created_at DESC', [id]),
+      db.query(`SELECT id, items, item_count, value, updated_at, checkout_at, reminded_at FROM carts WHERE customer_id = $1 AND item_count > 0 AND order_id IS NULL
+                 ORDER BY updated_at DESC LIMIT 1`, [id]),
+      db.query('SELECT kind, channel, status, staff_email, created_at FROM marketing_messages WHERE customer_id = $1 ORDER BY created_at DESC LIMIT 10', [id]),
+      db.query('SELECT marketing_consent, marketing_consent_at FROM customers WHERE id = $1', [id]),
+      db.query(`SELECT value FROM settings WHERE key = 'reorder_days'`),
+    ]);
+    const reviews = (await db.query(`SELECT r.id, r.product_id, p.name AS product, r.rating, r.title, r.status, r.created_at FROM reviews r JOIN products p ON p.id = r.product_id
+                                     WHERE r.customer_id = $1 ORDER BY r.created_at DESC`, [id])).rows;
+    const v = visits.rows[0];
+    const reorderDays = Number(settings.rows[0]?.value ?? 30) || 30;
+    const openCart = cart.rows[0] ? { ...cart.rows[0], value: Number(cart.rows[0].value), items: typeof cart.rows[0].items === 'string' ? JSON.parse(cart.rows[0].items) : cart.rows[0].items } : null;
     const c = out(s);
     return {
       customer: { id: c.id, name: c.name, phone: c.phone, email: c.email, created_at: c.created_at, last_login_at: c.last_login_at, deleted_at: c.deleted_at },
       stats: { orders: c.orders, spent: c.spent, aov: c.orders ? Math.round(c.spent / c.orders) : 0, first_order: c.first_order, last_order: c.last_order,
         refunded: Number(refunds.rows[0].n), returns: returns.rows.filter((r) => r.status !== 'rejected').length, city: c.city },
+      activity: { visits: Number(v.visits), pages: Number(v.pages), firstSeen: v.first_seen, lastSeen: v.last_seen, device: v.device, firstSource: v.first_source },
+      timeline: timeline.rows, wishlist: wishlist.rows, cart: openCart, reminders: reminders.rows, reviews,
+      marketingConsent: !!consent.rows[0]?.marketing_consent, marketingConsentAt: consent.rows[0]?.marketing_consent_at,
+      reorderDue: c.last_order ? new Date(new Date(c.last_order).getTime() + reorderDays * 86400000).toISOString() : null, reorderDays,
       segment: s.segment, orders: orders.rows, addresses: addresses.rows, notes: notes.rows, favourites: favourites.rows, returns: returns.rows, messages: messages.rows,
     };
   });

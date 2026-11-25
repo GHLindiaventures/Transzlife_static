@@ -8,7 +8,7 @@
   --ft-text:rgba(255,255,255,.9);--ft-soft:rgba(255,255,255,.72);--ft-line:rgba(255,255,255,.12);
   min-height:0;padding:0;color:var(--ft-text);overflow:hidden;isolation:isolate;
   background:linear-gradient(to bottom,transparent 0,transparent 140px,var(--ft-bg) 140px);
-  font-family:'Manrope','Archivo',system-ui,sans-serif;
+  font-family:'Manrope',system-ui,sans-serif;
 }
 .ft a{color:inherit;text-decoration:none}
 .ft h2,.ft h3{margin:0;font-family:inherit;letter-spacing:0;text-transform:none}

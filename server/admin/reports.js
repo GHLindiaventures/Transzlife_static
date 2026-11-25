@@ -37,6 +37,7 @@ export default async function reportRoutes(app, { db, G, parse, env }) {
       SELECT p.id, p.name, i.on_hand - i.reserved AS available, i.low_stock_at
         FROM inventory i JOIN products p ON p.id = i.product_id
        WHERE p.active AND i.on_hand - i.reserved <= i.low_stock_at ORDER BY available`)).rows;
+    const reviewsPending = num((await db.query(`SELECT COUNT(*) AS n FROM reviews WHERE status = 'pending'`)).rows[0].n);
     const failed = num((await db.query(`SELECT COUNT(*) AS n FROM notifications WHERE status = 'failed' AND created_at > now() - interval '7 days'`)).rows[0].n);
     // batches still in stock that expire within 90 days (sell these first; plan a discount or write-off)
     const expiring = (await db.query(`
@@ -69,6 +70,7 @@ export default async function reportRoutes(app, { db, G, parse, env }) {
     add('returns_requested', num(ret.requested), num(ret.requested) === 1 ? 'return on its way back' : 'returns on their way back', '/admin/returns?status=requested', 'info');
     add('returns', num(o.returns_week), 'returned to us this week', '/admin/orders?stage=returns', 'muted');
     add('awaiting_payment', num(o.awaiting_payment), 'awaiting online payment', '/admin/orders?stage=awaiting_payment', 'muted');
+    add('reviews', reviewsPending, reviewsPending === 1 ? 'review waiting for a check' : 'reviews waiting for a check', '/admin/reviews', 'info');
     add('failed_messages', failed, failed === 1 ? 'customer message failed' : 'customer messages failed', '/admin/settings', 'warn');
     return items;
   }

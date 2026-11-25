@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { setBuyNow, BUY_NOW_URL } from '../lib/checkoutIntent';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { Check, Download, ShieldCheck, Truck, RotateCcw, Leaf, ArrowRight, Lock, Pill, Clock, Package, Lightbulb, Hand, Briefcase, MapPin, Sparkles, FileText, FlaskConical, Sprout } from 'lucide-react';
+import { Check, Download, ShieldCheck, Eye, TrendingUp, Truck, RotateCcw, Leaf, ArrowRight, Lock, Pill, Clock, Package, Lightbulb, Hand, Briefcase, MapPin, Sparkles, FileText, FlaskConical, Sprout } from 'lucide-react';
 import { getProduct, PRODUCTS, PACKS } from '../data/products';
 import { useCatalog } from '../lib/catalog';
 import { SITE } from '../data/site';
@@ -10,15 +10,16 @@ import { getConcern } from '../data/concerns';
 import { ARTICLES } from '../data/articles';
 import { useCart, packPrice, packMrp } from '../context/CartContext';
 import { QtyStepper } from '../components/CartDrawer';
-import ProductCard from '../components/ProductCard';
+import ProductCard, { Money } from '../components/ProductCard';
 import Icon from '../components/Icon';
 import { Breadcrumbs, Reveal, SectionHead, useTitle } from '../components/Common';
-import { listReviews, summarise } from '../data/reviewStore';
+import { loadReviews } from '../data/reviewStore';
+import { useProductViewers } from '../lib/presence';
 import { RatingLine, GalleryActions } from '../components/pdp/ProductActions';
 import { IngredientGrid, UseTabs, FaqList, FaqHelp } from '../components/pdp/Sections';
 import Reviews from '../components/pdp/Reviews';
 import ProductInfo from '../components/pdp/ProductInfo';
-import { inr, pctOff } from '../utils/format';
+import { inr, pctOff, prepaidSaving } from '../utils/format';
 import NotFound from './NotFound';
 
 const ROUTINE_ICON = { Dose: Pill, When: Clock, Format: Package, Tip: Lightbulb, How: Hand, Use: Hand, Apply: Hand, Carry: Briefcase, Where: MapPin };
@@ -55,14 +56,17 @@ export default function Product() {
   const [qty, setQty] = useState(1);
   useTitle(p?.name);
   useEffect(() => { setPack(1); setQty(1); }, [id]);
-  const [reviews, setReviews] = useState([]);
+  const EMPTY = { summary: { avg: 0, total: 0, counts: [0, 0, 0, 0, 0] }, reviews: [], mine: null, canReview: null, signedIn: false };
+  const [reviewData, setReviewData] = useState(EMPTY);
+  const reloadReviews = useCallback(() => { if (p) loadReviews(p.id).then(setReviewData); }, [p?.id]);   // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     let live = true;
-    setReviews([]);
-    if (p) listReviews(p.id).then((r) => live && setReviews(r));
+    setReviewData(EMPTY);
+    if (p) loadReviews(p.id).then((d) => live && setReviewData(d));
     return () => { live = false; };
-  }, [p?.id]);
-  const summary = useMemo(() => summarise(reviews), [reviews]);
+  }, [p?.id]);   // eslint-disable-line react-hooks/exhaustive-deps
+  const summary = reviewData.summary;
+  const viewers = useProductViewers(p?.id);
 
   // a product added in the dashboard arrives with the live catalogue: wait for it before saying "not found"
   if (!p) return catalogV === 0 ? <div className="page-loading" aria-busy="true" /> : <NotFound />;
@@ -85,6 +89,14 @@ export default function Product() {
 
   return (
     <div className="pdpx" style={{ '--p-accent': p.accent, '--tint': p.tint }}>
+      {summary.total > 0 && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          '@context': 'https://schema.org', '@type': 'Product', name: p.name, description: p.summary, brand: { '@type': 'Brand', name: 'TranzLife' },
+          image: p.images.map((src) => new URL(src, window.location.origin).href),
+          offers: { '@type': 'Offer', priceCurrency: 'INR', price: String(p.price), availability: `https://schema.org/${p.stock === 'out' ? 'OutOfStock' : 'InStock'}` },
+          aggregateRating: { '@type': 'AggregateRating', ratingValue: summary.avg.toFixed(1), reviewCount: summary.total, bestRating: 5, worstRating: 1 },
+        }).replace(/</g, '\\u003c') }} />
+      )}
       <section className="container pdp">
         <Breadcrumbs items={[['Shop', '/shop'], [p.short]]} />
         <div className="pdp__grid">
@@ -101,10 +113,18 @@ export default function Product() {
             </div>
 
             <div className="pdp__price">
-              <strong>{inr(unit)}</strong>
+              <strong><Money value={unit} /></strong>
               {mrp > unit && <><s>MRP {inr(mrp)}</s><span className="save">Save {inr(mrp - unit)} ({off}% off)</span></>}
             </div>
-            <p className="pdp__tax">Inclusive of all taxes · {p.size} {p.format.toLowerCase()}</p>
+            {viewers && <p className="live-line"><span className="live-line__dot" aria-hidden="true" /><Eye size={15} aria-hidden="true" /> <span><strong>{viewers}</strong> other people are viewing this right now</span></p>}
+            {p.sold30 && <p className="live-line"><TrendingUp size={15} aria-hidden="true" /> <span>Bought <strong>{p.sold30} times</strong> in the last 30 days</span></p>}
+            <p className="pdp__tax">Inclusive of all taxes · {p.size} {p.format.toLowerCase()}{pack > 1 ? ` · pack of ${pack}` : ''}</p>
+            {SITE.prepaidDiscount > 0 && (
+              <p className="pdp__prepaid">
+                <Money value={unit - prepaidSaving(unit, SITE.prepaidDiscount)} /> when you pay online
+                <span>UPI, card or net banking · extra {Math.round(SITE.prepaidDiscount * 100)}% off at checkout</span>
+              </p>
+            )}
 
             <ul className="pdp__highlights">
               {p.highlights.map((h) => <li key={h}><Check size={16} /> {h}</li>)}
@@ -114,13 +134,15 @@ export default function Product() {
               <legend>Choose your pack</legend>
               {PACKS.map((pk) => {
                 const price = packPrice(p, pk.qty);
+                const saved = packMrp(p, pk.qty) - price;
                 return (
                   <label key={pk.qty} className={`pack ${pack === pk.qty ? 'is-active' : ''}`}>
                     <input type="radio" name="pack" value={pk.qty} checked={pack === pk.qty} onChange={() => setPack(pk.qty)} />
                     {pk.tag && <span className="pack__tag">{pk.tag}</span>}
                     <strong>{pk.label}</strong>
-                    <span>{inr(price)}</span>
+                    <span><Money value={price} /></span>
                     <small>{inr(Math.round(price / pk.qty))} each</small>
+                    {saved > 0 && <em className="pack__save">You save {inr(saved)}</em>}
                   </label>
                 );
               })}
@@ -229,7 +251,7 @@ export default function Product() {
         </div>
       </section>
 
-      <Reviews product={p} reviews={reviews} setReviews={setReviews} summary={summary} />
+      <Reviews product={p} data={reviewData} onChanged={reloadReviews} />
 
       <section className="section section--sand">
         <div className="container">

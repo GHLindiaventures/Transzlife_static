@@ -1,7 +1,7 @@
 // Ingredient library. "Traditional use" notes describe how an ingredient has
 // been used in Ayurveda / folk practice; they are not claims about what a
-// TranzLife product does. Exact quantities per product are pending from the
-// formulation team.
+// TranzLife product does. Ingredient lists follow the client's product document
+// ("Tranzlife Biosciences Products.pdf", Nov 2026) and the packs.
 
 export const INGREDIENT_TYPES = {
   herb: { label: 'Ayurvedic herb', color: '#2f6b3a' },
@@ -25,26 +25,27 @@ export const INGREDIENTS = [
   { id: 'vitamin-d3', name: 'Vitamin D3', alt: 'Cholecalciferol', latin: '', type: 'nutrient', part: '', note: 'The “sunshine vitamin”. Contributes to normal immune function and healthy bones and muscles. Many Indians are low in it.' },
   { id: 'zinc', name: 'Zinc', alt: 'Trace mineral', latin: '', type: 'nutrient', part: '', note: 'A trace mineral that contributes to normal immune function and cell protection.' },
 
-  // Liver herbs
-  { id: 'milk-thistle', name: 'Milk Thistle', alt: 'Carduus marianus', latin: 'Silybum marianum', type: 'herb', part: 'Seed', note: 'The best-known liver herb worldwide. Its seeds contain silymarin, studied for its antioxidant and liver-supporting properties.' },
-  { id: 'amla', name: 'Amla', alt: 'Indian Gooseberry', latin: 'Phyllanthus emblica', type: 'herb', part: 'Fruit', note: 'One of the richest natural sources of Vitamin C and a pillar of Ayurveda. Traditionally used for digestion, antioxidant support and rejuvenation.' },
+  // Liver herbs (Liver Booster, composition per 10 ml on the pack)
   { id: 'bhumyamalaki', name: 'Bhumyamalaki', alt: 'Keezhanelli', latin: 'Phyllanthus niruri', type: 'herb', part: 'Whole plant', note: 'Known in Tamil homes as Keezhanelli. One of the most traditionally used herbs for liver wellness in South India.' },
   { id: 'kalmegh', name: 'Kalmegh', alt: 'King of Bitters', latin: 'Andrographis paniculata', type: 'herb', part: 'Leaf', note: 'An intensely bitter herb traditionally used for the liver and digestion, and studied for its antioxidant activity.' },
   { id: 'kutki', name: 'Kutki', alt: 'Picrorhiza', latin: 'Picrorhiza kurroa', type: 'herb', part: 'Root', note: 'A Himalayan bitter root used in classical Ayurveda for liver function and digestion.' },
-  { id: 'giloy', name: 'Giloy', alt: 'Guduchi', latin: 'Tinospora cordifolia', type: 'herb', part: 'Stem', note: 'Called “Amrita” in Ayurveda. Traditionally used as a rejuvenating herb and for immune and liver support.' },
-  { id: 'punarnava', name: 'Punarnava', alt: 'Spreading Hogweed', latin: 'Boerhavia diffusa', type: 'herb', part: 'Whole plant', note: 'Its name means “one that renews”. Traditionally used for liver and kidney wellness.' },
-  { id: 'bhringraj', name: 'Bhringraj', alt: 'Karisalankanni', latin: 'Eclipta prostrata', type: 'herb', part: 'Whole plant', note: 'Famous for hair care, and also traditionally used in Siddha medicine as a liver herb.' },
-  { id: 'chelidonium', name: 'Chelidonium majus', alt: 'Greater Celandine', latin: 'Chelidonium majus', type: 'homeo', part: '', note: 'A traditional European botanical preparation associated with bile flow and liver function.' },
-  { id: 'lycopodium', name: 'Lycopodium clavatum', alt: 'Club Moss', latin: 'Lycopodium clavatum', type: 'homeo', part: '', note: 'A classical homeopathic preparation traditionally associated with digestion and liver support.' },
-  { id: 'nux-vomica', name: 'Nux vomica', alt: 'Strychnos nux-vomica', latin: 'Strychnos nux-vomica', type: 'homeo', part: '', note: 'Used in homeopathic potencies, traditionally associated with digestive comfort after rich food and late nights.' },
-  { id: 'bryonia', name: 'Bryonia alba', alt: 'White Bryony', latin: 'Bryonia alba', type: 'homeo', part: '', note: 'A homeopathic preparation traditionally associated with liver and digestive comfort.' },
-  { id: 'chionanthus', name: 'Chionanthus virginica', alt: 'Fringe Tree', latin: 'Chionanthus virginicus', type: 'homeo', part: '', note: 'A North American botanical traditionally used for hepatic (liver) support.' },
+  { id: 'punarnava', name: 'Punarnava', alt: 'Spreading Hogweed', latin: 'Boerhaavia diffusa', type: 'herb', part: 'Whole plant', note: 'Its name means “one that renews”. Traditionally used for liver and kidney wellness.' },
+  { id: 'bhringraj', name: 'Bhringraj', alt: 'Karisalankanni', latin: 'Eclipta alba', type: 'herb', part: 'Whole plant', note: 'Famous for hair care, and also traditionally used in Siddha medicine as a liver herb.' },
+  { id: 'daruharidra', name: 'Daruharidra', alt: 'Indian Barberry', latin: 'Berberis aristata', type: 'herb', part: 'Stem', note: 'A bitter Ayurvedic herb, traditionally used for liver and digestive wellness.' },
+  { id: 'giloy', name: 'Guduchi', alt: 'Giloy', latin: 'Tinospora cordifolia', type: 'herb', part: 'Stem', note: 'Called “Amrita” in Ayurveda. Traditionally used as a rejuvenating herb and for immune and liver support.' },
+  { id: 'amla', name: 'Amla', alt: 'Indian Gooseberry', latin: 'Emblica officinalis', type: 'herb', part: 'Fruit', note: 'One of the richest natural sources of Vitamin C and a pillar of Ayurveda. Traditionally used for digestion, antioxidant support and rejuvenation.' },
+  { id: 'haritaki', name: 'Haritaki', alt: 'Kadukkai', latin: 'Terminalia chebula', type: 'herb', part: 'Fruit', note: 'One of the three fruits of Triphala. Traditionally used in Ayurveda for digestion and gentle cleansing.' },
+  { id: 'turmeric', name: 'Turmeric', alt: 'Manjal / Haldi', latin: 'Curcuma longa', type: 'herb', part: 'Rhizome', note: 'The golden kitchen spice. Its curcuminoids are widely studied for antioxidant activity.' },
 
   // Essential oils
   { id: 'dill', name: 'Dill Oil', alt: 'Sowa', latin: 'Anethum graveolens', type: 'oil', part: 'Seed', note: 'Dill (sowa) seeds are a traditional Indian home remedy for tummy comfort. The essential oil has a warm, sweet, herbal aroma.' },
   { id: 'eucalyptus', name: 'Eucalyptus Oil', alt: 'Nilgiri Thailam', latin: 'Eucalyptus globulus', type: 'oil', part: 'Leaf', note: 'The familiar Nilgiri oil. Cooling, fresh and clearing, widely used in massage and steam inhalation.' },
   { id: 'peppermint', name: 'Peppermint Oil', alt: 'Pudina', latin: 'Mentha × piperita', type: 'oil', part: 'Leaf', note: 'Bright, cooling and refreshing. One of the most popular oils in aromatherapy.' },
   { id: 'lavender', name: 'Lavender Oil', alt: '', latin: 'Lavandula angustifolia', type: 'oil', part: 'Flower', note: 'Soft, floral and widely used in aromatherapy for relaxation and calm.' },
+  { id: 'lemon', name: 'Lemon Oil', alt: '', latin: 'Citrus limon', type: 'oil', part: 'Peel', note: 'Bright, zesty and uplifting. A fresh citrus note widely used in aromatherapy.' },
+  { id: 'wintergreen', name: 'Wintergreen Oil', alt: '', latin: 'Gaultheria procumbens', type: 'oil', part: 'Leaf', note: 'A cooling oil with a minty aroma, long used in massage oils and balms.' },
+  { id: 'ginger-oil', name: 'Ginger Essential Oil', alt: '', latin: 'Zingiber officinale', type: 'oil', part: 'Rhizome', note: 'Warm and spicy. Used in massage blends for a comforting, warming feel.' },
+  { id: 'sesame', name: 'Sesame Oil', alt: 'Nallennai / Til oil', latin: 'Sesamum indicum', type: 'oil', part: 'Seed', note: 'The classic Ayurvedic massage base oil, valued for its nourishing feel on the skin.' },
 
   // Energy Booster
   { id: 'ruta', name: 'Ruta graveolens (Q)', alt: 'Rue', latin: 'Ruta graveolens', type: 'homeo', part: 'Mother tincture', note: 'A botanical mother tincture traditionally associated with tired muscles and joints.' },
@@ -63,12 +64,7 @@ const INGREDIENT_IMG_MAP = {
   jeera: 'cumin',
   karumanjal: 'black-turmeric',
   giloy: 'guduchi',
-  'milk-thistle': 'haritaki',
-  chelidonium: 'daruharidra',
-  lycopodium: 'punarnava',
-  'nux-vomica': 'kalmegh',
-  bryonia: 'kutki',
-  chionanthus: 'bhringraj',
+  'ginger-oil': 'ginger',
 };
 
 // a photo uploaded in the admin dashboard wins over the built-in one

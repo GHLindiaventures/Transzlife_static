@@ -1,7 +1,7 @@
 // Customers: segments (new / repeat / loyal / at risk / signed up), lifetime value, full profile and notes.
 import { useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Search, Users, StickyNote, Trash2, Heart, MapPin, MessageSquare, Undo2, Phone, Mail } from 'lucide-react';
+import { ArrowLeft, Search, Users, StickyNote, Trash2, Heart, MapPin, MessageSquare, Undo2, Phone, Mail, Activity, Send, ShoppingCart, BellRing, Star } from 'lucide-react';
 import { api } from '../../store/lib/api';
 import { Badge, Empty, ErrorBox, Loading, METHOD, Notice, PageHead, Pager, can, d, dt, initials, rs, rsCompact, useAction, useAdmin, useApi } from '../ui';
 import { RSTATUS } from './Returns';
@@ -63,6 +63,19 @@ export function CustomerList() {
   );
 }
 
+const EVENT_TEXT = {
+  page_view: 'Viewed', product_click: 'Clicked', add_to_cart: 'Added to cart:', remove_from_cart: 'Removed from cart:', cart_view: 'Opened the cart',
+  begin_checkout: 'Started checkout', checkout_payment: 'Chose payment', place_order_click: 'Pressed "Place order"', payment_failed: 'Payment did not go through',
+  share: 'Shared', wishlist_add: 'Saved', wishlist_remove: 'Unsaved', chat_open: 'Opened the Tulsi chat', brochure_download: 'Downloaded a brochure',
+  whatsapp_click: 'Tapped WhatsApp', search: 'Searched', compare_add: 'Compared',
+};
+function eventText(e) {
+  const what = e.product || (e.path && e.name === 'page_view' ? e.path : '');
+  const p = typeof e.props === 'string' ? JSON.parse(e.props) : e.props || {};
+  const extra = e.name === 'checkout_payment' || e.name === 'place_order_click' || e.name === 'payment_failed' ? (p.method ? ` (${METHOD[p.method] || p.method})` : '') : '';
+  return `${EVENT_TEXT[e.name] || e.name} ${what}${extra}${p.oos ? ' (was out of stock)' : ''}`.trim();
+}
+
 export function CustomerDetail() {
   const { id } = useParams();
   const { staff } = useAdmin();
@@ -78,6 +91,8 @@ export function CustomerDetail() {
     if (await act.run(() => api(`/api/admin/customers/${c.id}/notes`, { method: 'POST', body: { body: note } }), 'Note added.')) { setNote(''); reload(); }
   };
   const removeNote = async (n) => { if (window.confirm('Remove this note?') && await act.run(() => api(`/api/admin/customers/${c.id}/notes/${n.id}`, { method: 'DELETE', body: {} }))) reload(); };
+  const remindCart = async () => { if (await act.run(() => api(`/api/admin/carts/${data.cart.id}/remind`, { method: 'POST', body: {} }), 'Cart reminder sent.')) reload(); };
+  const remindRefill = async () => { if (await act.run(() => api(`/api/admin/customers/${id}/remind-reorder`, { method: 'POST', body: {} }), 'Refill reminder sent.')) reload(); };
   const remove = async () => {
     const typed = window.prompt(`This permanently removes ${c.name}'s name, email, phone and saved addresses (their orders stay for tax records). Type DELETE to confirm.`);
     if (typed !== 'DELETE') return;
@@ -125,6 +140,14 @@ export function CustomerDetail() {
               </div>
             )}
           </section>
+          <section className="adm-card">
+            <h2 className="adm-h2"><Activity size={16} /> On the website</h2>
+            {!data.timeline?.length ? <p className="adm-muted">No tracked activity. Customers appear here when they browse with analytics accepted.</p> : (
+              <ol className="adm-timeline">{data.timeline.map((e, i) => (
+                <li key={i}><span className="adm-muted">{dt(e.created_at)}</span><p>{eventText(e)}</p></li>
+              ))}</ol>
+            )}
+          </section>
           {data.returns.length > 0 && (
             <section className="adm-card">
               <h2 className="adm-h2"><Undo2 size={16} /> Returns</h2>
@@ -164,6 +187,46 @@ export function CustomerDetail() {
               </ul>
             )}
           </section>
+          {!c.deleted_at && data.activity && (
+            <section className="adm-card">
+              <h2 className="adm-h2"><BellRing size={16} /> Browsing & reminders</h2>
+              <dl className="adm-kv">
+                <dt>Visits</dt><dd>{data.activity.visits} · {data.activity.pages} pages</dd>
+                <dt>Last seen</dt><dd>{data.activity.lastSeen ? dt(data.activity.lastSeen) : '—'}</dd>
+                <dt>Device</dt><dd style={{ textTransform: 'capitalize' }}>{data.activity.device || '—'}</dd>
+                <dt>First came from</dt><dd>{data.activity.firstSource || '—'}</dd>
+                <dt>Reminders</dt><dd>{data.marketingConsent ? <span className="adm-badge is-ok">Agreed</span> : <span className="adm-badge is-off">Not agreed</span>}</dd>
+                <dt>Refill due</dt><dd>{data.reorderDue ? `${d(data.reorderDue)} (${data.reorderDays} days after last order)` : '—'}</dd>
+              </dl>
+              {data.cart && (
+                <p style={{ marginTop: 12 }}><ShoppingCart size={14} style={{ verticalAlign: -2 }} /> <strong>{rs(data.cart.value)}</strong> in their cart · {data.cart.items.map((i) => `${i.id.replace(/-/g, ' ')} × ${i.qty}`).join(', ')}
+                  <span className="adm-sub">updated {dt(data.cart.updated_at)}{data.cart.checkout_at ? ' · reached checkout' : ''}{data.cart.reminded_at ? ` · reminded ${d(data.cart.reminded_at)}` : ''}</span></p>
+              )}
+              {can(staff, 'customers.edit') && data.marketingConsent && (
+                <div className="adm-rowbtns" style={{ marginTop: 12, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {data.cart && !data.cart.reminded_at && <button className="adm-btn is-ghost is-sm" disabled={act.busy} onClick={remindCart}><Send size={14} /> Cart reminder</button>}
+                  {s.orders > 0 && <button className="adm-btn is-ghost is-sm" disabled={act.busy} onClick={remindRefill}><Send size={14} /> Refill reminder</button>}
+                </div>
+              )}
+              {data.reminders?.length > 0 && <p className="adm-muted" style={{ marginTop: 10 }}>Sent: {data.reminders.map((m) => `${m.kind === 'cart' ? 'cart' : 'refill'} ${d(m.created_at)} (${m.status})`).join(' · ')}</p>}
+            </section>
+          )}
+          {data.reviews?.length > 0 && (
+            <section className="adm-card">
+              <h2 className="adm-h2"><Star size={16} /> Reviews</h2>
+              <ul className="adm-list">{data.reviews.map((r) => (
+                <li key={r.id} className="adm-row"><span><Link to={`/admin/reviews?status=${r.status === 'approved' ? 'approved' : r.status}&product=${r.product_id}`}>{r.product}</Link>
+                  <span className="adm-sub">{'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}{r.title ? ` · ${r.title}` : ''}</span></span>
+                  <span className={`adm-badge is-${r.status === 'approved' ? 'ok' : r.status === 'pending' ? 'warn' : 'off'}`}>{r.status === 'approved' ? 'Published' : r.status === 'pending' ? 'Waiting' : r.status}</span></li>
+              ))}</ul>
+            </section>
+          )}
+          {data.wishlist?.length > 0 && (
+            <section className="adm-card">
+              <h2 className="adm-h2"><Heart size={16} /> Saved for later</h2>
+              <ul className="adm-list">{data.wishlist.map((w) => <li key={w.id} className="adm-row"><Link to={`/admin/products/${w.id}`}>{w.name}</Link><span className="adm-muted">{d(w.created_at)}</span></li>)}</ul>
+            </section>
+          )}
           {data.favourites.length > 0 && (
             <section className="adm-card">
               <h2 className="adm-h2"><Heart size={16} /> Favourite products</h2>

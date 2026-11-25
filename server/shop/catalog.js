@@ -2,6 +2,8 @@
 // (prices in rupees), so the site can swap the database version in without changing its pages.
 // Stock is shown only as in / low / out, never exact numbers.
 
+export const SOLD_MIN = 5;
+
 export function toPublic(p, media, batch = null) {
   const c = p.content || {};
   const available = Number(p.available ?? 0);
@@ -18,12 +20,17 @@ export function toPublic(p, media, batch = null) {
     // the batch a customer receives next (soonest expiry still in stock): shown as "Use before"
     batch: batch ? { mfg: batch.mfg_date, expiry: batch.expiry_date } : null,
     stock: available <= 0 ? 'out' : available <= (p.low_stock_at ?? 10) ? 'low' : 'in',
+    rating: { avg: Number(p.rating_avg || 0), count: Number(p.rating_count || 0) },
+    // real orders in the last 30 days, shown only from SOLD_MIN (small numbers are not shown)
+    sold30: Number(p.sold30 || 0) >= SOLD_MIN ? Number(p.sold30) : null,
   };
 }
 
 export async function loadCatalog(q, { includeInactive = false } = {}) {
   const products = (await q(`
-    SELECT p.*, i.on_hand - i.reserved AS available, i.low_stock_at
+    SELECT p.*, i.on_hand - i.reserved AS available, i.low_stock_at,
+           (SELECT COUNT(DISTINCT o.id) FROM order_items oi JOIN orders o ON o.id = oi.order_id
+             WHERE oi.product_id = p.id AND o.status NOT IN ('pending_payment', 'cancelled') AND o.created_at > now() - interval '30 days') AS sold30
       FROM products p LEFT JOIN inventory i ON i.product_id = p.id
      ${includeInactive ? '' : 'WHERE p.active'} ORDER BY p.sort_order, p.name`)).rows;
   const media = (await q('SELECT product_id, url, thumb_url, alt FROM product_media ORDER BY sort, created_at')).rows;
