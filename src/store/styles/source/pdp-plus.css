@@ -343,3 +343,46 @@
   .read2:hover { transform: none; }
   .read2:hover .read2__img img { transform: none; }
 }
+
+/* ---------- gallery: vertical thumbnail rail on the left, infographic slides ---------- */
+.gallery--rail { grid-template-columns: 88px minmax(0, 1fr); gap: 16px; align-items: stretch; }
+.gallery--rail .gallery__thumbs { position: relative; flex-direction: column; gap: 12px; height: 0; min-height: 100%; /* as tall as the main image, scrolls beyond */ overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; padding: 2px; }
+.gallery--rail .gallery__thumbs::-webkit-scrollbar { display: none; }
+.gallery__thumbs button { flex: none; width: 84px; height: 84px; padding: 0; cursor: pointer; opacity: .72; transition: border-color .2s, opacity .2s, transform .25s var(--ease); }
+.gallery__thumbs button:hover { opacity: 1; transform: translateY(-1px); }
+.gallery__thumbs button.is-active { opacity: 1; box-shadow: 0 6px 16px color-mix(in srgb, var(--p-accent) 22%, transparent); }
+.gallery__thumbs img { display: block; }
+.gallery__thumbs img:not(.is-pack) { mix-blend-mode: normal; }
+.gallery__main:focus-visible { outline: 3px solid var(--p-accent); outline-offset: 3px; }
+.gallery__main img.is-full { object-fit: cover; mix-blend-mode: normal; }
+.gallery__nav { position: absolute; top: 50%; z-index: 2; width: 44px; height: 44px; margin-top: -22px; border-radius: 50%; display: grid; place-items: center; cursor: pointer; color: var(--forest); background: rgba(255,255,255,.88); border: 0; -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); box-shadow: 0 6px 18px rgba(23,63,36,.16); opacity: 0; transition: opacity .25s, transform .25s var(--ease), background .2s; }
+.gallery__nav--prev { left: 14px; }
+.gallery__nav--next { right: 14px; }
+.gallery__main:hover .gallery__nav, .gallery__main:focus-within .gallery__nav { opacity: 1; }
+.gallery__nav:hover { background: #fff; transform: scale(1.06); }
+.gallery__count { position: absolute; left: 14px; bottom: 14px; z-index: 2; padding: 5px 11px; border-radius: 999px; font-size: .78rem; font-weight: 700; letter-spacing: .04em; color: #fff; background: rgba(15, 30, 20, .55); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+@media (hover: none) { .gallery__nav { opacity: 1; } }
+@media (max-width: 760px) {
+  .gallery--rail { grid-template-columns: minmax(0, 1fr); }
+  .gallery--rail .gallery__thumbs { order: 2; flex-direction: row; height: auto; min-height: 0; overflow-x: auto; overflow-y: hidden; }
+  .gallery__thumbs button { width: 68px; height: 68px; border-radius: 12px; }
+  .gallery__nav { width: 38px; height: 38px; margin-top: -19px; }
+}
+
+/* ---------- bigger gallery on desktop: wider page, gallery takes the larger column ---------- */
+@media (min-width: 1025px) {
+  .pdpx .pdp.container { width: min(1480px, 100% - 48px); }
+  .pdpx .pdp__grid { grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); gap: clamp(32px, 3.5vw, 56px); }
+  .gallery--rail { grid-template-columns: 92px minmax(0, 1fr); gap: 18px; }
+  .gallery--rail .gallery__thumbs button { width: 88px; height: 88px; }
+  /* stay fully visible while sticky: never taller than the window */
+  .gallery--rail .gallery__main { width: 100%; max-width: calc(100svh - var(--header-h) - 64px); }
+}
+
+/* ingredient amount badge (e.g. "500 mg" per 10 ml) */
+.ing2__amt { display: inline-block; text-transform: none; letter-spacing: 0; font-size: .72rem; }
+@media (min-width: 861px) { .ing2__type.ing2__amt { display: inline-block; } }
+
+/* products without a confirmed price yet */
+.pdp__price--soon strong { font-size: 1.6rem; }
+.price--soon strong { font-size: .92rem; }
