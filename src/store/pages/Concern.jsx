@@ -2,6 +2,7 @@ import { Link, useParams } from 'react-router-dom';
 import { ArrowRight, Check, Stethoscope, Lightbulb, Activity } from 'lucide-react';
 import { getConcern, CONCERNS } from '../data/concerns';
 import { PRODUCTS } from '../data/products';
+import { useCatalog } from '../lib/catalog';
 import { ARTICLES } from '../data/articles';
 import { getIngredient, getIngredientImg, INGREDIENT_TYPES } from '../data/ingredients';
 import ProductCard from '../components/ProductCard';
@@ -10,6 +11,7 @@ import { Breadcrumbs, Reveal, SectionHead, useTitle } from '../components/Common
 import NotFound from './NotFound';
 
 export function ConcernsIndex() {
+  useCatalog();
   useTitle('Shop by concern');
   return (
     <>
@@ -42,6 +44,7 @@ export function ConcernsIndex() {
 }
 
 export default function Concern() {
+  useCatalog();
   const { id } = useParams();
   const c = getConcern(id);
   useTitle(c?.title);

@@ -29,6 +29,20 @@ export default defineConfig(({ mode }) => {
         '@': path.resolve(__dirname, 'src/store'),
       },
     },
-    server: { port: 5173 },
+    server: {
+      port: 5173,
+      // shop API (`npm run dev:api`, port 3000). Tulsi chat is answered by the plugin above first.
+      proxy: {
+        '/api': {
+          target: env.SHOP_API_URL || 'http://localhost:3000',
+          // API server not running: say so, instead of a bare 500
+          configure: (proxy) => proxy.on('error', (err, req, res) => {
+            if (res.headersSent || typeof res.writeHead !== 'function') return;
+            res.writeHead(503, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'The shop API is not running. Start it with `npm run dev:api` in a second terminal.', code: 'api_down' }));
+          }),
+        },
+      },
+    },
   };
 });

@@ -3,10 +3,12 @@ import { Link, useLocation } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { INGREDIENTS, INGREDIENT_TYPES, getIngredientImg } from '../data/ingredients';
 import { PRODUCTS } from '../data/products';
+import { useCatalog } from '../lib/catalog';
 import { Breadcrumbs, useTitle } from '../components/Common';
 import IngredientCarousel from '../../components/IngredientCarousel';
 
 export default function Ingredients() {
+  useCatalog();
   useTitle('Ingredient library');
   const [type, setType] = useState('');
   const [q, setQ] = useState('');

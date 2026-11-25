@@ -5,6 +5,9 @@ import Announcement from './Announcement.jsx';
 import Header from './Header.jsx';
 import Drawer from './Drawer.jsx';
 import Footer from './Footer.jsx';
+import ConsentBanner from './ConsentBanner.jsx';
+import LiveVisitors from './LiveVisitors.jsx';
+import { installTracking, track } from '../store/lib/track.js';
 
 export default function Layout() {
   const { pathname, hash, key } = useLocation();
@@ -16,6 +19,10 @@ export default function Layout() {
 
   // Tulsi chat (Gemini first, Ollama fallback on the server). Mounted once; safe under StrictMode.
   useEffect(() => { initChat({ navigate }); }, [navigate]);
+
+  // first-party analytics: one page view per page (see src/store/lib/track.js for consent rules)
+  useEffect(() => { installTracking(); }, []);
+  useEffect(() => { track('page_view'); }, [pathname]);
 
   // new page -> start at the top (or at the #section the link points to), close the drawer
   useEffect(() => {
@@ -94,6 +101,8 @@ export default function Layout() {
       </main>
 
       <Footer ref={footerRef} />
+      <ConsentBanner />
+      <LiveVisitors />
     </>
   );
 }

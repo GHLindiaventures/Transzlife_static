@@ -1,0 +1,18 @@
+/* Product information (label declarations) on the product page. Same prefix as store.css so it wins over its reset. */
+.tl-store:not(#tl-a):not(#tl-b) .pinfo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 32px 48px; align-items: start; }
+.tl-store:not(#tl-a):not(#tl-b) .pinfo__head h2 { margin: 6px 0 14px; }
+.tl-store:not(#tl-a):not(#tl-b) .pinfo__batch { display: flex; gap: 10px; align-items: flex-start; padding: 14px 16px; border-radius: 14px; background: var(--leaf-soft); color: var(--forest); margin: 0 0 14px; line-height: 1.5; }
+.tl-store:not(#tl-a):not(#tl-b) .pinfo__batch svg { flex: none; margin-top: 2px; }
+.tl-store:not(#tl-a):not(#tl-b) .pinfo__certs { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.tl-store:not(#tl-a):not(#tl-b) .pinfo__certs li { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--white); font-size: 13px; font-weight: 600; color: var(--forest); }
+.tl-store:not(#tl-a):not(#tl-b) .pinfo__list { margin: 0; border: 1px solid var(--line); border-radius: 16px; background: var(--white); overflow: hidden; }
+.tl-store:not(#tl-a):not(#tl-b) .pinfo__list > div { display: grid; grid-template-columns: 170px 1fr; gap: 16px; padding: 13px 18px; border-bottom: 1px solid var(--line); font-size: 14.5px; }
+.tl-store:not(#tl-a):not(#tl-b) .pinfo__list > div:last-child { border-bottom: 0; }
+.tl-store:not(#tl-a):not(#tl-b) .pinfo__list dt { color: var(--text-2); font-weight: 600; display: flex; align-items: center; gap: 6px; }
+.tl-store:not(#tl-a):not(#tl-b) .pinfo__list dd { margin: 0; color: var(--ink); }
+.tl-store:not(#tl-a):not(#tl-b) .pinfo__note { grid-column: 1 / -1; display: flex; align-items: center; gap: 6px; margin: -16px 0 0; font-size: 13px; color: var(--text-2); }
+@media (max-width: 860px) {
+  .tl-store:not(#tl-a):not(#tl-b) .pinfo { grid-template-columns: 1fr; gap: 20px; }
+  .tl-store:not(#tl-a):not(#tl-b) .pinfo__list > div { grid-template-columns: 1fr; gap: 2px; }
+  .tl-store:not(#tl-a):not(#tl-b) .pinfo__note { margin-top: 0; }
+}

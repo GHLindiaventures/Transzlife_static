@@ -5,6 +5,7 @@ import { SITE } from '../data/site';
 import { ARTICLES, getArticle } from '../data/articles';
 import { getConcern } from '../data/concerns';
 import { PRODUCTS } from '../data/products';
+import { useCatalog } from '../lib/catalog';
 import ProductCard from '../components/ProductCard';
 import { Accordion, Breadcrumbs, CertStrip, PageHero, Reveal, SectionHead, useTitle } from '../components/Common';
 import { fmtDate } from '../utils/format';
@@ -18,6 +19,7 @@ const RESEARCH = [
 ];
 
 export function Science() {
+  useCatalog();
   useTitle('Our science');
   const steps = [
     [Sprout, 'Botanical selection', 'We start from classical Ayurvedic, Siddha and traditional texts, choosing herbs with a long history of use for each wellness goal.'],
@@ -80,6 +82,7 @@ export function Science() {
 
 /* ---------------- About ---------------- */
 export function About() {
+  useCatalog();
   useTitle('About us');
   const values = [
     [Leaf, 'Rooted in nature', 'Botanicals first, always.'],
@@ -187,6 +190,7 @@ function Block({ b }) {
 const blocks = (body) => (Array.isArray(body) ? body : [body]);
 
 export function Journal() {
+  useCatalog();
   useTitle('Blogs');
   useMetaDescription('TranzLife blogs: practical, easy-to-read guides on quitting smoking, lung, liver and menstrual wellness, immunity and everyday Ayurvedic habits.');
   const [cat, setCat] = useState('');
@@ -235,6 +239,7 @@ export function Journal() {
 }
 
 export function Article() {
+  useCatalog();
   const { id } = useParams();
   const a = getArticle(id);
   useTitle(a?.title);
@@ -329,6 +334,7 @@ const FAQ_GROUPS = [
 ];
 
 export function Faq() {
+  useCatalog();
   useTitle('FAQs');
   return (
     <>
@@ -353,6 +359,7 @@ export function Faq() {
 
 /* ---------------- Contact ---------------- */
 export function Contact() {
+  useCatalog();
   useTitle('Contact us');
   const [sent, setSent] = useState(false);
   const endpoint = import.meta.env.VITE_CONTACT_ENDPOINT;
@@ -415,8 +422,11 @@ const POLICIES = {
   ]],
   privacy: ['Privacy policy', [
     ['What we collect', 'When you place an order or contact us, we collect your name, phone number, email, delivery address and order details. Payments are processed by our payment partner; we do not store card details.'],
-    ['How we use it', 'To process and deliver orders, provide customer support, and, if you opt in, send wellness tips and offers. You can unsubscribe at any time.'],
-    ['Sharing', 'We share only what is necessary with delivery and payment partners. We never sell your personal data.'],
+    ['How we use it', 'To process and deliver orders, provide customer support, and, if you opt in, send cart and refill reminders, wellness tips and offers by SMS or WhatsApp. You can turn reminders off in My account or reply STOP at any time.'],
+    ['Site analytics', 'We run our own analytics: no advertising networks, no third-party trackers, and we never store your IP address or fingerprint your device. Without your consent we count page views only, anonymously. If you choose "Accept" in the privacy banner, your browser keeps a random visitor ID so we can tell new from returning visitors, see which products are viewed, added to the cart, saved or shared, and keep your cart so it is not lost. If you are signed in, this activity is linked to your account. Raw activity is deleted after 13 months. You can change your choice any time with "Privacy choices" at the bottom of every page.'],
+    ['Reviews', 'Only customers whose order was delivered can review a product. Your review is shown with your first name and the initial of your last name, never your phone number or email. Reviews with links, contact details, medical claims or abusive language are checked by our team before they appear; we never hide a review because it is critical. You can edit your review at any time, and deleting your account removes your reviews.'],
+    ['Live visitor counts', 'The "people browsing right now" numbers are real counts of visitors active in the last 90 seconds, worked out on our server and kept only in memory: nothing about this is stored. Small numbers are not shown, and the numbers are never rounded up or made up.'],
+    ['Sharing', 'We share only what is necessary with delivery, payment and messaging partners. We never sell your personal data.'],
     ['Your rights', `You can ask us to access, correct or delete your data by writing to ${SITE.email}.`],
   ]],
   terms: ['Terms of use', [
@@ -428,6 +438,7 @@ const POLICIES = {
 };
 
 export function Policy() {
+  useCatalog();
   const { id } = useParams();
   const pol = POLICIES[id];
   useTitle(pol?.[0]);

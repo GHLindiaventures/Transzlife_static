@@ -8,6 +8,11 @@ import Faq from './pages/Faq.jsx';
 import Contact from './pages/Contact.jsx';
 import Sustainability from './pages/Sustainability.jsx';
 import { CartProvider } from './store/context/CartContext';
+import { AuthProvider } from './store/context/AuthContext';
+import { loadCatalog } from './store/lib/catalog';
+
+loadCatalog();   // live products from the database (shows built-in data until it arrives)
+import RequireAuth from './store/components/RequireAuth';
 import { TooltipProvider } from './store/components/ui/tooltip';
 import StoreLayout, { StoreOverlays } from './store/StoreLayout.jsx';
 import { STORE_ID } from './content/site.js';
@@ -26,6 +31,10 @@ const checkout = (name) => lazy(() => import('./store/pages/Checkout').then((m) 
 const Cart = checkout('Cart');
 const Checkout = checkout('Checkout');
 const OrderSuccess = checkout('OrderSuccess');
+const Login = lazy(() => import('./store/pages/Login'));
+const Account = lazy(() => import('./store/pages/Account'));
+/* Staff dashboard: its own chunk, outside the site layout (no header, footer or chat) */
+const AdminApp = lazy(() => import('./admin/AdminApp'));
 
 const page = (el) => <Suspense fallback={<div className="page-loading" aria-busy="true" />}>{el}</Suspense>;
 
@@ -43,9 +52,11 @@ function OldJournalLink() {
 
 export default function App() {
   return (
+    <AuthProvider>
     <CartProvider>
       <TooltipProvider delayDuration={250}>
         <Routes>
+          <Route path="admin/*" element={page(<AdminApp />)} />
           <Route element={<Layout />}>
             <Route index element={<Home />} />
             <Route path="about" element={<About />} />
@@ -69,8 +80,11 @@ export default function App() {
               <Route path="blogs/:id" element={page(<Article />)} />
               <Route path="policies/:id" element={page(<Policy />)} />
               <Route path="cart" element={page(<Cart />)} />
-              <Route path="checkout" element={page(<Checkout />)} />
-              <Route path="order/:id" element={page(<OrderSuccess />)} />
+              <Route path="login" element={page(<Login />)} />
+              {/* signed-in only: signed-out visitors go to /login and come straight back */}
+              <Route path="checkout" element={<RequireAuth>{page(<Checkout />)}</RequireAuth>} />
+              <Route path="order/:id" element={<RequireAuth>{page(<OrderSuccess />)}</RequireAuth>} />
+              <Route path="account" element={<RequireAuth>{page(<Account />)}</RequireAuth>} />
             </Route>
             <Route path="*" element={<Home />} />
           </Route>
@@ -78,5 +92,6 @@ export default function App() {
         <StoreOverlays />
       </TooltipProvider>
     </CartProvider>
+    </AuthProvider>
   );
 }

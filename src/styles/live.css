@@ -1,0 +1,40 @@
+/* Live visitor pill (src/components/LiveVisitors.jsx) and the product-page line. */
+.live-pill {
+  position: fixed; z-index: 80; left: max(16px, env(safe-area-inset-left, 0px)); bottom: max(16px, env(safe-area-inset-bottom, 0px));
+  display: inline-flex; align-items: center; gap: 9px; max-width: calc(100vw - 120px);
+  padding: 8px 8px 8px 14px; border-radius: 999px;
+  background: rgba(252, 250, 244, .94); color: #2c3a29; border: 1px solid rgba(31, 107, 60, .16);
+  box-shadow: 0 10px 30px -14px rgba(20, 40, 20, .45);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  font: 500 13px/1.3 var(--f-body, 'Manrope', system-ui, sans-serif);
+  animation: live-in .5s ease-out .8s both;
+}
+.live-pill strong { font-weight: 800; color: #1f4d2c; font-variant-numeric: tabular-nums; }
+.live-pill button {
+  display: grid; place-items: center; width: 24px; height: 24px; flex: none; border: 0; border-radius: 50%;
+  background: transparent; color: #6b7568; cursor: pointer;
+}
+.live-pill button:hover { background: rgba(31, 107, 60, .08); color: #1f4d2c; }
+.live-pill button:focus-visible { outline: 2px solid #b8840f; outline-offset: 1px; }
+.live-pill__dot, .live-line__dot {
+  position: relative; width: 8px; height: 8px; flex: none; border-radius: 50%; background: #2f9e57;
+}
+.live-pill__dot::after, .live-line__dot::after {
+  content: ""; position: absolute; inset: -4px; border-radius: 50%; border: 2px solid rgba(47, 158, 87, .35);
+  animation: live-ring 2.4s ease-out infinite;
+}
+@keyframes live-ring { from { transform: scale(.6); opacity: 1; } to { transform: scale(1.6); opacity: 0; } }
+@keyframes live-in { from { opacity: 0; transform: translateY(8px); } }
+/* never on top of the privacy banner or the open chat */
+.consent ~ .live-pill, body.chat-open .live-pill { display: none; }
+@media (max-width: 640px) { .live-pill { font-size: 12px; padding: 6px 6px 6px 12px; } }
+
+/* product page: one quiet line under the price */
+.live-line { display: flex; align-items: center; gap: 9px; margin: 6px 0 0; font-size: 14px; color: #46523f; }
+.live-line strong { color: #1f4d2c; font-variant-numeric: tabular-nums; }
+.live-line + .live-line { margin-top: 4px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .live-pill { animation: none; }
+  .live-pill__dot::after, .live-line__dot::after { animation: none; display: none; }
+}

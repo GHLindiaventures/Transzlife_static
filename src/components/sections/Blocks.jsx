@@ -35,8 +35,8 @@ export function LeafIcon({ className = 'banner__leaf-icon' }) {
         {/* Vibrant botanical leaf body */}
         <path
           d="M27.5 4.5C27.5 4.5 22 5 15.5 11C9 17 5 23 5 28C10 28 16 24 22 17.5C28 11 27.5 4.5 27.5 4.5Z"
-          fill="#22c55e"
-          stroke="#4ade80"
+          fill="#2d8a52"
+          stroke="#efc04a"
           strokeWidth="1.8"
           strokeLinejoin="round"
         />

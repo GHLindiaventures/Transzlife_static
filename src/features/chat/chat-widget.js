@@ -36,6 +36,7 @@ const $ = (s, r = document) => r.querySelector(s);
 const inr = (n) => '₹' + Math.round(n).toLocaleString('en-IN');
 const esc = s => s.replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
 const asset = (src) => `${import.meta.env.BASE_URL}${String(src).replace(/^\//, '')}`;
+const BOT = `<img class="ch-bot-img" src="${asset('img/chat/tulsi-bot-sm.png')}" alt="" aria-hidden="true" draggable="false">`;
 
 // light formatting: **bold**, "- " lists, paragraphs. Any [[tags]] or stray brackets from the model are dropped.
 function format(text){
@@ -79,7 +80,7 @@ function bubble(m){
   const row = document.createElement('div');
   row.className = `ch-msg ${m.role === 'user' ? 'me' : 'bot'}`;
   row.innerHTML = m.role === 'user' ? `<div class="ch-b"><p>${esc(m.content)}</p></div>`
-    : `<span class="ch-av">${LEAF}</span><div class="ch-b">${format(m.content)}${(m.products || []).map(productCard).join('')}${actionRow(m.actions)}${suggestRow(m.suggest)}</div>`;
+    : `<span class="ch-av">${BOT}</span><div class="ch-b">${format(m.content)}${(m.products || []).map(productCard).join('')}${actionRow(m.actions)}${suggestRow(m.suggest)}</div>`;
   return row;
 }
 
@@ -172,7 +173,7 @@ function initChat({ navigate } = {}){
   root.innerHTML = `
     <section class="ch-panel" id="chatPanel" role="dialog" aria-label="Chat with Tulsi, TranzLife wellness guide" aria-hidden="true">
       <header class="ch-head">
-        <span class="ch-av big">${LEAF}</span>
+        <span class="ch-av big">${BOT}</span>
         <div><b>Tulsi</b><small><i></i>TranzLife AI Wellness Guide</small></div>
         <button class="ch-new" type="button" title="Start a new chat">New chat</button>
         <button class="ch-min" type="button" aria-label="Minimize chat" title="Minimize" aria-expanded="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="ch-min-dash" d="M6 12h12"/><path class="ch-min-up" d="M6 15l6-6 6 6"/></svg></button>
@@ -189,90 +190,93 @@ function initChat({ navigate } = {}){
     <div class="ch-launcher-wrap">
       <aside class="ch-welcome" id="tulsiWelcome" aria-label="Tulsi welcome message">
         <div class="ch-welcome-header">
-          <span class="ch-welcome-avatar">
-            ${LEAF}
-            <span class="ch-welcome-dot" aria-hidden="true"></span>
-          </span>
           <span class="ch-welcome-name">Tulsi <span class="ch-welcome-tag">AI Guide</span></span>
           <button class="ch-welcome-close" type="button" aria-label="Dismiss welcome message">
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 1l10 10M11 1L1 11"/></svg>
           </button>
         </div>
-        <p class="ch-welcome-text">Questions about our products? Ask me anything here! 🌿</p>
+        <p class="ch-welcome-text">Questions about our products? I'm here to help!</p>
         <span class="ch-welcome-tail" aria-hidden="true"></span>
       </aside>
       <button class="ch-fab" type="button" aria-controls="chatPanel" aria-expanded="false" aria-label="Open chat with Tulsi, TranzLife wellness guide">
-        <span class="ch-fab-pulse" aria-hidden="true"></span>
-        <span class="ch-fab-ic">
-          <svg class="ch-fab-icon-leaf" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
-            <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
-          </svg>
-          <svg class="ch-fab-icon-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
-            <path d="M18 6L6 18M6 6l12 12" />
-          </svg>
+        <span class="ch-bot" aria-hidden="true">
+          <span class="ch-bot-float" style="--ring-body:url('${asset('img/chat/tulsi-ring-body.png')}');--ring-arm:url('${asset('img/chat/tulsi-ring-arm.png')}')">
+            <span class="ch-glow ch-glow-body"><i></i><i class="ch-glow-burst"></i></span>
+            <span class="ch-bot-arm">
+              <span class="ch-glow ch-glow-arm"><i></i><i class="ch-glow-burst"></i></span>
+              <img src="${asset('img/chat/tulsi-bot-arm.png')}" alt="" draggable="false">
+            </span>
+            <img class="ch-bot-body" src="${asset('img/chat/tulsi-bot-body.png')}" alt="" draggable="false">
+          </span>
         </span>
-        <span class="ch-fab-badge" aria-hidden="true" title="Tulsi is online"></span>
       </button>
     </div>`;
   document.body.append(root);
   els = { root, panel:$('.ch-panel', root), list:$('.ch-list', root), chips:$('.ch-chips', root), input:$('textarea', root), send:$('.ch-send', root), fab:$('.ch-fab', root) };
 
-  // Welcome bubble popup and dismiss logic
+  // ---- Greeting: the robot waves once and the welcome bubble appears, then both settle. ----
+  // First greeting ~4s after the page opens; the bubble stays ~8s; then a random 1-3 minute gap.
+  // At most 3 per visit. Stops for the visit once the chat is opened or the bubble is closed.
+  // Waits while the tab is in the background; visitors who prefer reduced motion get no wave.
   const welcomeEl = $('.ch-welcome', root);
   const welcomeClose = $('.ch-welcome-close', root);
-  let welcomeTimer = null;
-  let autoDismissTimer = null;
+  const calm = matchMedia('(prefers-reduced-motion: reduce)');
+  const FIRST_MS = 4000, SHOW_MS = 8000, MAX_GREETS = 3;
+  const gap = () => 60000 + Math.random() * 120000;
+  let greets = 0, stopped = false, pending = false, cycleTimer = null, hideTimer = null;
+  try { stopped = !!sessionStorage.getItem('tulsi_welcome_dismissed'); } catch(e) {}
 
-  function dismissWelcome() {
-    if (!welcomeEl) return;
+  const schedule = (ms) => {
+    clearTimeout(cycleTimer);
+    if (!stopped && greets < MAX_GREETS) cycleTimer = setTimeout(greet, ms);
+  };
+  function greet() {
+    if (stopped || root.classList.contains('open')) return;
+    if (document.hidden) { pending = true; return; }      // greet when they come back to the tab
+    greets++;
+    welcomeEl.classList.remove('is-closing');
+    welcomeEl.classList.add('is-visible');
+    if (!calm.matches) els.fab.classList.add('is-waving');
+    hideTimer = setTimeout(hideGreeting, SHOW_MS);
+  }
+  function hideGreeting() {
+    clearTimeout(hideTimer);
+    if (welcomeEl.classList.contains('is-visible')) {
+      welcomeEl.classList.remove('is-visible');
+      welcomeEl.classList.add('is-closing');
+    }
+    schedule(gap());
+  }
+  function stopGreeting() {
+    stopped = true;
+    clearTimeout(cycleTimer); clearTimeout(hideTimer);
     welcomeEl.classList.remove('is-visible');
     welcomeEl.classList.add('is-closing');
     try { sessionStorage.setItem('tulsi_welcome_dismissed', '1'); } catch(e) {}
-    clearTimeout(welcomeTimer);
-    clearTimeout(autoDismissTimer);
   }
-  dismissWelcomeFn = dismissWelcome;
+  dismissWelcomeFn = stopGreeting;   // opening the chat counts as "seen"
 
-  function showWelcome() {
-    try {
-      if (sessionStorage.getItem('tulsi_welcome_dismissed')) return;
-    } catch(e) {}
-    if (root.classList.contains('open')) return;
-    if (welcomeEl) {
-      welcomeEl.classList.remove('is-closing');
-      welcomeEl.classList.add('is-visible');
-      // auto-dismiss after 9.5s of no interaction
-      autoDismissTimer = setTimeout(dismissWelcome, 9500);
-    }
-  }
+  const armEl = $('.ch-bot-arm', root);
+  armEl.addEventListener('animationend', (e) => { if (e.target === armEl) els.fab.classList.remove('is-waving'); });
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && pending) { pending = false; schedule(1500); }
+  });
 
-  // Pop up after 3.2s
-  welcomeTimer = setTimeout(showWelcome, 3200);
-
-  // Clicking the bubble opens the chat
-  welcomeEl?.addEventListener('click', (e) => {
+  // clicking the bubble opens the chat; the x just closes it
+  welcomeEl.addEventListener('click', (e) => {
     if (e.target.closest('.ch-welcome-close')) return;
-    dismissWelcome();
+    stopGreeting();
     if (root.classList.contains('min')) minimize(false);
     else open(true);
   });
-
-  // Clicking close on the bubble dismisses it without opening
-  welcomeClose?.addEventListener('click', (e) => {
-    e.stopPropagation();
-    dismissWelcome();
+  welcomeClose.addEventListener('click', (e) => { e.stopPropagation(); stopGreeting(); });
+  // keep the bubble up while it's being read
+  welcomeEl.addEventListener('mouseenter', () => clearTimeout(hideTimer));
+  welcomeEl.addEventListener('mouseleave', () => {
+    if (welcomeEl.classList.contains('is-visible')) hideTimer = setTimeout(hideGreeting, 4000);
   });
 
-  // Pause auto-dismiss timer on hover
-  welcomeEl?.addEventListener('mouseenter', () => {
-    clearTimeout(autoDismissTimer);
-  });
-  welcomeEl?.addEventListener('mouseleave', () => {
-    if (welcomeEl.classList.contains('is-visible')) {
-      autoDismissTimer = setTimeout(dismissWelcome, 4500);
-    }
-  });
+  schedule(FIRST_MS);
 
   msgs = load(); render();
   els.min = $('.ch-min', root);

@@ -18,7 +18,7 @@ export const BRAND = {
   license: 'Manufacturing Lic. TN/AYU/24/1234',
   copyright: '© 2026 TranzLife Biosciences',
   disclaimer:
-    'We don’t cure. We care. TranzLife products support everyday well-being and are not intended to treat or cure any disease.',
+    'TranzLife products are plant-based wellness products and are not intended to diagnose, treat, cure or prevent any disease. Consult your doctor before use if you are pregnant, nursing or managing a health condition.',
 };
 
 /* Product photos live in /public/assets (product-N.jpg). `photo` = N. */
@@ -34,10 +34,10 @@ export const PRODUCTS = [
   {
     id: 'liver',
     showcase: 'assets/products/showcase-liver.jpg',
-    compare: { kind: "cutout", before: { src: "illustrations/liver-before.webp", label: "Before", sub: "Everyday strain", alt: "Illustration of a dull, mottled liver under everyday strain" }, after: { src: "illustrations/liver-botanical.webp", label: "After", sub: "Supported with Liver Booster", alt: "Illustration of a smooth, healthy liver" } }, photo: 5, ingredients: ['Bhumyamalaki 500mg', 'Kalmegh 400mg', 'Kutki 400mg', 'Punarnava 300mg', 'Bhringraj 300mg', 'Daruharidra 200mg'], dosage: 'Adults: 10 ml (2 tsp) twice daily after meals', name: 'LiverDetox™ Polyherbal Concoction', short: 'LiverDetox™', tag: 'Liver Booster',
-    price: 649, size: '500 ml Classical Concoction',
-    desc: '100% Ayurvedic Liver Booster. Detoxifies, protects, and rejuvenates liver parenchyma cells with 11 classical botanicals including Bhumyamalaki, Kalmegh, Kutki, Punarnava, and Daruharidra.',
-    story: { title: 'Liver Booster', text: '500 ml classical polyherbal concoction of Bhumyamalaki, Kalmegh, Kutki & Punarnava to detoxify, protect and rejuvenate.', note: 'Classical Ayurvedic Wisdom' },
+    compare: { kind: "cutout", before: { src: "illustrations/liver-before.webp", label: "Before", sub: "Everyday strain", alt: "Illustration of a dull, mottled liver under everyday strain" }, after: { src: "illustrations/liver-botanical.webp", label: "After", sub: "Supported with Liver Booster", alt: "Illustration of a smooth, healthy liver" } }, photo: 5, ingredients: ['Bhumyamalaki 500mg', 'Kalmegh 400mg', 'Kutki 400mg', 'Punarnava 300mg', 'Bhringraj 300mg', 'Daruharidra 200mg'], dosage: 'Adults: 10 ml (2 tsp) twice daily after meals', name: 'Liver Booster (LiverDetox™) Polyherbal Concoction', short: 'LiverDetox™', tag: 'Liver Booster',
+    price: 900, size: '500 ml Polyherbal Concoction',
+    desc: '100% Ayurvedic polyherbal concoction of 11 traditional botanicals, including Bhumyamalaki, Kalmegh, Kutki, Punarnava and Daruharidra, designed to support normal liver function, digestive wellness and overall well-being. No added colours or sugar.',
+    story: { title: 'Liver Booster', text: '500 ml polyherbal concoction of Bhumyamalaki, Kalmegh, Kutki & Punarnava to support normal liver function and digestive wellness.', note: 'Classical Ayurvedic Wisdom' },
   },
   {
     id: 'rollon',
@@ -59,9 +59,9 @@ export const PRODUCTS = [
     id: 'energy',
     showcase: 'assets/products/showcase-energy.jpg',
     photo: 2, ingredients: ['Ruta graveolens (Q)', 'Hecla lava (3X)', 'Symphytum officinale (Q)', 'Calcarea phosphorica (8X)', 'Echinacea angustifolia (Q)'], dosage: '7.5 ml twice daily, or as advised by a healthcare professional', name: 'TranzLife Energy Booster™', short: 'Energy Booster™', tag: 'Energy & Vitality',
-    price: null, size: '500 ml Oral Liquid',
-    desc: 'Herbal & bioactive wellness formulation. A convenient oral liquid designed to complement an active lifestyle and everyday wellness routine.',
-    story: { title: 'Energy & Vitality', text: 'A convenient oral liquid designed to complement an active lifestyle and everyday wellness routine.', note: 'Oral Liquid · 500 ml' },
+    price: 1850, size: '500 ml Oral Liquid',
+    desc: 'Herbal and bioactive oral liquid formulation designed to complement an active lifestyle and support everyday energy, stamina, vitality and overall wellness.',
+    story: { title: 'Energy & Vitality', text: 'An easy-to-measure oral liquid designed to support everyday energy and stamina as part of an active lifestyle.', note: 'Oral Liquid · 500 ml' },
   },
   {
     id: 'inhaler',
@@ -97,13 +97,13 @@ export const productUrl = (id) => (STORE_ID[id] ? `/products/${STORE_ID[id]}` : 
 
 export const priceLabel = (p) => (p.price == null ? 'Price to be announced' : `₹${p.price}`);
 
-/* Card pricing: `price` is what the customer pays. The struck-out MRP is the price
-   marked up by MRP_MARKUP, rounded up to the next ₹10 and ending in 9 (649 → 819). */
-export const MRP_MARKUP = 0.25;
-export const mrpOf = (p) => (p.price == null ? null : Math.ceil((p.price * (1 + MRP_MARKUP)) / 10) * 10 - 1);
+/* Card pricing: `price` is what the customer pays; `mrp` is the printed MRP (defaults to the price).
+   A struck-out MRP and "% off" only show when the price is actually below the MRP: never sell
+   above, or advertise an MRP higher than, the one printed on the pack. */
+export const mrpOf = (p) => (p.price == null ? null : Math.max(p.mrp ?? p.price, p.price));
 export const offOf = (p) => {
   const mrp = mrpOf(p);
-  return mrp ? Math.round((1 - p.price / mrp) * 100) : 0;
+  return mrp && mrp > p.price ? Math.round((1 - p.price / mrp) * 100) : 0;
 };
 
 export const ANNOUNCEMENTS = [
@@ -354,7 +354,11 @@ export const FOOTER = {
   tagline: 'Live naturally. Live healthier.',
   blurb: 'Ayurvedic, plant-based solutions for everyday wellness and good health.',
   motto: ['Wellness', 'Innovation', 'A Healthier Tomorrow'],
-  legal: [],
+  legal: [
+    { label: 'Privacy policy', to: '/policies/privacy' },
+    { label: 'Terms of use', to: '/policies/terms' },
+    { label: 'Shipping & returns', to: '/policies/shipping' },
+  ],
 };
 
 /* Social profiles: add the real URLs to show the icons in the footer (empty = hidden). */

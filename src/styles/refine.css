@@ -26,17 +26,17 @@
 .footer__inner{justify-content:space-between;padding-bottom:clamp(20px,3vw,36px)}
 .footer__copy{font-size:13px;line-height:1.6;margin-top:clamp(24px,3.5vw,40px)}
 .footer__massive-brand{display:flex;align-items:center;justify-content:center;width:100%;margin-top:clamp(24px,4vw,52px);padding:0;user-select:none;pointer-events:none;overflow:hidden}
-.footer__massive-text{font-family:'Manrope','Syne',sans-serif;font-size:clamp(56px,16vw,230px);font-weight:800;letter-spacing:-.035em;line-height:.82;color:#ffffff;text-align:center;white-space:nowrap;display:inline-flex;align-items:baseline;justify-content:center;transform:translateZ(0)}
-.footer__massive-reg{font-family:'Manrope','Syne',sans-serif;font-size:.22em;font-weight:600;line-height:1;transform:translateY(-1.55em);margin-left:.08em;opacity:.9}
+.footer__massive-text{font-family:'Manrope',system-ui,sans-serif;font-size:clamp(56px,16vw,230px);font-weight:800;letter-spacing:-.035em;line-height:.82;color:#ffffff;text-align:center;white-space:nowrap;display:inline-flex;align-items:baseline;justify-content:center;transform:translateZ(0)}
+.footer__massive-reg{font-family:'Manrope',system-ui,sans-serif;font-size:.22em;font-weight:600;line-height:1;transform:translateY(-1.55em);margin-left:.08em;opacity:.9}
 @media (max-width:640px){
   .footer__massive-brand{margin-top:18px}
   .footer__massive-text{font-size:clamp(44px,16.5vw,76px)}
 }
 
-/* ---------------- readable body copy: Archivo for running text, Syne stays for headings and labels ---------------- */
+/* ---------------- readable body copy: Manrope for running text ---------------- */
 .rich__text,.featured__sub,.pslider-intro__note,
 .has-text.slot--hero-sub,.has-text.slot--b-text,.has-text.slot--iwt-p,.has-text.slot--par-p,.has-text.slot--par-p-sm,
-.has-text.slot--news-p,.footer .has-text.slot--f-address,.footer__copy{font-family:'Archivo',system-ui,sans-serif;font-stretch:96%}
+.has-text.slot--news-p,.footer .has-text.slot--f-address,.footer__copy{font-family:'Manrope',system-ui,sans-serif}
 
 /* small labels: nothing under 12px */
 .has-text.slot--badge{font-size:12px;letter-spacing:.08em}
@@ -131,36 +131,36 @@
     var(--tex,linear-gradient(transparent,transparent)),
     var(--wash,#eef0ea);
 }
-/* PulmoClear (lungs, green pack, orange berries): fresh sage with tiny air bubbles */
+/* PulmoClear: fresh botanical sage */
 .featured .pcard[data-product="gummies"]{
-  --wash:linear-gradient(160deg,#eef5ea 0%,#d5e5cf 60%,#bfd6b8 100%);
+  --wash:linear-gradient(160deg,#eef4ea 0%,var(--green-100,#e3eddc) 60%,#d2e2ca 100%);
   --tex:radial-gradient(circle,rgba(255,255,255,.75) 1.6px,transparent 2.2px) 0 0/22px 22px;
 }
-/* Craving Control (white inhaler, breathing): cool eucalyptus blue with vapour rings */
+/* BreatheFree: crisp herbal mist */
 .featured .pcard[data-product="inhaler"]{
-  --wash:linear-gradient(165deg,#eef5f7 0%,#d3e3e8 60%,#b9d0d8 100%);
+  --wash:linear-gradient(165deg,var(--bg,#fcfaf1) 0%,#e7efe3 60%,#d6e4d2 100%);
   --tex:repeating-radial-gradient(circle at 80% 16%,rgba(255,255,255,0) 0 22px,rgba(255,255,255,.5) 22px 23px);
 }
-/* CycleRelief (lavender label, calm): lavender with soft petal blooms */
+/* CycleRelief: soft cream & botanical gold */
 .featured .pcard[data-product="rollon"]{
-  --wash:linear-gradient(160deg,#f4f0f8 0%,#e1d7ee 60%,#cbbce2 100%);
+  --wash:linear-gradient(160deg,var(--bg,#fcfaf1) 0%,var(--gold-100,#faf0cf) 60%,#efe1b3 100%);
   --tex:radial-gradient(30% 24% at 14% 18%,rgba(255,255,255,.6),transparent 70%),
-        radial-gradient(34% 26% at 88% 86%,rgba(150,120,195,.25),transparent 70%);
+        radial-gradient(34% 26% at 88% 86%,rgba(224,168,38,.18),transparent 70%);
 }
-/* Reviva (orange label, massage): warm clay with a fine linen weave */
+/* Reviva: warm linen & golden sand */
 .featured .pcard[data-product="reviva"]{
-  --wash:linear-gradient(160deg,#fbf1ea 0%,#f0d6c4 60%,#e3bca3 100%);
+  --wash:linear-gradient(160deg,var(--bg,#fcfaf1) 0%,var(--bg-warm,#f7efd2) 60%,#eddca8 100%);
   --tex:repeating-linear-gradient(45deg,rgba(255,255,255,.2) 0 1px,transparent 1px 7px),
-        repeating-linear-gradient(-45deg,rgba(160,90,50,.06) 0 1px,transparent 1px 7px);
+        repeating-linear-gradient(-45deg,rgba(26,107,60,.05) 0 1px,transparent 1px 7px);
 }
-/* LiverDetox (amber bottle, herbal leaves): earthy olive with a leaf line drawing */
+/* LiverDetox: earthy olive-sage with leaf line drawing */
 .featured .pcard[data-product="liver"]{
-  --wash:linear-gradient(160deg,#f1f1e6 0%,#dcdcc4 60%,#c6c8a6 100%);
-  --tex:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%23556b3a' stroke-width='1.2' opacity='.3'%3E%3Cpath d='M20 104C30 60 62 30 108 18C100 64 70 94 20 104Z'/%3E%3Cpath d='M20 104L96 30M44 82l-6-22M60 66l-4-24M76 50l-2-20M48 80h22M64 64l22-2'/%3E%3C/g%3E%3C/svg%3E") no-repeat right -4% bottom -4%/44% auto;
+  --wash:linear-gradient(160deg,#f4f5ea 0%,var(--green-100,#e3eddc) 60%,#d0dec7 100%);
+  --tex:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%231a6b3c' stroke-width='1.2' opacity='.26'%3E%3Cpath d='M20 104C30 60 62 30 108 18C100 64 70 94 20 104Z'/%3E%3Cpath d='M20 104L96 30M44 82l-6-22M60 66l-4-24M76 50l-2-20M48 80h22M64 64l22-2'/%3E%3C/g%3E%3C/svg%3E") no-repeat right -4% bottom -4%/44% auto;
 }
-/* Energy Booster (purple label, sunrise): dawn sky from violet to coral with light rays */
+/* Energy Booster: sunlit gold-to-cream radiance */
 .featured .pcard[data-product="energy"]{
-  --wash:linear-gradient(180deg,#e9e0f1 0%,#f1dde0 55%,#f4cfc0 100%);
+  --wash:linear-gradient(180deg,var(--bg,#fcfaf1) 0%,var(--gold-100,#faf0cf) 55%,var(--gold-200,#f6e3a1) 100%);
   --tex:repeating-conic-gradient(from -90deg at 50% 110%,rgba(255,255,255,.24) 0 4deg,rgba(255,255,255,0) 4deg 12deg);
 }
 

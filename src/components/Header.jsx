@@ -3,6 +3,7 @@ import { Link, NavLink } from 'react-router-dom';
 import { Media, Slot, ProductImg } from './ui.jsx';
 import { PRODUCTS, productUrl } from '../content/site.js';
 import { useCart } from '../store/context/CartContext';
+import { useAuth } from '../store/context/AuthContext';
 
 export const SHOP_URL = '/shop';
 
@@ -156,10 +157,23 @@ export default function Header({ onBurger }) {
           <Link className="header__cta header__cta--icon" to={SHOP_URL} aria-label="Shop">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" /><path d="M3 6h18" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>
           </Link>
+          <AccountButton />
           <CartButton />
         </div>
       </div>
     </header>
+  );
+}
+
+/** Account icon: "My account" when signed in, otherwise sign in. */
+function AccountButton() {
+  const { customer } = useAuth();
+  const signedIn = !!customer?.name;
+  return (
+    <Link className="icon-btn header__account" to={signedIn ? '/account' : '/login'} aria-label={signedIn ? `My account, ${customer.name}` : 'Sign in'} title={signedIn ? 'My account' : 'Sign in'}>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></svg>
+      {signedIn && <span className="header__account-dot" aria-hidden="true" />}
+    </Link>
   );
 }
 

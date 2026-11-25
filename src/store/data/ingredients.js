@@ -1,7 +1,7 @@
 // Ingredient library. "Traditional use" notes describe how an ingredient has
 // been used in Ayurveda / folk practice; they are not claims about what a
-// TranzLife product does. Exact quantities per product are pending from the
-// formulation team.
+// TranzLife product does. Ingredient lists follow the client's product document
+// ("Tranzlife Biosciences Products.pdf", Nov 2026) and the packs.
 
 export const INGREDIENT_TYPES = {
   herb: { label: 'Ayurvedic herb', color: '#2f6b3a' },
@@ -53,6 +53,10 @@ export const INGREDIENTS = [
   { id: 'mct', name: 'MCT', alt: 'Coconut-derived', latin: 'Medium-chain triglycerides', type: 'base', part: '', note: 'A light, coconut-derived carrier that holds the botanical actives in the drops.' },
   { id: 'stevia', name: 'Stevia', alt: 'Sweet leaf', latin: 'Stevia rebaudiana', type: 'base', part: 'Leaf', note: 'A plant-based sweetener used in place of sugar.' },
   { id: 'lavender', name: 'Lavender Oil', alt: '', latin: 'Lavandula angustifolia', type: 'oil', part: 'Flower', note: 'Soft, floral and widely used in aromatherapy for relaxation and calm.' },
+  { id: 'lemon', name: 'Lemon Oil', alt: '', latin: 'Citrus limon', type: 'oil', part: 'Peel', note: 'Bright, zesty and uplifting. A fresh citrus note widely used in aromatherapy.' },
+  { id: 'wintergreen', name: 'Wintergreen Oil', alt: '', latin: 'Gaultheria procumbens', type: 'oil', part: 'Leaf', note: 'A cooling oil with a minty aroma, long used in massage oils and balms.' },
+  { id: 'ginger-oil', name: 'Ginger Essential Oil', alt: '', latin: 'Zingiber officinale', type: 'oil', part: 'Rhizome', note: 'Warm and spicy. Used in massage blends for a comforting, warming feel.' },
+  { id: 'sesame', name: 'Sesame Oil', alt: 'Nallennai / Til oil', latin: 'Sesamum indicum', type: 'oil', part: 'Seed', note: 'The classic Ayurvedic massage base oil, valued for its nourishing feel on the skin.' },
 
   // Energy Booster
   { id: 'ruta', name: 'Ruta graveolens (Q)', alt: 'Rue', latin: 'Ruta graveolens', type: 'homeo', part: 'Mother tincture', note: 'A botanical mother tincture traditionally associated with tired muscles and joints.' },
@@ -76,14 +80,25 @@ const INGREDIENT_IMG_MAP = {
   jeera: 'cumin',
   karumanjal: 'black-turmeric',
   giloy: 'guduchi',
+  'ginger-oil': 'ginger',
 };
 
+// a photo uploaded in the admin dashboard wins over the built-in one
 export const getIngredientImg = (id) => {
+  const uploaded = getIngredient(id)?.photoUrl;
+  if (uploaded) return uploaded;
   const filename = INGREDIENT_IMG_MAP[id] || id;
   return `/assets/ingredients/cutout/${filename}.webp`;
 };
 
 export const getIngredientPhoto = (id) => {
+  const uploaded = getIngredient(id)?.photoUrl;
+  if (uploaded) return uploaded;
   const filename = INGREDIENT_IMG_MAP[id] || id;
   return `/assets/ingredients/${filename}.webp`;
 };
+
+/** Live library from the database (GET /api/ingredients), replacing the built-in list in place. */
+export function replaceIngredients(list) {
+  if (Array.isArray(list) && list.length) INGREDIENTS.splice(0, INGREDIENTS.length, ...list);
+}

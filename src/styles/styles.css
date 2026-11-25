@@ -1,3 +1,4 @@
+@import './fonts.css';
 /* ==========================================================
    Layout template — design tokens
    ========================================================== */
@@ -16,7 +17,7 @@
    --slide-bg: #d96f6c;
    /* product slider (each slide may override --slide-bg) */
    --line: rgba(21, 21, 21, .75);
-   --font: 'Syne', sans-serif;
+   --font: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
    --pad: 34px;
    --announcement-h: 34px;
    --header-h: 55px;

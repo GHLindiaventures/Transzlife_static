@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
 import { getProduct, onSale, PACKS } from '../data/products';
 import { SITE } from '../data/site';
+import { useCatalog } from '../lib/catalog';
+import { syncCart, track } from '../lib/track';
 
 const CartContext = createContext(null);
 const KEY = 'tranzlife.cart.v1';
@@ -9,7 +11,8 @@ function load() {
   try {
     const raw = localStorage.getItem(KEY);
     const parsed = raw ? JSON.parse(raw) : [];
-    return Array.isArray(parsed) ? parsed.filter((l) => onSale(getProduct(l.id))) : [];
+    // keep every line: products added in the dashboard arrive with the live catalogue a moment later
+    return Array.isArray(parsed) ? parsed.filter((l) => l && typeof l.id === 'string') : [];
   } catch {
     return [];
   }
@@ -32,6 +35,7 @@ export function CartProvider({ children }) {
     } catch {
       /* storage unavailable */
     }
+    syncCart(lines);            // server copy for abandoned-cart insights (only with analytics consent)
   }, [lines]);
 
   const add = useCallback((id, qty = 1, pack = 1, { openDrawer = true } = {}) => {
@@ -43,19 +47,25 @@ export function CartProvider({ children }) {
       return [...prev, { key, id, pack, qty }];
     });
     const p = getProduct(id);
+    track('add_to_cart', { pid: id, pack, qty, value: p ? packPrice(p, pack) * qty : undefined });
     setToast(`${p?.short} added to your cart`);
     if (openDrawer) setOpen(true);
   }, []);
 
   const setQty = useCallback((key, qty) => {
+    if (qty <= 0) track('remove_from_cart', { pid: String(key).split(':')[0] });
     setLines((prev) => (qty <= 0 ? prev.filter((l) => l.key !== key) : prev.map((l) => (l.key === key ? { ...l, qty: Math.min(qty, 10) } : l))));
   }, []);
 
-  const remove = useCallback((key) => setLines((prev) => prev.filter((l) => l.key !== key)), []);
+  const remove = useCallback((key) => {
+    track('remove_from_cart', { pid: String(key).split(':')[0] });
+    setLines((prev) => prev.filter((l) => l.key !== key));
+  }, []);
   const clear = useCallback(() => setLines([]), []);
 
+  const catalog = useCatalog();
   const totals = useMemo(() => {
-    const detailed = lines.map((l) => {
+    const detailed = lines.filter((l) => getProduct(l.id)).map((l) => {
       const product = getProduct(l.id);
       const unit = packPrice(product, l.pack);
       const unitMrp = packMrp(product, l.pack);
@@ -66,7 +76,9 @@ export function CartProvider({ children }) {
     const count = detailed.reduce((s, l) => s + l.qty, 0);
     const shipping = subtotal === 0 || subtotal >= SITE.freeShippingAbove ? 0 : SITE.shippingFee;
     return { detailed, subtotal, mrpTotal, savings: mrpTotal - subtotal, count, shipping, toFree: Math.max(0, SITE.freeShippingAbove - subtotal) };
-  }, [lines]);
+  }, [lines, catalog]);
+
+  useEffect(() => { if (open) track('cart_view', { items: lines.length }); }, [open]);   // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!toast) return;

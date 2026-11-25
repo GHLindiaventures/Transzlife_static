@@ -27,6 +27,7 @@
   --placeholder-dark:var(--green-900);
   --slide-bg:var(--gold-500);
   --line:rgba(15,47,29,.7);
+  --hairline:rgba(15,47,29,.1);   /* soft divider for rows that sit on glass cards */
 }
 
 body{background:var(--bg);color:var(--ink)}
@@ -87,9 +88,9 @@ body{background:var(--bg);color:var(--ink)}
 .media--icon{background:var(--gold-200)}
 
 /* ---- product slider: alternate gold / green slides ---- */
-.pslider{background:var(--gold-500)}
-.pslider__slide{background:var(--gold-500)}
-.pslider__slide:nth-child(even){background:var(--green-700)}
+.pslider{background:var(--bg-warm)}
+.pslider__slide{background:var(--bg-warm)}
+.pslider__slide:nth-child(even){background:var(--gold-100)}
 .pslider__right{background:var(--green-900)}
 .pslider__right .media{background:linear-gradient(135deg,#6f9a7c,#3d6b4e)}
 .pslider__next{background:#fff;color:var(--green-900)}

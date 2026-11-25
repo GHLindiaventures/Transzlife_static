@@ -412,3 +412,20 @@
 .article__figure { margin: 1.4em 0 1.6em; }
 .article__figure img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 18px; background: #eef0ea; }
 .article__figure figcaption { margin-top: 8px; font-size: .9rem; line-height: 1.5; color: var(--text-2, #5b6a60); text-align: center; }
+/* ---- Price display: smaller raised ₹, lining equal-width digits, honest offers ---- */
+.money { font-variant-numeric: lining-nums tabular-nums; white-space: nowrap; }
+.money__sym { font-family: var(--f-body); font-size: .6em; font-weight: 600; vertical-align: .45em; margin-right: .1em; letter-spacing: 0; }
+.price strong { font-family: var(--f-head); font-weight: 500; font-size: 1.25rem; letter-spacing: -.01em; }
+.price s .money__sym { vertical-align: baseline; font-size: 1em; margin: 0; }
+.pcard__pricing { display: grid; gap: 2px; min-width: 0; }
+.pcard__deal { margin: 0; font-size: .74rem; line-height: 1.35; color: var(--text-2); }
+.pcard__deal .money { font-weight: 700; color: var(--forest); }
+.pcard__deal .money__sym { font-size: 1em; vertical-align: baseline; margin: 0; }
+.pdp__price strong { font-weight: 450; font-size: 2.3rem; letter-spacing: -.015em; line-height: 1; }
+.pdp__tax:has(+ .pdp__prepaid) { margin-bottom: 10px; }
+.pdp__prepaid { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; margin: 0 0 18px; padding: 10px 14px; border-radius: 12px; background: var(--leaf-soft); color: var(--forest); font-size: .95rem; font-weight: 700; }
+.pdp__prepaid .money__sym { font-size: 1em; vertical-align: baseline; margin: 0; }
+.pdp__prepaid > span:not(.money) { font-size: .8rem; font-weight: 500; color: var(--text-2); }
+.pack span .money__sym { font-size: .7em; vertical-align: .3em; }
+.pack__save { font-style: normal; font-size: .72rem; font-weight: 700; color: var(--forest-2); }
+.cart__prepaid { margin: 0 0 8px; padding: 8px 12px; border-radius: 10px; background: var(--leaf-soft); color: var(--forest); font-size: .84rem; }
