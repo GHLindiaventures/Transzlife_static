@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { api } from '../../store/lib/api';
 import { ErrorBox, Loading, Notice, PageHead, Pager, can, dt, rs, toPaise, useAction, useAdmin, useApi } from '../ui';
@@ -5,6 +6,7 @@ import { ErrorBox, Loading, Notice, PageHead, Pager, can, dt, rs, toPaise, useAc
 const ACTIONS = {
   'content.announcement_create': 'Added bar message', 'content.announcement_update': 'Changed bar message', 'content.announcement_delete': 'Removed bar message',
   'content.announcement_style': 'Changed bar colours', 'content.home': 'Changed homepage',
+  'order.cod': 'Recorded COD confirmation',
   'product.pricing': 'Changed price or badge', 'offer.create': 'Created offer', 'offer.update': 'Changed offer', 'offer.delete': 'Deleted offer', 'settings.packs': 'Changed pack discounts',
   'review.approve': 'Published review', 'review.reject': 'Rejected review', 'review.remove': 'Removed review', 'review.reply': 'Replied to review',
   'customer.cart_reminder': 'Sent cart reminder', 'customer.reorder_reminder': 'Sent refill reminder',
@@ -93,6 +95,7 @@ export function SettingsPage() {
           )}
         </section>
         <Reminders s={s} owner={owner} reload={reload} />
+        <Operations s={s} owner={owner} reload={reload} />
         <section className="adm-card">
           <h2 className="adm-h2">Your password</h2>
           <form className="adm-form" onSubmit={changePw}>
@@ -106,6 +109,43 @@ export function SettingsPage() {
         </section>
       </div>
     </>
+  );
+}
+
+/** COD confirmation by message, the owner's daily summary, and when to warn about stock running out. */
+function Operations({ s, owner, reload }) {
+  const act = useAction();
+  const { data } = useApi('/api/admin/integrations');
+  const [preview, setPreview] = useState('');
+  const save = async (e) => {
+    e.preventDefault();
+    const f = Object.fromEntries(new FormData(e.currentTarget));
+    const phones = String(f.phones || '').split(/[\s,]+/).map((x) => x.replace(/\D/g, '').slice(-10)).filter(Boolean);
+    const body = { cod_confirmation: f.cod === 'on', stock_alert_days: Number(f.stockDays), daily_summary: { enabled: f.summary === 'on', phones, hour: Number(f.hour) } };
+    if (await act.run(() => api('/api/admin/settings', { method: 'PATCH', body }), 'Saved.')) reload();
+  };
+  const ds = s?.daily_summary || { enabled: false, phones: [], hour: 9 };
+  return (
+    <section className="adm-card">
+      <h2 className="adm-h2">Orders, stock & daily summary</h2>
+      {!s ? <Loading /> : (
+        <form className="adm-form" onSubmit={save}>
+          <label className="adm-check"><input type="checkbox" name="cod" defaultChecked={!!s.cod_confirmation} disabled={!owner} /> Ask cash-on-delivery customers to confirm (reply YES / NO)</label>
+          <p className="adm-muted">Customers who don't reply within 24 hours show in "Needs your attention" so you can call them. Replies reach the site only if Twilio's "A message comes in" webhook is set to:<br />
+            <code>{data?.replyWebhook || 'set SITE_URL first'}</code></p>
+          <label>Warn when a product will run out within (days)<input name="stockDays" type="number" min="3" max="90" defaultValue={s.stock_alert_days ?? 14} disabled={!owner} required /></label>
+          <label className="adm-check"><input type="checkbox" name="summary" defaultChecked={!!ds.enabled} disabled={!owner} /> Send a daily summary (yesterday's orders and revenue, today's to-dos)</label>
+          <div className="adm-pair">
+            <label>To these mobile numbers<span className="adm-sub">Up to 5, separated by commas</span><input name="phones" defaultValue={(ds.phones || []).join(', ')} disabled={!owner} placeholder="98xxxxxxxx" /></label>
+            <label>At (India time)<select name="hour" defaultValue={ds.hour ?? 9} disabled={!owner}>{Array.from({ length: 17 }, (_, i) => i + 6).map((h) => <option key={h} value={h}>{h}:00</option>)}</select></label>
+          </div>
+          <button type="button" className="adm-btn is-ghost is-sm" onClick={async () => { try { setPreview((await api('/api/admin/daily-summary/preview')).text); } catch (e) { setPreview(e.message); } }}>Preview today's summary</button>
+          {preview && <p className="adm-notice" style={{ whiteSpace: 'pre-line' }}>{preview}</p>}
+          <ErrorBox>{act.error}</ErrorBox><Notice>{act.notice}</Notice>
+          {owner ? <button className="adm-btn" disabled={act.busy}>Save</button> : <p className="adm-muted">Only an owner can change these.</p>}
+        </form>
+      )}
+    </section>
   );
 }
 

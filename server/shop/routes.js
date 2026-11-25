@@ -43,7 +43,7 @@ function parse(schema, data, reply) {
 
 const customerOut = (c) => c && { phone: c.phone, name: c.name, email: c.email, marketingConsent: !!c.marketing_consent };
 
-export default async function shopRoutes(app, { db, auth, orders, razorpay, notifier, log }) {
+export default async function shopRoutes(app, { db, auth, orders, razorpay, notifier, ops, log }) {
   const signedIn = { preHandler: auth.requireCustomer };
   const tight = (max, minutes = 15) => ({ config: { rateLimit: { max, timeWindow: `${minutes} minutes` } } });
 
@@ -127,7 +127,10 @@ export default async function shopRoutes(app, { db, auth, orders, razorpay, noti
         await db.query('UPDATE customers SET marketing_consent = $2, marketing_consent_at = now() WHERE id = $1', [c.id, body.marketingConsent]);
       }
       await attributeOrder(db, order, c.id, body.track).catch((e) => log?.warn?.(`[track] attribution failed: ${e.message}`));
-      if (order.status === 'confirmed') notifier?.notify(order.id, 'confirmed');    // cash on delivery
+      if (order.status === 'confirmed') {                                             // cash on delivery
+        notifier?.notify(order.id, 'confirmed');
+        ops?.requestCodConfirmation(order.id).catch((e) => log?.warn?.(`[ops] COD confirmation: ${e.message}`));
+      }
     }
     const payment = order.status === 'pending_payment' ? await orders.startPayment(order, c) : null;
     return { order: orders.PUBLIC(order), payment };

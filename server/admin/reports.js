@@ -20,7 +20,8 @@ export const STAGES = {
   cancelled: ['cancelled', 'refunded'],
 };
 
-export default async function reportRoutes(app, { db, G, parse, env }) {
+export default async function reportRoutes(app, { db, G, parse, env, ops }) {
+  const runoutList = async () => (ops ? ops.stockRunout() : []);
   const insights = createInsights(env);
   const num = (v) => Number(v || 0);
 
@@ -42,6 +43,10 @@ export default async function reportRoutes(app, { db, G, parse, env }) {
       SELECT name, starts_at, ends_at, CASE WHEN starts_at > now() THEN 'starts' ELSE 'ends' END AS what FROM offers
        WHERE active AND ((starts_at <= now() AND ends_at > now() AND ends_at < now() + interval '48 hours')
                       OR (starts_at > now() AND starts_at < now() + interval '24 hours')) ORDER BY LEAST(starts_at, ends_at)`)).rows;
+    const cod = (await db.query(`
+      SELECT COUNT(*) FILTER (WHERE cod_confirmation = 'no_reply') AS no_reply, COUNT(*) FILTER (WHERE cod_confirmation = 'cancel_requested') AS cancel
+        FROM orders WHERE status = 'confirmed'`)).rows[0];
+    const runout = await runoutList();
     const reviewsPending = num((await db.query(`SELECT COUNT(*) AS n FROM reviews WHERE status = 'pending'`)).rows[0].n);
     const failed = num((await db.query(`SELECT COUNT(*) AS n FROM notifications WHERE status = 'failed' AND created_at > now() - interval '7 days'`)).rows[0].n);
     // batches still in stock that expire within 90 days (sell these first; plan a discount or write-off)
@@ -78,6 +83,10 @@ export default async function reportRoutes(app, { db, G, parse, env }) {
     const ending = offersSoon.filter((o) => o.what === 'ends'), starting = offersSoon.filter((o) => o.what === 'starts');
     add('offers_ending', ending.length, ending.length === 1 ? 'offer ends within 48 hours' : 'offers end within 48 hours', '/admin/pricing', 'info', ending.map((o) => o.name).join(', '));
     add('offers_starting', starting.length, starting.length === 1 ? 'offer starts within 24 hours' : 'offers start within 24 hours', '/admin/pricing', 'muted', starting.map((o) => o.name).join(', '));
+    add('cod_no_reply', num(cod.no_reply), num(cod.no_reply) === 1 ? 'COD order with no reply: call to confirm' : 'COD orders with no reply: call to confirm', '/admin/orders?stage=to_pack', 'warn');
+    add('cod_cancel', num(cod.cancel), num(cod.cancel) === 1 ? 'customer asked to cancel a COD order' : 'customers asked to cancel COD orders', '/admin/orders?stage=to_pack', 'bad');
+    add('runout', runout.length, runout.length === 1 ? 'product will run out soon' : 'products will run out soon', '/admin/products', 'warn',
+      runout.map((r) => `${r.name.replace(/^TranzLife /, '')}: about ${r.days} day${r.days === 1 ? '' : 's'} left`).join(' · '));
     add('reviews', reviewsPending, reviewsPending === 1 ? 'review waiting for a check' : 'reviews waiting for a check', '/admin/reviews', 'info');
     add('failed_messages', failed, failed === 1 ? 'customer message failed' : 'customer messages failed', '/admin/settings', 'warn');
     return items;

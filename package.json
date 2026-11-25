@@ -13,7 +13,7 @@
     "start": "node --env-file-if-exists=.env --env-file-if-exists=.env.local server/index.js",
     "gemini-bot": "cd gemini-bot && npm start",
     "dev:api": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --watch-path=server server/index.js",
-    "test:api": "node --test --test-concurrency=3 server/shop/shop.test.js server/admin/admin.test.js server/shop/twilio.test.js server/admin/catalog.test.js server/admin/phase3.test.js server/admin/phase4.test.js server/admin/tracking.test.js server/admin/reviews.test.js server/admin/offers.test.js server/admin/content.test.js",
+    "test:api": "node --test --test-concurrency=3 server/shop/shop.test.js server/admin/admin.test.js server/shop/twilio.test.js server/admin/catalog.test.js server/admin/phase3.test.js server/admin/phase4.test.js server/admin/tracking.test.js server/admin/reviews.test.js server/admin/offers.test.js server/admin/content.test.js server/admin/ops.test.js",
     "db": "node --env-file-if-exists=.env --env-file-if-exists=.env.local server/db/console.js",
     "admin:create": "node --env-file-if-exists=.env --env-file-if-exists=.env.local server/admin/create-staff.js",
     "twilio:check": "node --env-file-if-exists=.env --env-file-if-exists=.env.local server/shop/twilio-check.js"

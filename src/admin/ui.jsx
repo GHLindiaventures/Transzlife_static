@@ -25,6 +25,10 @@ export const PAYSTATUS = {
   created: ['Started', 'warn'],
 };
 export const METHOD = { upi: 'UPI', card: 'Card', netbanking: 'Net banking', cod: 'COD' };
+export const CODSTATUS = {
+  pending: ['COD: waiting for reply', 'warn'], confirmed: ['COD confirmed', 'ok'],
+  no_reply: ['COD: no reply, call', 'bad'], cancel_requested: ['Customer wants to cancel', 'bad'],
+};
 
 export function Badge({ map = STATUS, value }) {
   const [label, tone] = map[value] || [value, 'off'];
