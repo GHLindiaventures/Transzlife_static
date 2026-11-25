@@ -63,9 +63,9 @@ const ALL_FORMULATIONS = [
       { key: 'tl-inner', zone: 'top-left-inner', src: '/assets/ingredients/cutout/lavender.webp', size: 80, rot: -8, delay: '0.12s', label: 'Lavender' },
       { key: 'mid-l', zone: 'mid-left', src: '/assets/ingredients/cutout/wintergreen.webp', size: 84, rot: 14, delay: '0.18s', label: 'Wintergreen' },
       { key: 'base-l', zone: 'base-left', src: '/assets/ingredients/cutout/peppermint.webp', size: 105, rot: -20, delay: '0.22s', label: 'Peppermint' },
-      { key: 'tr-bokeh', zone: 'top-right-bokeh', src: '/assets/ingredients/cutout/lavender.webp', blur: 10, size: 120, rot: 18, delay: '0.08s', label: 'Lavender' },
+      { key: 'tr-bokeh', zone: 'top-right-bokeh', src: '/assets/ingredients/cutout/ginger.webp', blur: 10, size: 120, rot: 18, delay: '0.08s', label: 'Ginger' },
       { key: 'tr-inner', zone: 'top-right-inner', src: '/assets/ingredients/cutout/sesame.webp', size: 80, rot: 10, delay: '0.15s', label: 'Sesame' },
-      { key: 'mid-r', zone: 'mid-right', src: '/assets/ingredients/cutout/ginger.webp', size: 84, rot: -12, delay: '0.20s', label: 'Ginger Oil' },
+      { key: 'mid-r', zone: 'mid-right', src: '/assets/ingredients/cutout/wintergreen.webp', size: 84, rot: -12, delay: '0.20s', label: 'Wintergreen' },
       { key: 'base-r', zone: 'base-right', src: '/assets/ingredients/cutout/lavender.webp', size: 100, rot: 24, delay: '0.25s', label: 'Lavender' },
     ],
   },
@@ -114,13 +114,13 @@ const ALL_FORMULATIONS = [
   {
     id: 'inhaler',
     navTitle: 'BreatheFree',
-    fullName: 'Craving Control™ Aromatherapy Inhaler',
+    fullName: 'BreatheFree™ Aromatherapy Inhaler',
     subTitle: 'Fast-Acting Nicotine & Smoking Urge Relief',
     bgWord: 'BREATHE',
     bgColor: '#9ecfc5', // Crisp cooling peppermint teal
     bottleImg: '/assets/product-6.png',
-    alt: 'Craving Control™ Aromatherapy Inhaler',
-    tag: 'Craving Control',
+    alt: 'BreatheFree™ Aromatherapy Inhaler',
+    tag: 'Quit Smoking Support',
     ingredients: [
       { key: 'tl-bokeh', zone: 'top-left-bokeh', src: '/assets/ingredients/cutout/peppermint.webp', blur: 10, size: 130, rot: -15, delay: '0.04s', label: 'Peppermint' },
       { key: 'tl-inner', zone: 'top-left-inner', src: '/assets/ingredients/cutout/lavender.webp', size: 80, rot: -8, delay: '0.12s', label: 'Lavender' },

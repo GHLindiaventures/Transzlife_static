@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { setBuyNow, BUY_NOW_URL } from '../lib/checkoutIntent';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { Check, Download, ShieldCheck, Eye, TrendingUp, Truck, RotateCcw, Leaf, ArrowRight, Lock, Pill, Clock, Package, Lightbulb, Hand, Briefcase, MapPin, Sparkles, FileText, FlaskConical, Sprout } from 'lucide-react';
-import { getProduct, PRODUCTS, PACKS } from '../data/products';
+import { Check, Download, ShieldCheck, Eye, TrendingUp, Truck, RotateCcw, Leaf, ArrowRight, Lock, Pill, Clock, Package, Lightbulb, Hand, Briefcase, MapPin, Sparkles, FileText, FlaskConical, Sprout, ChevronLeft, ChevronRight } from 'lucide-react';
+import { getProduct, onSale, PRODUCTS, PACKS } from '../data/products';
+import { getGallery } from '../data/gallery';
 import { useCatalog } from '../lib/catalog';
 import { SITE } from '../data/site';
 import { getIngredient } from '../data/ingredients';
@@ -23,26 +24,66 @@ import OfferTimer from '../components/OfferTimer';
 import { inr, pctOff, prepaidSaving } from '../utils/format';
 import NotFound from './NotFound';
 
-const ROUTINE_ICON = { Dose: Pill, When: Clock, Format: Package, Tip: Lightbulb, How: Hand, Use: Hand, Apply: Hand, Carry: Briefcase, Where: MapPin };
+const ROUTINE_ICON = { Dose: Pill, When: Clock, Format: Package, Pack: Package, Tip: Lightbulb, How: Hand, Use: Hand, Apply: Hand, Carry: Briefcase, Where: MapPin };
+
+// Plain pack shots (white background) are blended onto the product tint; photos and the
+// generated infographic slides fill the frame as they are.
+const isPackShot = (src) => src.startsWith('/img/p/');
 
 function Gallery({ p, children }) {
+  const images = getGallery(p);
   const [i, setI] = useState(0);
+  const thumbs = useRef(null);
+  const touch = useRef(null);
   useEffect(() => setI(0), [p.id]);
+  const go = (k) => setI((k + images.length) % images.length);
+  // keep the active thumbnail in view inside the scrolling strip
+  useEffect(() => {
+    const el = thumbs.current?.children[i];
+    const box = thumbs.current;
+    if (!el || !box) return;
+    if (box.scrollHeight > box.clientHeight) box.scrollTo({ top: el.offsetTop - box.clientHeight / 2 + el.clientHeight / 2, behavior: 'smooth' });
+    else if (box.scrollWidth > box.clientWidth) box.scrollTo({ left: el.offsetLeft - box.clientWidth / 2 + el.clientWidth / 2, behavior: 'smooth' });
+  }, [i]);
+  // warm the cache so switching slides is instant
+  useEffect(() => { images.forEach((src) => { const im = new Image(); im.src = src; }); }, [p.id]);
+
+  const src = images[i];
+  const multi = images.length > 1;
   return (
-    <div className="gallery">
-      <div className="gallery__main" style={{ background: p.tint }}>
-        <img src={p.images[i]} alt={p.name} key={p.images[i]} />
-        {children}
-      </div>
-      {p.images.length > 1 && (
-        <div className="gallery__thumbs">
-          {p.images.map((src, k) => (
-            <button key={src} className={k === i ? 'is-active' : ''} onClick={() => setI(k)} aria-label={`View image ${k + 1}`}>
-              <img src={src} alt="" />
+    <div className={`gallery ${multi ? 'gallery--rail' : ''}`}>
+      {multi && (
+        <div className="gallery__thumbs" ref={thumbs} role="tablist" aria-label="Product images">
+          {images.map((s, k) => (
+            <button key={s} role="tab" aria-selected={k === i} className={k === i ? 'is-active' : ''} onClick={() => setI(k)} aria-label={`View image ${k + 1} of ${images.length}`}>
+              <img src={s} alt="" loading="lazy" className={isPackShot(s) ? 'is-pack' : ''} />
             </button>
           ))}
         </div>
       )}
+      <div
+        className="gallery__main"
+        style={{ background: p.tint }}
+        tabIndex={multi ? 0 : undefined}
+        onKeyDown={(e) => { if (e.key === 'ArrowRight') go(i + 1); if (e.key === 'ArrowLeft') go(i - 1); }}
+        onTouchStart={(e) => { touch.current = e.touches[0].clientX; }}
+        onTouchEnd={(e) => {
+          if (touch.current == null) return;
+          const dx = e.changedTouches[0].clientX - touch.current;
+          touch.current = null;
+          if (Math.abs(dx) > 40) go(i + (dx < 0 ? 1 : -1));
+        }}
+      >
+        <img src={src} alt={`${p.name}, image ${i + 1} of ${images.length}`} key={src} className={isPackShot(src) ? 'is-pack' : 'is-full'} />
+        {multi && (
+          <>
+            <button type="button" className="gallery__nav gallery__nav--prev" onClick={() => go(i - 1)} aria-label="Previous image"><ChevronLeft size={22} /></button>
+            <button type="button" className="gallery__nav gallery__nav--next" onClick={() => go(i + 1)} aria-label="Next image"><ChevronRight size={22} /></button>
+            <span className="gallery__count" aria-hidden="true">{i + 1} / {images.length}</span>
+          </>
+        )}
+        {children}
+      </div>
     </div>
   );
 }
@@ -72,9 +113,11 @@ export default function Product() {
   // a product added in the dashboard arrives with the live catalogue: wait for it before saying "not found"
   if (!p) return catalogV === 0 ? <div className="page-loading" aria-busy="true" /> : <NotFound />;
 
-  const unit = packPrice(p, pack);
-  const mrp = packMrp(p, pack);
-  const off = pctOff(unit, mrp);
+  const sale = onSale(p);
+  const unit = sale ? packPrice(p, pack) : null;
+  const mrp = sale ? packMrp(p, pack) : null;
+  const off = sale ? pctOff(unit, mrp) : 0;
+  const notifyUrl = `${SITE.whatsapp}?text=${encodeURIComponent(`Hi TranzLife, please let me know when ${p.short} is available.`)}`;
   const concerns = p.concerns.map(getConcern).filter(Boolean);
   const ings = p.ingredients.map(getIngredient).filter(Boolean);
   // every other product, ones sharing a concern first
@@ -113,25 +156,35 @@ export default function Product() {
               ))}
             </div>
 
-            <div className="pdp__price">
-              <strong><Money value={unit} /></strong>
-              {mrp > unit && <><s>MRP {inr(mrp)}</s><span className="save">Save {inr(mrp - unit)} ({off}% off)</span></>}
-            </div>
-            {p.offer && <OfferTimer offer={p.offer} />}
-            {viewers && <p className="live-line"><span className="live-line__dot" aria-hidden="true" /><Eye size={15} aria-hidden="true" /> <span><strong>{viewers}</strong> other people are viewing this right now</span></p>}
-            {p.sold30 && <p className="live-line"><TrendingUp size={15} aria-hidden="true" /> <span>Bought <strong>{p.sold30} times</strong> in the last 30 days</span></p>}
-            <p className="pdp__tax">Inclusive of all taxes · {p.size} {p.format.toLowerCase()}{pack > 1 ? ` · pack of ${pack}` : ''}</p>
-            {SITE.prepaidDiscount > 0 && (
-              <p className="pdp__prepaid">
-                <Money value={unit - prepaidSaving(unit, SITE.prepaidDiscount)} /> when you pay online
-                <span>UPI, card or net banking · extra {Math.round(SITE.prepaidDiscount * 100)}% off at checkout</span>
-              </p>
+            {sale ? (
+              <>
+                <div className="pdp__price">
+                  <strong><Money value={unit} /></strong>
+                  {mrp > unit && <><s>MRP {inr(mrp)}</s><span className="save">Save {inr(mrp - unit)} ({off}% off)</span></>}
+                </div>
+                {p.offer && <OfferTimer offer={p.offer} />}
+                {viewers && <p className="live-line"><span className="live-line__dot" aria-hidden="true" /><Eye size={15} aria-hidden="true" /> <span><strong>{viewers}</strong> other people are viewing this right now</span></p>}
+                {p.sold30 && <p className="live-line"><TrendingUp size={15} aria-hidden="true" /> <span>Bought <strong>{p.sold30} times</strong> in the last 30 days</span></p>}
+                <p className="pdp__tax">Inclusive of all taxes · {p.size} {p.format.toLowerCase()}{pack > 1 ? ` · pack of ${pack}` : ''}</p>
+                {SITE.prepaidDiscount > 0 && (
+                  <p className="pdp__prepaid">
+                    <Money value={unit - prepaidSaving(unit, SITE.prepaidDiscount)} /> when you pay online
+                    <span>UPI, card or net banking · extra {Math.round(SITE.prepaidDiscount * 100)}% off at checkout</span>
+                  </p>
+                )}
+              </>
+            ) : (
+              <>
+                <div className="pdp__price pdp__price--soon"><strong>Price to be announced</strong></div>
+                <p className="pdp__tax">Coming soon · {p.size} {p.format.toLowerCase()}</p>
+              </>
             )}
 
             <ul className="pdp__highlights">
               {p.highlights.map((h) => <li key={h}><Check size={16} /> {h}</li>)}
             </ul>
 
+            {sale ? (<>
             <fieldset className="packs">
               <legend>Choose your pack</legend>
               {PACKS.map((pk) => {
@@ -161,6 +214,11 @@ export default function Product() {
                 </>
               )}
             </div>
+            </>) : (
+              <div className="pdp__buy">
+                <a className="btn btn--lg btn--grow" href={notifyUrl} target="_blank" rel="noreferrer">Notify me on WhatsApp</a>
+              </div>
+            )}
 
             <div className="pdp__trust">
               <span><Truck size={18} /> Free shipping above ₹{SITE.freeShippingAbove}</span>
@@ -225,12 +283,14 @@ export default function Product() {
           <div className="pdp-ings__head">
             <p className="eyebrow">Key ingredients</p>
             <h2>What’s inside</h2>
-            <p className="shead__text">{ings.length} carefully chosen ingredients. Tap one to learn more.</p>
+            <p className="shead__text">
+              {ings.length} carefully chosen ingredients. Tap one to learn more.
+              {p.composition && <> Amounts shown are per {p.composition.per}, as printed on the pack (excipients q.s.).</>}
+            </p>
             <Link to="/ingredients" className="link-arrow">Ingredient library <ArrowRight size={16} /></Link>
           </div>
           <div>
-            <IngredientGrid ings={ings} />
-            {p.id === 'breathefree-inhaler' && <p className="note">Aroma profile shown above. The full essential-oil declaration is printed on the pack.</p>}
+            <IngredientGrid ings={ings} amounts={p.composition?.amounts} />
           </div>
         </div>
       </section>
@@ -297,8 +357,10 @@ export default function Product() {
 
       <div className="sticky-buy">
         <img src={p.images[0]} alt="" />
-        <span><strong>{p.short}</strong><small>{inr(unit)}</small></span>
-        <button className="btn" disabled={p.stock === 'out'} onClick={() => add(p.id, qty, pack)}>{p.stock === 'out' ? 'Out of stock' : 'Add to cart'}</button>
+        <span><strong>{p.short}</strong><small>{sale ? inr(unit) : 'Price to be announced'}</small></span>
+        {sale
+          ? <button className="btn" disabled={p.stock === 'out'} onClick={() => add(p.id, qty, pack)}>{p.stock === 'out' ? 'Out of stock' : 'Add to cart'}</button>
+          : <a className="btn" href={notifyUrl} target="_blank" rel="noreferrer">Notify me</a>}
       </div>
     </div>
   );

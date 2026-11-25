@@ -10,10 +10,12 @@
 #products,#sc-pipeline,#sc-certs,#roots{scroll-margin-top:calc(var(--header-h) + var(--announcement-h, 34px) + 12px)}
 
 /* ---------------- header: one clear Shop action instead of dead icons ---------------- */
-.header__cta{display:inline-flex;align-items:center;gap:8px;min-height:34px;padding:0 21px;border-radius:999px;background:var(--green-700);color:#fff;font-size:12.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;transition:background .25s var(--ease),color .25s var(--ease)}
+.header__cta{display:inline-flex;align-items:center;gap:8px;min-height:32px;padding:0 16px;border-radius:999px;background:var(--green-700);color:#fff;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;transition:background .25s var(--ease),color .25s var(--ease)}
 .header__cta:hover{background:var(--green-900);color:var(--gold-400)}
-@media (max-width:989px){.header__cta{min-height:34px;padding:0 13px}}
-@media (max-width:420px){.header__cta span{display:none}.header__cta{width:34px;padding:0;justify-content:center}}
+.header__cta--icon{padding:0;min-height:40px;min-width:40px;background:var(--green-700);color:#fff;border-radius:50%;justify-content:center}
+.header__cta--icon:hover{background:var(--green-900);color:var(--gold-400)}
+@media (max-width:989px){.header__cta--icon{display:inline-flex;min-height:36px;min-width:36px}}
+@media (max-width:420px){.header__cta span{display:none}.header__cta{width:32px;padding:0;justify-content:center}}
 .mega__tag{display:block;margin-top:2px;font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--green-700);opacity:.8}
 
 /* ---------------- footer ---------------- */
@@ -129,37 +131,44 @@
     var(--tex,linear-gradient(transparent,transparent)),
     var(--wash,#eef0ea);
 }
-/* PulmoClear (lungs, green pack, orange berries): fresh sage with tiny air bubbles */
+/* PulmoClear: fresh botanical sage */
 .featured .pcard[data-product="gummies"]{
-  --wash:linear-gradient(160deg,#eef5ea 0%,#d5e5cf 60%,#bfd6b8 100%);
+  --wash:linear-gradient(160deg,#eef4ea 0%,var(--green-100,#e3eddc) 60%,#d2e2ca 100%);
   --tex:radial-gradient(circle,rgba(255,255,255,.75) 1.6px,transparent 2.2px) 0 0/22px 22px;
 }
-/* Craving Control (white inhaler, breathing): cool eucalyptus blue with vapour rings */
+/* BreatheFree: crisp herbal mist */
 .featured .pcard[data-product="inhaler"]{
-  --wash:linear-gradient(165deg,#eef5f7 0%,#d3e3e8 60%,#b9d0d8 100%);
+  --wash:linear-gradient(165deg,var(--bg,#fcfaf1) 0%,#e7efe3 60%,#d6e4d2 100%);
   --tex:repeating-radial-gradient(circle at 80% 16%,rgba(255,255,255,0) 0 22px,rgba(255,255,255,.5) 22px 23px);
 }
-/* CycleRelief (lavender label, calm): lavender with soft petal blooms */
+/* CycleRelief: soft cream & botanical gold */
 .featured .pcard[data-product="rollon"]{
-  --wash:linear-gradient(160deg,#f4f0f8 0%,#e1d7ee 60%,#cbbce2 100%);
+  --wash:linear-gradient(160deg,var(--bg,#fcfaf1) 0%,var(--gold-100,#faf0cf) 60%,#efe1b3 100%);
   --tex:radial-gradient(30% 24% at 14% 18%,rgba(255,255,255,.6),transparent 70%),
-        radial-gradient(34% 26% at 88% 86%,rgba(150,120,195,.25),transparent 70%);
+        radial-gradient(34% 26% at 88% 86%,rgba(224,168,38,.18),transparent 70%);
 }
-/* Reviva (orange label, massage): warm clay with a fine linen weave */
+/* Reviva: warm linen & golden sand */
 .featured .pcard[data-product="reviva"]{
-  --wash:linear-gradient(160deg,#fbf1ea 0%,#f0d6c4 60%,#e3bca3 100%);
+  --wash:linear-gradient(160deg,var(--bg,#fcfaf1) 0%,var(--bg-warm,#f7efd2) 60%,#eddca8 100%);
   --tex:repeating-linear-gradient(45deg,rgba(255,255,255,.2) 0 1px,transparent 1px 7px),
-        repeating-linear-gradient(-45deg,rgba(160,90,50,.06) 0 1px,transparent 1px 7px);
+        repeating-linear-gradient(-45deg,rgba(26,107,60,.05) 0 1px,transparent 1px 7px);
 }
-/* LiverDetox (amber bottle, herbal leaves): earthy olive with a leaf line drawing */
+/* LiverDetox: earthy olive-sage with leaf line drawing */
 .featured .pcard[data-product="liver"]{
-  --wash:linear-gradient(160deg,#f1f1e6 0%,#dcdcc4 60%,#c6c8a6 100%);
-  --tex:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%23556b3a' stroke-width='1.2' opacity='.3'%3E%3Cpath d='M20 104C30 60 62 30 108 18C100 64 70 94 20 104Z'/%3E%3Cpath d='M20 104L96 30M44 82l-6-22M60 66l-4-24M76 50l-2-20M48 80h22M64 64l22-2'/%3E%3C/g%3E%3C/svg%3E") no-repeat right -4% bottom -4%/44% auto;
+  --wash:linear-gradient(160deg,#f4f5ea 0%,var(--green-100,#e3eddc) 60%,#d0dec7 100%);
+  --tex:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%231a6b3c' stroke-width='1.2' opacity='.26'%3E%3Cpath d='M20 104C30 60 62 30 108 18C100 64 70 94 20 104Z'/%3E%3Cpath d='M20 104L96 30M44 82l-6-22M60 66l-4-24M76 50l-2-20M48 80h22M64 64l22-2'/%3E%3C/g%3E%3C/svg%3E") no-repeat right -4% bottom -4%/44% auto;
 }
-/* Energy Booster (purple label, sunrise): dawn sky from violet to coral with light rays */
+/* Energy Booster: sunlit gold-to-cream radiance */
 .featured .pcard[data-product="energy"]{
-  --wash:linear-gradient(180deg,#e9e0f1 0%,#f1dde0 55%,#f4cfc0 100%);
+  --wash:linear-gradient(180deg,var(--bg,#fcfaf1) 0%,var(--gold-100,#faf0cf) 55%,var(--gold-200,#f6e3a1) 100%);
   --tex:repeating-conic-gradient(from -90deg at 50% 110%,rgba(255,255,255,.24) 0 4deg,rgba(255,255,255,0) 4deg 12deg);
+}
+
+/* BreathFree Drops (black + bright green pack, mint): deep mint with soft light pools */
+.featured .pcard[data-product="drops"]{
+  --wash:linear-gradient(160deg,#ecf5ec 0%,#cfe5d2 60%,#a9cdb1 100%);
+  --tex:radial-gradient(28% 22% at 18% 20%,rgba(255,255,255,.6),transparent 70%),
+        radial-gradient(30% 24% at 86% 84%,rgba(40,140,70,.18),transparent 70%);
 }
 
 /* ---- photographic showcase images in product cards ---- */

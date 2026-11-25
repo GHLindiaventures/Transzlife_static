@@ -145,19 +145,32 @@ const Footer = forwardRef(function Footer(_, ref) {
     const el = document.getElementById('footer');
     const curtain = el && el.previousElementSibling;           // <main>: its lower edge is the footer's natural top
     if (!el || !curtain || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
+    // fixed footer only on larger screens: on phones the URL bar resizing innerHeight makes the
+    // fixed/curtain mode flip mid-scroll, which shows up as a glitch
+    const desktop = window.matchMedia('(min-width: 990px)');
     let raf = 0;
+    let h = 0;
+    const measure = () => {
+      h = el.offsetHeight;
+      el.style.setProperty('--ftr', Math.round(Math.min(h, window.innerHeight * 0.7)) + 'px');
+      const fixed = desktop.matches && h > 0 && h <= window.innerHeight;
+      const root = document.documentElement;
+      root.classList.toggle('ft-fixed', fixed);
+      if (fixed) root.style.setProperty('--ft-h', h + 'px');
+    };
     const update = () => {
       raf = 0;
       const vh = window.innerHeight;
       const p = (vh - curtain.getBoundingClientRect().bottom) / vh;
       el.style.setProperty('--ftp', Math.max(0, Math.min(1, p)).toFixed(3));
-      el.style.setProperty('--ftr', Math.round(Math.min(el.offsetHeight, vh * 0.7)) + 'px');
     };
     const onScroll = () => { if (!raf) raf = requestAnimationFrame(update); };
+    const onResize = () => { measure(); onScroll(); };
+    measure();
     update();
     window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll);
-    return () => { window.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onScroll); if (raf) cancelAnimationFrame(raf); };
+    window.addEventListener('resize', onResize);
+    return () => { window.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onResize); if (raf) cancelAnimationFrame(raf); };
   }, []);
   return (
     <footer className="footer ft" id="footer" ref={ref}>

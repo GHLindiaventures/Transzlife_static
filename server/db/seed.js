@@ -21,7 +21,8 @@ export async function seed(db, log = console) {
       const r = await t.query(
         `INSERT INTO products (id, name, format, size, price, mrp) VALUES ($1,$2,$3,$4,$5,$6)
          ON CONFLICT (id) DO NOTHING`,
-        [p.id, p.name, p.format ?? null, p.size ?? null, Math.round(p.price * 100), Math.round(p.mrp * 100)]);
+        // no price yet ("coming soon") is stored as 0: shown without a price and refused at checkout
+        [p.id, p.name, p.format ?? null, p.size ?? null, Math.round((p.price ?? 0) * 100), Math.round((p.mrp ?? 0) * 100)]);
       if (r.affectedRows ?? r.rowCount) {
         added++;
         await t.query('INSERT INTO inventory (product_id, on_hand) VALUES ($1,$2) ON CONFLICT DO NOTHING', [p.id, SEED_STOCK]);

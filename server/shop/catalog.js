@@ -12,11 +12,12 @@ export const SOLD_MIN = 5;
 export function toPublic(p, media, batch = null, { eff = null, badge = null } = {}) {
   const c = p.content || {};
   eff ??= { price: Math.min(p.price, p.mrp), regular: Math.min(p.price, p.mrp), offer: null };
+  const priced = p.price > 0;          // 0 = price not set yet: "coming soon", not for sale
   const available = Number(p.available ?? 0);
   return {
     id: p.id, name: p.name, short: p.short || p.name, tagline: p.tagline || '', format: p.format || '', size: p.size || '',
-    price: eff.price / 100, mrp: p.mrp / 100, regularPrice: eff.regular / 100,
-    offer: eff.offer ? { id: eff.offer.id, name: eff.offer.name, kind: eff.offer.kind, endsAt: eff.offer.ends_at, showCountdown: eff.offer.show_countdown } : null,
+    price: priced ? eff.price / 100 : null, mrp: priced ? p.mrp / 100 : null, regularPrice: priced ? eff.regular / 100 : null,
+    offer: priced && eff.offer ? { id: eff.offer.id, name: eff.offer.name, kind: eff.offer.kind, endsAt: eff.offer.ends_at, showCountdown: eff.offer.show_countdown } : null,
     badge: badge?.text || null, badgeKey: badge?.key || null, badgeStyle: badge ? { bg: badge.bg, fg: badge.fg } : null, accent: p.accent || '#1f6b3c', tint: p.tint || '#eef4ea',
     concerns: p.concerns || [],
     images: media.length ? media.map((m) => m.url) : ['/assets/logo.png'],      // no photo yet: brand logo

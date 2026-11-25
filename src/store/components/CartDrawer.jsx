@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { X, Minus, Plus, Trash2, Truck, ShoppingBag } from 'lucide-react';
 import { useCart } from '../context/CartContext';
-import { PRODUCTS } from '../data/products';
+import { PRODUCTS, onSale } from '../data/products';
 import { useCatalog } from '../lib/catalog';
 import { SITE } from '../data/site';
 import { inr, prepaidSaving } from '../utils/format';
@@ -43,7 +43,7 @@ export default function CartDrawer() {
   }, [open, setOpen]);
 
   const inCart = new Set(lines.map((l) => l.id));
-  const suggestions = PRODUCTS.filter((p) => !inCart.has(p.id)).slice(0, 2);
+  const suggestions = PRODUCTS.filter((p) => onSale(p) && !inCart.has(p.id)).slice(0, 2);
 
   return (
     <div className={`cart ${open ? 'is-open' : ''}`} aria-hidden={!open}>

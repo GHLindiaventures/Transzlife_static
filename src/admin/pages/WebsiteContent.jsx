@@ -7,7 +7,7 @@ import { ErrorBox, Loading, Notice, PageHead, can, dt, useAction, useAdmin, useA
 
 const SECTION_LABEL = {
   rich: 'Introduction (who we are)', products: 'Product cards (slider)', sep: 'Divider', banner: 'Banner image', benefits: 'Benefits',
-  formulations: 'Formulations showcase', strip: 'Trust strip', story: 'Our story (image + text)', video: 'Background video', brands: 'Recognition logos', help: 'Help / contact',
+  formulations: 'Formulations showcase', strip: 'Trust strip', story: 'Our story (image + text)', video: 'Background video', brands: 'Recognition logos', help: 'Help / contact', reviews: 'Customer reviews',
 };
 const STATUS = { live: ['Showing', 'ok'], scheduled: ['Scheduled', 'info'], ended: ['Ended', 'off'], off: ['Off', 'off'] };
 const toInput = (iso) => { if (!iso) return ''; const d = new Date(iso); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16); };

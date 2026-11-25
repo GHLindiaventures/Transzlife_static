@@ -24,9 +24,9 @@
       ],
       "usage": "Brochure artwork shows 7.5 ml twice daily or as advised by a healthcare professional. Use the supplied measuring device. Do not exceed the recommended serving.",
       "highlights": [
-        "Supports everyday energy and stamina",
-        "Supports hormonal wellness and healthy immune function",
-        "Easy-to-measure oral liquid, 500 ml"
+        "Combines selected botanical and mineral ingredients",
+        "Ready-to-use liquid",
+        "Positioned for daily energy, activity and general well-being"
       ],
       "precautions": "Consult a healthcare professional if pregnant, breastfeeding, taking medication or managing a health condition. Keep out of reach of children.",
       "unconfirmed": "Exact quantities, product classification (herbal vs homeopathic), mechanism, age limits, shelf life"
@@ -65,10 +65,10 @@
     {
       "id": "liver-booster",
       "name": "TranzLife Liver Booster",
-      "category": "Polyherbal Ayurvedic concoction (Ayurvedic Proprietary Medicine)",
-      "form": "Oral liquid, mixed flavour",
+      "category": "Ayurvedic proprietary medicine (polyherbal concoction)",
+      "form": "Liquid (mixed flavour)",
       "pack": "500 ml",
-      "forWhom": "Adults who want to support normal liver function, digestive wellness and overall well-being",
+      "forWhom": "Adults concerned about liver wellness, lifestyle-related liver stress, digestion, or mildly elevated liver enzymes",
       "ingredients": [
         "Bhumyamalaki (Phyllanthus niruri) 500 mg",
         "Kalmegh (Andrographis paniculata) 400 mg",
@@ -81,17 +81,17 @@
         "Haritaki (Terminalia chebula) 200 mg",
         "Turmeric (Curcuma longa) 150 mg",
         "Piper nigrum (Black Pepper) 50 mg",
-        "Excipients q.s. (per 10 ml)"
+        "Excipients q.s. (composition per 10 ml)"
       ],
-      "usage": "Adults: 10 ml (2 teaspoons) twice daily after meals. Shake well before use. Use a measuring cup. Store cool and dry; refrigerate after opening.",
+      "usage": "Adults: 10 ml (2 teaspoons) twice daily after meals. Shake well before use. Use a measuring cup. Follow the label or a healthcare professional's advice.",
       "highlights": [
-        "11 traditional botanicals",
-        "Supports normal liver function, antioxidant support, digestion and appetite",
-        "No added colours, no added sugar, no artificial flavours; gluten-free; vegetarian",
+        "11 Ayurvedic botanicals per 10 ml",
+        "100% Ayurvedic, natural ingredients",
+        "No added colours, no added sugar",
         "GMP certified, made in India"
       ],
-      "precautions": "Not recommended for pregnant or lactating women. Consult your physician if you are under medication. Not a substitute for diagnosis, treatment or monitoring.",
-      "unconfirmed": "Long-term suitability"
+      "precautions": "Not recommended for pregnant or lactating women. Consult your physician if you are under medication. Store in a cool, dry place away from direct sunlight; refrigerate after opening. Not a substitute for diagnosis, treatment or monitoring.",
+      "unconfirmed": "Mechanism, side effects/interactions, long-term suitability"
     },
     {
       "id": "reviva",
@@ -104,12 +104,11 @@
         "Dill essential oil",
         "Eucalyptus essential oil"
       ],
-      "usage": "External use. Roll gently around the belly button every morning on an empty stomach and massage gently. Use daily. Wash hands after use.",
+      "usage": "External use. Roll gently around the belly button every morning on an empty stomach and massage gently; use daily. Patch test first. Wash hands after use.",
       "highlights": [
         "Easy roll-on application",
-        "Dill and Eucalyptus essential oils",
-        "Part of a daily self-care routine",
-        "ISO 9001:2015 and GMP certified"
+        "100% natural positioning, essential-oil based",
+        "Part of a daily wellness routine"
       ],
       "precautions": "External use only. Avoid eyes and mucous membranes. Not for wounds or irritated skin. Stop if irritation occurs. Keep out of reach of children. MUST NOT replace diabetes medication, glucose monitoring or medical advice.",
       "unconfirmed": "Carrier oils, concentrations, shelf life"
@@ -129,13 +128,13 @@
         "Eucalyptus oil",
         "Sesame oil"
       ],
-      "usage": "Patch test before first use. Roll onto the lower abdomen, lower back or inner wrists and massage gently until absorbed. Reapply 2-4 times daily or as needed during the menstrual cycle.",
+      "usage": "Roll onto the lower abdomen, lower back or inner wrists and massage gently until absorbed. Reapply 2-4 times daily or as needed during the menstrual cycle. Patch test before first use.",
       "highlights": [
         "Fast-absorbing, non-greasy (per label)",
         "Plant-based",
         "Not tested on animals; recyclable packaging; label shows ISO 9001:2015 and GMP marks"
       ],
-      "precautions": "External use only. Avoid eyes, mucous membranes, broken or irritated skin. Do not use on children. Stop if irritation occurs. Store cool and dry with the container tightly closed. Keep out of reach of children.",
+      "precautions": "External use only. Avoid eyes, mucous membranes, broken or irritated skin. Do not use on children; keep out of reach of children. Stop if irritation occurs. Store in a cool, dry place away from direct sunlight with the container tightly closed.",
       "unconfirmed": "Concentrations, shelf life"
     },
     {
@@ -153,15 +152,15 @@
         "Black pepper oil",
         "Tulsi oil"
       ],
-      "usage": "Remove the protective cap, place the inhaler near each nostril and take slow, deep inhalations. Repeat whenever you experience cravings or feel stressed.",
+      "usage": "Gently remove the protective cap, place the inhaler near each nostril and take slow, deep inhalations. Repeat whenever you experience cravings or feel stressed.",
       "highlights": [
-        "Helps manage smoking cravings, stress and irritability",
-        "Promotes relaxation and a refreshing breathing experience",
+        "Essential oil-based aromatherapy inhaler",
         "Compact, pocket-sized and discreet",
-        "Non-addictive formulation"
+        "Easy to carry while travelling or working",
+        "Marketed as a non-addictive formulation"
       ],
       "precautions": "Not specified in material. Do not present as a treatment for asthma, breathing disorders or smoking addiction.",
-      "unconfirmed": "Pack size, age limits"
+      "unconfirmed": "Pack size, age limits, allergy/pregnancy precautions, evidence for the non-addictive claim"
     }
   ]
 }

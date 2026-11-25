@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
-import { getProduct, PACKS } from '../data/products';
+import { getProduct, onSale, PACKS } from '../data/products';
 import { SITE } from '../data/site';
 import { useCatalog } from '../lib/catalog';
 import { syncCart, track } from '../lib/track';
@@ -39,6 +39,7 @@ export function CartProvider({ children }) {
   }, [lines]);
 
   const add = useCallback((id, qty = 1, pack = 1, { openDrawer = true } = {}) => {
+    if (!onSale(getProduct(id))) return; // no confirmed price yet
     setLines((prev) => {
       const key = `${id}:${pack}`;
       const found = prev.find((l) => l.key === key);

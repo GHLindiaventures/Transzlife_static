@@ -163,3 +163,15 @@ test('discount report: every rupee by source, offer results and lift, packs, cam
   assert.ok(d.series.reduce((s, x) => s + x.discount, 0) === 32200);
   assert.ok(Array.isArray(d.campaigns));
 });
+
+test('a product without a price ("coming soon") is shown without a price and cannot be ordered', async () => {
+  const drops = (await call('GET', '/api/products', undefined, '')).body.products.find((p) => p.id === 'breathfree-drops');
+  assert.ok(drops, 'listed');
+  assert.equal(drops.price, null); assert.equal(drops.mrp, null); assert.equal(drops.offer, null);
+  const c = await customer('9811100013', 'Early Bird');
+  const q = await call('POST', '/api/checkout/quote', { items: [{ id: 'breathfree-drops', pack: 1, qty: 1 }] }, c);
+  assert.equal(q.status, 400); assert.match(q.body.error, /coming soon/);
+  const placed = await call('POST', '/api/checkout/place', { items: [{ id: 'breathfree-drops', pack: 1, qty: 1 }], paymentMethod: 'cod', idempotencyKey: 'drops-order-1',
+    address: { name: 'Early Bird', phone: '9811100013', line1: '1 Lake Rd', city: 'Chennai', state: 'Tamil Nadu', pin: '600001' } }, c);
+  assert.equal(placed.status, 400, 'never sold at ₹0');
+});

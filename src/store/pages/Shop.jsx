@@ -28,8 +28,9 @@ export default function Shop() {
       if (format && !p.format.toLowerCase().includes(format.toLowerCase())) return false;
       return true;
     });
-    if (sort === 'low') l = [...l].sort((a, b) => a.price - b.price);
-    if (sort === 'high') l = [...l].sort((a, b) => b.price - a.price);
+    // products without a price yet go last either way
+    if (sort === 'low') l = [...l].sort((a, b) => (a.price ?? Infinity) - (b.price ?? Infinity));
+    if (sort === 'high') l = [...l].sort((a, b) => (b.price ?? -Infinity) - (a.price ?? -Infinity));
     return l;
   }, [q, concern, format, sort]);
 

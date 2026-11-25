@@ -1,16 +1,21 @@
+import { lazy, Suspense } from 'react';
 import Hero from '../components/sections/Hero.jsx';
 import Featured from '../components/sections/Featured.jsx';
 import ProductSlider from '../components/sections/ProductSlider.jsx';
 import { Sep, Rich, Banner, Benefits, Strip, ImageWithText, Brands, BgVideo, HelpCta } from '../components/sections/Blocks.jsx';
 import { useSiteContent } from '../store/lib/siteContent.js';
 
+const HomeReviews = lazy(() => import('../components/sections/HomeReviews.jsx'));
+
 /*
- * Home: who we are -> what we make -> why trust us -> our story -> recognition -> how to get help.
+ * Home: who we are -> what we make -> why trust us -> recognition -> how to get help -> customer reviews.
  * The hero always comes first; the order, visibility, headings and products of the other sections are
  * set in the dashboard (Website content > Homepage). Until that loads, the built-in order below shows.
- * Reels and Testimonials are left out until real videos and customer reviews are available.
+ * "Our story" (image + text) is kept but hidden by default; staff can switch it back on.
+ * Reels and Testimonials are left out until real videos are available.
  */
-const DEFAULT = ['rich', 'products', 'sep', 'banner', 'benefits', 'formulations', 'strip', 'story', 'video', 'brands', 'help'].map((key) => ({ key, visible: true }));
+const DEFAULT = ['rich', 'products', 'sep', 'banner', 'benefits', 'formulations', 'strip', 'story', 'video', 'brands', 'help', 'reviews']
+  .map((key) => ({ key, visible: key !== 'story' }));
 
 function Section({ s }) {
   switch (s.key) {
@@ -26,6 +31,7 @@ function Section({ s }) {
     case 'video': return <BgVideo />;
     case 'brands': return <Brands />;
     case 'help': return <HelpCta />;
+    case 'reviews': return <Suspense fallback={null}><HomeReviews /></Suspense>;
     default: return null;
   }
 }

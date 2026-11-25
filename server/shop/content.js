@@ -4,7 +4,7 @@
 // can never promise a different free-shipping amount from the one checkout applies.
 import { loadSettings } from './pricing.js';
 
-export const SECTION_KEYS = ['rich', 'products', 'sep', 'banner', 'benefits', 'formulations', 'strip', 'story', 'video', 'brands', 'help'];
+export const SECTION_KEYS = ['rich', 'products', 'sep', 'banner', 'benefits', 'formulations', 'strip', 'story', 'video', 'brands', 'help', 'reviews'];
 export const PRODUCT_SECTIONS = ['products', 'formulations'];
 
 /** WCAG contrast ratio of two #rrggbb colours (4.5 or more is readable small text). */

@@ -26,10 +26,10 @@ export const PRODUCTS = [
   {
     id: 'gummies',
     showcase: 'assets/products/showcase-gummies.jpg',
-    compare: { kind: "cutout", before: { src: "illustrations/lungs-before.webp", label: "Before", sub: "Everyday pollutants", alt: "Illustration of discoloured lungs burdened by everyday pollutants" }, after: { src: "illustrations/lungs.webp", label: "After", sub: "Supported with Lung Booster", alt: "Illustration of healthy, clear lungs" } }, photo: 4, ingredients: ['Tulsi', 'Vasaka', 'Licorice root', 'Dry ginger (Sukku)', 'Long pepper (Thippili)', 'Vitamin C, D3 & Zinc'], dosage: 'Follow the serving size on the pack label. Do not exceed the recommended daily intake.', name: 'PulmoClear™ Lung Booster Gummies', short: 'PulmoClear™', tag: 'Respiratory Wellness',
-    price: 200, size: '60 Gummies',
-    desc: 'Botanical-based wellness gummies combining traditional Ayurvedic herbs with Vitamin C, Vitamin D3 and Zinc, designed to support respiratory wellness, antioxidant protection and natural immune function. Natural berry flavour.',
-    story: { title: 'Respiratory Wellness', text: 'Tulsi, Vasaka, licorice root, dry ginger and long pepper with Vitamin C, D3 & Zinc, in an easy berry gummy for everyday respiratory wellness.', note: 'Breathe Freely · Live Fully' },
+    compare: { kind: "cutout", before: { src: "illustrations/lungs-before.webp", label: "Before", sub: "Everyday pollutants", alt: "Illustration of discoloured lungs burdened by everyday pollutants" }, after: { src: "illustrations/lungs.webp", label: "After", sub: "Supported with Lung Booster", alt: "Illustration of healthy, clear lungs" } }, photo: 4, ingredients: ['Tulsi', 'Vasaka', 'Licorice Root', 'Sukku (Dry Ginger)', 'Thippili (Long Pepper)', 'Vitamin C, D3 & Zinc'], dosage: 'Follow the serving size on the pack; do not exceed the recommended daily intake', name: 'PulmoClear™ Lung Booster Gummies', short: 'PulmoClear™', tag: 'Lung Detox',
+    price: 549, size: '60 Gummies',
+    desc: 'Botanical-based wellness gummies combining traditional Ayurvedic herbs (Tulsi, Vasaka, Licorice, Dry Ginger, Long Pepper and more) with Vitamin C, D3 and Zinc, to support respiratory wellness and everyday health. Natural berry flavour, 60 gummies.',
+    story: { title: 'Lung Detox', text: 'Tulsi, Vasaka, Licorice and 6 more Ayurvedic botanicals with Vitamin C, D3 & Zinc, in berry gummies for everyday respiratory wellness.', note: 'Breathe Freely · Live Fully' },
   },
   {
     id: 'liver',
@@ -42,18 +42,18 @@ export const PRODUCTS = [
   {
     id: 'rollon',
     showcase: 'assets/products/showcase-rollon.jpg',
-    compare: { kind: "scene", before: { src: "illustrations/cycle-before.webp", label: "Before", sub: "Uneasy days", alt: "Illustration of a young woman holding her stomach, looking uncomfortable" }, after: { src: "illustrations/cycle.webp", label: "After", sub: "With the CycleRelief ritual", alt: "Illustration of the same young woman smiling and relaxed" } }, photo: 1, ingredients: ['Wintergreen oil', 'Peppermint oil', 'Ginger essential oil', 'Lavender essential oil', 'Eucalyptus oil', 'Sesame oil'], dosage: 'Roll onto the lower abdomen, lower back or inner wrists and massage gently. Reapply 2–4 times daily as needed.', name: 'CycleRelief™ Menstrual Comfort Roll-On', short: 'CycleRelief™', tag: 'Period Comfort',
+    compare: { kind: "scene", before: { src: "illustrations/cycle-before.webp", label: "Before", sub: "Uneasy days", alt: "Illustration of a young woman holding her stomach, looking uncomfortable" }, after: { src: "illustrations/cycle.webp", label: "After", sub: "With the CycleRelief ritual", alt: "Illustration of the same young woman smiling and relaxed" } }, photo: 1, ingredients: ['Wintergreen oil', 'Peppermint oil', 'Ginger essential oil', 'Lavender essential oil', 'Eucalyptus oil', 'Sesame oil'], dosage: 'Roll onto the lower abdomen, lower back or inner wrists and massage until absorbed; 2–4 times daily as needed', name: 'CycleRelief™ Menstrual Comfort Roll-On', short: 'CycleRelief™', tag: 'Period Relief',
     price: 299, size: '8 ml Roll-On',
-    desc: 'Plant-based roll-on with Wintergreen, Peppermint, Ginger, Lavender and Eucalyptus oils in a Sesame oil base, for a soothing, comforting massage that helps relax muscle tension during the menstrual cycle. Easy to apply and non-greasy.',
-    story: { title: 'Cycle Relief', text: 'Wintergreen, Peppermint, Ginger and Lavender oils for a soothing, comforting massage during your cycle.', note: 'Nature’s Care Every Cycle' },
+    desc: 'Plant-based period comfort roll-on with Wintergreen, Peppermint, Ginger, Lavender and Eucalyptus oils in Sesame oil. A soothing, non-greasy massage for menstrual comfort, relaxation and well-being.',
+    story: { title: 'Cycle Relief', text: 'Wintergreen, Peppermint, Ginger, Lavender and Eucalyptus oils for a soothing massage that supports menstrual comfort.', note: 'Nature’s Care Every Cycle' },
   },
   {
     id: 'reviva',
     showcase: 'assets/products/showcase-reviva.jpg',
-    compare: { kind: "scene", before: { src: "illustrations/reviva-before.webp", label: "Before", sub: "A heavy start", alt: "A tired man sitting on the edge of his bed in dim morning light, rubbing his neck" }, after: { src: "illustrations/reviva.webp", label: "After", sub: "With the Reviva ritual", alt: "The same man refreshed and smiling in warm sunlight, holding a roll-on bottle" } }, photo: 3, ingredients: ['Dill essential oil', 'Eucalyptus essential oil', 'Massage roll-on', 'External use'], dosage: 'Roll gently around the belly button every morning on an empty stomach, and massage gently', name: 'Reviva™ Roll-On', short: 'Reviva™', tag: 'Botanical Massage Roll-On',
-    price: 699, size: '50 ml Massage Roll-On',
-    desc: 'Botanical-inspired massage roll-on with Dill and Eucalyptus essential oils, for a refreshing daily self-care and wellness routine. For external use; it complements, and never replaces, prescribed medicines and check-ups.',
-    story: { title: 'Wellness & Vitality', text: 'Botanical massage roll-on with Dill and Eucalyptus essential oils, for a refreshing daily self-care routine.', note: 'Massage Roll-On · 50 ml' },
+    compare: { kind: "scene", before: { src: "illustrations/reviva-before.webp", label: "Before", sub: "A heavy start", alt: "A tired man sitting on the edge of his bed in dim morning light, rubbing his neck" }, after: { src: "illustrations/reviva.webp", label: "After", sub: "With the Reviva ritual", alt: "The same man refreshed and smiling in warm sunlight, holding a roll-on bottle" } }, photo: 3, ingredients: ['Dill essential oil', 'Eucalyptus essential oil', 'Massage roll-on', 'External use'], dosage: 'Roll gently around the belly button every morning on an empty stomach; use daily', name: 'Reviva™ Roll-On', short: 'Reviva™', tag: 'Botanical Massage Roll-On',
+    price: 399, size: '50 ml Massage Roll-On',
+    desc: 'Botanical massage roll-on for an everyday wellness and vitality ritual. A practical massage roll-on designed to complement a daily self-care routine with a refreshing topical application.',
+    story: { title: 'Wellness & Vitality', text: 'Botanical massage roll-on with Dill and Eucalyptus essential oils, for an everyday wellness and vitality ritual.', note: 'Massage Roll-On · 50 ml' },
   },
   {
     id: 'energy',
@@ -66,10 +66,20 @@ export const PRODUCTS = [
   {
     id: 'inhaler',
     showcase: 'assets/products/showcase-inhaler.jpg',
-    compare: { kind: "scene", before: { src: "illustrations/inhaler-before.webp", label: "Before", sub: "The urge hits", alt: "A stressed man on a grey city terrace, hand on his forehead, holding a cigarette pack" }, after: { src: "illustrations/inhaler.webp", label: "After", sub: "With BreatheFree", alt: "The same man calm on a green, sunlit terrace, breathing in from a small white inhaler, the cigarette pack crushed and set aside" } }, photo: 6, ingredients: ['Peppermint Oil', 'Eucalyptus Oil', 'Lavender Oil', 'Lemon Oil', 'Black Pepper Oil', 'Tulsi Oil'], dosage: 'Remove the cap, place near each nostril and take slow, deep inhalations whenever cravings or stress come', name: 'BreatheFree™ Aromatherapy Inhaler', short: 'BreatheFree™', tag: 'Quit Smoking Support',
+    compare: { kind: "scene", before: { src: "illustrations/inhaler-before.webp", label: "Before", sub: "The urge hits", alt: "A stressed man on a grey city terrace, hand on his forehead, holding a cigarette pack" }, after: { src: "illustrations/inhaler.webp", label: "After", sub: "With BreatheFree", alt: "The same man calm on a green, sunlit terrace, breathing in from a small white inhaler, the cigarette pack crushed and set aside" } }, photo: 6, ingredients: ['Peppermint Oil', 'Eucalyptus Oil', 'Lavender Oil', 'Lemon Oil', 'Black Pepper Oil', 'Tulsi Oil'], dosage: 'Remove the cap, place near each nostril and take slow, deep inhalations whenever cravings or stress hit', name: 'BreatheFree™ Aromatherapy Inhaler', short: 'BreatheFree™', tag: 'Quit Smoking',
     price: 249, size: 'Pocket Inhaler',
-    desc: 'Essential oil-based, non-addictive aromatherapy inhaler to support your journey to a smoke-free lifestyle. Peppermint, Eucalyptus, Lavender, Lemon, Black Pepper and Tulsi oils help manage cravings, stress and irritability, and support a refreshing breathing experience.',
-    story: { title: 'Craving Control', text: 'Peppermint, Eucalyptus, Lavender, Lemon, Black Pepper & Tulsi oils to help manage cravings and stress on the go.', note: 'Pocket Friendly · Non-addictive' },
+    desc: 'Essential oil-based, non-addictive aromatherapy inhaler to support your journey towards a smoke-free lifestyle. Peppermint, Eucalyptus, Lavender, Lemon, Black Pepper and Tulsi oils help manage cravings and stress, and promote relaxation and breathing comfort.',
+    story: { title: 'BreatheFree', text: 'Peppermint, Eucalyptus, Lavender, Lemon, Black Pepper & Tulsi oils to help manage cravings and stress on the go.', note: 'Pocket Friendly · 100% Natural' },
+  },
+  {
+    // Coming soon: no price yet, so cards show "Price to be announced" and an Explore link.
+    // Showcase + product-7.png are made from the pack photo by scripts/gallery/build-showcase.mjs.
+    id: 'drops',
+    showcase: 'assets/products/showcase-drops.jpg',
+    photo: 7, ingredients: ['Peppermint', 'Pudina (Indian Mint)', 'Tulsi', 'Ginger', 'Spearmint', 'MCT (coconut-derived)', 'Stevia'], dosage: '10–15 drops (about 0.5 ml) under the tongue or in a little water, 1–2 times daily', name: 'BreathFree™ Respiratory Wellness Drops', short: 'BreathFree™ Drops', tag: 'Coming Soon',
+    price: null, size: '30 ml Drops',
+    desc: 'Respiratory wellness drops with natural botanical actives (Peppermint, Pudina, Tulsi, Ginger and Spearmint) for a refreshing, cooling and soothing breathing experience. Vegetarian, caffeine free and gluten free.',
+    story: { title: 'BreathFree Drops', text: 'Peppermint, Pudina, Tulsi & Ginger drops for a refreshing, cooling respiratory experience.', note: 'Liquid Drops · 30 ml' },
   },
 ];
 
@@ -81,6 +91,7 @@ export const STORE_ID = {
   reviva: 'reviva-roll-on',
   liver: 'liver-booster',
   inhaler: 'breathefree-inhaler',
+  drops: 'breathfree-drops',
 };
 export const productUrl = (id) => (STORE_ID[id] ? `/products/${STORE_ID[id]}` : '/shop');
 

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useCart, packPrice } from '../context/CartContext';
-import { PACKS } from '../data/products';
+import { PACKS, onSale } from '../data/products';
 import { inrDigits, pctOff } from '../utils/format';
 import Stars from './pdp/Stars';
 import '../styles/reviews.css';
@@ -23,8 +23,9 @@ export function bestPack(product) {
 
 export default function ProductCard({ product: p }) {
   const { add } = useCart();
-  const off = pctOff(p.price, p.mrp);
-  const best = bestPack(p);
+  const sale = onSale(p);
+  const off = sale ? pctOff(p.price, p.mrp) : 0;
+  const best = sale ? bestPack(p) : null;
   return (
     <article className="pcard" style={{ '--p-accent': p.accent, '--tint': p.tint }}>
       <Link to={`/products/${p.id}`} className="pcard__media" aria-label={p.name}>
@@ -43,16 +44,25 @@ export default function ProductCard({ product: p }) {
         )}
         <p className="pcard__tag">{p.tagline}</p>
         <div className="pcard__foot">
-          <div className="pcard__pricing">
-            <p className="price">
-              <strong><Money value={p.price} /></strong>
-              {p.mrp > p.price && <s>MRP <Money value={p.mrp} /></s>}
-            </p>
-            {best && best.each < p.price && (
-              <p className="pcard__deal">or <Money value={best.each} /> each in a pack of {best.qty}</p>
-            )}
-          </div>
-          <button className="btn btn--sm" onClick={() => add(p.id)}>Add to cart</button>
+          {sale ? (
+            <>
+              <div className="pcard__pricing">
+                <p className="price">
+                  <strong><Money value={p.price} /></strong>
+                  {p.mrp > p.price && <s>MRP <Money value={p.mrp} /></s>}
+                </p>
+                {best && best.each < p.price && (
+                  <p className="pcard__deal">or <Money value={best.each} /> each in a pack of {best.qty}</p>
+                )}
+              </div>
+              <button className="btn btn--sm" onClick={() => add(p.id)}>Add to cart</button>
+            </>
+          ) : (
+            <>
+              <p className="price price--soon"><strong>Price to be announced</strong></p>
+              <Link to={`/products/${p.id}`} className="btn btn--sm btn--ghost">View</Link>
+            </>
+          )}
         </div>
       </div>
     </article>

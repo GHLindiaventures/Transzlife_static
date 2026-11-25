@@ -8,7 +8,8 @@ export const PRODUCTS_MAP = {
   energy: { id: 'energy-booster', label: 'Energy Booster', short: 'Energy' },
   inhaler: { id: 'breathefree-inhaler', label: 'Inhaler', short: 'Inhaler' },
   cycle: { id: 'cyclerelief-roll-on', label: 'Cycle Relief Roll-On', short: 'Cycle' },
-  reviva: { id: 'reviva-roll-on', label: 'Reviva Roll-On', short: 'Reviva' }
+  reviva: { id: 'reviva-roll-on', label: 'Reviva Roll-On', short: 'Reviva' },
+  drops: { id: 'breathfree-drops', label: 'BreathFree Drops', short: 'Drops' }
 };
 const P = PRODUCTS_MAP;
 
@@ -47,7 +48,7 @@ export const BOTANICAL_INGREDIENTS = [
     dose: '',
     compound: 'Natural Menthol',
     target: 'Cooling Freshness & Easy Breathing',
-    products: [P.cycle, P.inhaler],
+    products: [P.cycle, P.inhaler, P.drops],
     desc: 'A cooling, refreshing oil that gives a clear, open feeling in the airways and a pleasant cooling sensation on the skin.'
   },
   {
@@ -60,7 +61,7 @@ export const BOTANICAL_INGREDIENTS = [
     dose: '',
     compound: 'Gingerols & Zingiberene',
     target: 'Warming Comfort & Respiratory Support',
-    products: [P.cycle, P.lung],
+    products: [P.cycle, P.lung, P.drops],
     desc: 'Used as a warming essential oil in the roll-on and as dry ginger (Sukku) in the Lung Booster. A classic kitchen-medicine root valued for its warming nature.'
   },
   {
@@ -285,7 +286,7 @@ export const BOTANICAL_INGREDIENTS = [
     dose: '',
     compound: 'Eugenol',
     target: 'Respiratory Health & Natural Immunity',
-    products: [P.lung, P.inhaler],
+    products: [P.lung, P.inhaler, P.drops],
     desc: 'The sacred herb of Indian homes. Supports respiratory health and the body\'s natural defenses, and helps the body adapt to stress.'
   },
 
