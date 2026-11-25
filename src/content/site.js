@@ -95,11 +95,17 @@ export const offOf = (p) => {
   return mrp && mrp > p.price ? Math.round((1 - p.price / mrp) * 100) : 0;
 };
 
+import { SITE as SHOP } from '../store/data/site.js';
+
+/** Built-in bar messages (the dashboard's Website content replaces them). {free_shipping} = live setting. */
 export const ANNOUNCEMENTS = [
-  'Free delivery on orders over ₹999',
+  'Free delivery on orders over {free_shipping}',
   'Government Recognized & Certified',
   'Live naturally. Live healthier.',
 ];
+
+export const fillShopTokens = (t) => t.replaceAll('{free_shipping}', `₹${Number(SHOP.freeShippingAbove).toLocaleString('en-IN')}`)
+  .replaceAll('{prepaid}', `${Math.round(SHOP.prepaidDiscount * 100)}%`);
 
 export const NAV_COLLECTIONS = PRODUCTS.map((p) => p.short);
 

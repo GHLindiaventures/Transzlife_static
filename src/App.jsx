@@ -10,8 +10,10 @@ import Sustainability from './pages/Sustainability.jsx';
 import { CartProvider } from './store/context/CartContext';
 import { AuthProvider } from './store/context/AuthContext';
 import { loadCatalog } from './store/lib/catalog';
+import { loadSiteContent } from './store/lib/siteContent';
 
 loadCatalog();   // live products from the database (shows built-in data until it arrives)
+loadSiteContent();   // announcement bar + homepage sections from the dashboard
 import RequireAuth from './store/components/RequireAuth';
 import { TooltipProvider } from './store/components/ui/tooltip';
 import StoreLayout, { StoreOverlays } from './store/StoreLayout.jsx';

@@ -15,6 +15,7 @@ import { writeOffExpired } from './batches.js';
 import trackRoutes from './track.js';
 import { createReminders } from './reminders.js';
 import reviewRoutes from './reviews.js';
+import contentRoutes from './content.js';
 import presenceRoutes, { createPresence } from './presence.js';
 
 const UNSAFE = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
@@ -75,6 +76,7 @@ export async function buildShopApp({ env = process.env, db, fastifyOptions = {},
   await app.register(trackRoutes, { db, log });
   await app.register(reviewRoutes, { db, env, log });
   await app.register(presenceRoutes, { presence });
+  await app.register(contentRoutes, { db });
   await app.register(catalogPublic, { db });
 
   // free stock held by payments that were never completed

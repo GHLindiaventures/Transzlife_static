@@ -12,7 +12,6 @@ const withLive = (product) => {
   return live ? { ...product, price: live.price, mrp: live.mrp, stock: live.stock } : product;
 };
 
-const COUNT = PRODUCTS.length;
 const inr = (n) => `₹${n.toLocaleString('en-IN')}`;
 
 /** Price block: final price, struck-out MRP and discount. Pass no product for the empty placeholder version. */
@@ -172,7 +171,17 @@ const Arrow = ({ dir }) => (
  * layout="slider" (home): an automatic, continuous, infinite-looping carousel with navigation arrows.
  * layout="grid" (/products): every product at once in a static grid.
  */
-export default function Featured({ headline = PRODUCTS_SECTION.headline, sub = PRODUCTS_SECTION.sub, layout = 'slider' }) {
+/** productIds: shop product ids in the order to show (from the dashboard); empty = all. */
+const pick = (ids) => {
+  if (!ids?.length) return PRODUCTS;
+  const byStore = Object.fromEntries(PRODUCTS.map((p) => [STORE_ID[p.id], p]));
+  const list = ids.map((id) => byStore[id]).filter(Boolean);
+  return list.length ? list : PRODUCTS;
+};
+
+export default function Featured({ headline = PRODUCTS_SECTION.headline, sub = PRODUCTS_SECTION.sub, layout = 'slider', productIds }) {
+  const items = pick(productIds);
+  const COUNT = items.length;
   const trackRef = useRef(null);
   const isSlider = layout === 'slider';
   const isJumpingRef = useRef(false);
@@ -192,8 +201,8 @@ export default function Featured({ headline = PRODUCTS_SECTION.headline, sub = P
 
   // For slider mode, render 3 sets of products so the loop wraps around infinitely and seamlessly
   const displayProducts = isSlider
-    ? [...PRODUCTS, ...PRODUCTS, ...PRODUCTS]
-    : PRODUCTS;
+    ? [...items, ...items, ...items]
+    : items;
 
   const getMetrics = useCallback(() => {
     const el = trackRef.current;
@@ -205,7 +214,7 @@ export default function Featured({ headline = PRODUCTS_SECTION.headline, sub = P
     const stepWidth = card.offsetWidth + gap;
     const singleSetWidth = stepWidth * COUNT;
     return { stepWidth, singleSetWidth };
-  }, []);
+  }, [COUNT]);
 
   // Start scroll at middle set (Set 1) so user can scroll left or right indefinitely
   useEffect(() => {
@@ -278,7 +287,7 @@ export default function Featured({ headline = PRODUCTS_SECTION.headline, sub = P
       el.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onScroll);
     };
-  }, [isSlider, getMetrics]);
+  }, [isSlider, getMetrics, COUNT]);
 
   // Step helper for next/prev
   const step = useCallback((dir) => {

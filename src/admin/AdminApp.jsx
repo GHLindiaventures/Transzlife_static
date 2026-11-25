@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import {
   Home, Package, Boxes, Users, CreditCard, UserCog, History, Settings, LogOut, Menu, X, ShieldCheck,
-  Search, Bell, Moon, Sun, MoreHorizontal, Activity as ActivityIcon, ArrowRight, User, CheckCircle2, Undo2, BarChart3, Sprout, Star, BadgePercent, ShieldCheck as Shield,
+  Search, Bell, Moon, Sun, MoreHorizontal, Activity as ActivityIcon, ArrowRight, User, CheckCircle2, Undo2, BarChart3, Sprout, Star, BadgePercent, Megaphone, ShieldCheck as Shield,
 } from 'lucide-react';
 import { api } from '../store/lib/api';
 import { markStaffBrowser } from '../store/lib/track';
@@ -20,6 +20,7 @@ import Analytics from './pages/Analytics';
 import Visitors from './pages/Visitors';
 import ReviewsAdmin from './pages/ReviewsAdmin';
 import PricingOffers from './pages/PricingOffers';
+import WebsiteContent from './pages/WebsiteContent';
 import Ingredients from './pages/Ingredients';
 import Compliance from './pages/Compliance';
 import Staff from './pages/Staff';
@@ -73,6 +74,7 @@ export default function AdminApp() {
                     <Route path="visitors" element={<Visitors />} />
                     <Route path="reviews" element={<ReviewsAdmin />} />
                     <Route path="pricing" element={<PricingOffers />} />
+                    <Route path="content" element={<WebsiteContent />} />
                     <Route path="ingredients" element={<Ingredients />} />
                     <Route path="compliance" element={<Compliance />} />
                     {can(staff, 'staff') && <Route path="staff" element={<Staff />} />}
@@ -127,6 +129,7 @@ function Shell({ children }) {
     [null, [['/admin', 'Home', Home, { end: true }]]],
     ['Sell', [['/admin/orders', 'Orders', Package, { count: toPack, title: `${toPack} to pack` }], ['/admin/returns', 'Returns', Undo2, { count: live.returns, title: `${live.returns} open returns` }], ['/admin/payments', 'Payments', CreditCard]]],
     ['Catalog', [['/admin/products', 'Products & stock', Boxes], ['/admin/pricing', 'Pricing & offers', BadgePercent], ['/admin/reviews', 'Reviews', Star, { count: live.reviews, title: `${live.reviews} waiting for a check` }], ['/admin/ingredients', 'Ingredients', Sprout], ['/admin/compliance', 'Licences & certificates', Shield]]],
+    ['Marketing', [['/admin/content', 'Website content', Megaphone]]],
     ['Insights', [['/admin/analytics', 'Sales analytics', BarChart3], ['/admin/visitors', 'Visitors & carts', ActivityIcon]]],
     ['People', [['/admin/customers', 'Customers', Users], can(staff, 'staff') && ['/admin/staff', 'Staff', UserCog]]],
     ['Settings', [['/admin/settings', 'Store settings', Settings], ['/admin/activity', 'Activity log', History]]],

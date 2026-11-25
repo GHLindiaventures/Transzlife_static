@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { productUrl } from '../../content/site.js';
+import { productUrl, STORE_ID } from '../../content/site.js';
 
 // The 6 TranzLife Targeted Ayurvedic Formulations
 // Static centered product image + top-to-bottom falling letters & floating botanicals.
 // Strictly NO prices displayed. Transitions automatically every 2 seconds.
-const FORMULATIONS = [
+const ALL_FORMULATIONS = [
   {
     id: 'gummies',
     navTitle: 'PulmoClear',
@@ -134,7 +134,13 @@ const FORMULATIONS = [
   },
 ];
 
-export default function ProductSlider() {
+/** productIds: shop product ids in the order to show (from the dashboard); empty = all six. */
+export default function ProductSlider({ productIds }) {
+  const FORMULATIONS = (() => {
+    if (!productIds?.length) return ALL_FORMULATIONS;
+    const list = productIds.map((id) => ALL_FORMULATIONS.find((f) => STORE_ID[f.id] === id)).filter(Boolean);
+    return list.length ? list : ALL_FORMULATIONS;
+  })();
   const [activeIdx, setActiveIdx] = useState(0);
   const [reduceMotion, setReduceMotion] = useState(false);
   const timerRef = useRef(null);
