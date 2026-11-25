@@ -63,7 +63,7 @@ const batch = z.object({
     n: z.enum(EVENT_NAMES),
     p: str(300).optional(),
     pid: slug.optional(),
-    props: z.record(z.union([z.string().max(120), z.number(), z.boolean(), z.null()])).optional(),
+    props: z.record(z.string().max(40), z.union([z.string().max(120), z.number(), z.boolean(), z.null()])).optional(),
   })).min(1).max(40),
 });
 const cartBody = z.object({
