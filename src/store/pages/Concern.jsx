@@ -144,10 +144,10 @@ export default function Concern() {
       {articles.length > 0 && (
         <section className="section section--sand">
           <div className="container">
-            <SectionHead eyebrow="Read next" title="From the wellness journal" />
+            <SectionHead eyebrow="Read next" title="From our blogs" />
             <div className="grid-3">
               {articles.map((a) => (
-                <Link key={a.id} to={`/journal/${a.id}`} className="acard">
+                <Link key={a.id} to={`/blogs/${a.id}`} className="acard">
                   <span className="acard__img"><img src={a.image} alt="" loading="lazy" /></span>
                   <span className="acard__meta">{a.category} · {a.readTime}</span>
                   <h3>{a.title}</h3>

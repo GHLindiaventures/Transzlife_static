@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowRight, Sprout, Microscope, Factory, PackageCheck, FlaskConical, ShieldCheck, Leaf, HeartHandshake, Target, Eye, Phone, Mail, MapPin, Clock, Check, Dna, BrainCircuit } from 'lucide-react';
 import { SITE } from '../data/site';
@@ -129,9 +129,66 @@ export function About() {
   );
 }
 
-/* ---------------- Journal ---------------- */
+/* ---------------- Blogs (wellness journal) ---------------- */
+export const BLOGS_URL = '/blogs';
+export const blogUrl = (id) => `${BLOGS_URL}/${id}`;
+
+/** Sets the page's meta description while mounted (helps search results show the excerpt). */
+function useMetaDescription(text) {
+  useEffect(() => {
+    if (!text) return undefined;
+    let tag = document.querySelector('meta[name="description"]');
+    const created = !tag;
+    if (created) { tag = document.createElement('meta'); tag.name = 'description'; document.head.appendChild(tag); }
+    const prev = tag.content;
+    tag.content = text;
+    return () => { if (created) tag.remove(); else tag.content = prev; };
+  }, [text]);
+}
+
+/** Inline text: **bold** and *italic*. */
+function Rich({ text }) {
+  const parts = String(text).split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g).filter(Boolean);
+  return parts.map((s, i) => (
+    s.startsWith('**') ? <strong key={i}>{s.slice(2, -2)}</strong>
+      : s.startsWith('*') ? <em key={i}>{s.slice(1, -1)}</em>
+        : <span key={i}>{s}</span>
+  ));
+}
+
+/** One body block: paragraph, list, table, callout or FAQ list. */
+function Block({ b }) {
+  if (typeof b === 'string') return <p><Rich text={b} /></p>;
+  if (b.ul) return <ul>{b.ul.map((t, i) => <li key={i}><Rich text={t} /></li>)}</ul>;
+  if (b.ol) return <ol>{b.ol.map((t, i) => <li key={i}><Rich text={t} /></li>)}</ol>;
+  if (b.callout) return <p className="article__callout"><Rich text={b.callout} /></p>;
+  if (b.table) {
+    const [head, ...rows] = b.table;
+    return (
+      <div className="article__table">
+        <table>
+          <thead><tr>{head.map((h) => <th key={h} scope="col">{h}</th>)}</tr></thead>
+          <tbody>{rows.map((r) => <tr key={r[0]}>{r.map((c, i) => (i === 0 ? <th key={i} scope="row">{c}</th> : <td key={i}><Rich text={c} /></td>))}</tr>)}</tbody>
+        </table>
+      </div>
+    );
+  }
+  if (b.faq) {
+    return (
+      <dl className="article__faq">
+        {b.faq.map(([q, a]) => (
+          <div key={q}><dt>{q}</dt><dd><Rich text={a} /></dd></div>
+        ))}
+      </dl>
+    );
+  }
+  return null;
+}
+const blocks = (body) => (Array.isArray(body) ? body : [body]);
+
 export function Journal() {
-  useTitle('Wellness journal');
+  useTitle('Blogs');
+  useMetaDescription('TranzLife blogs: practical, easy-to-read guides on quitting smoking, lung, liver and menstrual wellness, immunity and everyday Ayurvedic habits.');
   const [cat, setCat] = useState('');
   const cats = [...new Set(ARTICLES.map((a) => a.category))];
   const list = ARTICLES.filter((a) => !cat || a.category === cat);
@@ -140,9 +197,9 @@ export function Journal() {
     <>
       <section className="shop-hero">
         <div className="container">
-          <Breadcrumbs items={[['Wellness journal']]} />
-          <h1>The wellness journal</h1>
-          <p>Practical, easy-to-read guides on how your body works and the small habits that help.</p>
+          <Breadcrumbs items={[['Blogs']]} />
+          <h1>Blogs</h1>
+          <p>Our wellness journal: practical, easy-to-read guides on how your body works and the small habits that help.</p>
         </div>
       </section>
       <section className="container section--tight">
@@ -151,7 +208,7 @@ export function Journal() {
           {cats.map((c) => <button key={c} className={cat === c ? 'is-active' : ''} onClick={() => setCat(c)}>{c}</button>)}
         </div>
         {first && (
-          <Link to={`/journal/${first.id}`} className="feature-article">
+          <Link to={blogUrl(first.id)} className="feature-article">
             <span className="feature-article__img"><img src={first.image} alt="" /></span>
             <span className="feature-article__body">
               <span className="acard__meta">{first.category} · {first.readTime}</span>
@@ -163,7 +220,7 @@ export function Journal() {
         )}
         <div className="grid-3">
           {rest.map((a) => (
-            <Link key={a.id} to={`/journal/${a.id}`} className="acard">
+            <Link key={a.id} to={blogUrl(a.id)} className="acard">
               <span className="acard__img"><img src={a.image} alt="" loading="lazy" /></span>
               <span className="acard__meta">{a.category} · {a.readTime}</span>
               <h3>{a.title}</h3>
@@ -181,6 +238,7 @@ export function Article() {
   const { id } = useParams();
   const a = getArticle(id);
   useTitle(a?.title);
+  useMetaDescription(a?.excerpt);
   if (!a) return <NotFound />;
   const concern = getConcern(a.concern);
   const products = PRODUCTS.filter((p) => p.concerns.includes(a.concern)).slice(0, 2);
@@ -192,18 +250,34 @@ export function Article() {
     <>
       <article className="article">
         <header className="container article__head">
-          <Breadcrumbs items={[['Journal', '/journal'], [a.category]]} />
+          <Breadcrumbs items={[['Blogs', BLOGS_URL], [a.category]]} />
           <p className="acard__meta">{a.category} · {a.readTime} · {fmtDate(a.date)}</p>
           <h1>{a.title}</h1>
           <p className="lead">{a.excerpt}</p>
         </header>
-        <div className="container article__img"><img src={a.image} alt="" /></div>
+        <div className="container article__img"><img src={a.image} alt={a.imageAlt || ''} /></div>
         <div className="container article__layout">
           <div className="article__body">
-            {a.sections.map(([h, t]) => (
-              <section key={h}><h2>{h}</h2><p>{t}</p></section>
+            {a.intro && <section>{a.intro.map((b, i) => <Block key={i} b={b} />)}</section>}
+            {a.sections.map(([h, body], k) => (
+              <section key={k}>
+                <h2>{h}</h2>
+                {blocks(body).map((b, i) => <Block key={i} b={b} />)}
+                {(a.figures || []).filter((f) => f.after === k).map((f) => (
+                  <figure key={f.src} className="article__figure">
+                    <img src={f.src} alt={f.alt} loading="lazy" decoding="async" />
+                    {f.caption && <figcaption>{f.caption}</figcaption>}
+                  </figure>
+                ))}
+              </section>
             ))}
-            <p className="note">This article is for general information only and is not medical advice. Please consult a qualified healthcare professional about your health.</p>
+            {a.cta && (
+              <div className="article__cta">
+                <p><Rich text={a.cta.text} /></p>
+                <Link to={a.cta.to} className="btn">{a.cta.label} <ArrowRight size={16} /></Link>
+              </div>
+            )}
+            <p className="note">{a.disclaimer || 'This article is for general information only and is not medical advice. Please consult a qualified healthcare professional about your health.'}</p>
           </div>
           <aside className="article__aside">
             {concern && (
@@ -217,10 +291,10 @@ export function Article() {
       </article>
       <section className="section section--sand">
         <div className="container">
-          <SectionHead eyebrow="Keep reading" title="More from the journal" />
+          <SectionHead eyebrow="Keep reading" title="More blogs" action={<Link to={BLOGS_URL} className="link-arrow">All blogs <ArrowRight size={16} /></Link>} />
           <div className="grid-3">
             {more.map((m) => (
-              <Link key={m.id} to={`/journal/${m.id}`} className="acard">
+              <Link key={m.id} to={blogUrl(m.id)} className="acard">
                 <span className="acard__img"><img src={m.image} alt="" loading="lazy" /></span>
                 <span className="acard__meta">{m.category}</span>
                 <h3>{m.title}</h3>

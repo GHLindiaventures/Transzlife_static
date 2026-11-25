@@ -129,7 +129,7 @@ export default function Sustainability() {
           <p>Explore our laboratory-tested, sustainably crafted Ayurvedic formulations.</p>
           <div className="sustain-cta__btns">
             <Link to="/shop" className="btn btn--light">Shop Sustainable Formulations</Link>
-            <Link to="/science" className="btn btn--outline">Discover Our Clean Science</Link>
+            <Link to="/blogs" className="btn btn--outline">Read Our Blogs</Link>
           </div>
         </div>
       </section>

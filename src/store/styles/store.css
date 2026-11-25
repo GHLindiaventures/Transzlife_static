@@ -1875,3 +1875,28 @@
 /* products without a confirmed price yet */
 .tl-store:not(#tl-a):not(#tl-b) .pdp__price--soon strong { font-size: 1.6rem; }
 .tl-store:not(#tl-a):not(#tl-b) .price--soon strong { font-size: .92rem; }
+/* ---------- blog article bodies: lists, callout, table, FAQ, product link ---------- */
+.tl-store:not(#tl-a):not(#tl-b) .article__body ul, .tl-store:not(#tl-a):not(#tl-b) .article__body ol { margin: .4em 0 1.1em; padding-left: 1.3em; display: grid; gap: .45em; font-size: 1.08rem; line-height: 1.7; color: #34433a; }
+.tl-store:not(#tl-a):not(#tl-b) .article__body ul { list-style: disc; }
+.tl-store:not(#tl-a):not(#tl-b) .article__body ol { list-style: decimal; }
+.tl-store:not(#tl-a):not(#tl-b) .article__body li::marker { color: var(--leaf, #2f6b3a); font-weight: 700; }
+.tl-store:not(#tl-a):not(#tl-b) .article__body strong { color: var(--ink); font-weight: 700; }
+.tl-store:not(#tl-a):not(#tl-b) .article__callout { margin: 1.2em 0; padding: 16px 20px; border-radius: 14px; background: #eef5ea; border-left: 4px solid var(--leaf, #2f6b3a); }
+.tl-store:not(#tl-a):not(#tl-b) .article__table { margin: .8em 0 1.2em; overflow-x: auto; border-radius: 14px; border: 1px solid var(--line); }
+.tl-store:not(#tl-a):not(#tl-b) .article__table table { width: 100%; border-collapse: collapse; font-size: 1rem; line-height: 1.5; }
+.tl-store:not(#tl-a):not(#tl-b) .article__table th, .tl-store:not(#tl-a):not(#tl-b) .article__table td { padding: 12px 16px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
+.tl-store:not(#tl-a):not(#tl-b) .article__table thead th { background: #eef5ea; color: var(--forest); font-weight: 800; font-size: .82rem; letter-spacing: .06em; text-transform: uppercase; }
+.tl-store:not(#tl-a):not(#tl-b) .article__table tbody th { font-weight: 700; color: var(--ink); white-space: nowrap; }
+.tl-store:not(#tl-a):not(#tl-b) .article__table tr:last-child th, .tl-store:not(#tl-a):not(#tl-b) .article__table tr:last-child td { border-bottom: 0; }
+.tl-store:not(#tl-a):not(#tl-b) .article__faq { margin: .4em 0 1em; display: grid; gap: 10px; }
+.tl-store:not(#tl-a):not(#tl-b) .article__faq > div { padding: 16px 20px; border-radius: 14px; background: var(--white, #fff); border: 1px solid var(--line); }
+.tl-store:not(#tl-a):not(#tl-b) .article__faq dt { font-weight: 800; color: var(--ink); font-size: 1.04rem; line-height: 1.45; }
+.tl-store:not(#tl-a):not(#tl-b) .article__faq dd { margin: 6px 0 0; color: #34433a; line-height: 1.7; }
+.tl-store:not(#tl-a):not(#tl-b) .article__cta { margin: 2em 0 1em; padding: 22px 24px; border-radius: 18px; background: linear-gradient(135deg, #eef5ea, #f7f3ea); border: 1px solid var(--line); display: grid; gap: 14px; justify-items: start; }
+.tl-store:not(#tl-a):not(#tl-b) .article__cta p { margin: 0; }
+@media (max-width: 600px) { .tl-store:not(#tl-a):not(#tl-b) .article__table th, .tl-store:not(#tl-a):not(#tl-b) .article__table td { padding: 10px 12px; } .tl-store:not(#tl-a):not(#tl-b) .article__table tbody th { white-space: normal; } }
+
+/* in-article images */
+.tl-store:not(#tl-a):not(#tl-b) .article__figure { margin: 1.4em 0 1.6em; }
+.tl-store:not(#tl-a):not(#tl-b) .article__figure img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 18px; background: #eef0ea; }
+.tl-store:not(#tl-a):not(#tl-b) .article__figure figcaption { margin-top: 8px; font-size: .9rem; line-height: 1.5; color: var(--text-2, #5b6a60); text-align: center; }

@@ -1,6 +1,7 @@
 import { photo } from './photos';
-// Wellness Journal articles. General education only.
-export const ARTICLES = [
+import { BLOG_ARTICLES } from './blogArticles';
+// Blog / wellness journal articles. General education only.
+const JOURNAL = [
   {
     id: 'liver-the-silent-worker',
     title: 'Your liver: the silent worker that never takes a day off',
@@ -321,5 +322,33 @@ export const ARTICLES = [
     ],
   },
 ];
+
+// Cover photos and in-article images for the journal pieces, chosen to match each topic.
+// figures: [{ after: section index, src, alt, caption }] are shown after that section.
+const fig = (after, key, alt, caption) => ({ after, src: photo(key, 1200), alt, caption });
+const MEDIA = {
+  'liver-the-silent-worker': { figures: [fig(2, 'manWalking', 'A man out for a walk', 'Regular movement is one of the simplest habits for your liver.')] },
+  'breathing-in-polluted-cities': { image: photo('cityFog', 1200), figures: [fig(1, 'faceMask', 'A man wearing a face mask outdoors', 'On high-AQI days, a well-fitted mask helps when you have to be outside.')] },
+  'beat-the-afternoon-slump': { image: photo('tiredDesk', 1200), figures: [fig(1, 'mixedNuts', 'A mix of nuts and dried fruit', 'A handful of nuts keeps energy steadier than a sugary snack.')] },
+  'period-pain-self-care': { figures: [fig(1, 'oilBottles', 'Small bottles of massage oil', 'A gentle massage with a diluted oil blend is a calming ritual.')] },
+  'daily-habits-blood-sugar': { figures: [fig(5, 'glucose', 'A blood sugar test with a glucometer', 'Track your readings as your doctor advises.')] },
+  'first-week-without-cigarettes': { image: photo('noSmoking', 1200), figures: [fig(3, 'waterGlass', 'A glass of water', 'Sipping water keeps your hands and mouth busy when a craving hits.')] },
+  'liver-friendly-indian-plate': { figures: [fig(2, 'leafThali', 'An Indian thali with dal, rice, roti and vegetables', 'Dal, vegetables and a modest portion of grains make a liver-friendly plate.')] },
+  'bitter-herbs-and-digestion': { image: photo('herbPowders', 1200), figures: [fig(1, 'bitterMelon', 'Bitter gourd growing on the vine', 'Karela (bitter gourd) is one of the most familiar bitter foods in Indian kitchens.')] },
+  'five-minute-pranayama': { image: photo('meditateHome', 1200), figures: [fig(2, 'meditatePark', 'A woman meditating in a park', 'A quiet corner and a straight spine are all you need.')] },
+  'cleaner-air-at-home': { image: photo('houseplants', 1200), figures: [fig(2, 'openWindow', 'An open window beside potted plants', 'Air out the house when outdoor air is at its cleanest.')] },
+  'body-after-you-quit': { figures: [fig(1, 'stairs', 'Walking up a flight of stairs', 'Within weeks, stairs and walks often start to feel easier.')] },
+  'cravings-at-work-and-with-friends': { image: photo('officeTea', 1200), figures: [fig(3, 'cafeFriends', 'Friends talking over coffee', 'Plan ahead for evenings out, when old habits are strongest.')] },
+  'eating-for-period-comfort': { image: photo('dates', 1200), figures: [fig(2, 'nutBowls', 'Bowls of nuts', 'Nuts and seeds are easy magnesium-rich snacks.')] },
+  'gentle-movement-period-days': { image: photo('yogaMat', 1200), figures: [fig(2, 'yogaStretch', 'A woman stretching in a yoga pose', 'Move slowly and stop if anything hurts.')] },
+  'sleep-for-more-energy': { image: photo('sleeping', 1200), figures: [fig(1, 'morningSun', 'A woman with the morning sun on her face', 'Morning light helps set your body clock.')] },
+  'everyday-energy-indian-kitchen': { image: photo('riceDal', 1200), figures: [fig(0, 'legumes', 'Different dried lentils and legumes', 'Dals and legumes add protein to every meal.'), fig(3, 'drinkWater', 'A woman drinking a glass of water', 'Even mild dehydration can make you feel tired.')] },
+  'daily-foot-care-routine': { image: photo('footSoak', 1200), figures: [fig(2, 'footCream', 'Taking moisturising cream from a jar', 'Wash, dry well and moisturise as part of your daily routine.')] },
+  'millets-and-portions': { image: photo('foxtailMillet', 1200), figures: [fig(1, 'grainTrays', 'Trays of millets, beans and cereals', 'Ragi, jowar, bajra and other millets are easy to rotate through the week.')] },
+};
+
+// Newest first: the content team's blog articles, then the original journal pieces.
+export const ARTICLES = [...BLOG_ARTICLES, ...JOURNAL.map((a) => ({ ...a, ...MEDIA[a.id] }))]
+  .sort((a, b) => b.date.localeCompare(a.date));
 
 export const getArticle = (id) => ARTICLES.find((a) => a.id === id);
