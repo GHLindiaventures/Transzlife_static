@@ -143,7 +143,7 @@ export const PRODUCTS_PAGE = {
   sub: 'Every TranzLife formulation, in one place.',
 };
 
-export const BANNER = { words: ['Nature meets science', 'Rooted in Ayurveda'], cta: 'Discover our science', to: '/science' };
+export const BANNER = { words: ['Nature meets science', 'Rooted in Ayurveda'], cta: 'Read our blogs', to: '/blogs' };
 
 export const COMPARE_INTRO = {
   eyebrow: 'What each formula is designed to support',
@@ -340,10 +340,8 @@ export const FOOTER = {
     title: 'Company',
     links: [
       { label: 'About Us', to: '/about' },
-      { label: 'Science & Innovation', to: '/science' },
+      { label: 'Blogs', to: '/blogs' },
       { label: 'Sustainability', to: '/sustainability' },
-      { label: 'Quality & Manufacturing', to: '/science#sc-pipeline' },
-      { label: 'Certifications', to: '/science#sc-certs' },
       { label: 'Privacy Policy', to: '/policies/privacy' },
       { label: 'Terms & Conditions', to: '/policies/terms' },
       { label: 'Shipping & Returns', to: '/policies/shipping' },

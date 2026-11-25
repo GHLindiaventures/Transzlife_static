@@ -3,7 +3,7 @@ import { Routes, Route, Navigate, useParams } from 'react-router-dom';
 import Layout from './components/Layout.jsx';
 import Home from './pages/Home.jsx';
 import About from './pages/About.jsx';
-import Science from './pages/Science.jsx';
+// Science page is switched off for now (route redirects to /blogs); the file stays for later.
 import Faq from './pages/Faq.jsx';
 import Contact from './pages/Contact.jsx';
 import Sustainability from './pages/Sustainability.jsx';
@@ -46,6 +46,12 @@ function OldProductLink() {
   return <Navigate to={STORE_ID[id] ? `/products/${STORE_ID[id]}` : '/shop'} replace />;
 }
 
+/** Old /journal/<id> links (the journal is now Blogs). */
+function OldJournalLink() {
+  const { id } = useParams();
+  return <Navigate to={`/blogs/${id}`} replace />;
+}
+
 export default function App() {
   return (
     <AuthProvider>
@@ -56,13 +62,15 @@ export default function App() {
           <Route element={<Layout />}>
             <Route index element={<Home />} />
             <Route path="about" element={<About />} />
-            <Route path="science" element={<Science />} />
+            <Route path="science" element={<Navigate to="/blogs" replace />} />
             <Route path="sustainability" element={<Sustainability />} />
             <Route path="faq" element={<Faq />} />
-            <Route path="blog" element={<Navigate to="/journal" replace />} />
+            <Route path="blog" element={<Navigate to="/blogs" replace />} />
+            <Route path="journal" element={<Navigate to="/blogs" replace />} />
+            <Route path="journal/:id" element={<OldJournalLink />} />
             <Route path="contact" element={<Contact />} />
             <Route path="products" element={<Navigate to="/shop" replace />} />
-            <Route path="certifications" element={<Navigate to="/science#sc-certs" replace />} />
+            <Route path="certifications" element={<Navigate to="/about" replace />} />
             <Route path="product/:id" element={<OldProductLink />} />
             <Route element={<StoreLayout />}>
               <Route path="shop" element={page(<Shop />)} />
@@ -70,8 +78,8 @@ export default function App() {
               <Route path="concerns" element={page(<ConcernsIndex />)} />
               <Route path="concerns/:id" element={page(<Concern />)} />
               <Route path="ingredients" element={page(<Ingredients />)} />
-              <Route path="journal" element={page(<Journal />)} />
-              <Route path="journal/:id" element={page(<Article />)} />
+              <Route path="blogs" element={page(<Journal />)} />
+              <Route path="blogs/:id" element={page(<Article />)} />
               <Route path="policies/:id" element={page(<Policy />)} />
               <Route path="cart" element={page(<Cart />)} />
               <Route path="login" element={page(<Login />)} />

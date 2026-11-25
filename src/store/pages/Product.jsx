@@ -328,14 +328,14 @@ export default function Product() {
         <section className="section section--tight reads">
           <div className="container">
             <SectionHead
-              eyebrow="Wellness journal"
+              eyebrow="From our blogs"
               title="Read before you start"
               text="Simple guides on how your body works and the everyday habits that go with this product."
-              action={<Link to="/journal" className="link-arrow">All articles <ArrowRight size={16} /></Link>}
+              action={<Link to="/blogs" className="link-arrow">All blogs <ArrowRight size={16} /></Link>}
             />
             <div className="reads2 m-scroll">
               {reads.map((a) => (
-                <Link key={a.id} to={`/journal/${a.id}`} className="read2">
+                <Link key={a.id} to={`/blogs/${a.id}`} className="read2">
                   <span className="read2__img"><img src={a.image} alt="" loading="lazy" /></span>
                   <span className="read2__body">
                     <span className="acard__meta">{a.category} · {a.readTime}</span>
