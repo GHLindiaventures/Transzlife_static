@@ -910,3 +910,74 @@ html { text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; 
   .header, .footer, .float-widget, .to-top { display: none; }
   .hero { height: auto; min-height: 0; }
 }
+
+
+/* ================================================================
+   OUR PRODUCTS carousel, on the golden-ratio tokens (phi = 1.618, Fibonacci spacing)
+   - framed: the track sits inside side margins (--fside) and clips there, so cards no
+     longer run under the screen edges; the arrows sit on the frame edges
+   - whole cards fill the frame (--fn per row); the image is a square, and the text below
+     follows Fibonacci steps 21 / 5 / 13 / 21 (image > name > size > price > button)
+   - progress line and "View all" share one row inside the same frame
+   - type, spacing and radii come from the phi tokens in golden.css
+   ================================================================ */
+.featured{
+  --fside:var(--s-6);        /* 55: frame margin at each end */
+  --fedge:var(--s-2);        /* 8: inner breathing room so the first/last card shadow is not cut */
+  --fgap:var(--s-5);         /* 34 between cards */
+  --ftop:var(--s-5);         /* 34 room for the hover lift */
+  --fn:3;                    /* whole cards visible in the frame */
+  /* cqw = width of .featured__viewport (the container), so the scrollbar is not counted */
+  --fcard:clamp(260px,calc((100cqw - 2 * var(--fside) - 2 * var(--fedge) - (var(--fn) - 1) * var(--fgap)) / var(--fn)),440px);
+}
+@media (min-width:1760px){.featured{--fn:4}}
+@media (max-width:1279px){.featured{--fgap:var(--s-4)}}                             /* 21 */
+@media (max-width:989px){.featured{--fside:var(--s-5);--fn:2.618}}                  /* 2 + 0.618 peek */
+@media (max-width:749px){.featured{--fside:var(--s-4);--fgap:var(--s-3);--fn:1.236;--fcard:calc((100cqw - 2 * var(--fside) - 2 * var(--fedge) - var(--fgap)) / 1.236)}}
+
+.featured__viewport{container-type:inline-size}
+.featured .featured__track{
+  margin-inline:var(--fside);                          /* the frame: cards clip here */
+  padding:var(--ftop) var(--fedge) var(--s-5);
+  scroll-padding-inline:var(--fedge);
+}
+.featured__arrow--prev{left:calc(var(--fside) - 27px)}
+.featured__arrow--next{right:calc(var(--fside) - 27px)}
+
+.featured__head{margin-bottom:var(--s-4)}                                          /* 21 */
+.featured__head h2{margin-bottom:var(--s-5)}                                       /* 34 */
+
+.featured .pcard{
+  display:grid;grid-template-columns:minmax(0,1fr);
+  /* image | 21 | name | 5 | size | 13 | price | 21 | button */
+  grid-template-rows:auto var(--s-4) auto var(--s-1) auto var(--s-3) auto var(--s-4) auto;
+  align-content:start;
+}
+.featured .pcard__media{grid-row:1;border-radius:var(--r-3)}                       /* 21 */
+.featured .pcard__title{grid-row:3;padding:0 var(--s-2);font-size:var(--fs-1);line-height:var(--lh-h)}
+.featured .pcard__title .slot{font-size:inherit;line-height:inherit}
+.featured .pcard__size{grid-row:5;margin:0;font-size:var(--fs--1);line-height:var(--lh-h)}
+.featured .pcard__price{grid-row:7;margin:0;padding:0}
+.featured .pcard__price--deal{gap:var(--s-1) var(--s-3)}
+.featured .pcard__now{font-size:var(--fs-2);line-height:1}                         /* 25.9 */
+.featured .pcard__mrp{font-size:var(--fs-0)}                                      /* 16 */
+.featured .pcard__save{padding:var(--s-1) var(--s-2);font-size:var(--fs--1);line-height:1}
+.featured .pcard__price--tba{font-size:var(--fs-0);line-height:var(--lh-h);display:flex;align-items:center;justify-content:center;min-height:26px}
+.featured .pcard__buy{
+  grid-row:9;margin:0;min-height:var(--s-6);                                       /* 55 */
+  border-radius:var(--r-2);font-size:var(--fs--1);letter-spacing:.1618em;
+}
+.featured .pcard__badge{top:var(--s-3);left:var(--s-3)}
+.featured .pcard__quick{left:var(--s-3);right:var(--s-3);bottom:var(--s-3);height:var(--s-6);border-radius:var(--r-2)}
+@media (max-width:749px){
+  .featured .pcard__now{font-size:var(--fs-2)}
+  .featured .pcard__buy{min-height:var(--s-6)}
+}
+
+/* progress line + View all: one row, aligned to the card frame */
+.featured__foot{
+  display:flex;align-items:center;gap:var(--s-5);
+  margin:0 calc(var(--fside) + var(--fedge));
+}
+.featured__foot .featured__progress{flex:1;width:auto;max-width:none;margin:0}
+.featured__foot .featured__all{margin:0;flex:none}
