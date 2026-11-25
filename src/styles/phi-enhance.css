@@ -87,11 +87,11 @@ html { text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; 
 .hero__dots { gap: var(--s-2); }
 
 /* ----------------------------------------------------------------
-   3. RICH TEXT HEADLINE — large display statement
+   3. RICH TEXT HEADLINE — unified with Featured Products below
    ---------------------------------------------------------------- */
 
 .rich {
-  padding: var(--s-7) var(--pad) var(--s-5);  /* 89px top / 34px bottom */
+  padding: var(--s-5) var(--pad) var(--s-3);  /* 34px top / 13px bottom — compact continuous flow */
 }
 
 .has-text.slot--rich {
@@ -106,16 +106,23 @@ html { text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; 
   .has-text.slot--rich { font-size: clamp(var(--fs-2), 5vw, var(--fs-4)); }
 }
 @media (max-width: 749px) {
-  .rich { padding: var(--s-6) var(--pad) var(--s-4); }
+  .rich { padding: var(--s-4) var(--pad) var(--s-2); }
   .has-text.slot--rich { font-size: var(--fs-2); line-height: 1.2; }
 }
 
 /* ----------------------------------------------------------------
-   4. FEATURED PRODUCTS — card spacing & proportions
+   4. FEATURED PRODUCTS — continuous section with Rich headline
    ---------------------------------------------------------------- */
 
 /* Section breathing room */
-.featured { padding-block: var(--s-5) var(--s-7); }   /* 34px / 89px */
+.featured {
+  padding-block: var(--s-4) var(--s-5);  /* 21px / 34px — tight bottom spacing */
+  background: transparent;
+}
+
+.rich + .featured {
+  padding-top: var(--s-2);               /* 8px — merges Rich & Featured into one continuous block */
+}
 
 /* Section headline */
 .featured__head { margin-bottom: var(--s-3); }         /* 13px */
@@ -128,12 +135,17 @@ html { text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; 
   color: var(--ink-soft);
 }
 
-/* Product cards: square media frame, generous bottom padding */
+/* Track bottom room: keep card shadow visible without creating excessive bottom gap */
+.featured .featured__track {
+  padding-bottom: var(--s-4);           /* 21px instead of 56px */
+}
+
+/* Product cards: square media frame, balanced bottom padding */
 .featured .pcard__title { padding-top: var(--s-3); }   /* 13px */
 .featured .pcard__price--deal { margin-bottom: var(--s-2); } /* 8px */
 
-/* "View all" link: golden margin above */
-.featured__all { margin-top: var(--s-5); }              /* 34px */
+/* "View all" link: compact margin above */
+.featured__all { margin-top: var(--s-4); }              /* 21px instead of 34px */
 
 /* Grid variant: consistent gutters */
 .featured--grid .featured__track {
@@ -245,52 +257,129 @@ html { text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; 
 }
 
 /* ----------------------------------------------------------------
-   8. IMAGE-WITH-TEXT ROWS — φ : 1 split, golden padding
+   8. IMAGE-WITH-TEXT ("Our Story") — unified warm cream composition
    ---------------------------------------------------------------- */
 
-/* Image side: φ portion (61.8%) */
-.iwt { grid-template-columns: var(--split-rev); }      /* 1.618fr 1fr */
+.iwt {
+  grid-template-columns: var(--split-rev);   /* 1.618fr 1fr */
+  align-items: stretch;
+  min-height: 0;
+  background: #f3f0e4;                       /* matches wellness-journey infographic warm ivory */
+  border: 0;
+  box-shadow: none;
+}
 .iwt--row.iwt--rev, .iwt.iwt--rev { grid-template-columns: var(--split); }
 
-/* Text padding: generous but not excessive */
+.iwt__media {
+  min-height: 0;
+  aspect-ratio: 1672 / 941;
+  border-radius: 0;
+  overflow: hidden;
+  background: transparent;
+}
+
+.iwt__media > .media,
+.iwt__media img {
+  position: relative;
+  inset: auto;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+/* Text column: integrated directly onto warm cream (no stark white card), vertically centered */
 .iwt__text,
 .iwt--row .iwt__text,
 .iwt--row.iwt--rev .iwt__text {
-  padding: var(--s-7) var(--s-6);       /* 89px / 55px */
+  padding: var(--s-6) var(--s-6);       /* 55px */
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: flex-start;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
 }
 
-/* IWT heading: large, uppercase, display */
+.iwt__text .slot--eyebrow {
+  color: var(--green-700, #1a6b3c);
+  margin: 0 0 var(--s-3);               /* 13px, flush left with heading */
+  text-align: left;
+  align-self: flex-start;
+}
+
+/* IWT heading: prominent forest green without dominating the panel */
+.iwt__text .slot--iwt-title,
 .has-text.slot--iwt-title {
-  font-size: clamp(var(--fs-3), 5vw, var(--fs-5));   /* 33px → 53px */
-  line-height: var(--lh-d);
+  margin-left: 0;
+  font-size: clamp(26px, 2.5vw, 40px);
+  line-height: 1.12;
+  color: var(--green-950, #08261a);
+  -webkit-text-fill-color: currentColor;
+  background: none;
   margin-bottom: var(--s-4);            /* 21px */
+  max-width: 16ch;
 }
 
-/* IWT body: readable with golden line-height */
+/* IWT body: forest ink with golden line-height */
+.iwt__text .slot--iwt-p,
 .has-text.slot--iwt-p {
-  font-size: clamp(var(--fs--1), 1.1vw, var(--fs-0));
+  font-size: clamp(14.5px, 1.05vw, 16px);
   line-height: var(--lh);               /* 1.618 */
+  color: var(--ink, #0f2f1d);
   margin-bottom: var(--s-3);            /* 13px */
+  max-width: 44ch;
+}
+
+.iwt__link {
+  margin-top: var(--s-2);               /* 8px */
 }
 
 @media (max-width: 1190px) {
-  .has-text.slot--iwt-title { font-size: var(--fs-4); }
+  .iwt__text,
+  .iwt--row .iwt__text,
+  .iwt--row.iwt--rev .iwt__text {
+    padding: var(--s-5) var(--s-5);     /* 34px */
+  }
+  .iwt__text .slot--iwt-title,
+  .has-text.slot--iwt-title {
+    font-size: clamp(24px, 2.6vw, 34px);
+  }
 }
 @media (max-width: 989px) {
+  .iwt, .iwt--row.iwt--rev, .iwt.iwt--rev {
+    grid-template-columns: 1fr;
+  }
+  .iwt__media {
+    aspect-ratio: 1672 / 941;
+  }
   .iwt__text, .iwt--row .iwt__text, .iwt--row.iwt--rev .iwt__text {
-    padding: var(--s-5) var(--s-5);     /* 34px each */
+    padding: var(--s-5) var(--pad) var(--s-6);
+    justify-content: flex-start;
+  }
+  .iwt__text .slot--iwt-title,
+  .has-text.slot--iwt-title {
+    max-width: none;
+  }
+  .iwt__text .slot--iwt-p,
+  .has-text.slot--iwt-p {
+    max-width: 56ch;
   }
 }
 @media (max-width: 749px) {
-  .iwt, .iwt--row.iwt--rev, .iwt.iwt--rev { grid-template-columns: 1fr; }
-  .iwt__text, .iwt--row .iwt__text, .iwt--row.iwt--rev .iwt__text {
-    padding: var(--s-5) var(--pad) var(--s-6);
+  .iwt__media {
+    aspect-ratio: 1672 / 941;           /* keep full brand illustration & callouts visible without cropping */
   }
-  .iwt__media { aspect-ratio: 1.618 / 1; }
-  .has-text.slot--iwt-title { font-size: var(--fs-3); }
+  .iwt__text, .iwt--row .iwt__text, .iwt--row.iwt--rev .iwt__text {
+    padding: var(--s-5) var(--pad) var(--s-5);
+  }
+  .iwt__text .slot--iwt-title,
+  .has-text.slot--iwt-title {
+    font-size: clamp(24px, 6.2vw, 30px);
+  }
 }
 
 /* ----------------------------------------------------------------
@@ -923,7 +1012,7 @@ html { text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; 
    ================================================================ */
 .featured{
   --fside:var(--s-6);        /* 55: frame margin at each end */
-  --fedge:var(--s-2);        /* 8: inner breathing room so the first/last card shadow is not cut */
+  --fedge:var(--s-4);        /* 21: inner breathing room so the first/last card shadow fades out instead of being cut by the frame */
   --fgap:var(--s-5);         /* 34 between cards */
   --ftop:var(--s-5);         /* 34 room for the hover lift */
   --fn:3;                    /* whole cards visible in the frame */
@@ -938,8 +1027,10 @@ html { text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; 
 .featured__viewport{container-type:inline-size}
 .featured .featured__track{
   margin-inline:var(--fside);                          /* the frame: cards clip here */
-  padding:var(--ftop) var(--fedge) var(--s-5);
+  padding:var(--ftop) var(--fedge) var(--s-6);          /* bottom room so the card / button shadows are not sliced off... */
+  margin-bottom:calc(var(--s-5) - var(--s-6));          /* ...pulled back so the section height is unchanged */
   scroll-padding-inline:var(--fedge);
+
 }
 .featured__arrow--prev{left:calc(var(--fside) - 27px)}
 .featured__arrow--next{right:calc(var(--fside) - 27px)}

@@ -59,8 +59,7 @@
   background: rgba(252, 250, 241, .58);
   -webkit-backdrop-filter: blur(22px) saturate(1.6);
   backdrop-filter: blur(22px) saturate(1.6);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, .6), 0 8px 30px rgba(15, 47, 29, .08);
-  border-bottom: 1px solid rgba(255, 255, 255, .55);
+  box-shadow: 0 8px 30px rgba(15, 47, 29, .08);   /* the soft gold hairline (polish.css .header::after) is the only edge line */
 }
 
 /* ---- mega menu + drawer ---- */

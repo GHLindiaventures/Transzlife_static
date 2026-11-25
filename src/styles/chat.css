@@ -1,11 +1,11 @@
 /* ---------- Tulsi wellness chat (src/features/chat/chat-widget.js) ----------
    TranzLife botanical chat widget with floating launcher and animated welcome speech bubble. */
 .chat{
-  --ground:#e9efe3;--ground-2:#dfe8d5;--panel:#ffffff;--panel-2:#f4f8ef;
-  --line:rgba(31,70,35,.14);--line-strong:rgba(31,70,35,.3);
-  --ink:#1f4423;--muted:#4c6648;--faint:#7c9077;
-  --sage:#6f9e4c;--moss:#8cb86a;--forest:#24502a;
-  --gold-accent:#f6e3a1;
+  --ground:var(--green-100,#e3eddc);--ground-2:var(--bg-warm,#f7efd2);--panel:#ffffff;--panel-2:var(--bg,#fcfaf1);
+  --line:rgba(15,47,29,.14);--line-strong:rgba(15,47,29,.3);
+  --ink:var(--green-950,#08261a);--muted:var(--ink-soft,rgba(15,47,29,.72));--faint:rgba(15,47,29,.52);
+  --sage:var(--green-700,#1a6b3c);--moss:var(--green-600,#238049);--forest:var(--green-900,#0c3320);
+  --gold-accent:var(--gold-200,#f6e3a1);
   --ease:cubic-bezier(.2,.7,.1,1);
 }
 .chat button{appearance:none;border:0;background:none;padding:0;margin:0;cursor:pointer;color:inherit}

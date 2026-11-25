@@ -113,7 +113,7 @@ export default function Faq() {
           </div>
 
           {/* Questions list */}
-          <div className="faq__list" style={{ borderTop: '1px solid var(--line, rgba(21, 21, 21, 0.15))' }}>
+          <div className="faq__list">
             {filtered.length === 0 ? (
               <p style={{ padding: '36px 0', textAlign: 'center', color: '#5a7863', fontFamily: 'Manrope, sans-serif' }}>
                 No questions found matching &ldquo;{query}&rdquo;. Please contact our customer care team directly.
@@ -122,7 +122,7 @@ export default function Faq() {
               filtered.map((item, i) => {
                 const isOpen = open === i;
                 return (
-                  <div className={`faq__item${isOpen ? ' is-open' : ''}`} key={item.q} style={{ borderBottom: '1px solid var(--line, rgba(21, 21, 21, 0.15))' }}>
+                  <div className={`faq__item${isOpen ? ' is-open' : ''}`} key={item.q} style={{ borderBottom: '1px solid var(--hairline, rgba(15, 47, 29, 0.1))' }}>
                     <button
                       className="faq__q"
                       type="button"
