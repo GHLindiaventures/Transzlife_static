@@ -26,6 +26,7 @@ import Ingredients from './pages/Ingredients';
 import Compliance from './pages/Compliance';
 import Staff from './pages/Staff';
 import { Activity, SettingsPage } from './pages/System';
+import SystemHealth from './pages/SystemHealth';
 import './admin.css';
 
 export default function AdminApp() {
@@ -81,6 +82,7 @@ export default function AdminApp() {
                     <Route path="compliance" element={<Compliance />} />
                     {can(staff, 'staff') && <Route path="staff" element={<Staff />} />}
                     <Route path="activity" element={<Activity />} />
+                    <Route path="health" element={<SystemHealth />} />
                     <Route path="settings" element={<SettingsPage />} />
                     <Route path="*" element={<Navigate to="/admin" replace />} />
                   </Routes>
@@ -134,7 +136,7 @@ function Shell({ children }) {
     ['Marketing', [['/admin/content', 'Website content', Megaphone]]],
     ['Insights', [['/admin/analytics', 'Sales analytics', BarChart3], ['/admin/visitors', 'Visitors & carts', ActivityIcon], ['/admin/discounts', 'Discounts & campaigns', TicketPercent]]],
     ['People', [['/admin/customers', 'Customers', Users], can(staff, 'staff') && ['/admin/staff', 'Staff', UserCog]]],
-    ['Settings', [['/admin/settings', 'Store settings', Settings], ['/admin/activity', 'Activity log', History]]],
+    ['Settings', [['/admin/settings', 'Store settings', Settings], ['/admin/health', 'System health', ShieldCheck], ['/admin/activity', 'Activity log', History]]],
   ];
 
   return (

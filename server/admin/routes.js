@@ -17,6 +17,7 @@ import adminReviewRoutes from './reviews.js';
 import offerRoutes from './offers.js';
 import contentAdminRoutes from './content.js';
 import discountRoutes from './discounts.js';
+import healthAdminRoutes from './health.js';
 import { refreshRating } from '../shop/reviews.js';
 import { restoreStock } from '../shop/batches.js';
 
@@ -45,7 +46,7 @@ const like = (s) => `%${String(s).replace(/[%_\\]/g, (c) => '\\' + c)}%`;
 const staffOut = (s) => ({ id: s.id, email: s.email, name: s.name, role: s.role, mustChangePassword: s.must_change_password,
   totpEnabled: s.totp_enabled, permissions: permsOf(s.role) });
 
-export default async function adminRoutes(app, { db, razorpay, twilio, notifier, reminders, presence, ops, auth: authInfo, log, env }) {
+export default async function adminRoutes(app, { db, razorpay, twilio, notifier, reminders, presence, ops, health, auth: authInfo, log, env }) {
   const auth = createAdminAuth({ db, env });
   const G = (perm, opts) => ({ preHandler: auth.guard(perm, opts) });
   const tight = (max) => ({ config: { rateLimit: { max, timeWindow: '15 minutes' } } });
@@ -553,6 +554,7 @@ export default async function adminRoutes(app, { db, razorpay, twilio, notifier,
   await offerRoutes(app, { db, G, parse, audit });
   await contentAdminRoutes(app, { db, G, parse, audit });
   await discountRoutes(app, { db, G });
+  if (health) await healthAdminRoutes(app, { health, G });
 
   // ---- cash-on-delivery confirmation recorded by staff (after a phone call) ----
   app.post('/api/admin/orders/:number/cod', G('orders.note'), async (req, reply) => {
