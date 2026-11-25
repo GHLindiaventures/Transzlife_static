@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { Check, Download, ShieldCheck, Truck, RotateCcw, Leaf, ArrowRight, Lock, Pill, Clock, Package, Lightbulb, Hand, Briefcase, MapPin, Sparkles, FileText, FlaskConical, Sprout } from 'lucide-react';
+import { Check, Download, ShieldCheck, Truck, RotateCcw, Leaf, ArrowRight, Lock, Pill, Clock, Package, Lightbulb, Hand, Briefcase, MapPin, Sparkles, FileText, FlaskConical, Sprout, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getProduct, PRODUCTS, PACKS } from '../data/products';
+import { getGallery } from '../data/gallery';
 import { SITE } from '../data/site';
 import { getIngredient } from '../data/ingredients';
 import { getConcern } from '../data/concerns';
@@ -20,24 +21,64 @@ import NotFound from './NotFound';
 
 const ROUTINE_ICON = { Dose: Pill, When: Clock, Format: Package, Tip: Lightbulb, How: Hand, Use: Hand, Apply: Hand, Carry: Briefcase, Where: MapPin };
 
+// Plain pack shots (white background) are blended onto the product tint; photos and the
+// generated infographic slides fill the frame as they are.
+const isPackShot = (src) => src.startsWith('/img/p/');
+
 function Gallery({ p, children }) {
+  const images = getGallery(p);
   const [i, setI] = useState(0);
+  const thumbs = useRef(null);
+  const touch = useRef(null);
   useEffect(() => setI(0), [p.id]);
+  const go = (k) => setI((k + images.length) % images.length);
+  // keep the active thumbnail in view inside the scrolling strip
+  useEffect(() => {
+    const el = thumbs.current?.children[i];
+    const box = thumbs.current;
+    if (!el || !box) return;
+    if (box.scrollHeight > box.clientHeight) box.scrollTo({ top: el.offsetTop - box.clientHeight / 2 + el.clientHeight / 2, behavior: 'smooth' });
+    else if (box.scrollWidth > box.clientWidth) box.scrollTo({ left: el.offsetLeft - box.clientWidth / 2 + el.clientWidth / 2, behavior: 'smooth' });
+  }, [i]);
+  // warm the cache so switching slides is instant
+  useEffect(() => { images.forEach((src) => { const im = new Image(); im.src = src; }); }, [p.id]);
+
+  const src = images[i];
+  const multi = images.length > 1;
   return (
-    <div className="gallery">
-      <div className="gallery__main" style={{ background: p.tint }}>
-        <img src={p.images[i]} alt={p.name} key={p.images[i]} />
-        {children}
-      </div>
-      {p.images.length > 1 && (
-        <div className="gallery__thumbs">
-          {p.images.map((src, k) => (
-            <button key={src} className={k === i ? 'is-active' : ''} onClick={() => setI(k)} aria-label={`View image ${k + 1}`}>
-              <img src={src} alt="" />
+    <div className={`gallery ${multi ? 'gallery--rail' : ''}`}>
+      {multi && (
+        <div className="gallery__thumbs" ref={thumbs} role="tablist" aria-label="Product images">
+          {images.map((s, k) => (
+            <button key={s} role="tab" aria-selected={k === i} className={k === i ? 'is-active' : ''} onClick={() => setI(k)} aria-label={`View image ${k + 1} of ${images.length}`}>
+              <img src={s} alt="" loading="lazy" className={isPackShot(s) ? 'is-pack' : ''} />
             </button>
           ))}
         </div>
       )}
+      <div
+        className="gallery__main"
+        style={{ background: p.tint }}
+        tabIndex={multi ? 0 : undefined}
+        onKeyDown={(e) => { if (e.key === 'ArrowRight') go(i + 1); if (e.key === 'ArrowLeft') go(i - 1); }}
+        onTouchStart={(e) => { touch.current = e.touches[0].clientX; }}
+        onTouchEnd={(e) => {
+          if (touch.current == null) return;
+          const dx = e.changedTouches[0].clientX - touch.current;
+          touch.current = null;
+          if (Math.abs(dx) > 40) go(i + (dx < 0 ? 1 : -1));
+        }}
+      >
+        <img src={src} alt={`${p.name}, image ${i + 1} of ${images.length}`} key={src} className={isPackShot(src) ? 'is-pack' : 'is-full'} />
+        {multi && (
+          <>
+            <button type="button" className="gallery__nav gallery__nav--prev" onClick={() => go(i - 1)} aria-label="Previous image"><ChevronLeft size={22} /></button>
+            <button type="button" className="gallery__nav gallery__nav--next" onClick={() => go(i + 1)} aria-label="Next image"><ChevronRight size={22} /></button>
+            <span className="gallery__count" aria-hidden="true">{i + 1} / {images.length}</span>
+          </>
+        )}
+        {children}
+      </div>
     </div>
   );
 }
