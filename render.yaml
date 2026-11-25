@@ -1,4 +1,12 @@
-# Render Blueprint: the website + Tulsi chat API from one Node web service.
+# Render Blueprint: the website + Tulsi chat API + shop API from one Node web service.
+# The PostgreSQL database (customers, orders, payments) is hosted separately, for now on
+# Neon's free plan; the service connects to it through DATABASE_URL.
+#
+# IMPORTANT before taking real orders:
+#   - move the web service off the free plan (free instances sleep, so checkout is slow and
+#     Razorpay webhooks can be missed)
+#   - keep the web service and the database close together (Singapore is closest to India);
+#     a service's region cannot be changed after it is created
 #   build: installs dependencies and builds the React site into dist/
 #   start: `npm start` runs server/index.js, which serves dist/ (with SPA fallback
 #          to index.html) and the chat API (/api/chat, /api/health) on Render's $PORT.
@@ -34,3 +42,37 @@ services:
         sync: false
       - key: CHAT_MODEL
         value: gemma2:9b
+      # ---- Shop backend ----
+      # PostgreSQL connection URL. For now: Neon's free plan (neon.tech, Singapore region);
+      # paste its connection string here when Render asks. Later this can point at any Postgres.
+      - key: DATABASE_URL
+        sync: false
+      # Neon's direct (non-pooled) URL, used only for schema migrations at startup
+      - key: DATABASE_URL_UNPOOLED
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
+      # Razorpay: empty = Cash on delivery only. Use rzp_test_ keys until the account is live.
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: RAZORPAY_WEBHOOK_SECRET
+        sync: false
+      # Twilio: sign-in codes (Verify) and order updates. Customers cannot sign in until set.
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_VERIFY_SERVICE_SID
+        sync: false
+      - key: TWILIO_MESSAGING_SERVICE_SID
+        sync: false
+      - key: TWILIO_PHONE_NUMBER
+        sync: false
+      - key: TWILIO_WHATSAPP_FROM
+        sync: false
+      - key: ORDER_NOTIFICATIONS
+        value: "off"
+      - key: SITE_URL
+        sync: false

@@ -17,3 +17,7 @@ All photographs in `public/assets/photos/` come from Wikimedia Commons and are *
 | `turmeric-dried.jpg` | Dried Vasmat Turmeric fingers held in hand.jpg | Govind Bhalerao | CC0 | [page](https://commons.wikimedia.org/wiki/File:Dried_Vasmat_Turmeric_fingers_held_in_hand.jpg) |
 
 The three home-page hero images in `public/assets/hero/` (`hero-1.webp`, `hero-2.webp`, `hero-3.webp`, 2000 x 1116 px) were supplied by the site owner.
+
+## Fonts (self-hosted, src/styles/fonts/)
+
+Fraunces, Manrope, Caveat and Archivo: SIL Open Font License 1.1, files from Fontsource (fontsource.org).

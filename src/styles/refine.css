@@ -26,17 +26,17 @@
 .footer__inner{justify-content:space-between;padding-bottom:clamp(20px,3vw,36px)}
 .footer__copy{font-size:13px;line-height:1.6;margin-top:clamp(24px,3.5vw,40px)}
 .footer__massive-brand{display:flex;align-items:center;justify-content:center;width:100%;margin-top:clamp(24px,4vw,52px);padding:0;user-select:none;pointer-events:none;overflow:hidden}
-.footer__massive-text{font-family:'Manrope','Syne',sans-serif;font-size:clamp(56px,16vw,230px);font-weight:800;letter-spacing:-.035em;line-height:.82;color:#ffffff;text-align:center;white-space:nowrap;display:inline-flex;align-items:baseline;justify-content:center;transform:translateZ(0)}
-.footer__massive-reg{font-family:'Manrope','Syne',sans-serif;font-size:.22em;font-weight:600;line-height:1;transform:translateY(-1.55em);margin-left:.08em;opacity:.9}
+.footer__massive-text{font-family:'Manrope',system-ui,sans-serif;font-size:clamp(56px,16vw,230px);font-weight:800;letter-spacing:-.035em;line-height:.82;color:#ffffff;text-align:center;white-space:nowrap;display:inline-flex;align-items:baseline;justify-content:center;transform:translateZ(0)}
+.footer__massive-reg{font-family:'Manrope',system-ui,sans-serif;font-size:.22em;font-weight:600;line-height:1;transform:translateY(-1.55em);margin-left:.08em;opacity:.9}
 @media (max-width:640px){
   .footer__massive-brand{margin-top:18px}
   .footer__massive-text{font-size:clamp(44px,16.5vw,76px)}
 }
 
-/* ---------------- readable body copy: Archivo for running text, Syne stays for headings and labels ---------------- */
+/* ---------------- readable body copy: Manrope for running text ---------------- */
 .rich__text,.featured__sub,.pslider-intro__note,
 .has-text.slot--hero-sub,.has-text.slot--b-text,.has-text.slot--iwt-p,.has-text.slot--par-p,.has-text.slot--par-p-sm,
-.has-text.slot--news-p,.footer .has-text.slot--f-address,.footer__copy{font-family:'Archivo',system-ui,sans-serif;font-stretch:96%}
+.has-text.slot--news-p,.footer .has-text.slot--f-address,.footer__copy{font-family:'Manrope',system-ui,sans-serif}
 
 /* small labels: nothing under 12px */
 .has-text.slot--badge{font-size:12px;letter-spacing:.08em}

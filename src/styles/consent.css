@@ -1,0 +1,37 @@
+/* Privacy choice banner (src/components/ConsentBanner.jsx) */
+.consent {
+  position: fixed; z-index: 90; left: 16px; right: 16px; bottom: 16px; margin: 0 auto; max-width: 760px;
+  display: flex; gap: 18px; align-items: center; justify-content: space-between;
+  padding: 18px 20px; border-radius: 18px;
+  background: rgba(252, 250, 244, .97); color: #1f2a1d;
+  border: 1px solid rgba(31, 107, 60, .18);
+  box-shadow: 0 18px 50px -18px rgba(20, 40, 20, .45);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  font-family: var(--f-body, 'Manrope', system-ui, sans-serif);
+  animation: consent-in .35s ease-out both;
+}
+.consent h2 { margin: 0 0 4px; font-family: var(--f-head, 'Fraunces', Georgia, serif); font-weight: 500; font-size: 18px; line-height: 1.2; color: #1f4d2c; }
+.consent p { margin: 0; font-size: 14px; line-height: 1.5; color: #46523f; }
+.consent a { color: #1f6b3c; text-decoration: underline; text-underline-offset: 2px; }
+.consent__now { margin-top: 6px !important; font-size: 13px !important; }
+.consent__actions { display: flex; gap: 10px; flex-shrink: 0; }
+.consent__btn {
+  min-height: 44px; padding: 0 20px; border-radius: 999px; cursor: pointer; font: inherit; font-weight: 700; font-size: 14px;
+  background: #1f6b3c; color: #fff; border: 1px solid #1f6b3c; transition: background .2s, color .2s;
+}
+.consent__btn:hover { background: #18552f; }
+.consent__btn.is-ghost { background: transparent; color: #1f4d2c; border-color: rgba(31, 77, 44, .35); }
+.consent__btn.is-ghost:hover { background: rgba(31, 107, 60, .08); }
+.consent__btn:focus-visible { outline: 3px solid #b8840f; outline-offset: 2px; }
+body.chat-open .consent { display: none; }
+@keyframes consent-in { from { opacity: 0; transform: translateY(14px); } }
+@media (prefers-reduced-motion: reduce) { .consent { animation: none; } }
+@media (max-width: 640px) {
+  .consent { flex-direction: column; align-items: stretch; left: 12px; right: 12px; bottom: 12px; padding: 16px; }
+  .consent__actions { display: grid; grid-template-columns: 1fr 1fr; }
+}
+
+/* footer "Privacy choices" link, styled like its neighbours */
+.ft-privacy-btn { background: none; border: 0; padding: 0; font: inherit; color: var(--ft-text, inherit); cursor: pointer; transition: color .25s; }
+.ft-privacy-btn::before { content: "|"; margin: 0 14px; color: rgba(255, 255, 255, .4); }
+.ft-privacy-btn:hover { text-decoration: underline; }

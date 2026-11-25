@@ -1,0 +1,102 @@
+/* Sign-in, account and checkout additions (Login.jsx, Account.jsx, Checkout.jsx).
+   Same selector prefix as store.css so these win over its reset. */
+.tl-store:not(#tl-a):not(#tl-b) .auth-page { display: grid; place-items: start center; padding: 48px 16px 80px; }
+.tl-store:not(#tl-a):not(#tl-b) .auth-card {
+  width: 100%; max-width: 440px; background: var(--white); border: 1px solid var(--line);
+  border-radius: var(--r-lg); padding: 28px 26px 22px; box-shadow: var(--shadow);
+}
+.tl-store:not(#tl-a):not(#tl-b) .auth-form { display: grid; gap: 14px; border: 0; padding: 0; margin: 0; }
+.tl-store:not(#tl-a):not(#tl-b) .auth-form h1 { font-size: var(--t-2xl); line-height: 1.2; margin: 0; color: var(--ink); }
+.tl-store:not(#tl-a):not(#tl-b) .auth-sub { margin: 0; color: var(--text-2); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.tl-store:not(#tl-a):not(#tl-b) .auth-step-hint {
+  display: flex; align-items: center; gap: 6px; margin: 0 0 14px; padding: 8px 12px; border-radius: 10px;
+  background: var(--leaf-soft); color: var(--forest); font-size: var(--t-sm); font-weight: 600;
+}
+.tl-store:not(#tl-a):not(#tl-b) .auth-item {
+  display: flex; align-items: center; gap: 12px; margin: 0 0 18px; padding: 10px; border: 1px solid var(--line); border-radius: 12px;
+}
+.tl-store:not(#tl-a):not(#tl-b) .auth-item__thumb { width: 48px; height: 48px; border-radius: 10px; display: grid; place-items: center; flex: none; overflow: hidden; }
+.tl-store:not(#tl-a):not(#tl-b) .auth-item__thumb img { width: 100%; height: 100%; object-fit: contain; }
+.tl-store:not(#tl-a):not(#tl-b) .auth-item strong { display: block; }
+.tl-store:not(#tl-a):not(#tl-b) .auth-item small { color: var(--text-2); }
+.tl-store:not(#tl-a):not(#tl-b) .auth-phone { display: flex; align-items: stretch; margin-top: 6px; }
+.tl-store:not(#tl-a):not(#tl-b) .auth-phone__cc {
+  display: grid; place-items: center; padding: 0 12px; border: 1px solid var(--line); border-right: 0;
+  border-radius: 10px 0 0 10px; background: var(--sand); font-weight: 600; color: var(--ink);
+}
+.tl-store:not(#tl-a):not(#tl-b) .auth-phone input { flex: 1; min-width: 0; margin: 0; border-radius: 0 10px 10px 0; }
+.tl-store:not(#tl-a):not(#tl-b) .auth-code { letter-spacing: .5em; font-size: 22px; text-align: center; font-variant-numeric: tabular-nums; }
+.tl-store:not(#tl-a):not(#tl-b) .auth-back { display: inline-flex; align-items: center; gap: 4px; justify-self: start; font-size: var(--t-sm); }
+.tl-store:not(#tl-a):not(#tl-b) .auth-error {
+  margin: 0; padding: 10px 12px; border-radius: 10px; background: #fdecea; color: #a02a1e; font-size: var(--t-sm);
+}
+.tl-store:not(#tl-a):not(#tl-b) .auth-resend, .tl-store:not(#tl-a):not(#tl-b) .auth-fine { margin: 0; text-align: center; font-size: var(--t-sm); color: var(--text-2); }
+.tl-store:not(#tl-a):not(#tl-b) .auth-trust {
+  display: flex; align-items: center; justify-content: center; gap: 6px; margin: 18px 0 0; padding-top: 14px;
+  border-top: 1px solid var(--line); font-size: var(--t-xs); color: var(--text-2);
+}
+.tl-store:not(#tl-a):not(#tl-b) .auth-signed { margin: 0 0 4px; color: var(--text-2); }
+
+/* checkout: saved addresses, unavailable payment options, interrupted payment */
+.tl-store:not(#tl-a):not(#tl-b) .addr-list { display: grid; gap: 10px; }
+.tl-store:not(#tl-a):not(#tl-b) .addr-opt {
+  position: relative; display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px;
+  border: 2px solid var(--line); border-radius: 14px; cursor: pointer; transition: border-color .2s, background .2s;
+}
+.tl-store:not(#tl-a):not(#tl-b) .addr-opt input { position: absolute; opacity: 0; }
+.tl-store:not(#tl-a):not(#tl-b) .addr-opt.is-active { border-color: var(--forest); background: var(--leaf-soft); }
+.tl-store:not(#tl-a):not(#tl-b) .addr-opt:has(input:focus-visible) { outline: 2px solid var(--gold); }
+.tl-store:not(#tl-a):not(#tl-b) .addr-opt > svg { color: var(--forest); flex: none; margin-top: 2px; }
+.tl-store:not(#tl-a):not(#tl-b) .addr-opt strong { display: block; }
+.tl-store:not(#tl-a):not(#tl-b) .addr-opt small { color: var(--text-2); }
+.tl-store:not(#tl-a):not(#tl-b) .payopt.is-off { opacity: .5; cursor: not-allowed; }
+.tl-store:not(#tl-a):not(#tl-b) .pay-pending {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 0 0 20px; padding: 16px 18px;
+  border-radius: 14px; background: #fff7e0; border: 1px solid #ecd27a; color: #5c4400;
+}
+.tl-store:not(#tl-a):not(#tl-b) .pay-pending > div { flex: 1; min-width: 220px; }
+.tl-store:not(#tl-a):not(#tl-b) .pay-pending p { margin: 2px 0 0; font-size: var(--t-sm); }
+.tl-store:not(#tl-a):not(#tl-b) .success-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+
+/* account page */
+.tl-store:not(#tl-a):not(#tl-b) .acct { padding: 32px 16px 80px; max-width: 920px; }
+.tl-store:not(#tl-a):not(#tl-b) .acct__head { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
+.tl-store:not(#tl-a):not(#tl-b) .acct__head h1 { margin: 0; }
+.tl-store:not(#tl-a):not(#tl-b) .acct__head p { margin: 4px 0 0; color: var(--text-2); }
+.tl-store:not(#tl-a):not(#tl-b) .acct h2 { font-size: var(--t-lg); margin: 28px 0 12px; }
+.tl-store:not(#tl-a):not(#tl-b) .acct-orders { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+.tl-store:not(#tl-a):not(#tl-b) .acct-order {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  padding: 16px 18px; border: 1px solid var(--line); border-radius: 14px; background: var(--white);
+  color: inherit; text-decoration: none; transition: border-color .2s, box-shadow .2s;
+}
+.tl-store:not(#tl-a):not(#tl-b) .acct-order:hover { border-color: var(--forest); box-shadow: var(--shadow); }
+.tl-store:not(#tl-a):not(#tl-b) .acct-order strong { display: block; }
+.tl-store:not(#tl-a):not(#tl-b) .acct-order small { color: var(--text-2); }
+.tl-store:not(#tl-a):not(#tl-b) .acct-badge {
+  display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: var(--t-xs); font-weight: 700;
+  background: var(--leaf-soft); color: var(--forest);
+}
+.tl-store:not(#tl-a):not(#tl-b) .acct-badge.is-warn { background: #fff3cd; color: #7a5a00; }
+.tl-store:not(#tl-a):not(#tl-b) .acct-badge.is-off { background: #eee; color: #666; }
+.tl-store:not(#tl-a):not(#tl-b) .acct-addr { display: grid; gap: 10px; }
+.tl-store:not(#tl-a):not(#tl-b) .acct-addr > div {
+  display: flex; justify-content: space-between; gap: 12px; align-items: flex-start;
+  padding: 14px 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--white);
+}
+.tl-store:not(#tl-a):not(#tl-b) .acct-addr small { color: var(--text-2); display: block; }
+.tl-store:not(#tl-a):not(#tl-b) .acct-empty { color: var(--text-2); margin: 0; }
+
+/* opt-in checkbox (checkout contact step, account reminders) */
+.tl-store:not(#tl-a):not(#tl-b) .check-opt { display: flex; gap: 10px; align-items: flex-start; font-weight: 500; color: var(--text); cursor: pointer; line-height: 1.45; }
+.tl-store:not(#tl-a):not(#tl-b) .check-opt input { width: 18px; height: 18px; margin: 2px 0 0; flex: none; accent-color: var(--forest); }
+.tl-store:not(#tl-a):not(#tl-b) .check-opt small { display: block; color: var(--text-2); font-weight: 400; }
+
+/* account: saved products + reminders */
+.tl-store:not(#tl-a):not(#tl-b) .acct-saved { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+.tl-store:not(#tl-a):not(#tl-b) .acct-saved > div { display: flex; align-items: center; gap: 12px; padding: 10px; border: 1px solid var(--line); border-radius: 12px; background: var(--white); }
+.tl-store:not(#tl-a):not(#tl-b) .acct-saved img { width: 52px; height: 52px; object-fit: contain; border-radius: 8px; flex: none; }
+.tl-store:not(#tl-a):not(#tl-b) .acct-saved a { font-weight: 700; color: var(--ink); }
+.tl-store:not(#tl-a):not(#tl-b) .acct-saved small { display: block; color: var(--text-2); }
+.tl-store:not(#tl-a):not(#tl-b) .acct-saved button { margin-left: auto; }
+.tl-store:not(#tl-a):not(#tl-b) .acct-prefs { padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--white); }

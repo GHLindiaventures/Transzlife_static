@@ -4,8 +4,8 @@
 
 :root {
   --f-hand: 'Caveat', cursive;
-  --f-display: 'Syne', sans-serif;
-  --f-body: 'Archivo', sans-serif;
+  --f-display: 'Manrope', system-ui, sans-serif;
+  --f-body: 'Manrope', system-ui, sans-serif;
 }
 
 .ayur-section {
@@ -134,7 +134,7 @@
 }
 
 .apo-big {
-  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-family: 'Fraunces', Georgia, serif;
   font-weight: 600;
   font-size: clamp(48px, 5.2vw, 92px);
   letter-spacing: .02em;
@@ -146,7 +146,7 @@
 }
 
 .apo-small {
-  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-family: 'Fraunces', Georgia, serif;
   font-weight: 500;
   font-size: clamp(20px, 2vw, 34px);
   color: #2e5a2c;
@@ -209,7 +209,7 @@
 }
 
 .ayur-quote {
-  font-family: 'Manrope', 'Archivo', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Manrope', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   font-weight: 500;
   font-size: clamp(16px, 1.85vw, 23px);
   line-height: 1.62;
@@ -222,7 +222,7 @@
 
 .aq-quote-mark {
   color: #2e6e3c;
-  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-family: 'Fraunces', Georgia, serif;
   font-size: 1.45em;
   line-height: 0;
   vertical-align: -0.1em;

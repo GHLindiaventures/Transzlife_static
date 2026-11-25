@@ -1,18 +1,23 @@
 // TranzLife product catalogue.
-// Wording follows the "Tranzlife Products - KT" product study: wellness-support
-// language only, no cure / treatment claims. PRICES ARE PLACEHOLDERS until the
-// client shares the approved MRP list.
+// Content follows the client's product document "Tranzlife Biosciences Products.pdf" (Nov 2026):
+// introduction, key benefits, ingredients, how to use, how it works, features, and the details
+// printed on the actual packs (directions, cautions, storage, certifications). Marketing copy uses
+// the document's wellness wording; disease claims printed on some packs (e.g. "support for
+// diabetes", "detoxification") are deliberately not repeated here.
+// Prices are the client's MRPs (24 Nov 2026), sold at MRP; BreatheFree is still a placeholder.
+// Checkout charges the prices in the database (admin > Products). Migration 009 copies this
+// content into the database for existing shops.
 
 export const PRODUCTS = [
   {
     id: 'pulmoclear-gummies',
     name: 'PulmoClear™ Gummies',
     short: 'PulmoClear Gummies',
-    tagline: 'Ayurvedic botanicals for everyday respiratory wellness',
+    tagline: 'Ayurvedic botanicals with Vitamin C, D3 & Zinc for respiratory wellness',
     format: 'Gummies',
     size: '60 Gummies',
-    price: 549,
-    mrp: 699,
+    price: 200,
+    mrp: 200,
     badge: 'New',
     accent: '#1f6b34',
     tint: '#eaf4e6',
@@ -34,7 +39,7 @@ export const PRODUCTS = [
       'Combines traditional Ayurvedic botanicals with selected nutrients',
       'Convenient daily wellness supplement',
     ],
-    ingredients: ['tulsi', 'vasaka', 'mulethi', 'sukku', 'thippili', 'black-pepper', 'jeera', 'karumanjal', 'small-onion', 'vitamin-c', 'vitamin-d3', 'zinc'],
+    ingredients: ['jeera', 'karumanjal', 'sukku', 'thippili', 'black-pepper', 'tulsi', 'vasaka', 'mulethi', 'small-onion', 'vitamin-c', 'vitamin-d3', 'zinc'],
     routine: [
       { label: 'Dose', value: 'As per pack label' },
       { label: 'Format', value: 'Berry-flavour gummy' },
@@ -48,22 +53,22 @@ export const PRODUCTS = [
     whoFor: [
       'Adults who want daily respiratory wellness support',
       'People living in polluted or dusty cities',
-      'Smokers and people trying to cut down',
-      'Anyone who prefers gummies to capsules',
+      'Anyone who prefers an easy-to-consume gummy to capsules',
     ],
     precautions: [
+      'Do not exceed the recommended daily intake.',
       'Not a substitute for prescribed respiratory medicines or medical care.',
-      'Pregnant or breastfeeding? Consult a healthcare professional before use.',
-      'Taking medication or managing a medical condition? Check with your doctor first.',
-      'Check the pack label for allergens and age guidance. Keep out of reach of children.',
+      'Pregnant, breastfeeding, taking medication or managing a medical condition? Consult a healthcare professional before use.',
+      'Keep out of reach of children.',
     ],
     faqs: [
-      ['What are PulmoClear™ Gummies?', 'A botanical respiratory wellness supplement with selected Ayurvedic botanicals and essential micronutrients in a gummy format.'],
-      ['What is inside?', 'Jeera, Karumanjal (black turmeric), Sukku (dry ginger), Thippili (long pepper), black pepper, Tulsi, Vasaka, licorice root, small onion extract, Vitamin C, Vitamin D3 and Zinc.'],
+      ['What are PulmoClear™ Gummies?', 'A botanical-based wellness supplement combining traditional Ayurvedic herbs with essential vitamins and minerals, designed to support respiratory wellness and everyday health.'],
+      ['What is inside?', 'Botanicals: Jeera (cumin), Karumanjal (black turmeric), Sukku (dry ginger), Thippili (long pepper), black pepper, Tulsi, Vasaka, licorice root and small onion extract. Added nutrients: Vitamin C, Vitamin D3 and Zinc.'],
       ['How many gummies should I take?', 'Follow the serving size and frequency on the approved pack label. Do not exceed the recommended daily intake.'],
-      ['Can it replace my inhaler or prescribed medicine?', 'No. PulmoClear™ is a wellness supplement and is not a substitute for prescribed respiratory medicines or medical care.'],
-      ['What flavour is it?', 'Natural berry flavour.'],
+      ['How does it work?', 'It combines traditional Ayurvedic botanicals with essential vitamins and minerals to provide nutritional and botanical support for everyday respiratory wellness.'],
+      ['What flavour is it, and how many are in a pack?', 'Natural berry flavour, 60 gummies per pack.'],
     ],
+    compliance: { netQuantity: '60 gummies' },
   },
   {
     id: 'liver-booster',
@@ -113,9 +118,9 @@ export const PRODUCTS = [
       'Store in a cool, dry place away from direct sunlight. Refrigerate after opening.',
     ],
     whoFor: [
-      'Adults who want to look after their liver health',
-      'People concerned about lifestyle-related liver load (diet, stress, alcohol)',
-      'Anyone looking for herbal digestive wellness support',
+      'Adults who want to look after their liver and digestive wellness',
+      'People with lifestyle habits that add to liver load (rich food, stress, alcohol)',
+      'Anyone looking for a plant-based daily wellness routine',
     ],
     precautions: [
       'Not recommended for pregnant or lactating women.',
@@ -131,6 +136,7 @@ export const PRODUCTS = [
       ['Can I take it during pregnancy?', 'No. It is not recommended for pregnant or lactating women. If you are on any medication, consult your physician first.'],
       ['What size is the pack and how do I store it?', '500 ml, mixed flavour. Store in a cool, dry place away from direct sunlight and refrigerate after opening.'],
     ],
+    compliance: { netQuantity: '500 ml', countryOfOrigin: 'India', storage: 'Store in a cool, dry place away from direct sunlight. Refrigerate after opening.', certifications: ['100% Ayurvedic', 'GMP Certified', 'No added sugar', 'No added colours'] },
   },
   {
     id: 'cyclerelief-roll-on',
@@ -140,7 +146,7 @@ export const PRODUCTS = [
     format: 'Roll-On',
     size: '8 ml',
     price: 299,
-    mrp: 349,
+    mrp: 299,
     badge: 'For Her',
     accent: '#6b2d8c',
     tint: '#f3ebf8',
@@ -174,7 +180,7 @@ export const PRODUCTS = [
       'Reapply 2–4 times daily or as needed during the menstrual cycle. Follow the approved product label directions.',
     ],
     whoFor: [
-      'Women who experience period discomfort or tension',
+      'Women who want a soothing self-care routine during their period',
       'Anyone who prefers plant-based personal care',
       'Students and working women who want on-the-go comfort',
     ],
@@ -194,28 +200,29 @@ export const PRODUCTS = [
       ['Can children use it?', 'No. The pack says not to use it on children, and to keep it out of their reach.'],
       ['How big is the pack?', '8 ml, small enough for a pocket or handbag.'],
     ],
+    compliance: { netQuantity: '8 ml', countryOfOrigin: 'India', storage: 'Store in a cool, dry place away from direct sunlight. Keep the container tightly closed.', certifications: ['ISO 9001:2015', 'GMP Certified', 'Plant-based', 'Not tested on animals', 'Recyclable packaging'] },
   },
   {
     id: 'reviva-roll-on',
     name: 'Reviva™ Roll-On',
     short: 'Reviva Roll-On',
-    tagline: 'Botanical massage roll-on for everyday vitality',
+    tagline: 'Botanical massage roll-on for a daily self-care routine',
     format: 'Massage Roll-On',
     size: '50 ml',
-    price: 399,
-    mrp: 499,
+    price: 699,
+    mrp: 699,
     badge: null,
     accent: '#e0701a',
     tint: '#fdf1e5',
     concerns: ['blood-sugar'],
     images: ['/img/p/reviva.webp'],
     brochure: '/brochures/reviva.pdf',
-    highlights: ['Dill & Eucalyptus oils', 'Gentle massage roll-on', 'Plant-based, skin friendly', 'Pocket-friendly 50 ml'],
+    highlights: ['Dill & Eucalyptus essential oils', 'Gentle massage roll-on', 'Portable 50 ml pack', 'ISO 9001:2015 & GMP certified'],
     summary:
-      'A refreshing botanical massage roll-on with Dill and Eucalyptus essential oils, made for a calm daily self-care ritual and everyday vitality.',
+      'A botanical-inspired massage roll-on with Dill and Eucalyptus essential oils, designed for external application as part of a daily personal-care and wellness routine.',
     description: [
-      'Living with blood-sugar concerns means daily routines matter: food, movement, sleep, check-ups and a little time for yourself. Reviva™ adds a soothing, two-minute massage ritual to that routine.',
-      'The roll-on glides on easily, absorbs quickly and leaves a fresh, herbal feel from Dill and Eucalyptus essential oils.',
+      'TranzLife Reviva™ adds a simple, refreshing massage to your morning. Its Dill and Eucalyptus essential oils give a fresh, herbal feel as you roll it gently around the belly button.',
+      'The convenient 50 ml roll-on needs no preparation and travels easily, so the routine is easy to keep every day.',
     ],
     benefits: [
       'Provides a refreshing topical application',
@@ -237,13 +244,13 @@ export const PRODUCTS = [
       'Do not apply to wounds or irritated skin. Wash hands after use.',
     ],
     whoFor: [
-      'Adults managing blood-sugar wellness who want a daily self-care ritual',
+      'Adults who want a simple daily self-care ritual',
       'People who enjoy botanical massage and personal-care products',
-      'Anyone looking for a quick, refreshing wellness break',
+      'Anyone looking for a quick, refreshing start to the day',
     ],
     precautions: [
-      'For external use only. Avoid eyes and mucous membranes.',
-      'Not a replacement for diabetes medication, glucose monitoring or medical advice.',
+      'For external use only. Apply on intact skin; avoid eyes and mucous membranes.',
+      'Not a replacement for prescribed medicines, monitoring or medical advice.',
       'Discontinue use if irritation occurs.',
       'Keep out of reach of children.',
     ],
@@ -255,28 +262,29 @@ export const PRODUCTS = [
       ['Can I use it on cuts or irritated skin?', 'No. Only apply on clean, intact skin.'],
       ['Should I do a patch test?', 'Yes, always patch test before first use.'],
     ],
+    compliance: { netQuantity: '50 ml', certifications: ['ISO 9001:2015', 'GMP Certified'] },
   },
   {
     id: 'energy-booster',
     name: 'TranzLife Energy Booster™',
     short: 'Energy Booster',
-    tagline: 'Natural wellness formulation for daily energy and vitality',
+    tagline: 'Herbal and bioactive oral liquid for everyday energy and stamina',
     format: 'Oral Liquid',
     size: '500 ml',
     price: 1850,
-    mrp: 2199,
+    mrp: 1850,
     badge: 'Bestseller',
     accent: '#5b2a6e',
     tint: '#f4ecf6',
     concerns: ['energy'],
     images: ['/img/p/energy.webp'],
     brochure: '/brochures/energy-booster.pdf',
-    highlights: ['Botanical + mineral blend', 'Ready-to-use liquid', 'For active adults', '500 ml family pack'],
+    highlights: ['Botanical + mineral blend', 'Easy-to-measure dosage', 'For active adults', '500 ml pack'],
     summary:
-      'A herbal and bioactive wellness formulation in a ready-to-use oral liquid, made for adults who want to complement their daily energy, activity and general well-being.',
+      'A herbal and bioactive oral liquid formulation designed to complement an active lifestyle and support everyday energy, stamina and overall wellness.',
     description: [
-      'Busy days, long commutes and late nights can leave you feeling flat. TranzLife Energy Booster™ is a simple, measured daily ritual that fits into an active lifestyle.',
-      'It combines selected botanical ingredients with mineral-origin preparations in a convenient oral liquid, so there is nothing to mix and nothing to swallow whole.',
+      'TranzLife Energy Booster™ combines selected botanical and mineral-origin ingredients (Ruta graveolens, Hecla lava, Symphytum officinale, Calcarea phosphorica and Echinacea angustifolia) in an oral liquid.',
+      'It is designed to complement daily energy, activity and general wellness, with an easy-to-measure dose that fits a simple daily routine.',
     ],
     benefits: [
       'Supports everyday energy and stamina',
@@ -290,7 +298,7 @@ export const PRODUCTS = [
     routine: [
       { label: 'Dose', value: '7.5 ml' },
       { label: 'When', value: 'Twice daily' },
-      { label: 'Tip', value: 'Use the cup provided' },
+      { label: 'Tip', value: 'Use the measure supplied' },
     ],
     howToUse: [
       'Suggested dosage: 7.5 ml twice daily, or as recommended by a healthcare professional.',
@@ -299,29 +307,30 @@ export const PRODUCTS = [
       'Do not exceed the recommended serving.',
     ],
     whoFor: [
-      'Adults who often feel tired or low on stamina',
+      'Adults who want to support everyday energy and stamina',
       'People with active, busy lifestyles',
       'Anyone looking for a convenient daily wellness routine',
     ],
     precautions: [
-      'Use only as directed. Do not exceed the recommended serving.',
+      'Use only as directed. Do not exceed the recommended dose.',
       'Pregnant or breastfeeding? Consult a qualified healthcare professional before use.',
       'Taking medication or managing a health condition? Consult your doctor first.',
       'Keep out of reach of children. Store in a cool, dry place.',
     ],
     faqs: [
-      ['What is TranzLife Energy Booster™?', 'A herbal and bioactive wellness formulation in a 500 ml oral liquid, designed to complement daily energy, activity and general well-being.'],
-      ['How much should I take?', 'The suggested serving is 7.5 ml twice daily, or as advised by a healthcare professional. Always follow the directions on the pack label.'],
-      ['What are the key ingredients?', 'Ruta graveolens (Q), Hecla lava (3X), Symphytum officinale (Q), Calcarea phosphorica (8X) and Echinacea angustifolia (Q).'],
-      ['Is it a medicine for any disease?', 'No. It is a wellness formulation and is not intended to diagnose, treat, cure or prevent any disease.'],
+      ['What is TranzLife Energy Booster™?', 'A herbal and bioactive oral liquid formulation (500 ml) designed to complement an active lifestyle and support everyday energy, stamina and overall wellness.'],
+      ['How much should I take?', 'The suggested dosage is 7.5 ml twice daily, using the measuring device supplied, or as recommended by a healthcare professional.'],
+      ['What are the ingredients?', 'Ruta graveolens (Q), Hecla lava (3X), Symphytum officinale (Q), Calcarea phosphorica (8X) and Echinacea angustifolia (Q).'],
+      ['How does it work?', 'It combines selected botanical and mineral-origin ingredients in an oral liquid, designed to complement daily energy, activity and general wellness.'],
       ['Can I take it with my regular medicines?', 'Please check with your doctor before combining it with prescription medicines.'],
     ],
+    compliance: { netQuantity: '500 ml' },
   },
   {
     id: 'breathefree-inhaler',
     name: 'BreatheFree™ Aromatherapy Inhaler',
     short: 'BreatheFree Inhaler',
-    tagline: 'Pocket aromatherapy for fresh breaths and calm moments',
+    tagline: 'Essential-oil inhaler for your journey to a smoke-free life',
     format: 'Aromatherapy Inhaler',
     size: 'Pocket inhaler',
     price: 249,
@@ -365,7 +374,7 @@ export const PRODUCTS = [
       'Travellers and commuters',
     ],
     precautions: [
-      'For inhalation of aroma only. Do not insert deep into the nose.',
+      'For inhalation of the aroma only. Do not insert into the nose.',
       'People with asthma, allergies or essential-oil sensitivity should check with a doctor first.',
       'Pregnant or breastfeeding? Seek professional advice before use.',
       'Keep out of reach of children.',
@@ -455,3 +464,26 @@ export const PACKS = [
 ];
 
 export const FORMATS = [...new Set(PRODUCTS.map((p) => p.format))];
+
+// ---- Live catalogue -------------------------------------------------------
+// The list above shows instantly; the database version (GET /api/products, managed in the admin
+// dashboard) replaces it in place once loaded. Pages call useCatalog() (src/store/lib/catalog.js)
+// so they re-render with the live data: prices, photos, copy, stock and new products.
+const listeners = new Set();
+let version = 0;
+export const subscribeCatalog = (fn) => { listeners.add(fn); return () => listeners.delete(fn); };
+export const catalogVersion = () => version;
+/** The live catalogue could not be loaded: keep the built-in list, but stop waiting for it. */
+export function markCatalogSettled() {
+  if (version > 0) return;
+  version = 1;
+  listeners.forEach((fn) => fn(version));
+}
+
+export function replaceCatalog(list) {
+  if (!Array.isArray(list) || !list.length) return;
+  PRODUCTS.splice(0, PRODUCTS.length, ...list);
+  FORMATS.splice(0, FORMATS.length, ...new Set(list.map((p) => p.format).filter(Boolean)));
+  version += 1;
+  listeners.forEach((fn) => fn(version));
+}

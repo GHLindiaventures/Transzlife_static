@@ -1,28 +1,37 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Reviews from '../../store/components/pdp/Reviews';
-import { listReviews, summarise } from '../../store/data/reviewStore';
+import { loadReviews } from '../../store/data/reviewStore';
+import { PRODUCTS, STORE_ID } from '../../content/site.js';
 
-/** Site-wide reviews are stored under one id (the store's per-product reviews keep their own ids). */
 const SITE = { id: 'tranzlife-site', short: 'TranzLife' };
+const EMPTY = { summary: { avg: 0, total: 0, counts: [0, 0, 0, 0, 0] }, reviews: [], mine: null, canReview: null, signedIn: false };
+
+/** Combines the per-product review lists into one site-wide list and summary. */
+function combine(lists) {
+  const reviews = lists.flatMap((d) => d.reviews || []).sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+  const counts = [0, 0, 0, 0, 0];
+  reviews.forEach((r) => { if (r.rating >= 1 && r.rating <= 5) counts[r.rating - 1] += 1; });
+  const total = reviews.length;
+  const avg = total ? reviews.reduce((s, r) => s + r.rating, 0) / total : 0;
+  return { summary: { avg, total, counts }, reviews, mine: null, canReview: null, signedIn: lists.some((d) => d.signedIn) };
+}
 
 /**
- * Customer reviews for the home page: star rating summary, written reviews, photo / video upload,
- * "helpful" votes and reporting. It reuses the store's review component and storage (see
- * store/data/reviewStore.js: reviews live in this browser until a real API is connected).
- * With no reviews yet it shows the empty state and the "write the first review" button.
+ * Customer reviews for the home page: star summary and every approved review across the products, with their photos.
+ * Reviews are written by verified buyers on each product page (the store's review system), so this section shows
+ * the empty state until the first review is approved.
  */
 export default function HomeReviews() {
-  const [reviews, setReviews] = useState([]);
-  useEffect(() => {
-    let live = true;
-    listReviews(SITE.id).then((r) => live && setReviews(r));
-    return () => { live = false; };
+  const [data, setData] = useState(EMPTY);
+  const load = useCallback(() => {
+    const ids = PRODUCTS.map((p) => STORE_ID[p.id]).filter(Boolean);
+    Promise.all(ids.map((id) => loadReviews(id))).then((lists) => setData(combine(lists)));
   }, []);
-  const summary = useMemo(() => summarise(reviews), [reviews]);
+  useEffect(() => { load(); }, [load]);
 
   return (
     <div className="tl-store home-reviews">
-      <Reviews product={SITE} reviews={reviews} setReviews={setReviews} summary={summary} />
+      <Reviews product={SITE} data={data} onChanged={load} />
     </div>
   );
 }
