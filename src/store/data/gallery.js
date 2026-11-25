@@ -55,6 +55,14 @@ export const GALLERY = {
     "/img/gallery/breathefree-inhaler/03-made-for.webp",
     "/img/gallery/breathefree-inhaler/04-how-to-use.webp",
     "/img/gallery/breathefree-inhaler/05-why-tranzlife.webp"
+  ],
+  "breathfree-drops": [
+    "/img/p/breathfree-drops.jpg",
+    "/img/gallery/breathfree-drops/01-helps.webp",
+    "/img/gallery/breathfree-drops/02-ingredients.webp",
+    "/img/gallery/breathfree-drops/03-made-for.webp",
+    "/img/gallery/breathfree-drops/04-how-to-use.webp",
+    "/img/gallery/breathfree-drops/05-why-tranzlife.webp"
   ]
 };
 

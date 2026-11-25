@@ -1857,3 +1857,21 @@
   .tl-store:not(#tl-a):not(#tl-b) .gallery__thumbs button { width: 68px; height: 68px; border-radius: 12px; }
   .tl-store:not(#tl-a):not(#tl-b) .gallery__nav { width: 38px; height: 38px; margin-top: -19px; }
 }
+
+/* ---------- bigger gallery on desktop: wider page, gallery takes the larger column ---------- */
+@media (min-width: 1025px) {
+  .tl-store:not(#tl-a):not(#tl-b) .pdpx .pdp.container { width: min(1480px, 100% - 48px); }
+  .tl-store:not(#tl-a):not(#tl-b) .pdpx .pdp__grid { grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); gap: clamp(32px, 3.5vw, 56px); }
+  .tl-store:not(#tl-a):not(#tl-b) .gallery--rail { grid-template-columns: 92px minmax(0, 1fr); gap: 18px; }
+  .tl-store:not(#tl-a):not(#tl-b) .gallery--rail .gallery__thumbs button { width: 88px; height: 88px; }
+  /* stay fully visible while sticky: never taller than the window */
+  .tl-store:not(#tl-a):not(#tl-b) .gallery--rail .gallery__main { width: 100%; max-width: calc(100svh - var(--header-h) - 64px); }
+}
+
+/* ingredient amount badge (e.g. "500 mg" per 10 ml) */
+.tl-store:not(#tl-a):not(#tl-b) .ing2__amt { display: inline-block; text-transform: none; letter-spacing: 0; font-size: .72rem; }
+@media (min-width: 861px) { .tl-store:not(#tl-a):not(#tl-b) .ing2__type.ing2__amt { display: inline-block; } }
+
+/* products without a confirmed price yet */
+.tl-store:not(#tl-a):not(#tl-b) .pdp__price--soon strong { font-size: 1.6rem; }
+.tl-store:not(#tl-a):not(#tl-b) .price--soon strong { font-size: .92rem; }

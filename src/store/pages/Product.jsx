@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Check, Download, ShieldCheck, Truck, RotateCcw, Leaf, ArrowRight, Lock, Pill, Clock, Package, Lightbulb, Hand, Briefcase, MapPin, Sparkles, FileText, FlaskConical, Sprout, ChevronLeft, ChevronRight } from 'lucide-react';
-import { getProduct, PRODUCTS, PACKS } from '../data/products';
+import { getProduct, onSale, PRODUCTS, PACKS } from '../data/products';
 import { getGallery } from '../data/gallery';
 import { SITE } from '../data/site';
 import { getIngredient } from '../data/ingredients';
@@ -19,7 +19,7 @@ import Reviews from '../components/pdp/Reviews';
 import { inr, pctOff } from '../utils/format';
 import NotFound from './NotFound';
 
-const ROUTINE_ICON = { Dose: Pill, When: Clock, Format: Package, Tip: Lightbulb, How: Hand, Use: Hand, Apply: Hand, Carry: Briefcase, Where: MapPin };
+const ROUTINE_ICON = { Dose: Pill, When: Clock, Format: Package, Pack: Package, Tip: Lightbulb, How: Hand, Use: Hand, Apply: Hand, Carry: Briefcase, Where: MapPin };
 
 // Plain pack shots (white background) are blended onto the product tint; photos and the
 // generated infographic slides fill the frame as they are.
@@ -103,9 +103,11 @@ export default function Product() {
 
   if (!p) return <NotFound />;
 
-  const unit = packPrice(p, pack);
-  const mrp = packMrp(p, pack);
-  const off = pctOff(unit, mrp);
+  const sale = onSale(p);
+  const unit = sale ? packPrice(p, pack) : null;
+  const mrp = sale ? packMrp(p, pack) : null;
+  const off = sale ? pctOff(unit, mrp) : 0;
+  const notifyUrl = `${SITE.whatsapp}?text=${encodeURIComponent(`Hi TranzLife, please let me know when ${p.short} is available.`)}`;
   const concerns = p.concerns.map(getConcern).filter(Boolean);
   const ings = p.ingredients.map(getIngredient).filter(Boolean);
   // every other product, ones sharing a concern first
@@ -136,16 +138,26 @@ export default function Product() {
               ))}
             </div>
 
-            <div className="pdp__price">
-              <strong>{inr(unit)}</strong>
-              {mrp > unit && <><s>MRP {inr(mrp)}</s><span className="save">Save {inr(mrp - unit)} ({off}% off)</span></>}
-            </div>
-            <p className="pdp__tax">Inclusive of all taxes · {p.size} {p.format.toLowerCase()}</p>
+            {sale ? (
+              <>
+                <div className="pdp__price">
+                  <strong>{inr(unit)}</strong>
+                  {mrp > unit && <><s>MRP {inr(mrp)}</s><span className="save">Save {inr(mrp - unit)} ({off}% off)</span></>}
+                </div>
+                <p className="pdp__tax">Inclusive of all taxes · {p.size} {p.format.toLowerCase()}</p>
+              </>
+            ) : (
+              <>
+                <div className="pdp__price pdp__price--soon"><strong>Price to be announced</strong></div>
+                <p className="pdp__tax">Coming soon · {p.size} {p.format.toLowerCase()}</p>
+              </>
+            )}
 
             <ul className="pdp__highlights">
               {p.highlights.map((h) => <li key={h}><Check size={16} /> {h}</li>)}
             </ul>
 
+            {sale ? (<>
             <fieldset className="packs">
               <legend>Choose your pack</legend>
               {PACKS.map((pk) => {
@@ -167,6 +179,11 @@ export default function Product() {
               <button className="btn btn--lg btn--grow btn--ghost" onClick={() => add(p.id, qty, pack)}>Add to cart</button>
               <button className="btn btn--lg btn--grow" onClick={() => { add(p.id, qty, pack, { openDrawer: false }); navigate('/checkout'); }}>Buy now</button>
             </div>
+            </>) : (
+              <div className="pdp__buy">
+                <a className="btn btn--lg btn--grow" href={notifyUrl} target="_blank" rel="noreferrer">Notify me on WhatsApp</a>
+              </div>
+            )}
 
             <div className="pdp__trust">
               <span><Truck size={18} /> Free shipping above ₹{SITE.freeShippingAbove}</span>
@@ -231,12 +248,14 @@ export default function Product() {
           <div className="pdp-ings__head">
             <p className="eyebrow">Key ingredients</p>
             <h2>What’s inside</h2>
-            <p className="shead__text">{ings.length} carefully chosen ingredients. Tap one to learn more.</p>
+            <p className="shead__text">
+              {ings.length} carefully chosen ingredients. Tap one to learn more.
+              {p.composition && <> Amounts shown are per {p.composition.per}, as printed on the pack (excipients q.s.).</>}
+            </p>
             <Link to="/ingredients" className="link-arrow">Ingredient library <ArrowRight size={16} /></Link>
           </div>
           <div>
-            <IngredientGrid ings={ings} />
-            {p.id === 'breathefree-inhaler' && <p className="note">Aroma profile shown above. The full essential-oil declaration is printed on the pack.</p>}
+            <IngredientGrid ings={ings} amounts={p.composition?.amounts} />
           </div>
         </div>
       </section>
@@ -301,8 +320,10 @@ export default function Product() {
 
       <div className="sticky-buy">
         <img src={p.images[0]} alt="" />
-        <span><strong>{p.short}</strong><small>{inr(unit)}</small></span>
-        <button className="btn" onClick={() => add(p.id, qty, pack)}>Add to cart</button>
+        <span><strong>{p.short}</strong><small>{sale ? inr(unit) : 'Price to be announced'}</small></span>
+        {sale
+          ? <button className="btn" onClick={() => add(p.id, qty, pack)}>Add to cart</button>
+          : <a className="btn" href={notifyUrl} target="_blank" rel="noreferrer">Notify me</a>}
       </div>
     </div>
   );

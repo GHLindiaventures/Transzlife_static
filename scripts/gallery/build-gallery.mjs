@@ -58,6 +58,15 @@ body{font-family:'Manrope',system-ui,sans-serif;color:#15281c;-webkit-font-smoot
 .pack{position:absolute;mix-blend-mode:multiply;object-fit:contain;z-index:1}
 .halo{position:absolute;border-radius:50%;background:radial-gradient(circle,#fff 0%,#fff 45%,rgba(255,255,255,0) 70%)}
 .leafy{position:absolute;opacity:.10;color:var(--a)}
+.bot{position:absolute;z-index:1;border-radius:50%;background:radial-gradient(circle at 40% 35%,#fff 0%,#f7f3ea 70%,#ece4d2 100%);
+  border:6px solid #fff;box-shadow:0 24px 50px color-mix(in srgb,var(--a) 22%,transparent);display:grid;place-items:center;overflow:hidden}
+.bot img{width:82%;height:82%;object-fit:contain;mix-blend-mode:multiply}
+.cover .ctext{position:absolute;left:0;right:0;top:86px;text-align:center;z-index:2}
+.cover h1{font-size:120px;line-height:1;font-weight:700;letter-spacing:-.02em;margin-top:26px}
+.cover .ctext p{font-size:30px;color:var(--muted);margin-top:14px}
+.cover .soon{position:absolute;right:64px;bottom:56px;z-index:3;padding:12px 22px;border-radius:999px;border:2px dashed var(--a);
+  color:var(--a);font-weight:800;font-size:20px;background:rgba(255,255,255,.7)}
+.ithumb b{font-family:'Fraunces',serif;font-size:38px;color:#fff;width:100%;height:100%;display:grid;place-items:center;background:var(--a)}
 .pcard{position:absolute;object-fit:cover;border-radius:40px;z-index:1;border:10px solid #fff;
   box-shadow:0 30px 70px color-mix(in srgb,var(--a) 28%,transparent),0 8px 20px rgba(0,0,0,.08)}
 
@@ -140,6 +149,7 @@ const LEAF_SVG = (x, y, s, r) => `<svg class="leafy" style="left:${x}px;top:${y}
 // Pack shot on a white halo; or, for products whose pack shot is white or not on a white
 // background (`card: true` in content.mjs), the lifestyle photo in a framed card.
 function art(p, c, x, y, w, h) {
+  if (c.botanicals) return botanicals(c.botanicals, x, y, w, h);
   if (c.card) {
     const cw = Math.round(w * 0.9), ch = Math.round(h * 0.86);
     return `<img class="pcard" src="${asset(c.photo)}" style="left:${x + (w - cw) / 2}px;top:${y + (h - ch) / 2}px;width:${cw}px;height:${ch}px" alt="">`;
@@ -147,6 +157,33 @@ function art(p, c, x, y, w, h) {
   const d = Math.max(w, h) * 1.1;
   return `<div class="halo" style="left:${x + w / 2 - d / 2}px;top:${y + h / 2 - d / 2}px;width:${d}px;height:${d}px"></div>`
     + `<img class="pack" src="${asset(p.images[0])}" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px" alt="">`;
+}
+
+// For a product with no pack photo yet: a cluster of its ingredient cutouts on a white halo.
+function botanicals(ids, x, y, w, h) {
+  const d = Math.min(w, h);
+  const cx = x + w / 2, cy = y + h / 2;
+  const big = d * 0.5, small = d * 0.34;
+  const spots = [[0, -0.2, big], [-0.27, 0.17, small], [0.27, 0.17, small], [0, 0.33, small * 0.8]];
+  const halo = `<div class="halo" style="left:${cx - d * 0.62}px;top:${cy - d * 0.62}px;width:${d * 1.24}px;height:${d * 1.24}px"></div>`;
+  return halo + ids.slice(0, spots.length).map((id, k) => {
+    const [dx, dy, s] = spots[k];
+    return `<span class="bot" style="left:${cx + dx * d - s / 2}px;top:${cy + dy * d - s / 2}px;width:${s}px;height:${s}px"><img src="${asset(getIngredientImg(id))}" alt=""></span>`;
+  }).join('');
+}
+
+// Cover image for a product whose pack photo is not available yet. Says so on the image.
+function slideCover(p, c) {
+  return page(p, 'cover', `
+    ${LEAF_SVG(980, 40, 200, 30)}${LEAF_SVG(60, 900, 150, -40)}
+    ${botanicals(c.botanicals, 300, 330, 600, 560)}
+    <div class="ctext">
+      <span class="eyebrow">${esc(p.format)} · ${esc(p.size)}</span>
+      <h1 class="serif">${esc(shortName(p).replace(/\s*Respiratory Wellness Drops$/, ''))}</h1>
+      <p>${esc(p.tagline)}</p>
+    </div>
+    <span class="soon">Product photo coming soon</span>
+    ${brand()}`);
 }
 
 function page(p, cls, body) {
@@ -178,7 +215,9 @@ function slideIngredients(p, c) {
   const shown = ings.slice(0, few ? 3 : 5);
   const rows = shown.map((g) => {
     const sub = few ? g.note.split(/(?<=\.)\s+/).slice(0, 2).join(' ') : [g.alt, g.part].filter(Boolean).join(' · ') || g.latin;
-    return `<div class="irow"><span class="ithumb"><img src="${asset(getIngredientImg(g.id))}" alt=""></span>
+    const img = getIngredientImg(g.id);
+    const thumb = existsSync(join(PUB, img)) ? `<img src="${asset(img)}" alt="">` : `<b>${esc(g.name[0])}</b>`;
+    return `<div class="irow"><span class="ithumb">${thumb}</span>
       <div><strong>${esc(g.name)}</strong><small>${esc(sub)}</small></div></div>`;
   }).join('');
   const rest = ings.length - shown.length;
@@ -190,7 +229,7 @@ function slideIngredients(p, c) {
       <h1 class="serif">Powered by<br><em>nature.</em></h1>
       <div class="rule"></div>
       ${rows}
-      ${rest > 0 ? `<span class="more">${icon('Plus', 22, 2.4)} ${rest} more botanicals &amp; nutrients</span>` : ''}
+      ${rest > 0 ? `<span class="more">${icon('Plus', 22, 2.4)} ${rest} more ingredients</span>` : ''}
     </div>
     ${brand()}`);
 }
@@ -212,7 +251,7 @@ function slideMadeFor(p, c) {
     ${brand()}<p class="note">*${DISCLAIMER}</p>`);
 }
 
-const ROUTINE_ICON = { Dose: 'Pill', When: 'Clock', Format: 'Package', Tip: 'Lightbulb', How: 'Hand', Use: 'Hand', Apply: 'Hand', Carry: 'Briefcase', Where: 'MapPin' };
+const ROUTINE_ICON = { Dose: 'Pill', When: 'Clock', Format: 'Package', Pack: 'Package', Tip: 'Lightbulb', How: 'Hand', Use: 'Hand', Apply: 'Hand', Carry: 'Briefcase', Where: 'MapPin' };
 function slideHow(p, c) {
   const steps = p.howToUse.slice(0, 3).map((s, i) => `<div class="step"><b>0${i + 1}</b><span>${esc(s)}</span></div>`).join('');
   const chips = p.routine.slice(0, 3).map((r) => `<div class="rchip"><span class="ric">${icon(ROUTINE_ICON[r.label] || 'Sparkles', 28)}</span><div><small>${esc(r.label)}</small><strong>${esc(r.value)}</strong></div></div>`).join('');
@@ -239,7 +278,7 @@ function slideTrust(p, c) {
   const badges = ['ayush.png', 'fssai.png', 'make-in-india.png', 'msme.png', 'dpiit-startup-india.png', 'gem-gov.png']
     .map((b) => `<span><img src="${asset('assets/badges/' + b)}" alt=""></span>`).join('');
   return page(p, 'trust', `
-    <img class="bg" src="${asset(c.photo)}" alt="">
+    ${c.photo ? `<img class="bg" src="${asset(c.photo)}" alt="">` : ''}
     <div class="copy">
       <span class="eyebrow">Why TranzLife</span>
       <h1 class="serif">Purity you can trust,<br><em>in every pack.</em></h1>
@@ -323,6 +362,11 @@ try {
     const dir = join(OUT, p.id);
     mkdirSync(dir, { recursive: true });
     const urls = [];
+    if (c.cover) {
+      // stands in for the pack shot (p.images[0] points here) until the real photo arrives
+      await render(b, slideCover(p, c), join(dir, '00-pack.webp'));
+      console.log(`  ${p.id}/00-pack.webp`);
+    }
     for (const [n, [slug, fn]] of SLIDES.entries()) {
       const name = `${String(n + 1).padStart(2, '0')}-${slug}.webp`;
       await render(b, fn(p, c), join(dir, name));
@@ -340,7 +384,8 @@ try {
 if (!only.length) {
   const order = Object.fromEntries(PRODUCTS.filter((p) => manifest[p.id]).map((p) => {
     const [helps, ...rest] = manifest[p.id];
-    return [p.id, ['/' + SLIDE_COPY[p.id].photo, helps, ...p.images, ...rest]];
+    const photo = SLIDE_COPY[p.id].photo;
+    return [p.id, photo ? ['/' + photo, helps, ...p.images, ...rest] : [...p.images, helps, ...rest]];
   }));
   writeFileSync(join(ROOT, 'src/store/data/gallery.js'),
     `// Product-page gallery images, generated by scripts/gallery/build-gallery.mjs. Do not edit by hand:\n` +
