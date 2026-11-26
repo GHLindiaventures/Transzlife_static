@@ -482,7 +482,7 @@ export function markCatalogSettled() {
 }
 
 export function replaceCatalog(list) {
-  if (!Array.isArray(list) || !list.length) return;
+  if (!Array.isArray(list)) return;   // an empty list is real: the database has no products, so the shop shows none
   PRODUCTS.splice(0, PRODUCTS.length, ...list);
   FORMATS.splice(0, FORMATS.length, ...new Set(list.map((p) => p.format).filter(Boolean)));
   version += 1;

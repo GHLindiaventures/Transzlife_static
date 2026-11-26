@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App.jsx';
 import { loadSiteDocs } from './content/docs.js';
+import { loadCatalog } from './store/lib/catalog';
 import './styles/styles.css';
 import './styles/pages.css';
 import './styles/slider.css';
@@ -22,7 +23,7 @@ import './styles/ingredients-carousel.css';
 function Boot() {
   const needs = !window.location.pathname.startsWith('/admin');
   const [state, setState] = useState(needs ? 'loading' : 'ready');
-  const load = () => { setState('loading'); loadSiteDocs().then(() => setState('ready'), (e) => { console.error(e); setState('failed'); }); };
+  const load = () => { setState('loading'); Promise.all([loadSiteDocs(), loadCatalog()]).then(() => setState('ready'), (e) => { console.error(e); setState('failed'); }); };
   useEffect(() => { if (needs) load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
   if (state === 'ready') return <BrowserRouter><App /></BrowserRouter>;
   return (

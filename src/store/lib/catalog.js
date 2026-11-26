@@ -14,7 +14,7 @@ export function loadCatalog() {
     // pack discounts and shipping / prepaid rules as set in the dashboard
     if (Array.isArray(p?.packs) && p.packs.length) PACKS.splice(0, PACKS.length, ...p.packs);
     if (p?.shop) Object.assign(SITE, p.shop);
-    if (p?.products?.length) replaceCatalog(p.products); else markCatalogSettled();
+    if (Array.isArray(p?.products)) replaceCatalog(p.products); else markCatalogSettled();
   });
   return loading;
 }
