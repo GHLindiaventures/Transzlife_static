@@ -8,20 +8,25 @@
 .ptag.ptag--lg:not(#tl-a):not(#tl-b) .ptag__now { font-size: 36px; }
 .ptag.ptag--lg:not(#tl-a):not(#tl-b) .ptag__mrp { font-size: 19px; }
 .ptag.ptag--lg:not(#tl-a):not(#tl-b) .ptag__off { font-size: 13px; padding: 4px 11px; }
+/* "sm": compact rows (cart suggestions, saved/recent lists, sticky buy bar) */
+.ptag.ptag--sm:not(#tl-a):not(#tl-b) { gap: 2px 6px; width: auto; }
+.ptag.ptag--sm:not(#tl-a):not(#tl-b) .ptag__now { font-size: 16px; }
+.ptag.ptag--sm:not(#tl-a):not(#tl-b) .ptag__mrp { font-size: 12px; }
+.ptag.ptag--sm:not(#tl-a):not(#tl-b) .ptag__off { font-size: 10px; padding: 2px 6px; letter-spacing: .02em; }
 @container (max-width: 250px) {
-  .ptag__now { font-size: 22px !important; }
-  .ptag__mrp { font-size: 13px !important; }
-  .ptag__off { font-size: 11px !important; padding: 2px 7px !important; }
+  .ptag:not(.ptag--sm) .ptag__now { font-size: 22px !important; }
+  .ptag:not(.ptag--sm) .ptag__mrp { font-size: 13px !important; }
+  .ptag:not(.ptag--sm) .ptag__off { font-size: 11px !important; padding: 2px 7px !important; }
 }
 @container (max-width: 170px) {
-  .ptag__now { font-size: 19px !important; }
-  .ptag__mrp { font-size: 12px !important; }
-  .ptag__off { font-size: 10px !important; padding: 2px 6px !important; letter-spacing: .02em; }
+  .ptag:not(.ptag--sm) .ptag__now { font-size: 19px !important; }
+  .ptag:not(.ptag--sm) .ptag__mrp { font-size: 12px !important; }
+  .ptag:not(.ptag--sm) .ptag__off { font-size: 10px !important; padding: 2px 6px !important; letter-spacing: .02em; }
 }
 @media (max-width: 520px) { .ptag.ptag--lg:not(#tl-a):not(#tl-b) .ptag__now { font-size: 30px; } .ptag.ptag--lg:not(#tl-a):not(#tl-b) .ptag__mrp { font-size: 16px; } }
 
 /* shop cards: the price gets its own full-width row, with the button under it (same arrangement as the home cards) */
-.ptag.ptag:not(#tl-a):not(#tl-b) { width: 100%; }
+.ptag.ptag:not(.ptag--sm):not(#tl-a):not(#tl-b) { width: 100%; }
 .tl-store:not(#tl-a):not(#tl-b) .pcard__foot { flex-direction: column; align-items: stretch; gap: 12px; }
 .tl-store:not(#tl-a):not(#tl-b) .pcard__foot .pcard__pricing { width: 100%; }
 .tl-store:not(#tl-a):not(#tl-b) .pcard__foot > .btn { width: 100%; justify-content: center; }
