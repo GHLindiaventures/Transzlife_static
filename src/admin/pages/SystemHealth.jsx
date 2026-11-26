@@ -68,12 +68,11 @@ export default function SystemHealth() {
       <PageHead
         title="System health"
         sub={data ? `${overallText} · Last checked ${dt(data.checkedAt)} · Node ${data.server.nodeVersion} · ${data.server.memoryMb} MB RAM · Up ${fmtUptime(data.server.uptimeSeconds)}` : 'Monitoring availability, services, security, jobs, and data health.'}
-        right={
-          <button type="button" className="adm-btn" onClick={runNow} disabled={act.busy}>
-            <RefreshCw size={15} className={act.busy ? 'spin' : ''} /> {act.busy ? 'Running…' : 'Run checks now'}
-          </button>
-        }
-      />
+      >
+        <button type="button" className="adm-btn" onClick={runNow} disabled={act.busy}>
+          <RefreshCw size={15} className={act.busy ? 'spin' : ''} /> {act.busy ? 'Running…' : 'Run checks now'}
+        </button>
+      </PageHead>
 
       <ErrorBox>{error || act.error}</ErrorBox>
       <Notice>{act.notice}</Notice>

@@ -39,7 +39,7 @@ export async function loadSiteContent(q) {
 
 export default async function contentRoutes(app, { db }) {
   app.get('/api/site-content', async (req, reply) => {
-    reply.header('Cache-Control', 'public, max-age=60');     // staff changes show within a minute
+    reply.header('Cache-Control', 'no-cache');                // staff changes show immediately
     return loadSiteContent(db.query);
   });
 }
