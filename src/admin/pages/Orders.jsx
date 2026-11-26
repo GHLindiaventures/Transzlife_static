@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { Download, Printer, ArrowLeft, X, Search, ExternalLink, Truck, PackageCheck, PackageOpen, Undo2 } from 'lucide-react';
+import { Download, Printer, ArrowLeft, X, Search, ExternalLink, Truck, PackageCheck, PackageOpen, Undo2, PhoneCall } from 'lucide-react';
 import { StartReturn } from './Returns';
 import { api } from '../../store/lib/api';
-import { Badge, Empty, ErrorBox, Loading, METHOD, Notice, PAYSTATUS, PageHead, Pager, STATUS, can, dt, rs, toPaise, useAction, useAdmin, useApi } from '../ui';
+import { Badge, CODSTATUS, Empty, ErrorBox, Loading, METHOD, Notice, PAYSTATUS, PageHead, Pager, STATUS, can, dt, rs, toPaise, useAction, useAdmin, useApi } from '../ui';
 
 // Flipkart-style pipeline tabs (server: STAGES in server/admin/reports.js)
 const STAGES = [
@@ -94,7 +94,7 @@ export function OrderList() {
                     <td className="adm-ordercell"><strong>{o.order_number}</strong><span className="adm-sub">{dt(o.created_at)}</span></td>
                     <td>{o.customer}<span className="adm-sub">{[o.city, o.phone].filter(Boolean).join(' · ')}</span></td>
                     <td data-hide-sm><span className="adm-clamp" title={o.products}>{o.items} item{o.items === 1 ? '' : 's'} · {o.products}</span></td>
-                    <td>{METHOD[o.payment_method]}<span className="adm-sub"><Badge map={PAYSTATUS} value={o.payment_status} /></span></td>
+                    <td>{METHOD[o.payment_method]}<span className="adm-sub"><Badge map={PAYSTATUS} value={o.payment_status} /></span>{o.cod_confirmation && o.cod_confirmation !== 'confirmed' && ['confirmed', 'packed'].includes(o.status) && <span className="adm-sub"><Badge map={CODSTATUS} value={o.cod_confirmation} /></span>}</td>
                     <td><Badge value={o.status} /></td>
                     <td className="num"><strong>{rs(o.total)}</strong></td>
                   </tr>
@@ -254,6 +254,10 @@ export function OrderDetail() {
       (res) => `Refund of ${rs(res.amount)} ${res.method === 'razorpay' ? `sent through Razorpay (${res.status})` : 'recorded'}.`);
     if (r) { setRefund({ amount: '', reason: '' }); reload(); }
   };
+  const codResult = async (result) => {
+    const note = result === 'cancel_requested' ? window.prompt('What did the customer say? (optional)') ?? '' : '';
+    if (await act.run(() => api(`/api/admin/orders/${o.number}/cod`, { method: 'POST', body: { result, note } }), result === 'confirmed' ? 'Marked as confirmed.' : 'Noted: the customer wants to cancel. Cancel the order to release the stock.')) reload();
+  };
   const saveNote = async () => {
     const r = await act.run(() => api(`/api/admin/orders/${o.number}/note`, { method: 'POST', body: { note: staffNote } }), 'Note saved.');
     if (r) { setStaffNote(null); reload(); }
@@ -264,6 +268,13 @@ export function OrderDetail() {
       <Link to="/admin/orders" className="adm-link adm-back no-print"><ArrowLeft size={15} /> Orders</Link>
       <PageHead title={`Order ${o.number}`} sub={`Placed ${dt(o.createdAt)}`}>
         <Badge value={o.status} /> <Badge map={PAYSTATUS} value={o.paymentStatus} />
+        {o.codConfirmation && <Badge map={CODSTATUS} value={o.codConfirmation} />}
+        {o.paymentMethod === 'cod' && ['confirmed', 'packed'].includes(o.status) && o.codConfirmation !== 'confirmed' && can(staff, 'orders.note') && (
+          <>
+            <button className="adm-btn is-ghost no-print" disabled={act.busy} onClick={() => codResult('confirmed')} title="After calling the customer"><PhoneCall size={16} /> Confirmed by phone</button>
+            {o.codConfirmation !== 'cancel_requested' && <button className="adm-btn is-ghost no-print" disabled={act.busy} onClick={() => codResult('cancel_requested')}>Customer wants to cancel</button>}
+          </>
+        )}
         {o.status === 'delivered' && can(staff, 'orders.edit') && <button className="adm-btn is-ghost no-print" onClick={() => setReturning(true)}><Undo2 size={16} /> Start a return</button>}
         <Link className="adm-btn is-ghost no-print" to={`/admin/orders/print?numbers=${o.number}`}><Printer size={16} /> Packing slip</Link>
       </PageHead>
@@ -372,7 +383,7 @@ export function PrintSlips() {
   const { data, error } = useApi(numbers ? `/api/admin/orders/slips?numbers=${encodeURIComponent(numbers)}` : null);
   return (
     <div className="adm-content" style={{ maxWidth: 820, margin: '0 auto' }}>
-      <div className="adm-row no-print" style={{ marginBottom: 18 }}>
+      <div className="adm-row no-print" style={{ marginBottom: 20 }}>
         <button className="adm-link" onClick={() => navigate(-1)}><ArrowLeft size={15} /> Back</button>
         <button className="adm-btn" onClick={() => window.print()} disabled={!data}><Printer size={16} /> Print {data ? `${data.slips.length} slip${data.slips.length === 1 ? '' : 's'}` : ''}</button>
       </div>

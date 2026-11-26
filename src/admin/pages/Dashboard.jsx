@@ -1,20 +1,20 @@
 // Home: what needs doing today, how the business is doing (vs the previous period), and what's selling.
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { ArrowRight, CheckCircle2, Leaf, MessageCircle, Table2, LineChart as LineIcon, PackageOpen } from 'lucide-react';
-import { Badge, Delta, Empty, ErrorBox, Loading, METHOD, Sparkline, dt, rs, rsCompact, useAdmin, useApi, useChartColors } from '../ui';
+import { Badge, Delta, Empty, ErrorBox, Loading, METHOD, RangePicker, Sparkline, dt, rs, rsCompact, useAdmin, useApi, useChartColors, useRange } from '../ui';
 
-const RANGE_LABEL = { today: 'Today', '7d': '7 days', '30d': '30 days', '90d': '90 days' };
-const PREV_LABEL = { today: 'yesterday', '7d': 'previous 7 days', '30d': 'previous 30 days', '90d': 'previous 90 days' };
+const RANGE_LABEL = { today: 'Today', '7d': '7 days', '30d': '30 days', '90d': '90 days', '365d': '12 months', month: 'This month', custom: 'Chosen dates' };
+const PREV_LABEL = { today: 'yesterday', '7d': 'previous 7 days', '30d': 'previous 30 days', '90d': 'previous 90 days', '365d': 'previous 12 months', month: 'same days last month', custom: 'previous period' };
 const greeting = () => { const h = new Date().getHours(); return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening'; };
 
 export default function Dashboard() {
   const { staff, theme } = useAdmin();
-  const [range, setRange] = useState(() => { try { return localStorage.getItem('tl-admin-range') || '30d'; } catch { return '30d'; } });
-  const { data, error, loading } = useApi(`/api/admin/overview?range=${range}`);
+  const rng = useRange();
+  const range = rng.range;
+  const { data, error, loading } = useApi(`/api/admin/overview?${rng.qs}`);
   const colors = useChartColors(theme);
-  const pick = (r) => { setRange(r); try { localStorage.setItem('tl-admin-range', r); } catch { /* ignore */ } };
 
   return (
     <>
@@ -23,8 +23,9 @@ export default function Dashboard() {
           <p className="adm-eyebrow">{new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
           <h1>{greeting()}, {staff.name.split(' ')[0]}</h1>
         </div>
-        <div className="adm-seg" role="group" aria-label="Date range">
-          {Object.entries(RANGE_LABEL).map(([k, v]) => <button key={k} className={range === k ? 'is-on' : ''} aria-pressed={range === k} onClick={() => pick(k)}>{v}</button>)}
+        <div className="adm-hello__right">
+          <LiveNow />
+          <RangePicker value={rng} />
         </div>
       </div>
       <ErrorBox>{error}</ErrorBox>
@@ -32,11 +33,11 @@ export default function Dashboard() {
         <div style={{ opacity: loading ? 0.6 : 1, transition: 'opacity .15s' }}>
           <Attention items={data.attention} />
           <Kpis data={data} range={range} colors={colors} />
-          <div className="adm-grid2 is-wide-left" style={{ marginBottom: 18 }}>
+          <div className="adm-grid2 is-wide-left" style={{ marginBottom: 20 }}>
             <Trend data={data} range={range} colors={colors} />
             <Pipeline pipeline={data.pipeline} />
           </div>
-          <div className="adm-grid3" style={{ marginBottom: 18 }}>
+          <div className="adm-grid3" style={{ marginBottom: 20 }}>
             <BestSellers best={data.best} />
             <Mix data={data} colors={colors} />
             <Tulsi tulsi={data.tulsi} />
@@ -46,6 +47,14 @@ export default function Dashboard() {
       )}
     </>
   );
+}
+
+/** "● 12 on the site now" (same live count as Visitors > Right now), refreshed every 30 s. */
+function LiveNow() {
+  const { data, reload } = useApi('/api/admin/presence');
+  useEffect(() => { const t = setInterval(reload, 30_000); return () => clearInterval(t); }, [reload]);
+  if (!data) return null;
+  return <Link to="/admin/visitors" className="adm-livechip"><span className="adm-livedot" aria-hidden="true" /> <b className="tabular">{data.total}</b> on the site now</Link>;
 }
 
 function Attention({ items }) {
@@ -126,7 +135,7 @@ function Trend({ data, range, colors }) {
       {asTable ? (
         <div className="adm-tablewrap" style={{ maxHeight: 280, marginTop: 10 }}>
           <table className="adm-table is-compact">
-            <thead><tr><th>{range === 'today' ? 'Hour' : 'Day'}</th><th className="num">This period</th><th className="num">Previous</th></tr></thead>
+            <thead><tr><th>{data.trend.length === 24 && range === 'today' ? 'Hour' : 'Day'}</th><th className="num">This period</th><th className="num">Previous</th></tr></thead>
             <tbody>{data.trend.map((t) => <tr key={t.label}><td>{t.label}</td><td className="num">{metric === 'revenue' ? rs(t[metric]) : t[metric]}</td><td className="num">{metric === 'revenue' ? rs(t[prevKey]) : t[prevKey]}</td></tr>)}</tbody>
           </table>
         </div>

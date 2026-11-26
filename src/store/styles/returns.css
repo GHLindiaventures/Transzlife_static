@@ -58,3 +58,5 @@
 .tl-store:not(#tl-a):not(#tl-b) .acct-orders > li { display: grid; gap: 6px; }
 .tl-store:not(#tl-a):not(#tl-b) .acct-return { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-left: 14px; padding: 6px 12px; border-radius: 12px; background: var(--bg, #fcfaf1); border: 1px dashed rgba(15, 47, 29, .2); font-size: .85rem; color: var(--text-2, #4a5d50); }
 .tl-store:not(#tl-a):not(#tl-b) .acct-return:hover { border-color: var(--forest, #173f24); }
+.tl-store:not(#tl-a):not(#tl-b) .acx-return { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 8px; padding: 6px 12px; border-radius: 12px; background: var(--bg, #fcfaf1); border: 1px dashed rgba(15, 47, 29, .2); font-size: .85rem; color: var(--text-2, #4a5d50); }
+.tl-store:not(#tl-a):not(#tl-b) .acx-return:hover { border-color: var(--forest, #173f24); }

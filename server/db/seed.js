@@ -6,7 +6,13 @@ import { PRODUCTS, PACKS } from '../../src/store/data/products.js';
 import { SITE } from '../../src/store/data/site.js';
 import { INGREDIENTS } from '../../src/store/data/ingredients.js';
 
-const SEED_STOCK = 100;   // placeholder opening stock per product
+const SEED_STOCK = 100;
+
+/** The site's badge text as a structured badge ("Bestseller" is decided by real sales, see offers.js). */
+const seedBadge = (text) => (!text ? null
+  : /best\s*-?seller/i.test(text) ? { key: 'auto', enabled: true }
+    : /^new/i.test(text) ? { key: 'new_arrival', enabled: true, startsAt: new Date().toISOString() }
+      : { key: 'custom', text, tone: 'forest', enabled: true });   // placeholder opening stock per product
 
 export async function seed(db, log = console) {
   let added = 0;
@@ -15,7 +21,8 @@ export async function seed(db, log = console) {
       const r = await t.query(
         `INSERT INTO products (id, name, format, size, price, mrp) VALUES ($1,$2,$3,$4,$5,$6)
          ON CONFLICT (id) DO NOTHING`,
-        [p.id, p.name, p.format ?? null, p.size ?? null, Math.round(p.price * 100), Math.round(p.mrp * 100)]);
+        // no price yet ("coming soon") is stored as 0: shown without a price and refused at checkout
+        [p.id, p.name, p.format ?? null, p.size ?? null, Math.round((p.price ?? 0) * 100), Math.round((p.mrp ?? 0) * 100)]);
       if (r.affectedRows ?? r.rowCount) {
         added++;
         await t.query('INSERT INTO inventory (product_id, on_hand) VALUES ($1,$2) ON CONFLICT DO NOTHING', [p.id, SEED_STOCK]);
@@ -31,10 +38,10 @@ export async function seed(db, log = console) {
       };
       const r = await t.query(
         `UPDATE products SET short = $2, tagline = $3, badge = $4, accent = $5, tint = $6, concerns = $7, sort_order = $8, content = $9,
-                compliance = $10::jsonb || compliance
+                compliance = $10::jsonb || compliance, badge_config = COALESCE(badge_config, $11::jsonb)
           WHERE id = $1 AND content = '{}'::jsonb`,
         [p.id, p.short ?? null, p.tagline ?? null, p.badge ?? null, p.accent ?? null, p.tint ?? null, p.concerns || [], (i + 1) * 10, JSON.stringify(content),
-          JSON.stringify(p.compliance || {})]);
+          JSON.stringify(p.compliance || {}), JSON.stringify(seedBadge(p.badge))]);
       if ((r.affectedRows ?? r.rowCount) && !(await t.query('SELECT 1 FROM product_media WHERE product_id = $1 LIMIT 1', [p.id])).rows.length) {
         for (const [k, url] of (p.images || []).entries()) {
           await t.query('INSERT INTO product_media (product_id, url, alt, sort) VALUES ($1,$2,$3,$4)', [p.id, url, p.name, k]);

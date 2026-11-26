@@ -25,6 +25,10 @@ export const PAYSTATUS = {
   created: ['Started', 'warn'],
 };
 export const METHOD = { upi: 'UPI', card: 'Card', netbanking: 'Net banking', cod: 'COD' };
+export const CODSTATUS = {
+  pending: ['COD: waiting for reply', 'warn'], confirmed: ['COD confirmed', 'ok'],
+  no_reply: ['COD: no reply, call', 'bad'], cancel_requested: ['Customer wants to cancel', 'bad'],
+};
 
 export function Badge({ map = STATUS, value }) {
   const [label, tone] = map[value] || [value, 'off'];
@@ -156,3 +160,47 @@ export function Empty({ icon: I, title, children }) {
 
 /** Initials for the avatar circle. */
 export const initials = (name = '') => name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join('') || '?';
+
+// ---- Shared date range (every report page) -----------------------------------------------------
+// One picker, remembered across pages and visits: Today / 7 / 30 / 90 days / This month / 12 months / Custom.
+// Matches server/admin/range.js. Reports compare with the period of the same length just before.
+export const RANGE_OPTIONS = [['today', 'Today'], ['7d', '7 days'], ['30d', '30 days'], ['90d', '90 days'], ['month', 'This month'], ['365d', '12 months'], ['custom', 'Custom']];
+const RANGE_KEY = 'tl-admin-range-v2';
+const todayIST = () => new Date(Date.now() + 5.5 * 3600e3).toISOString().slice(0, 10);
+
+export function useRange(fallback = '30d') {
+  const read = () => {
+    try { const v = JSON.parse(localStorage.getItem(RANGE_KEY)); if (v?.range) return v; } catch { /* ignore */ }
+    return { range: fallback, from: todayIST(), to: todayIST() };
+  };
+  const [value, setValue] = useState(read);
+  const set = useCallback((next) => {
+    setValue((v) => {
+      const merged = { ...v, ...next };
+      try { localStorage.setItem(RANGE_KEY, JSON.stringify(merged)); } catch { /* ignore */ }
+      return merged;
+    });
+  }, []);
+  const qs = value.range === 'custom' ? `range=custom&from=${value.from}&to=${value.to}` : `range=${value.range}`;
+  return { ...value, qs, set };
+}
+
+export function RangePicker({ value }) {
+  const [draft, setDraft] = useState({ from: value.from, to: value.to });
+  const label = RANGE_OPTIONS.find(([k]) => k === value.range)?.[1];
+  return (
+    <div className="adm-range">
+      <select className="adm-range__select" value={value.range} onChange={(e) => value.set({ range: e.target.value })} aria-label="Date range">
+        {RANGE_OPTIONS.map(([k, l]) => <option key={k} value={k}>{l}</option>)}
+      </select>
+      {value.range === 'custom' ? (
+        <form className="adm-range__custom" onSubmit={(e) => { e.preventDefault(); value.set(draft); }}>
+          <input type="date" value={draft.from} max={draft.to} onChange={(e) => setDraft((d) => ({ ...d, from: e.target.value }))} aria-label="From" required />
+          <span aria-hidden="true">–</span>
+          <input type="date" value={draft.to} min={draft.from} max={todayIST()} onChange={(e) => setDraft((d) => ({ ...d, to: e.target.value }))} aria-label="To" required />
+          <button className="adm-btn is-sm">Apply</button>
+        </form>
+      ) : <span className="adm-range__vs">vs previous {label === 'Today' ? 'day' : label === 'This month' ? 'month' : 'period'}</span>}
+    </div>
+  );
+}

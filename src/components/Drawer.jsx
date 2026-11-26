@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { ProductImg } from './ui.jsx';
-import { PRODUCTS, productUrl, ANNOUNCEMENTS } from '../content/site.js';
+import { PRODUCTS, productUrl, ANNOUNCEMENTS, fillShopTokens } from '../content/site.js';
 import { NAV } from './Header.jsx';
 
 export default function Drawer({ open, onClose }) {
@@ -83,7 +83,7 @@ export default function Drawer({ open, onClose }) {
                     </svg>
                   )}
                 </span>
-                <span className="drawer__trust-text">{item}</span>
+                <span className="drawer__trust-text">{fillShopTokens(item)}</span>
               </li>
             ))}
           </ul>

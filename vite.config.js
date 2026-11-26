@@ -39,7 +39,7 @@ export default defineConfig(({ mode }) => {
           configure: (proxy) => proxy.on('error', (err, req, res) => {
             if (res.headersSent || typeof res.writeHead !== 'function') return;
             res.writeHead(503, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'The shop API is not running. Start it with `npm run dev:api` in a second terminal.', code: 'api_down' }));
+            res.end(JSON.stringify({ error: 'The shop API is not running. `npm run dev` starts it with the site; check the [api] lines in that terminal for the error.', code: 'api_down' }));
           }),
         },
       },

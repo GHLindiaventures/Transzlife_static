@@ -2,6 +2,7 @@
 // Times are in India Standard Time. Sales count orders that are not awaiting payment or cancelled.
 import { z } from 'zod';
 import { createInsights, summarise } from '../insights.js';
+import { resolveRange } from './range.js';
 
 const COUNTED = `o.status NOT IN ('pending_payment', 'cancelled')`;
 const IST = `'Asia/Kolkata'`;
@@ -19,7 +20,8 @@ export const STAGES = {
   cancelled: ['cancelled', 'refunded'],
 };
 
-export default async function reportRoutes(app, { db, G, parse, env }) {
+export default async function reportRoutes(app, { db, G, parse, env, ops }) {
+  const runoutList = async () => (ops ? ops.stockRunout() : []);
   const insights = createInsights(env);
   const num = (v) => Number(v || 0);
 
@@ -37,6 +39,14 @@ export default async function reportRoutes(app, { db, G, parse, env }) {
       SELECT p.id, p.name, i.on_hand - i.reserved AS available, i.low_stock_at
         FROM inventory i JOIN products p ON p.id = i.product_id
        WHERE p.active AND i.on_hand - i.reserved <= i.low_stock_at ORDER BY available`)).rows;
+    const offersSoon = (await db.query(`
+      SELECT name, starts_at, ends_at, CASE WHEN starts_at > now() THEN 'starts' ELSE 'ends' END AS what FROM offers
+       WHERE active AND ((starts_at <= now() AND ends_at > now() AND ends_at < now() + interval '48 hours')
+                      OR (starts_at > now() AND starts_at < now() + interval '24 hours')) ORDER BY LEAST(starts_at, ends_at)`)).rows;
+    const cod = (await db.query(`
+      SELECT COUNT(*) FILTER (WHERE cod_confirmation = 'no_reply') AS no_reply, COUNT(*) FILTER (WHERE cod_confirmation = 'cancel_requested') AS cancel
+        FROM orders WHERE status = 'confirmed'`)).rows[0];
+    const runout = await runoutList();
     const reviewsPending = num((await db.query(`SELECT COUNT(*) AS n FROM reviews WHERE status = 'pending'`)).rows[0].n);
     const failed = num((await db.query(`SELECT COUNT(*) AS n FROM notifications WHERE status = 'failed' AND created_at > now() - interval '7 days'`)).rows[0].n);
     // batches still in stock that expire within 90 days (sell these first; plan a discount or write-off)
@@ -70,6 +80,13 @@ export default async function reportRoutes(app, { db, G, parse, env }) {
     add('returns_requested', num(ret.requested), num(ret.requested) === 1 ? 'new return request to review' : 'new return requests to review', '/admin/returns?status=requested', 'info');
     add('returns', num(o.returns_week), 'returned to us this week', '/admin/orders?stage=returns', 'muted');
     add('awaiting_payment', num(o.awaiting_payment), 'awaiting online payment', '/admin/orders?stage=awaiting_payment', 'muted');
+    const ending = offersSoon.filter((o) => o.what === 'ends'), starting = offersSoon.filter((o) => o.what === 'starts');
+    add('offers_ending', ending.length, ending.length === 1 ? 'offer ends within 48 hours' : 'offers end within 48 hours', '/admin/pricing', 'info', ending.map((o) => o.name).join(', '));
+    add('offers_starting', starting.length, starting.length === 1 ? 'offer starts within 24 hours' : 'offers start within 24 hours', '/admin/pricing', 'muted', starting.map((o) => o.name).join(', '));
+    add('cod_no_reply', num(cod.no_reply), num(cod.no_reply) === 1 ? 'COD order with no reply: call to confirm' : 'COD orders with no reply: call to confirm', '/admin/orders?stage=to_pack', 'warn');
+    add('cod_cancel', num(cod.cancel), num(cod.cancel) === 1 ? 'customer asked to cancel a COD order' : 'customers asked to cancel COD orders', '/admin/orders?stage=to_pack', 'bad');
+    add('runout', runout.length, runout.length === 1 ? 'product will run out soon' : 'products will run out soon', '/admin/products', 'warn',
+      runout.map((r) => `${r.name.replace(/^TranzLife /, '')}: about ${r.days} day${r.days === 1 ? '' : 's'} left`).join(' · '));
     add('reviews', reviewsPending, reviewsPending === 1 ? 'review waiting for a check' : 'reviews waiting for a check', '/admin/reviews', 'info');
     add('failed_messages', failed, failed === 1 ? 'customer message failed' : 'customer messages failed', '/admin/settings', 'warn');
     return items;
@@ -79,14 +96,10 @@ export default async function reportRoutes(app, { db, G, parse, env }) {
 
   // ---- Overview: KPIs vs previous period, trend, pipeline, best sellers, mixes, Tulsi topics ----
   app.get('/api/admin/overview', G('view'), async (req) => {
-    const range = RANGES[req.query.range] ? req.query.range : '30d';
-    const days = RANGES[range];
-    // window bounds (IST): "today" = since midnight; others = the last N whole days including today
-    const b = (await db.query(`
-      SELECT (date_trunc('day', now() AT TIME ZONE ${IST}) - make_interval(days => $1 - 1)) AT TIME ZONE ${IST} AS cur_from,
-             now() AS cur_to,
-             (date_trunc('day', now() AT TIME ZONE ${IST}) - make_interval(days => 2 * $1 - 1)) AT TIME ZONE ${IST} AS prev_from,
-             now() - make_interval(days => $1) AS prev_to`, [days])).rows[0];
+    // shared date ranges (server/admin/range.js): today / 7d / 30d / 90d / 365d / month / custom
+    const rr = await resolveRange(db, req.query);
+    const range = rr.key, days = rr.days;
+    const b = { cur_from: rr.from, cur_to: rr.to, prev_from: rr.prevFrom, prev_to: rr.prevTo };
 
     const kpis = async (from, to) => {
       const r = (await db.query(`
@@ -102,8 +115,8 @@ export default async function reportRoutes(app, { db, G, parse, env }) {
     const [current, previous] = [await kpis(b.cur_from, b.cur_to), await kpis(b.prev_from, b.prev_to)];
 
     // trend: hourly for today, daily otherwise; previous period aligned point by point
-    const unit = range === 'today' ? 'hour' : 'day';
-    const points = range === 'today' ? 24 : days;
+    const unit = days <= 1 ? 'hour' : 'day';
+    const points = days <= 1 ? 24 : days;
     const series = async (from) => (await db.query(`
       SELECT g.i, COALESCE(SUM(o.total), 0)::bigint AS revenue, COUNT(o.id) AS orders
         FROM generate_series(0, $3 - 1) AS g(i)
@@ -119,27 +132,27 @@ export default async function reportRoutes(app, { db, G, parse, env }) {
     const trend = labels.map((l, i) => ({ label: l.label, revenue: num(cur[i]?.revenue), orders: num(cur[i]?.orders), prevRevenue: num(prev[i]?.revenue), prevOrders: num(prev[i]?.orders) }));
 
     const pipeline = (await db.query(`
-      SELECT status, COUNT(*) AS n FROM orders o WHERE o.created_at >= $1 GROUP BY status`, [b.cur_from])).rows
+      SELECT status, COUNT(*) AS n FROM orders o WHERE o.created_at >= $1 AND o.created_at < $2 GROUP BY status`, [b.cur_from, b.cur_to])).rows
       .reduce((m, r) => ({ ...m, [r.status]: num(r.n) }), {});
 
     const best = (await db.query(`
       SELECT i.product_id AS id, MAX(i.name) AS name, SUM(i.pack * i.qty)::int AS units, SUM(i.line_total)::bigint AS revenue
         FROM order_items i JOIN orders o ON o.id = i.order_id
-       WHERE ${COUNTED} AND o.created_at >= $1 GROUP BY i.product_id ORDER BY revenue DESC LIMIT 6`, [b.cur_from])).rows
+       WHERE ${COUNTED} AND o.created_at >= $1 AND o.created_at < $2 GROUP BY i.product_id ORDER BY revenue DESC LIMIT 6`, [b.cur_from, b.cur_to])).rows
       .map((r) => ({ ...r, revenue: num(r.revenue) }));
 
     const pay = (await db.query(`
       SELECT CASE WHEN o.payment_method = 'cod' THEN 'cod' ELSE 'prepaid' END AS kind, COUNT(*) AS orders, COALESCE(SUM(o.total), 0)::bigint AS revenue
-        FROM orders o WHERE ${COUNTED} AND o.created_at >= $1 GROUP BY 1`, [b.cur_from])).rows
+        FROM orders o WHERE ${COUNTED} AND o.created_at >= $1 AND o.created_at < $2 GROUP BY 1`, [b.cur_from, b.cur_to])).rows
       .reduce((m, r) => ({ ...m, [r.kind]: { orders: num(r.orders), revenue: num(r.revenue) } }), { cod: { orders: 0, revenue: 0 }, prepaid: { orders: 0, revenue: 0 } });
 
     // new vs returning: was this the customer's first counted order?
     const mix = (await db.query(`
       SELECT COUNT(*) FILTER (WHERE first) AS first_orders, COUNT(*) FILTER (WHERE NOT first) AS repeat_orders
-        FROM (SELECT o.created_at >= $1 AS in_range,
+        FROM (SELECT o.created_at >= $1 AND o.created_at < $2 AS in_range,
                      NOT EXISTS (SELECT 1 FROM orders p WHERE p.customer_id = o.customer_id AND p.created_at < o.created_at
                                  AND p.status NOT IN ('pending_payment', 'cancelled')) AS first
-                FROM orders o WHERE ${COUNTED}) x WHERE in_range`, [b.cur_from])).rows[0];
+                FROM orders o WHERE ${COUNTED}) x WHERE in_range`, [b.cur_from, b.cur_to])).rows[0];
 
     // what customers ask the Tulsi chat about (anonymous topic counts, stored by server/insights.js)
     let tulsi = null;
@@ -150,7 +163,7 @@ export default async function reportRoutes(app, { db, G, parse, env }) {
     } catch { tulsi = null; }
 
     return {
-      range, from: b.cur_from, current, previous, trend, pipeline, best, payments: pay,
+      range, from: b.cur_from, to: b.cur_to, current, previous, trend, pipeline, best, payments: pay,
       customers: { first: num(mix.first_orders), repeat: num(mix.repeat_orders) },
       tulsi, attention: await attention(),
     };

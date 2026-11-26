@@ -31,7 +31,7 @@ function toPatch(f) {
   const c = f.content, k = f.compliance;
   return {
     name: f.name.trim(), short: f.short.trim(), tagline: f.tagline.trim(), format: f.format.trim(), size: f.size.trim(),
-    badge: f.badge.trim() || null, accent: f.accent, tint: f.tint, concerns: f.concerns, sortOrder: Number(f.sortOrder) || 0,
+    accent: f.accent, tint: f.tint, concerns: f.concerns, sortOrder: Number(f.sortOrder) || 0,
     price: toPaise(f.price), mrp: toPaise(f.mrp), gstRate: f.gstRate === '' ? null : Number(f.gstRate), hsnCode: f.hsnCode.trim() || null,
     lowStockAt: Number(f.lowStockAt) || 0,
     returnable: !!f.returnable, returnDays: f.returnDays === '' ? null : Number(f.returnDays),
@@ -161,7 +161,7 @@ function Basics({ form, set }) {
         <div className="adm-chips">{CONCERNS.map((c) => <button type="button" key={c.id} className={`adm-chip ${form.concerns.includes(c.id) ? 'is-on' : ''}`} aria-pressed={form.concerns.includes(c.id)} onClick={() => toggle(c.id)}>{c.title}</button>)}</div>
         <h2 className="adm-h2" style={{ marginTop: 8 }}>Look on the shop</h2>
         <div className="adm-pair">
-          <label>Badge<span className="adm-sub">e.g. New, Bestseller (optional)</span><input value={form.badge} onChange={(e) => set('badge', e.target.value)} maxLength={30} /></label>
+          <div className="adm-field-note"><span className="adm-label">Badge</span><span className="adm-sub">Badges (Hot deal, New arrival, automatic Best seller…) and offers are set in <Link to="/admin/pricing">Pricing &amp; offers</Link>.</span></div>
           <label>Position in the shop<span className="adm-sub">Lower numbers show first</span><input type="number" min="0" value={form.sortOrder} onChange={(e) => set('sortOrder', e.target.value)} /></label>
         </div>
         <div className="adm-pair">

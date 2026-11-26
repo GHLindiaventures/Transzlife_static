@@ -20,6 +20,7 @@ import { RatingLine, GalleryActions } from '../components/pdp/ProductActions';
 import { IngredientGrid, UseTabs, FaqList, FaqHelp } from '../components/pdp/Sections';
 import Reviews from '../components/pdp/Reviews';
 import ProductInfo from '../components/pdp/ProductInfo';
+import OfferTimer from '../components/OfferTimer';
 import { inr, pctOff, prepaidSaving } from '../utils/format';
 import NotFound from './NotFound';
 
@@ -145,7 +146,7 @@ export default function Product() {
         <div className="pdp__grid">
           <Gallery p={p}><GalleryActions product={p} /></Gallery>
           <div className="pdp__info">
-            {p.badge && <span className="tag">{p.badge}</span>}
+            {p.badge && <span className="tag" style={p.badgeStyle ? { background: p.badgeStyle.bg, color: p.badgeStyle.fg, borderColor: p.badgeStyle.bg } : undefined}>{p.badge}</span>}
             <h1>{p.name}</h1>
             <RatingLine summary={summary} />
             <p className="pdp__tagline">{p.tagline}</p>
@@ -161,6 +162,7 @@ export default function Product() {
                   <strong><Money value={unit} /></strong>
                   {mrp > unit && <><s>MRP {inr(mrp)}</s><span className="save">Save {inr(mrp - unit)} ({off}% off)</span></>}
                 </div>
+                {p.offer && <OfferTimer offer={p.offer} />}
                 {viewers && <p className="live-line"><span className="live-line__dot" aria-hidden="true" /><Eye size={15} aria-hidden="true" /> <span><strong>{viewers}</strong> other people are viewing this right now</span></p>}
                 {p.sold30 && <p className="live-line"><TrendingUp size={15} aria-hidden="true" /> <span>Bought <strong>{p.sold30} times</strong> in the last 30 days</span></p>}
                 <p className="pdp__tax">Inclusive of all taxes · {p.size} {p.format.toLowerCase()}{pack > 1 ? ` · pack of ${pack}` : ''}</p>
@@ -326,14 +328,14 @@ export default function Product() {
         <section className="section section--tight reads">
           <div className="container">
             <SectionHead
-              eyebrow="Wellness journal"
+              eyebrow="From our blogs"
               title="Read before you start"
               text="Simple guides on how your body works and the everyday habits that go with this product."
-              action={<Link to="/journal" className="link-arrow">All articles <ArrowRight size={16} /></Link>}
+              action={<Link to="/blogs" className="link-arrow">All blogs <ArrowRight size={16} /></Link>}
             />
             <div className="reads2 m-scroll">
               {reads.map((a) => (
-                <Link key={a.id} to={`/journal/${a.id}`} className="read2">
+                <Link key={a.id} to={`/blogs/${a.id}`} className="read2">
                   <span className="read2__img"><img src={a.image} alt="" loading="lazy" /></span>
                   <span className="read2__body">
                     <span className="acard__meta">{a.category} · {a.readTime}</span>

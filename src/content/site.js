@@ -108,11 +108,17 @@ export const offOf = (p) => {
   return mrp && mrp > p.price ? Math.round((1 - p.price / mrp) * 100) : 0;
 };
 
+import { SITE as SHOP } from '../store/data/site.js';
+
+/** Built-in bar messages (the dashboard's Website content replaces them). {free_shipping} = live setting. */
 export const ANNOUNCEMENTS = [
-  'Free delivery on orders over ₹999',
+  'Free delivery on orders over {free_shipping}',
   'Government Recognized & Certified',
   'Live naturally. Live healthier.',
 ];
+
+export const fillShopTokens = (t) => t.replaceAll('{free_shipping}', `₹${Number(SHOP.freeShippingAbove).toLocaleString('en-IN')}`)
+  .replaceAll('{prepaid}', `${Math.round(SHOP.prepaidDiscount * 100)}%`);
 
 export const NAV_COLLECTIONS = PRODUCTS.map((p) => p.short);
 
@@ -139,7 +145,7 @@ export const PRODUCTS_PAGE = {
   sub: 'Every TranzLife formulation, in one place.',
 };
 
-export const BANNER = { words: ['Nature meets science', 'Rooted in Ayurveda'], cta: 'Discover our science', to: '/science' };
+export const BANNER = { words: ['Nature meets science', 'Rooted in Ayurveda'], cta: 'Read our blogs', to: '/blogs' };
 
 export const COMPARE_INTRO = {
   eyebrow: 'What each formula is designed to support',
@@ -336,10 +342,8 @@ export const FOOTER = {
     title: 'Company',
     links: [
       { label: 'About Us', to: '/about' },
-      { label: 'Science & Innovation', to: '/science' },
+      { label: 'Blogs', to: '/blogs' },
       { label: 'Sustainability', to: '/sustainability' },
-      { label: 'Quality & Manufacturing', to: '/science#sc-pipeline' },
-      { label: 'Certifications', to: '/science#sc-certs' },
       { label: 'Privacy Policy', to: '/policies/privacy' },
       { label: 'Terms & Conditions', to: '/policies/terms' },
       { label: 'Shipping & Returns', to: '/policies/shipping' },

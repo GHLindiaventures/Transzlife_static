@@ -7,14 +7,15 @@
     "node": ">=22.9"
   },
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently --names web,api --prefix-colors cyan.bold,magenta.bold --kill-others --handle-input \"npm:dev:web\" \"npm:dev:api\"",
+    "dev:web": "vite",
     "build": "vite build && node scripts/copy-dist.js",
     "preview": "vite preview",
     "gallery": "node scripts/gallery/build-gallery.mjs",
     "start": "node --env-file-if-exists=.env --env-file-if-exists=.env.local server/index.js",
     "gemini-bot": "cd gemini-bot && npm start",
-    "dev:api": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --watch-path=server server/index.js",
-    "test:api": "node --test server/shop/shop.test.js server/admin/admin.test.js server/shop/twilio.test.js server/admin/catalog.test.js server/admin/phase3.test.js server/admin/phase4.test.js server/admin/tracking.test.js server/admin/reviews.test.js server/admin/returns.test.js",
+    "dev:api": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --watch server/index.js",
+    "test:api": "node --test --test-concurrency=3 server/shop/shop.test.js server/admin/admin.test.js server/shop/twilio.test.js server/admin/catalog.test.js server/admin/phase3.test.js server/admin/phase4.test.js server/admin/tracking.test.js server/admin/reviews.test.js server/admin/offers.test.js server/admin/content.test.js server/admin/ops.test.js server/admin/returns.test.js",
     "db": "node --env-file-if-exists=.env --env-file-if-exists=.env.local server/db/console.js",
     "admin:create": "node --env-file-if-exists=.env --env-file-if-exists=.env.local server/admin/create-staff.js",
     "twilio:check": "node --env-file-if-exists=.env --env-file-if-exists=.env.local server/shop/twilio-check.js"
@@ -48,6 +49,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^9.2.5",
     "vite": "^5.4.11"
   }
 }

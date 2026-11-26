@@ -14,6 +14,9 @@ import customerRoutes from './customers.js';
 import complianceRoutes from './compliance.js';
 import trafficRoutes from './traffic.js';
 import adminReviewRoutes from './reviews.js';
+import offerRoutes from './offers.js';
+import contentAdminRoutes from './content.js';
+import discountRoutes from './discounts.js';
 import { refreshRating } from '../shop/reviews.js';
 import { restoreStock } from '../shop/batches.js';
 
@@ -42,7 +45,7 @@ const like = (s) => `%${String(s).replace(/[%_\\]/g, (c) => '\\' + c)}%`;
 const staffOut = (s) => ({ id: s.id, email: s.email, name: s.name, role: s.role, mustChangePassword: s.must_change_password,
   totpEnabled: s.totp_enabled, permissions: permsOf(s.role) });
 
-export default async function adminRoutes(app, { db, razorpay, twilio, notifier, reminders, presence, auth: authInfo, log, env }) {
+export default async function adminRoutes(app, { db, razorpay, twilio, notifier, reminders, presence, ops, auth: authInfo, log, env }) {
   const auth = createAdminAuth({ db, env });
   const G = (perm, opts) => ({ preHandler: auth.guard(perm, opts) });
   const tight = (max) => ({ config: { rateLimit: { max, timeWindow: '15 minutes' } } });
@@ -165,7 +168,7 @@ export default async function adminRoutes(app, { db, razorpay, twilio, notifier,
     const f = orderFilters(req.query);
     const total = Number((await db.query(`SELECT COUNT(*) AS n FROM orders o JOIN customers c ON c.id = o.customer_id ${f.sql}`, f.params)).rows[0].n);
     const rows = (await db.query(`
-      SELECT o.order_number, o.status, o.payment_status, o.payment_method, o.total, o.created_at,
+      SELECT o.order_number, o.status, o.payment_status, o.payment_method, o.total, o.created_at, o.cod_confirmation,
              c.name AS customer, c.phone, o.ship_address->>'city' AS city, o.ship_address->>'state' AS state,
              (SELECT SUM(qty) FROM order_items i WHERE i.order_id = o.id) AS items,
              (SELECT string_agg(i.name, ', ') FROM order_items i WHERE i.order_id = o.id) AS products
@@ -219,6 +222,7 @@ export default async function adminRoutes(app, { db, razorpay, twilio, notifier,
       order: {
         number: o.order_number, status: o.status, paymentStatus: o.payment_status, paymentMethod: o.payment_method,
         createdAt: o.created_at, email: o.email, phone: o.phone, cancelReason: o.cancel_reason, staffNote: o.staff_note,
+        codConfirmation: o.cod_confirmation, codConfirmedAt: o.cod_confirmed_at, codConfirmedBy: o.cod_confirmed_by,
         address: typeof o.ship_address === 'string' ? JSON.parse(o.ship_address) : o.ship_address,
         subtotal: o.subtotal, discount: o.discount, shipping: o.shipping, tax: o.tax, total: o.total, refunded,
         next: FLOW[o.status] || [],
@@ -498,6 +502,9 @@ export default async function adminRoutes(app, { db, razorpay, twilio, notifier,
       cart_reminder_hours: z.number().int().min(1).max(72).optional(),
       reorder_days: z.number().int().min(7).max(120).optional(),
       review_requests: z.boolean().optional(),
+      cod_confirmation: z.boolean().optional(),
+      stock_alert_days: z.number().int().min(3).max(90).optional(),
+      daily_summary: z.object({ enabled: z.boolean(), phones: z.array(z.string().regex(/^[6-9]\d{9}$/, 'Enter 10-digit mobile numbers.')).max(5), hour: z.number().int().min(6).max(22) }).optional(),
       review_request_days: z.number().int().min(2).max(60).optional(),
       returns_enabled: z.boolean().optional(),                                   // customers can request returns from their account
       return_window_days: z.number().int().min(0).max(90).optional(),            // days after delivery (a product can override it)
@@ -518,6 +525,7 @@ export default async function adminRoutes(app, { db, razorpay, twilio, notifier,
     signInCodes: authInfo.mode,
     orderMessages: notifier.channel,
     reminders: reminders?.channel ?? 'off',
+    replyWebhook: env.SITE_URL ? `${String(env.SITE_URL).replace(/\/$/, '')}/api/webhooks/twilio/sms` : null,
     razorpay: razorpay.enabled,
   }));
 
@@ -536,7 +544,7 @@ export default async function adminRoutes(app, { db, razorpay, twilio, notifier,
     return { rows, total, page, pages: Math.max(1, Math.ceil(total / PAGE)) };
   });
 
-  await reportRoutes(app, { db, G, parse, env });
+  await reportRoutes(app, { db, G, parse, env, ops });
   await catalogRoutes(app, { db, G, parse, audit, env, log });
   await returnRoutes(app, { db, G, parse, audit, issueRefund, loadOrder });
   await analyticsRoutes(app, { db, G });
@@ -544,6 +552,24 @@ export default async function adminRoutes(app, { db, razorpay, twilio, notifier,
   await complianceRoutes(app, { db, G, parse, audit, env, log });
   await trafficRoutes(app, { db, G, parse, audit, reminders });
   await adminReviewRoutes(app, { db, G, parse, audit, env, log, presence });
+  await offerRoutes(app, { db, G, parse, audit });
+  await contentAdminRoutes(app, { db, G, parse, audit });
+  await discountRoutes(app, { db, G });
+
+  // ---- cash-on-delivery confirmation recorded by staff (after a phone call) ----
+  app.post('/api/admin/orders/:number/cod', G('orders.note'), async (req, reply) => {
+    const body = parse(z.object({ result: z.enum(['confirmed', 'cancel_requested']), note: z.string().trim().max(300).optional().default('') }), req.body, reply); if (!body) return;
+    const o = await loadOrder(db.query, req.params.number);
+    if (!o) return reply.code(404).send({ error: 'Order not found.' });
+    if (o.payment_method !== 'cod') return reply.code(400).send({ error: 'Only cash-on-delivery orders need this.' });
+    await db.query(`UPDATE orders SET cod_confirmation = $2, cod_confirmed_at = now(), cod_confirmed_by = $3 WHERE id = $1`, [o.id, body.result, `staff:${req.staff.email}`]);
+    await db.query(`INSERT INTO order_events (order_id, from_status, to_status, note, actor) VALUES ($1,$2,$2,$3,$4)`,
+      [o.id, o.status, `${body.result === 'confirmed' ? 'Cash-on-delivery order confirmed by phone' : 'Customer asked to cancel (by phone)'}${body.note ? `: ${body.note}` : ''}`, `staff:${req.staff.email}`]);
+    await audit(db.query, req, 'order.cod', 'order', o.order_number, { cod: o.cod_confirmation }, { cod: body.result });
+    return { ok: true };
+  });
+
+  app.get('/api/admin/daily-summary/preview', G('view'), async () => ({ text: await ops.dailySummaryText() }));
 
   app.setErrorHandler((err, req, reply) => {
     if (err.status && err.status < 500) return reply.code(err.status).send({ error: err.message, code: err.code || 'error' });

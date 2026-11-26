@@ -4,34 +4,32 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { Download, Table2, BarChart3 } from 'lucide-react';
-import { Delta, Empty, ErrorBox, Loading, PageHead, rs, rsCompact, useAdmin, useApi, useChartColors } from '../ui';
+import { Delta, Empty, ErrorBox, Loading, PageHead, RangePicker, rs, rsCompact, useAdmin, useApi, useChartColors, useRange } from '../ui';
 
-const RANGES = [['30d', '30 days'], ['90d', '90 days'], ['365d', '12 months']];
 const pct = (v) => `${(v * 100).toFixed(v > 0 && v < 0.1 ? 1 : 0)}%`;
 
 export default function Analytics() {
   const { theme } = useAdmin();
   const colors = useChartColors(theme);
-  const [range, setRange] = useState(() => { try { return localStorage.getItem('tl-admin-arange') || '30d'; } catch { return '30d'; } });
-  const { data, error, loading } = useApi(`/api/admin/analytics?range=${range}`);
-  const pick = (r) => { setRange(r); try { localStorage.setItem('tl-admin-arange', r); } catch { /* ignore */ } };
+  const rng = useRange();
+  const { data, error, loading } = useApi(`/api/admin/analytics?${rng.qs}`);
 
   return (
     <>
       <PageHead title="Analytics" sub="How sales, products and customers are doing. Compared with the period before.">
-        <div className="adm-seg" role="group" aria-label="Period">{RANGES.map(([k, l]) => <button key={k} className={range === k ? 'is-on' : ''} aria-pressed={range === k} onClick={() => pick(k)}>{l}</button>)}</div>
-        <Downloads range={range} />
+        <RangePicker value={rng} />
+        <Downloads qs={rng.qs} />
       </PageHead>
       <ErrorBox>{error}</ErrorBox>
       {!data ? <Loading /> : (
         <div style={{ opacity: loading ? 0.6 : 1, transition: 'opacity .15s' }}>
           <Kpis a={data} />
-          <div className="adm-grid2" style={{ marginBottom: 18 }}>
+          <div className="adm-grid2" style={{ marginBottom: 20 }}>
             <SalesChart a={data} colors={colors} />
             <CustomerMixChart a={data} colors={colors} />
           </div>
           <Products a={data} />
-          <div className="adm-grid3" style={{ marginBottom: 18 }}>
+          <div className="adm-grid3" style={{ marginBottom: 20 }}>
             <BarList title="Top states" sub="By revenue" rows={data.states.map((s) => ({ key: s.name, label: s.name, value: s.revenue, text: `${rsCompact(s.revenue)} · ${s.orders}` }))} />
             <BarList title="Top cities" sub="By revenue" rows={data.cities.map((s) => ({ key: s.name, label: s.name, value: s.revenue, text: `${rsCompact(s.revenue)} · ${s.orders}` }))} />
             <Payments a={data} colors={colors} />
@@ -53,13 +51,13 @@ export default function Analytics() {
   );
 }
 
-function Downloads({ range }) {
+function Downloads({ qs }) {
   return (
     <details className="adm-menu">
       <summary className="adm-btn is-ghost"><Download size={15} /> Download</summary>
       <div className="adm-pop" style={{ width: 230 }}>
         {[['sales', 'Sales by period'], ['products', 'Product performance'], ['customers', 'Top customers']].map(([k, l]) => (
-          <a key={k} className="adm-result" href={`/api/admin/analytics.csv?range=${range}&report=${k}`}><Download size={15} /><span><strong>{l}</strong><span className="adm-sub">CSV, opens in Excel</span></span></a>
+          <a key={k} className="adm-result" href={`/api/admin/analytics.csv?${qs}&report=${k}`}><Download size={15} /><span><strong>{l}</strong><span className="adm-sub">CSV, opens in Excel</span></span></a>
         ))}
       </div>
     </details>
@@ -155,7 +153,7 @@ function CustomerMixChart({ a, colors }) {
 function Products({ a }) {
   const total = a.products.reduce((s, p) => s + p.revenue, 0) || 1;
   return (
-    <section className="adm-card is-flush" style={{ marginBottom: 18 }}>
+    <section className="adm-card is-flush" style={{ marginBottom: 20 }}>
       <div className="adm-pad" style={{ paddingBottom: 0 }}><h2 className="adm-h2">Product performance</h2></div>
       {a.products.length === 0 ? <Empty title="No sales in this period" /> : (
         <div className="adm-tablewrap">

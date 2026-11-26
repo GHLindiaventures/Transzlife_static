@@ -10,7 +10,7 @@ export const SHOP_URL = '/shop';
 export const NAV = [
   { label: 'Shop', mega: 'shop', to: SHOP_URL },
   { label: 'About', to: '/about' },
-  { label: 'Science', to: '/science' },
+  { label: 'Blogs', to: '/blogs' },   // Science page is off for now
   { label: 'FAQ', to: '/faq' },
   { label: 'Contact', to: '/contact' },
 ];
