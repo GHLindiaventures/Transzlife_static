@@ -6,7 +6,6 @@ import { PRODUCTS, onSale } from '../data/products';
 import { useCatalog } from '../lib/catalog';
 import { SITE } from '../data/site';
 import { inr, prepaidSaving } from '../utils/format';
-import PriceTag from '../../components/PriceTag.jsx';
 
 export function QtyStepper({ value, onChange, small }) {
   useCatalog();
@@ -75,7 +74,7 @@ export default function CartDrawer() {
                     <small>{l.product.size}{l.pack > 1 ? ` · Pack of ${l.pack}` : ''}</small>
                     <div className="cart__row">
                       <QtyStepper small value={l.qty} onChange={(q) => setQty(l.key, q)} />
-                      <span className="cart__price"><PriceTag size="sm" price={l.total} mrp={l.mrpTotal} /></span>
+                      <span className="cart__price">{inr(l.total)}{l.mrpTotal > l.total && <s>{inr(l.mrpTotal)}</s>}</span>
                     </div>
                   </div>
                   <button className="icon-btn cart__remove" onClick={() => remove(l.key)} aria-label={`Remove ${l.product.short}`}><Trash2 size={16} /></button>
@@ -89,7 +88,7 @@ export default function CartDrawer() {
                 {suggestions.map((p) => (
                   <div key={p.id} className="cart__up">
                     <img src={p.images[0]} alt="" style={{ background: p.tint }} />
-                    <span><strong>{p.short}</strong><PriceTag size="sm" price={p.price} mrp={p.mrp} /></span>
+                    <span><strong>{p.short}</strong><small>{inr(p.price)}</small></span>
                     <button className="btn btn--sm btn--ghost" onClick={() => add(p.id, 1, 1, { openDrawer: false })}>Add</button>
                   </div>
                 ))}

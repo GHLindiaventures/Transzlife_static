@@ -6,7 +6,6 @@ import { QtyStepper, FreeShipBar } from '../components/CartDrawer';
 import { Breadcrumbs, useTitle } from '../components/Common';
 import { SITE } from '../data/site';
 import { inr } from '../utils/format';
-import PriceTag from '../../components/PriceTag.jsx';
 import { getProduct } from '../data/products';
 import ReturnSection from '../components/ReturnSection';
 import { useAuth } from '../context/AuthContext';
@@ -71,7 +70,8 @@ export function Cart() {
                   <QtyStepper small value={l.qty} onChange={(q) => setQty(l.key, q)} />
                 </div>
                 <div className="cart-table__price">
-                  <PriceTag size="sm" price={l.total} mrp={l.mrpTotal} />
+                  <strong>{inr(l.total)}</strong>
+                  {l.mrpTotal > l.total && <s>{inr(l.mrpTotal)}</s>}
                   <button className="link-btn" onClick={() => remove(l.key)}><Trash2 size={14} /> Remove</button>
                 </div>
               </li>

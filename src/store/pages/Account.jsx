@@ -13,7 +13,7 @@ import { statusLabel, rs } from './Checkout';
 import { loadMyReturns, returnTone } from '../data/returnStore';
 import { getProduct, onSale } from '../data/products';
 import { SITE } from '../data/site';
-import PriceTag from '../../components/PriceTag.jsx';   // product prices are in rupees; order totals (rs) are in paise
+import { inr } from '../utils/format';   // product prices are in rupees; order totals (rs) are in paise
 import { mergeWishlist, toggleWishlist } from '../lib/wishlist';
 import { myReviews } from '../data/reviewStore';
 import { recentlyViewed, clearViewed } from '../lib/recent';
@@ -550,7 +550,7 @@ export default function Account() {
                         <Link to={`/products/${p.id}`} className="acx-prod__name">{p.short || p.name}</Link>
                         <small>{p.format} · {p.size}</small>
                         <div className="acx-prod__foot">
-                          {onSale(p) ? <PriceTag size="sm" price={p.price} mrp={p.mrp} /> : <strong>Coming soon</strong>}
+                          <strong>{onSale(p) ? inr(p.price) : 'Coming soon'}</strong>
                           {onSale(p)
                             ? <button type="button" className="acx-btn acx-btn--sm" onClick={() => add(p.id)}><ShoppingBag size={14} /> Add</button>
                             : <Link className="acx-btn acx-btn--sm acx-btn--ghost" to={`/products/${p.id}`}>View</Link>}
@@ -576,7 +576,7 @@ export default function Account() {
                         <Link to={`/products/${p.id}`} className="acx-prod__name">{p.short || p.name}</Link>
                         <small>{p.format} · {p.size}</small>
                         <div className="acx-prod__foot">
-                          {onSale(p) ? <PriceTag size="sm" price={p.price} mrp={p.mrp} /> : <strong>Coming soon</strong>}
+                          <strong>{onSale(p) ? inr(p.price) : 'Coming soon'}</strong>
                           {onSale(p)
                             ? <button type="button" className="acx-btn acx-btn--sm" onClick={() => add(p.id)}><ShoppingBag size={14} /> Add</button>
                             : <Link className="acx-btn acx-btn--sm acx-btn--ghost" to={`/products/${p.id}`}>View</Link>}

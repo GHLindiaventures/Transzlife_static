@@ -356,7 +356,7 @@ export default function Product() {
 
       <div className="sticky-buy">
         <img src={p.images[0]} alt="" />
-        <span><strong>{p.short}</strong>{sale ? <PriceTag size="sm" price={unit} mrp={mrp} /> : <small>Price to be announced</small>}</span>
+        <span><strong>{p.short}</strong><small>{sale ? inr(unit) : 'Price to be announced'}</small></span>
         {sale
           ? <button className="btn" disabled={p.stock === 'out'} onClick={() => add(p.id, qty, pack)}>{p.stock === 'out' ? 'Out of stock' : 'Add to cart'}</button>
           : <a className="btn" href={notifyUrl} target="_blank" rel="noreferrer">Notify me</a>}
