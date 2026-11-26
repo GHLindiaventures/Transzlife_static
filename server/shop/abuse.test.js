@@ -92,3 +92,33 @@ test('chat: per-visitor limit answers 429 before any model is called', async () 
   assert.match(JSON.parse(second.body).error, /wait a few minutes/);
   assert.equal((await send('198.51.100.2')).status, 400);  // another visitor is unaffected
 });
+
+// ---- manage devices ----------------------------------------------------------
+test('manage devices: lists signed-in devices, signs out another, keeps this one', async () => {
+  const phone = '9811112222';
+  const signIn = async (ua, from) => {
+    await otp(phone, { from });
+    const code = sms.codeFor(phone);
+    const r = await app.inject({ method: 'POST', url: '/api/auth/otp/verify', payload: { phone, code },
+      headers: { origin: ORIGIN, host: 'localhost:3000', 'user-agent': ua }, remoteAddress: from });
+    assert.equal(r.statusCode, 200);
+    return [].concat(r.headers['set-cookie']).map((c) => c.split(';')[0]).join('; ');
+  };
+  await db.query('DELETE FROM otp_codes');      // the caps above were reached on purpose; start fresh
+  const phoneCookie = await signIn('Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 Chrome/131.0 Mobile Safari/537.36', '10.7.0.1');
+  await db.query(`UPDATE otp_codes SET created_at = now() - interval '2 minutes'`);   // past the 30 s resend wait
+  const laptopCookie = await signIn('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/131.0 Safari/537.36', '10.7.0.2');
+  const as = (cookie, method, url) => app.inject({ method, url, payload: method === 'GET' ? undefined : {},
+    headers: { origin: ORIGIN, host: 'localhost:3000', cookie } }).then((r) => ({ status: r.statusCode, body: r.json() }));
+
+  const list = await as(laptopCookie, 'GET', '/api/account/devices');
+  assert.equal(list.status, 200);
+  assert.deepEqual(list.body.devices.map((d) => [d.device, d.current]).sort(), [['Chrome on Android', false], ['Chrome on Windows', true]]);
+  const other = list.body.devices.find((d) => !d.current);
+  const self = list.body.devices.find((d) => d.current);
+  assert.equal((await as(laptopCookie, 'DELETE', `/api/account/devices/${self.id}`)).status, 400);   // use Log out for this one
+  assert.equal((await as(laptopCookie, 'DELETE', `/api/account/devices/${other.id}`)).status, 200);
+  assert.equal((await as(phoneCookie, 'GET', '/api/account/devices')).status, 401);                // the phone is signed out
+  assert.equal((await as(laptopCookie, 'POST', '/api/account/devices/sign-out-others')).body.signedOut, 0);
+  assert.equal((await as(laptopCookie, 'GET', '/api/account/devices')).body.devices.length, 1);
+});

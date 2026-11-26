@@ -159,6 +159,7 @@ export function createAuth({ db, env, log, twilio }) {
     if (!row) return;
     const { session_id, last_seen_at, ...customer } = row;
     req.customer = customer;
+    req.sessionId = session_id;          // "this device" in Manage devices
     // touch at most every 10 minutes
     if (Date.now() - new Date(last_seen_at).getTime() > 600_000) {
       db.query('UPDATE sessions SET last_seen_at = now() WHERE id = $1', [session_id]).catch(() => {});

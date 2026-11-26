@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {
-  LogOut, Package, ChevronRight, Trash2, Heart, Star, PenLine, ShoppingBag, MapPin, Bell, Phone, Mail,
-  RotateCcw, MessageCircle, HelpCircle, Plus, Check,
+  LogOut, Package, ChevronRight, ChevronLeft, Trash2, Heart, Star, PenLine, ShoppingBag, MapPin, Bell, Phone, Mail,
+  RotateCcw, MessageCircle, HelpCircle, Plus, Check, Headset, UserRound, Smartphone, ShieldCheck, FileText, Truck,
+  Eye, Leaf, Gift, Monitor,
 } from 'lucide-react';
 import { useTitle } from '../components/Common';
 import { useAuth } from '../context/AuthContext';
@@ -15,16 +16,31 @@ import { SITE } from '../data/site';
 import { inr } from '../utils/format';   // product prices are in rupees; order totals (rs) are in paise
 import { mergeWishlist, toggleWishlist } from '../lib/wishlist';
 import { myReviews } from '../data/reviewStore';
+import { recentlyViewed, clearViewed } from '../lib/recent';
+import { SOCIAL } from '../../components/Footer';
+import { SOCIAL_LINKS } from '../../content/site.js';
 import '../styles/account.css';
 
 const badgeClass = (s) => (s === 'pending_payment' ? 'is-warn' : ['cancelled', 'refunded', 'returned', 'rto'].includes(s) ? 'is-off' : '');
 const date = (iso) => new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+const ago = (iso) => {
+  const min = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
+  return min < 15 ? 'Active now' : min < 60 ? `${min} min ago` : min < 1440 ? `${Math.round(min / 60)} h ago` : date(iso);
+};
 const initials = (name = '') => name.trim().split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase() || '').join('') || 'T';
 const greeting = () => { const h = new Date().getHours(); return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening'; };
 
 // Delivery progress shown on each order (out for delivery counts as past "Shipped").
 const STEPS = [['confirmed', 'Confirmed'], ['packed', 'Packed'], ['shipped', 'Shipped'], ['delivered', 'Delivered']];
 const STEP_OF = { confirmed: 0, packed: 1, shipped: 2, out_for_delivery: 2, delivered: 3 };
+
+// On phones the page opens as a menu (like shopping apps); each menu row opens one section as
+// its own screen via ?v=..., so the phone's back button returns to the menu.
+const VIEWS = {
+  orders: 'My orders', returns: 'Returns & refunds', reviews: 'My reviews', saved: 'Saved products',
+  recent: 'Recently viewed', profile: 'Edit profile', addresses: 'Saved addresses',
+  reminders: 'Notification settings', devices: 'Manage devices',
+};
 
 function OrderProgress({ status }) {
   const at = STEP_OF[status];
@@ -52,9 +68,11 @@ function Empty({ icon: Icon, title, text, action }) {
   );
 }
 
-function Card({ id, icon: Icon, title, count, action, children }) {
+function Card({ id, icon: Icon, title, count, action, view, children }) {
+  // on a phone, while one section is open (?v=...), the other sections step aside
+  const off = view && view !== id;
   return (
-    <section className="acx-card" id={id} aria-labelledby={`${id}-title`}>
+    <section className={`acx-card${off ? ' acx-card--off' : ''}`} id={id} aria-labelledby={`${id}-title`}>
       <header className="acx-card__head">
         <h2 id={`${id}-title`}><span className="acx-card__icon" aria-hidden="true"><Icon size={18} /></span>{title}{count > 0 && <span className="acx-count">{count}</span>}</h2>
         {action}
@@ -64,27 +82,66 @@ function Card({ id, icon: Icon, title, count, action, children }) {
   );
 }
 
-/** My account: profile, orders, reviews, saved products, reminders and addresses. Signed-in only (RequireAuth). */
+/* one row of the phone menu: icon, label, optional pill, chevron */
+function Row({ to, href, icon: Icon, label, pill, onClick }) {
+  const inner = (
+    <>
+      <span className="acm-row__icon" aria-hidden="true"><Icon size={18} /></span>
+      <span className="acm-row__label">{label}</span>
+      {pill != null && pill !== '' && <span className="acm-pill">{pill}</span>}
+      <ChevronRight size={18} className="acm-row__chev" aria-hidden="true" />
+    </>
+  );
+  if (to) return <li><Link className="acm-row" to={to}>{inner}</Link></li>;
+  if (href) return <li><a className="acm-row" href={href} {...(/^https?:/.test(href) ? { target: '_blank', rel: 'noreferrer' } : {})}>{inner}</a></li>;
+  return <li><button type="button" className="acm-row" onClick={onClick}>{inner}</button></li>;
+}
+
+function Group({ id, title, children }) {
+  return (
+    <section className="acm-group" id={id} aria-labelledby={`${id}-t`}>
+      <h2 id={`${id}-t`}>{title}</h2>
+      <ul>{children}</ul>
+    </section>
+  );
+}
+
+/** My account: profile, orders, returns, reviews, saved products, reminders, addresses and devices. Signed-in only (RequireAuth). */
 export default function Account() {
   useTitle('My account');
   const { customer, logout, setCustomer } = useAuth();
   const { add } = useCart();
   const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const view = VIEWS[params.get('v')] ? params.get('v') : null;
   const [orders, setOrders] = useState(null);
-  const [returns, setReturns] = useState([]);
+  const [returns, setReturns] = useState(null);
   const [addresses, setAddresses] = useState(null);
   const [rv, setRv] = useState(null);
   const [saved, setSaved] = useState(null);
+  const [devices, setDevices] = useState(null);
+  const [recent, setRecent] = useState(() => recentlyViewed());
   const [prefBusy, setPrefBusy] = useState(false);
   const [error, setError] = useState('');
+  const [form, setForm] = useState({ name: customer.name || '', email: customer.email || '' });
+  const [profileMsg, setProfileMsg] = useState('');
+  const [busy, setBusy] = useState('');
 
   useEffect(() => {
     loadMyReturns().then(setReturns);
     api('/api/orders').then((r) => setOrders(r.orders)).catch((e) => { setError(e.message); setOrders([]); });
     api('/api/account/addresses').then((r) => setAddresses(r.addresses)).catch(() => setAddresses([]));
+    api('/api/account/devices').then((r) => setDevices(r.devices)).catch(() => setDevices([]));
     mergeWishlist().then(setSaved);
     myReviews().then(setRv).catch(() => setRv({ toReview: [], mine: [] }));
   }, []);
+
+  // opening a section: phones start it at the top; wider screens scroll to it
+  useEffect(() => {
+    if (!view) return;
+    if (window.matchMedia('(max-width: 749px)').matches) window.scrollTo(0, 0);
+    else document.getElementById(view)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [view]);
 
   const unsave = async (id) => { await toggleWishlist(id, true); setSaved((ids) => ids.filter((x) => x !== id)); };
   const setReminders = async (on) => {
@@ -93,11 +150,33 @@ export default function Account() {
     catch (e) { setError(e.message); }
     finally { setPrefBusy(false); }
   };
+  const saveProfile = async (e) => {
+    e.preventDefault();
+    setBusy('profile'); setProfileMsg(''); setError('');
+    try {
+      const r = await api('/api/account', { method: 'PATCH', body: { name: form.name, email: form.email } });
+      setCustomer(r.customer);
+      setProfileMsg('Saved.');
+    } catch (err) { setError(err.message); }
+    finally { setBusy(''); }
+  };
   const removeAddress = async (id) => {
     try {
       await api(`/api/account/addresses/${id}`, { method: 'DELETE', body: {} });
       setAddresses((list) => list.filter((a) => a.id !== id));
     } catch (e) { setError(e.message); }
+  };
+  const signOutDevice = async (id) => {
+    setBusy(id);
+    try { await api(`/api/account/devices/${id}`, { method: 'DELETE', body: {} }); setDevices((l) => l.filter((d) => d.id !== id)); }
+    catch (e) { setError(e.message); }
+    finally { setBusy(''); }
+  };
+  const signOutOthers = async () => {
+    setBusy('others');
+    try { await api('/api/account/devices/sign-out-others', { method: 'POST', body: {} }); setDevices((l) => l.filter((d) => d.current)); }
+    catch (e) { setError(e.message); }
+    finally { setBusy(''); }
   };
   // Buy again: put the order's items (still on sale) back in the cart
   const buyAgain = (o) => {
@@ -107,9 +186,14 @@ export default function Account() {
   const signOut = async () => { await logout(); navigate('/', { replace: true }); };
 
   const savedProducts = (saved || []).map(getProduct).filter(Boolean);
+  const recentProducts = recent.map(getProduct).filter(Boolean);
   const toReview = rv?.toReview || [];
   const mine = rv?.mine || [];
   const first = customer.name.split(' ')[0];
+  const socials = SOCIAL.filter((s) => SOCIAL_LINKS[s.label]);
+  // the latest order that is still on its way, shown at the top of the phone menu
+  const live = (orders || []).find((o) => o.status === 'pending_payment' || (STEP_OF[o.status] !== undefined && o.status !== 'delivered'));
+  const deleteHref = `mailto:${SITE.careEmail}?subject=${encodeURIComponent('Please delete my TranzLife account')}&body=${encodeURIComponent(`Please delete my account and personal data for the mobile number +91 ${customer.phone}.`)}`;
 
   const stats = [
     { href: '#orders', icon: Package, value: orders?.length, label: 'Orders' },
@@ -119,15 +203,172 @@ export default function Account() {
   ];
   const nav = [
     ['#orders', Package, 'Orders'],
+    ['#returns', RotateCcw, 'Returns'],
     ['#reviews', Star, 'Reviews'],
     ['#saved', Heart, 'Saved products'],
+    ['#recent', Eye, 'Recently viewed'],
+    ['#profile', UserRound, 'Profile'],
     ['#reminders', Bell, 'Reminders'],
     ['#addresses', MapPin, 'Addresses'],
+    ['#devices', Smartphone, 'Devices & privacy'],
+  ];
+  const tiles = [
+    ['orders', Package, 'Orders', orders?.length],
+    ['saved', Heart, 'Saved', saved ? savedProducts.length : undefined],
+    ['returns', RotateCcw, 'Returns', returns?.length],
+    ['reviews', Star, 'Reviews', rv ? mine.length : undefined],
   ];
 
   return (
-    <div className="acx">
-      {/* ---------- profile header ---------- */}
+    <div className="acx" data-view={view || undefined}>
+      {/* ================= phone: account menu ================= */}
+      {!view && (
+        <div className="acm">
+          <div className="acm-top">
+            <h1>Hey, {first}</h1>
+            <a className="acm-help-btn" href="#acm-help"><Headset size={18} aria-hidden="true" /> Help</a>
+          </div>
+
+          <Link className="acm-profile" to="?v=profile">
+            <span className="acm-profile__main">
+              <span className="acx-avatar acm-avatar" aria-hidden="true">{initials(customer.name)}</span>
+              <span className="acm-profile__text">
+                <strong>{customer.name}</strong>
+                <small>+91 {customer.phone}{customer.email ? ` · ${customer.email}` : ''}</small>
+              </span>
+              <span className="acm-profile__edit">Edit <ChevronRight size={16} aria-hidden="true" /></span>
+            </span>
+            <span className="acm-profile__perk"><Gift size={15} aria-hidden="true" /> Free shipping above ₹{SITE.freeShippingAbove} · extra {Math.round(SITE.prepaidDiscount * 100)}% off when you pay online</span>
+          </Link>
+
+          <ul className="acm-tiles">
+            {tiles.map(([v, Icon, label, n]) => (
+              <li key={v}>
+                <Link className="acm-tile" to={`?v=${v}`}>
+                  <Icon size={22} aria-hidden="true" />
+                  <span>{label}</span>
+                  {n > 0 && <small className="acm-tile__n">{n}</small>}
+                </Link>
+              </li>
+            ))}
+          </ul>
+
+          {error && <p className="auth-error" role="alert">{error}</p>}
+
+          {live && (
+            <Link className="acm-live" to={`/order/${live.number}`}>
+              <span className="acm-live__head">
+                <Truck size={18} aria-hidden="true" />
+                <strong>Order #{live.number}</strong>
+                <span className={`acx-badge ${badgeClass(live.status)}`}>{statusLabel(live.status)}</span>
+              </span>
+              <small>{live.items.map((it) => it.name).join(', ')}</small>
+              <OrderProgress status={live.status} />
+            </Link>
+          )}
+
+          {recentProducts.length > 0 && (
+            <section className="acm-shelf" aria-labelledby="acm-recent-t">
+              <div className="acm-shelf__head">
+                <h2 id="acm-recent-t">Recently viewed</h2>
+                <Link to="?v=recent">View all</Link>
+              </div>
+              <ul className="acm-scroll">
+                {recentProducts.slice(0, 8).map((p) => (
+                  <li key={p.id}>
+                    <Link to={`/products/${p.id}`} className="acm-mini">
+                      <span className="acm-mini__img" style={{ background: p.tint }}><img src={p.images?.[0]} alt="" loading="lazy" /></span>
+                      <span className="acm-mini__name">{p.short || p.name}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {toReview.length > 0 && (
+            <section className="acm-shelf" aria-labelledby="acm-rate-t">
+              <div className="acm-shelf__head">
+                <h2 id="acm-rate-t">Rate your purchases</h2>
+                <Link to="?v=reviews">View all</Link>
+              </div>
+              <ul className="acm-scroll acm-scroll--wide">
+                {toReview.map((x) => {
+                  const prod = getProduct(x.id);
+                  return (
+                    <li key={x.id} className="acm-rate">
+                      <div className="acm-rate__top">
+                        {prod?.images?.[0] && <span className="acm-rate__img" style={{ background: prod.tint }}><img src={prod.images[0]} alt="" loading="lazy" /></span>}
+                        <span><strong>{x.short || x.name}</strong><small>Delivered. How was it?</small></span>
+                      </div>
+                      <div className="acm-rate__stars" role="group" aria-label={`Rate ${x.short || x.name}`}>
+                        <span>Rate this product</span>
+                        {[1, 2, 3, 4, 5].map((n) => (
+                          <Link key={n} to={`/products/${x.id}?review=1&rating=${n}#reviews`} aria-label={`${n} star${n > 1 ? 's' : ''}`}><Star size={24} /></Link>
+                        ))}
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          )}
+
+          <Group id="acm-settings" title="Account settings">
+            <Row to="?v=profile" icon={UserRound} label="Edit profile" />
+            <Row to="?v=addresses" icon={MapPin} label="Saved addresses" pill={addresses?.length ? `${addresses.length} saved` : ''} />
+            <Row to="?v=reminders" icon={Bell} label="Notification settings" pill={customer.marketingConsent ? 'On' : 'Off'} />
+            <Row to="?v=devices" icon={Smartphone} label="Manage devices" pill={devices?.length ? `${devices.length} active device${devices.length > 1 ? 's' : ''}` : ''} />
+          </Group>
+
+          <Group id="acm-activity" title="My activity">
+            <Row to="?v=orders" icon={Package} label="My orders" />
+            <Row to="?v=returns" icon={RotateCcw} label="Returns & refunds" />
+            <Row to="?v=reviews" icon={Star} label="My reviews" pill={toReview.length ? `${toReview.length} to rate` : ''} />
+            <Row to="?v=saved" icon={Heart} label="Saved products" />
+            <Row to="?v=recent" icon={Eye} label="Recently viewed" />
+          </Group>
+
+          <Group id="acm-help" title="Help & support">
+            <Row href={SITE.whatsapp} icon={MessageCircle} label="Chat with us on WhatsApp" pill="Fastest" />
+            <Row href={SITE.phoneHref} icon={Phone} label={`Call ${SITE.phone}`} />
+            <Row href={`mailto:${SITE.careEmail}`} icon={Mail} label="Email customer care" />
+            <Row to="/faq" icon={HelpCircle} label="FAQs" />
+          </Group>
+
+          <Group id="acm-legal" title="Policies & privacy">
+            <Row to="/policies/shipping" icon={Truck} label="Shipping & returns policy" />
+            <Row to="/policies/privacy" icon={ShieldCheck} label="Privacy policy" />
+            <Row to="/policies/terms" icon={FileText} label="Terms of use" />
+            <Row href={deleteHref} icon={Trash2} label="Request account deletion" />
+          </Group>
+
+          {socials.length > 0 && (
+            <section className="acm-group" aria-labelledby="acm-follow-t">
+              <h2 id="acm-follow-t">Follow us on</h2>
+              <ul className="acm-social">
+                {socials.map((s) => (
+                  <li key={s.label}><a href={SOCIAL_LINKS[s.label]} target="_blank" rel="noopener noreferrer">{s.svg}<span>{s.label}</span></a></li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          <button type="button" className="acm-logout" onClick={signOut}>Log out</button>
+          <p className="acm-hours">Our team is here {SITE.hours}.</p>
+          <p className="acm-sign" aria-hidden="true"><Leaf size={26} /> Plant-based wellness,<br />made in India</p>
+        </div>
+      )}
+
+      {/* ================= phone: back bar for an open section ================= */}
+      {view && (
+        <div className="acm-back">
+          <Link to="/account" aria-label="Back to my account"><ChevronLeft size={22} /></Link>
+          <h1>{VIEWS[view]}</h1>
+        </div>
+      )}
+
+      {/* ---------- profile header (tablet and desktop) ---------- */}
       <header className="acx-hero">
         <div className="container acx-hero__inner">
           <span className="acx-avatar" aria-hidden="true">{initials(customer.name)}</span>
@@ -139,7 +380,10 @@ export default function Account() {
               {customer.email && <li><Mail size={14} aria-hidden="true" /> {customer.email}</li>}
             </ul>
           </div>
-          <button type="button" className="acx-signout" onClick={signOut}><LogOut size={16} /> Sign out</button>
+          <div className="acx-hero__actions">
+            <a className="acx-signout" href="#profile"><PenLine size={16} /> Edit profile</a>
+            <button type="button" className="acx-signout" onClick={signOut}><LogOut size={16} /> Sign out</button>
+          </div>
         </div>
       </header>
 
@@ -157,7 +401,7 @@ export default function Account() {
           ))}
         </ul>
 
-        {error && <p className="auth-error" role="alert">{error}</p>}
+        {error && <p className="auth-error acx-error" role="alert">{error}</p>}
 
         <div className="acx-layout">
           {/* ---------- side menu ---------- */}
@@ -170,15 +414,16 @@ export default function Account() {
             <div className="acx-help">
               <span className="acx-help__icon" aria-hidden="true"><HelpCircle size={20} /></span>
               <strong>Need help with an order?</strong>
-              <p>Our wellness team is here Mon to Sat, 10 am to 6:30 pm.</p>
+              <p>Our wellness team is here {SITE.hours}.</p>
               <a className="acx-help__btn" href={SITE.whatsapp} target="_blank" rel="noreferrer"><MessageCircle size={16} /> Chat on WhatsApp</a>
+              <a className="acx-help__link" href={SITE.phoneHref}><Phone size={14} /> {SITE.phone}</a>
               <Link className="acx-help__link" to="/faq">Read the FAQs <ChevronRight size={14} /></Link>
             </div>
           </aside>
 
           <div className="acx-main">
             {/* ---------- orders ---------- */}
-            <Card id="orders" icon={Package} title="Your orders" count={orders?.length} action={<Link className="acx-link" to="/shop">Shop again <ChevronRight size={14} /></Link>}>
+            <Card id="orders" view={view} icon={Package} title="Your orders" count={orders?.length} action={<Link className="acx-link" to="/shop">Shop again <ChevronRight size={14} /></Link>}>
               {orders === null ? <p className="acx-loading">Loading your orders…</p> : orders.length === 0 ? (
                 <Empty icon={ShoppingBag} title="No orders yet" text="When you place an order, you can track it here." action={<Link className="acx-btn" to="/shop">Start shopping</Link>} />
               ) : (
@@ -201,7 +446,7 @@ export default function Account() {
                           <span className={`acx-badge ${badgeClass(o.status)}`}>{statusLabel(o.status)}</span>
                         </div>
                         <OrderProgress status={o.status} />
-                        {returns.filter((r) => r.orderNumber === o.number).map((r) => (
+                        {(returns || []).filter((r) => r.orderNumber === o.number).map((r) => (
                           <Link key={r.id} className="acx-return" to={`/order/${o.number}#returns`}>
                             <RotateCcw size={14} aria-hidden="true" /> Return {r.number}: <span className={`acx-badge ${returnTone(r)}`}>{r.label}</span>
                           </Link>
@@ -217,8 +462,31 @@ export default function Account() {
               )}
             </Card>
 
+            {/* ---------- returns ---------- */}
+            <Card id="returns" view={view} icon={RotateCcw} title="Returns & refunds" count={returns?.length}>
+              {returns === null ? <p className="acx-loading">Loading…</p> : returns.length === 0 ? (
+                <Empty icon={RotateCcw} title="No returns" text="To return something, open the order and choose Return items. Refunds reach you in 5 to 7 working days." action={<Link className="acx-btn acx-btn--ghost" to="/policies/shipping">Read the returns policy</Link>} />
+              ) : (
+                <ul className="acx-reviews">
+                  {returns.map((r) => (
+                    <li key={r.id}>
+                      <Link to={`/order/${r.orderNumber}#returns`} className="acx-review">
+                        <span className="acx-addr__icon" aria-hidden="true"><RotateCcw size={16} /></span>
+                        <span className="acx-review__body">
+                          <strong>Return {r.number}</strong>
+                          <small>Order #{r.orderNumber} · {r.items.map((i) => i.name).join(', ')}</small>
+                        </span>
+                        <span className={`acx-badge ${returnTone(r)}`}>{r.label}</span>
+                        <ChevronRight size={16} className="acx-chev" aria-hidden="true" />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Card>
+
             {/* ---------- reviews ---------- */}
-            <Card id="reviews" icon={Star} title="Your reviews" count={mine.length}>
+            <Card id="reviews" view={view} icon={Star} title="Your reviews" count={mine.length}>
               {rv === null ? <p className="acx-loading">Loading…</p> : (toReview.length === 0 && mine.length === 0) ? (
                 <Empty icon={Star} title="No reviews yet" text="After your order is delivered, you can tell others how it went." />
               ) : (
@@ -263,7 +531,7 @@ export default function Account() {
             </Card>
 
             {/* ---------- saved products ---------- */}
-            <Card id="saved" icon={Heart} title="Saved products" count={savedProducts.length}>
+            <Card id="saved" view={view} icon={Heart} title="Saved products" count={savedProducts.length}>
               {saved === null ? <p className="acx-loading">Loading…</p> : savedProducts.length === 0 ? (
                 <Empty icon={Heart} title="Nothing saved yet" text="Tap the heart on any product to keep it here for later." action={<Link className="acx-btn acx-btn--ghost" to="/shop">Browse products</Link>} />
               ) : (
@@ -288,8 +556,56 @@ export default function Account() {
               )}
             </Card>
 
+            {/* ---------- recently viewed ---------- */}
+            <Card id="recent" view={view} icon={Eye} title="Recently viewed" count={recentProducts.length}
+              action={recentProducts.length > 0 && <button type="button" className="acx-link" onClick={() => { clearViewed(); setRecent([]); }}>Clear</button>}>
+              {recentProducts.length === 0 ? (
+                <Empty icon={Eye} title="Nothing here yet" text="Products you look at on this device show up here, so you can find them again." action={<Link className="acx-btn acx-btn--ghost" to="/shop">Browse products</Link>} />
+              ) : (
+                <ul className="acx-saved">
+                  {recentProducts.map((p) => (
+                    <li key={p.id} className="acx-prod" style={{ '--tint': p.tint }}>
+                      <Link to={`/products/${p.id}`} className="acx-prod__img"><img src={p.images?.[0]} alt="" loading="lazy" /></Link>
+                      <div className="acx-prod__body">
+                        <Link to={`/products/${p.id}`} className="acx-prod__name">{p.short || p.name}</Link>
+                        <small>{p.format} · {p.size}</small>
+                        <div className="acx-prod__foot">
+                          <strong>{onSale(p) ? inr(p.price) : 'Coming soon'}</strong>
+                          {onSale(p)
+                            ? <button type="button" className="acx-btn acx-btn--sm" onClick={() => add(p.id)}><ShoppingBag size={14} /> Add</button>
+                            : <Link className="acx-btn acx-btn--sm acx-btn--ghost" to={`/products/${p.id}`}>View</Link>}
+                        </div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Card>
+
+            {/* ---------- profile ---------- */}
+            <Card id="profile" view={view} icon={UserRound} title="Your profile">
+              <form className="acx-form" onSubmit={saveProfile}>
+                <label>
+                  <span>Full name</span>
+                  <input value={form.name} onChange={(e) => { setForm({ ...form, name: e.target.value }); setProfileMsg(''); }} autoComplete="name" required minLength={2} maxLength={80} />
+                </label>
+                <label>
+                  <span>Email <small>(for order updates and invoices)</small></span>
+                  <input type="email" value={form.email} onChange={(e) => { setForm({ ...form, email: e.target.value }); setProfileMsg(''); }} autoComplete="email" maxLength={120} placeholder="you@example.com" />
+                </label>
+                <label>
+                  <span>Mobile number <small>(used to sign in)</small></span>
+                  <input value={`+91 ${customer.phone}`} readOnly disabled />
+                </label>
+                <div className="acx-form__foot">
+                  <button type="submit" className="acx-btn" disabled={busy === 'profile'}>{busy === 'profile' ? 'Saving…' : 'Save changes'}</button>
+                  {profileMsg && <span className="acx-saved-msg" role="status"><Check size={15} /> {profileMsg}</span>}
+                </div>
+              </form>
+            </Card>
+
             {/* ---------- reminders ---------- */}
-            <Card id="reminders" icon={Bell} title="Reminders">
+            <Card id="reminders" view={view} icon={Bell} title="Reminders">
               <label className={`acx-switch ${prefBusy ? 'is-busy' : ''}`}>
                 <span className="acx-switch__text">
                   <strong>Restock and cart reminders</strong>
@@ -298,17 +614,18 @@ export default function Account() {
                 <input type="checkbox" role="switch" checked={!!customer.marketingConsent} disabled={prefBusy} onChange={(e) => setReminders(e.target.checked)} />
                 <span className="acx-switch__track" aria-hidden="true"><span /></span>
               </label>
+              <p className="acx-note">Order updates (confirmation, shipping, delivery) are always sent, so you never miss a parcel.</p>
             </Card>
 
             {/* ---------- addresses ---------- */}
-            <Card id="addresses" icon={MapPin} title="Saved addresses" count={addresses?.length}>
+            <Card id="addresses" view={view} icon={MapPin} title="Saved addresses" count={addresses?.length}>
               {addresses === null ? <p className="acx-loading">Loading…</p> : (
                 <ul className="acx-addrs">
                   {addresses.map((a) => (
                     <li key={a.id} className="acx-addr">
                       <span className="acx-addr__icon" aria-hidden="true"><MapPin size={16} /></span>
                       <span className="acx-addr__body">
-                        <strong>{a.name}</strong>
+                        <strong>{a.name}{a.isDefault && <span className="acx-badge">Default</span>}</strong>
                         <small>{a.line1}{a.line2 ? `, ${a.line2}` : ''}</small>
                         <small>{a.city}, {a.state} {a.pin}</small>
                         <small className="acx-addr__phone"><Phone size={12} aria-hidden="true" /> {a.phone}</small>
@@ -326,6 +643,34 @@ export default function Account() {
                 </ul>
               )}
             </Card>
+
+            {/* ---------- devices and privacy ---------- */}
+            <Card id="devices" view={view} icon={Smartphone} title="Devices & privacy" count={devices?.length}>
+              <p className="acx-note">You are signed in on these devices. If you see one you don’t recognise, sign it out.</p>
+              {devices === null ? <p className="acx-loading">Loading…</p> : (
+                <ul className="acx-addrs">
+                  {devices.map((d) => (
+                    <li key={d.id} className="acx-addr">
+                      <span className="acx-addr__icon" aria-hidden="true">{/Windows|Mac|Linux/.test(d.device) ? <Monitor size={16} /> : <Smartphone size={16} />}</span>
+                      <span className="acx-addr__body">
+                        <strong>{d.device}{d.current && <span className="acx-badge">This device</span>}</strong>
+                        <small>{d.current ? 'Active now' : `Last active: ${ago(d.lastSeen)}`} · signed in {date(d.signedInAt)}</small>
+                      </span>
+                      {!d.current && <button type="button" className="acx-addr__remove" disabled={busy === d.id} onClick={() => signOutDevice(d.id)}><LogOut size={15} /> Sign out</button>}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <div className="acx-form__foot">
+                {devices?.some((d) => !d.current) && (
+                  <button type="button" className="acx-btn acx-btn--ghost" disabled={busy === 'others'} onClick={signOutOthers}><LogOut size={15} /> Sign out of all other devices</button>
+                )}
+                <a className="acx-btn acx-btn--ghost" href={deleteHref}><Trash2 size={15} /> Request account deletion</a>
+              </div>
+              <p className="acx-note">Deletion requests are handled within 7 days. Invoices for past orders are kept as the law requires. <Link to="/policies/privacy">Privacy policy</Link></p>
+            </Card>
+
+            <button type="button" className="acx-logout-wide" onClick={signOut}><LogOut size={16} /> Log out</button>
           </div>
         </div>
       </div>
