@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import { Media, Slot, ProductImg } from './ui.jsx';
 import { PRODUCTS, productUrl } from '../content/site.js';
 import { useCart } from '../store/context/CartContext';
@@ -41,6 +41,8 @@ function ShopMega({ onPick }) {
 
 export default function Header({ onBurger }) {
   const [stuck, setStuck] = useState(false);
+  const hoverTimeoutRef = useRef(null);
+  const { pathname } = useLocation();
   const [openMega, setOpenMega] = useState(null); // tap-opened menu on touch screens
   const [hoverMega, setHoverMega] = useState(null); // hover-opened menu on desktop
 
@@ -76,7 +78,7 @@ export default function Header({ onBurger }) {
   useEffect(() => {
     setHoverMega(null);
     setOpenMega(null);
-  }, [window.location.pathname]);
+  }, [pathname]); // (was window.location.pathname, which never re-rendered the header)
 
   // touch screens: the first tap opens the menu, a second tap follows the link
   const onMegaClick = (e, key) => {
@@ -89,8 +91,6 @@ export default function Header({ onBurger }) {
   };
 
   // Desktop hover handlers
-  const hoverTimeoutRef = useRef(null);
-
   const onNavMouseEnter = (e, key) => {
     if (window.matchMedia('(hover:hover)').matches) {
       if (hoverTimeoutRef.current) {
@@ -137,7 +137,7 @@ export default function Header({ onBurger }) {
                   onMouseEnter={(e) => onNavMouseEnter(e, item.mega)}
                   onMouseLeave={onNavMouseLeave}
                 >
-                  <Link className="nav__link" to={item.to} aria-haspopup="true" aria-expanded={openMega === item.mega || hoverMega === item.mega} onClick={(e) => onMegaClick(e, item.mega)}>
+                  <Link className="nav__link" to={item.to} aria-haspopup="true" aria-expanded={openMega === item.mega || hoverMega === item.mega} onClick={(e) => onMegaClick(e, item.mega)} onFocus={(e) => { if (e.target.matches(':focus-visible')) setOpenMega(item.mega); }}>
                     <span className="nav__label">{item.label}</span><Chevron />
                   </Link>
                   <div className="mega" onMouseEnter={(e) => { if (hoverTimeoutRef.current) { clearTimeout(hoverTimeoutRef.current); hoverTimeoutRef.current = null; } }} onMouseLeave={onNavMouseLeave}><ShopMega onPick={() => { setOpenMega(null); setHoverMega(null); document.activeElement?.blur(); }} /></div>

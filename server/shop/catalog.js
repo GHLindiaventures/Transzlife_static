@@ -9,7 +9,8 @@ export function toPublic(p, media, batch = null) {
   const available = Number(p.available ?? 0);
   return {
     id: p.id, name: p.name, short: p.short || p.name, tagline: p.tagline || '', format: p.format || '', size: p.size || '',
-    price: p.price / 100, mrp: p.mrp / 100, badge: p.badge || null, accent: p.accent || '#1f6b3c', tint: p.tint || '#eef4ea',
+    // a missing / zero price is NOT free: send null so the site shows "price to be announced" instead of ₹0
+    price: p.price > 0 ? p.price / 100 : null, mrp: p.price > 0 && p.mrp > p.price ? p.mrp / 100 : null, badge: p.badge || null, accent: p.accent || '#1f6b3c', tint: p.tint || '#eef4ea',
     concerns: p.concerns || [],
     images: media.length ? media.map((m) => m.url) : ['/assets/logo.png'],      // no photo yet: brand logo
     brochure: c.brochure || null,

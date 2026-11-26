@@ -95,12 +95,14 @@ export const STORE_ID = {
 };
 export const productUrl = (id) => (STORE_ID[id] ? `/products/${STORE_ID[id]}` : '/shop');
 
-export const priceLabel = (p) => (p.price == null ? 'Price to be announced' : `₹${p.price}`);
+/** A real selling price: null, undefined, '' , 0 and negatives all mean "not priced yet", never ₹0. */
+export const hasPrice = (p) => Number.isFinite(p?.price) && p.price > 0;
+export const priceLabel = (p) => (hasPrice(p) ? `₹${p.price}` : 'Price to be announced');
 
 /* Card pricing: `price` is what the customer pays; `mrp` is the printed MRP (defaults to the price).
    A struck-out MRP and "% off" only show when the price is actually below the MRP: never sell
    above, or advertise an MRP higher than, the one printed on the pack. */
-export const mrpOf = (p) => (p.price == null ? null : Math.max(p.mrp ?? p.price, p.price));
+export const mrpOf = (p) => (!hasPrice(p) ? null : Math.max(p.mrp > 0 ? p.mrp : p.price, p.price));
 export const offOf = (p) => {
   const mrp = mrpOf(p);
   return mrp && mrp > p.price ? Math.round((1 - p.price / mrp) * 100) : 0;

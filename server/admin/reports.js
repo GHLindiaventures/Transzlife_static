@@ -67,7 +67,7 @@ export default async function reportRoutes(app, { db, G, parse, env }) {
       later.map((e) => `${e.name.replace(/^TranzLife /, '')} ${e.batch_no} (${e.days} days)`).join(' · '));
     const ret = (await db.query(`SELECT COUNT(*) FILTER (WHERE status = 'requested') AS requested, COUNT(*) FILTER (WHERE status = 'received') AS received FROM returns`)).rows[0];
     add('returns_received', num(ret.received), num(ret.received) === 1 ? 'return received, needs a decision' : 'returns received, need a decision', '/admin/returns?status=received', 'warn');
-    add('returns_requested', num(ret.requested), num(ret.requested) === 1 ? 'return on its way back' : 'returns on their way back', '/admin/returns?status=requested', 'info');
+    add('returns_requested', num(ret.requested), num(ret.requested) === 1 ? 'new return request to review' : 'new return requests to review', '/admin/returns?status=requested', 'info');
     add('returns', num(o.returns_week), 'returned to us this week', '/admin/orders?stage=returns', 'muted');
     add('awaiting_payment', num(o.awaiting_payment), 'awaiting online payment', '/admin/orders?stage=awaiting_payment', 'muted');
     add('reviews', reviewsPending, reviewsPending === 1 ? 'review waiting for a check' : 'reviews waiting for a check', '/admin/reviews', 'info');

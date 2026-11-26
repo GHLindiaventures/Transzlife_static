@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { LogOut, Package, ChevronRight, Trash2, Heart, Star, PenLine } from 'lucide-react';
+import { LogOut, Package, ChevronRight, Trash2, Heart, Star, PenLine, Undo2 } from 'lucide-react';
 import { useTitle } from '../components/Common';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../lib/api';
 import { statusLabel, rs } from './Checkout';
+import { loadMyReturns, returnTone } from '../data/returnStore';
 import { getProduct } from '../data/products';
 import { mergeWishlist, toggleWishlist } from '../lib/wishlist';
 import { myReviews } from '../data/reviewStore';
@@ -19,6 +20,8 @@ export default function Account() {
   const { customer, logout, setCustomer } = useAuth();
   const navigate = useNavigate();
   const [orders, setOrders] = useState(null);
+  const [returns, setReturns] = useState([]);
+  useEffect(() => { loadMyReturns().then(setReturns); }, []);
   const [addresses, setAddresses] = useState(null);
   const [error, setError] = useState('');
 
@@ -74,6 +77,11 @@ export default function Account() {
                 </span>
                 <span><span className={`acct-badge ${badgeClass(o.status)}`}>{statusLabel(o.status)}</span> <ChevronRight size={16} /></span>
               </Link>
+              {returns.filter((r) => r.orderNumber === o.number).map((r) => (
+                <Link key={r.id} className="acct-return" to={`/order/${o.number}#returns`}>
+                  <Undo2 size={14} aria-hidden="true" /> Return {r.number}: <span className={`acct-badge ${returnTone(r)}`}>{r.label}</span>
+                </Link>
+              ))}
             </li>
           ))}
         </ul>

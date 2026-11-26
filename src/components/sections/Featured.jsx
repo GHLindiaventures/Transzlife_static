@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Media, Slot, ProductImg } from '../ui.jsx';
-import { PRODUCTS, PRODUCTS_SECTION, STORE_ID, priceLabel, productUrl, mrpOf, offOf } from '../../content/site.js';
+import { PRODUCTS, PRODUCTS_SECTION, STORE_ID, hasPrice, priceLabel, productUrl, mrpOf, offOf } from '../../content/site.js';
 import { setBuyNow, BUY_NOW_URL } from '../../store/lib/checkoutIntent';
 import { getProduct as getStoreProduct } from '../../store/data/products';
 import { useCatalog } from '../../store/lib/catalog';
@@ -27,7 +27,7 @@ export function PriceRow({ product: base }) {
       </div>
     );
   }
-  if (product.price == null) {
+  if (!hasPrice(product)) {
     return <p className="pcard__price pcard__price--tba">{priceLabel(product)}</p>;
   }
   const mrp = mrpOf(product);
@@ -54,7 +54,7 @@ function BuyNow({ product: base, url }) {
   const product = withLive(base);
   const navigate = useNavigate();
   const storeId = STORE_ID[product.id];
-  if (product.price == null || !storeId) {
+  if (!hasPrice(product) || !storeId) {
     return <Link className="pcard__buy pcard__buy--ghost" to={url}>Explore</Link>;
   }
   return (

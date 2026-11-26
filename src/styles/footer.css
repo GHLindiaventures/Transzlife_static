@@ -163,3 +163,48 @@
   .ft-bottom__links{justify-content:center}
 }
 @media (prefers-reduced-motion:reduce){.ft-drop{animation:none}}
+
+/* ---------- phones: the whole footer fits one screen ----------
+   Link groups stay as compact accordions, the card keeps only the email signup and the contact lines. */
+@media (max-width:640px){
+  .ft-decor{height:44px}
+  .ft-drop,.ft-leaf{display:none}
+  .ft-body{padding:14px 16px 12px}
+  .ft-grid{row-gap:8px;column-gap:0;grid-template-columns:1fr}
+  .ft-brand{grid-column:1}
+  .ft-logo{font-size:34px}
+  .ft-brand__tag{margin:6px 0 0;font-size:14px;white-space:normal;text-align:center}
+  .ft-brand__rule,.ft-brand__text{display:none}
+  .ft-social{margin:10px 0 0;gap:10px}
+  .ft-social a{width:38px;height:38px}
+  .ft-col:nth-of-type(n){grid-column:1;border-top:1px solid var(--ft-line);padding:0}
+  .ft-col__head{margin-bottom:0 !important;min-height:42px;font-size:16px;gap:10px}
+  .ft-col__head svg:first-child{width:20px;height:20px}
+  .ft-col__list{gap:10px}
+  .ft-col__list--open{padding:2px 0 12px}
+  .ft-col:nth-of-type(1) .ft-col__list{grid-template-columns:1fr 1fr;column-gap:20px}
+  .ft-col a{font-size:14px}
+  .ft-card{grid-column:1;margin:4px 0 0;padding:14px;border-radius:18px;display:grid;grid-template-columns:1fr}
+  .ft-card__ic{width:34px;height:34px;border-radius:10px}
+  .ft-card__ic svg{width:18px;height:18px}
+  .ft-card__head{gap:10px}
+  .ft-card h2{font-size:17px}
+  .ft-card__text,.ft-card hr{display:none}
+  .ft-sub{grid-template-columns:1fr auto;gap:8px;margin-top:10px}
+  .ft-sub__field{min-height:42px;padding:0 12px;gap:8px;border-radius:11px}
+  .ft-sub__field svg{width:16px;height:16px}
+  .ft-sub__field input{font-size:14px}
+  .ft-sub__btn{min-height:42px;padding:0 14px;font-size:14px;border-radius:11px}
+  .ft-card__about{font-size:14px;margin:12px 0 8px !important}
+  .ft-card__list{gap:6px}
+  .ft-card__list li{grid-template-columns:18px 1fr;gap:10px;font-size:12.5px;line-height:1.4}
+  .ft-card__list svg{width:16px;height:16px}
+  .ft-bottom{margin-top:12px;padding-top:10px;gap:4px}
+  .ft-bottom__copy{font-size:11.5px;gap:6px;text-align:center}
+  .ft-bottom__copy svg{width:14px;height:14px}
+  .ft-bottom__motto{font-size:12.5px}
+  .ft-bottom__motto i{margin:0 8px}
+  .ft-bottom__links{font-size:11.5px}
+  .ft-bottom__links a+a::before{margin:0 8px}
+  .ft-disclaimer{margin-top:8px;font-size:10px;line-height:1.4}
+}

@@ -75,7 +75,8 @@ export default function Layout() {
       const footer = footerRef.current, main = mainRef.current;
       if (!footer || !main) return;
       const h = footer.offsetHeight;
-      const canFix = h <= window.innerHeight;
+      // not on phones: the URL bar resizing innerHeight would flip fixed/normal mid-scroll
+      const canFix = h <= window.innerHeight && window.innerWidth > 640;
       footer.classList.toggle('is-fixed', canFix);
       main.style.marginBottom = canFix ? `${h}px` : '';
     };

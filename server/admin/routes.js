@@ -499,6 +499,8 @@ export default async function adminRoutes(app, { db, razorpay, twilio, notifier,
       reorder_days: z.number().int().min(7).max(120).optional(),
       review_requests: z.boolean().optional(),
       review_request_days: z.number().int().min(2).max(60).optional(),
+      returns_enabled: z.boolean().optional(),                                   // customers can request returns from their account
+      return_window_days: z.number().int().min(0).max(90).optional(),            // days after delivery (a product can override it)
     }), req.body, reply); if (!body) return;
     const before = await loadSettings(db.query);
     for (const [k, v] of Object.entries(body)) {

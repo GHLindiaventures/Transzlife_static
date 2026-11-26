@@ -43,7 +43,7 @@ export async function quote(q, items, paymentMethod) {
 
   const priced = lines.map((l) => {
     const p = products.get(l.id);
-    if (!p || !p.active) throw new PricingError('One of the products is no longer available.', 'unavailable');
+    if (!p || !p.active || !(p.price > 0)) throw new PricingError('One of the products is no longer available.', 'unavailable');
     if (!packs.has(l.pack)) throw new PricingError('That pack size is not available.');
     const off = packs.get(l.pack) / 100;
     const unit = toPaise(rupees(p.price) * l.pack * (1 - off));

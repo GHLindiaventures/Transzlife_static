@@ -89,6 +89,7 @@ export function SettingsPage() {
             </form>
           )}
         </section>
+        <ReturnPolicy s={s} owner={owner} reload={reload} />
         <Reminders s={s} owner={owner} reload={reload} />
         <section className="adm-card">
           <h2 className="adm-h2">Your password</h2>
@@ -103,6 +104,31 @@ export function SettingsPage() {
         </section>
       </div>
     </>
+  );
+}
+
+/** Return policy: switch customer returns on or off and set the shop-wide window. */
+function ReturnPolicy({ s, owner, reload }) {
+  const act = useAction();
+  const save = async (e) => {
+    e.preventDefault();
+    const f = new FormData(e.currentTarget);
+    const body = { returns_enabled: f.get('on') === 'on', return_window_days: Number(f.get('days')) };
+    if (await act.run(() => api('/api/admin/settings', { method: 'PATCH', body }), 'Return policy saved.')) reload();
+  };
+  return (
+    <section className="adm-card">
+      <h2 className="adm-h2">Returns</h2>
+      {!s ? <Loading /> : (
+        <form className="adm-form" onSubmit={save}>
+          <label style={{ display: 'flex', gap: 8, alignItems: 'center' }}><input name="on" type="checkbox" defaultChecked={s.returns_enabled !== false} disabled={!owner} /> Customers can request returns from their account</label>
+          <label>Return window (days after delivery)<input name="days" type="number" min="0" max="90" defaultValue={s.return_window_days ?? 7} disabled={!owner} required /></label>
+          <p className="adm-muted">A product can have its own window or be marked not returnable on its page (Products).</p>
+          <ErrorBox>{act.error}</ErrorBox><Notice>{act.notice}</Notice>
+          {owner ? <button className="adm-btn" disabled={act.busy}>Save</button> : <p className="adm-muted">Only an owner can change these.</p>}
+        </form>
+      )}
+    </section>
   );
 }
 
