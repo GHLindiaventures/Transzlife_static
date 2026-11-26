@@ -1452,3 +1452,41 @@ html.ft-fixed .main { margin-bottom: var(--ft-h, 0px); }
 
 /* newsletter status line under the home-page sign-up form */
 .news__msg { min-height: 1.5em; margin: 10px 0 0; font-size: 14px; }
+
+/* Reviews: centred when they don't fill the row; still scrolls from the first card when they do
+   (auto margins, unlike justify-content:center, never cut off the start of an overflowing row). */
+.hr__track > .hr__card:first-child { margin-inline-start: auto; }
+.hr__track > .hr__card:last-child { margin-inline-end: auto; }
+
+/* Page placeholder while a page's code or data loads: the page background (never a blank white
+   block), and a small spinner only if loading takes longer than ~0.35s (fast loads show nothing). */
+.page-loading { position: relative; min-height: 61.8vh; background: transparent; }
+.page-loading::after {
+  content: ""; position: absolute; left: 50%; top: 96px; width: 30px; height: 30px; margin-left: -15px; border-radius: 50%;
+  border: 2.5px solid rgba(26, 107, 60, .16); border-top-color: var(--green-700, #1a6b3c);
+  opacity: 0; animation: pl-spin .8s linear infinite, pl-fade .25s ease .35s forwards;
+}
+@keyframes pl-spin { to { transform: rotate(360deg); } }
+@keyframes pl-fade { to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .page-loading::after { animation: pl-fade .25s ease .35s forwards; } }
+
+/* FAQ page: smooth expand. Every question card had a live backdrop blur, so opening one answer made the
+   browser re-blur every card below it on every frame (the lag). The cards keep the same frosted look
+   with a plain translucent fill, and the answer slides in on the compositor (opacity/transform only). */
+.faq__item { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; background: rgba(255, 255, 255, .78); }
+.faq__item.is-open { background: rgba(255, 255, 255, .92); }
+.faq__item:hover { transform: none; }
+.faq__a { animation: faq-open .22s cubic-bezier(.2, .7, .2, 1) both; }
+@keyframes faq-open { from { opacity: 0; transform: translateY(-4px); } }
+@media (prefers-reduced-motion: reduce) { .faq__a { animation: none; } }
+
+/* Contact page questions: quicker open */
+.ct-faq__a { transition-duration: .26s; }
+
+/* Narrow phones: a centred wordmark ran into the shop / account / cart icons. Sit it next to the
+   menu button instead, a touch smaller, so it never overlaps. */
+@media (max-width: 440px) {
+  .header__logo { left: 70px; transform: translateY(-50%); }
+  .header__logo:hover { transform: translateY(-50%) scale(1.02); }
+  .header__logo .logo__text { font-size: 22px; }
+}

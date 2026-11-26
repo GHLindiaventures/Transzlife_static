@@ -364,3 +364,28 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ---- Shipment activity: colour + icon per kind of event (see eventLook in TrackOrder.jsx) ---- */
+.trk-ev { --c: #b7791f; --bg: #fdf3dc; }
+.trk-ev--green { --c: #1c723e; --bg: #e3f2e6; }
+.trk-ev--blue { --c: #2563b0; --bg: #e2edfb; }
+.trk-ev--amber { --c: #a86b0c; --bg: #fcf0d6; }
+.trk-ev--red { --c: #c0362c; --bg: #fde6e3; }
+.trk-events li.trk-ev::before { content: none; }
+.trk-ev__icon {
+  position: absolute; left: -30px; top: 0; width: 26px; height: 26px; border-radius: 50%;
+  display: grid; place-items: center; color: var(--c); background: var(--bg);
+  border: 2px solid #fffdf8; box-shadow: 0 0 0 1.5px var(--c);
+}
+.trk-ev.is-latest .trk-ev__icon { color: #fff; background: var(--c); box-shadow: 0 0 0 4px var(--bg); }
+.trk-ev .trk-events__info strong { color: var(--c); }
+.trk-ev--red .trk-events__info p { color: #8f2a22; }
+.trk-events { padding-left: 22px; gap: 20px; }
+
+/* ==== golden ratio (see src/store/styles/phi.css) ==== */
+/* ---- order tracking: activity 61.8% | items + address 38.2% ---- */
+@media (min-width: 961px) {
+  .trk-grid2 { grid-template-columns: minmax(0, 1.618fr) minmax(0, 1fr); gap: var(--g-3); }
+}
+@media (min-width: 641px) { .trk-card { padding: var(--g-3) clamp(21px, 2.4vw, 34px); } }
+

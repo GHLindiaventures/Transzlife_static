@@ -16,9 +16,10 @@ const inr = (n) => `₹${n.toLocaleString('en-IN')}`;
 
 /** Price block: final price, struck-out MRP and discount. Pass no product for the empty placeholder version. */
 export function PriceRow({ product: base }) {
-  useCatalog();
+  // until the live prices arrive, show the placeholder: never flash an old built-in price first
+  const loaded = useCatalog() > 0;
   const product = withLive(base);
-  if (!product) {
+  if (!product || !loaded) {
     return (
       <div className="pcard__price">
         <Slot className="slot--price" />

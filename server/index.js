@@ -68,7 +68,7 @@ const KNOWN_PAGE = new RegExp('^/(' + [
   '', 'about', 'science', 'sustainability', 'faq', 'contact', 'certifications',
   'shop', 'products(/[^/]+)?', 'product/[^/]+', 'concerns(/[^/]+)?', 'ingredients',
   'blogs?(/[^/]+)?', 'journal(/[^/]+)?', 'policies/[^/]+',
-  'cart', 'login', 'checkout', 'order/[^/]+', 'account', 'admin(/.*)?',
+  'cart', 'login', 'checkout', 'order/[^/]+', 'track(/[^/]+)?', 'account', 'admin(/.*)?',
 ].join('|') + ')/?$');
 // Text files are compressed (Brotli, else gzip). Build files never change, so each is compressed once and kept.
 const COMPRESSIBLE = new Set(['.html', '.js', '.css', '.json', '.svg', '.txt', '.xml']);

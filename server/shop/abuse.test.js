@@ -122,3 +122,32 @@ test('manage devices: lists signed-in devices, signs out another, keeps this one
   assert.equal((await as(laptopCookie, 'POST', '/api/account/devices/sign-out-others')).body.signedOut, 0);
   assert.equal((await as(laptopCookie, 'GET', '/api/account/devices')).body.devices.length, 1);
 });
+
+// ---- saved addresses (account page "Add a new address", checkout "Save this address") ----------
+test('addresses: add, no duplicates, make default, validation, owner only', async () => {
+  await db.query('DELETE FROM otp_codes');
+  const phone = '9822223333';
+  await otp(phone, { from: '10.8.0.1' });
+  const r = await app.inject({ method: 'POST', url: '/api/auth/otp/verify', payload: { phone, code: sms.codeFor(phone) },
+    headers: { origin: ORIGIN, host: 'localhost:3000' }, remoteAddress: '10.8.0.1' });
+  const cookie = [].concat(r.headers['set-cookie']).map((c) => c.split(';')[0]).join('; ');
+  const as = (method, url, payload) => app.inject({ method, url, payload: method === 'GET' ? undefined : (payload || {}),
+    headers: { origin: ORIGIN, host: 'localhost:3000', cookie } }).then((x) => ({ status: x.statusCode, body: x.json() }));
+
+  const home = { name: 'Priya Raman', phone: '9822223333', line1: '12 Lake View Road', city: 'Chennai', state: 'Tamil Nadu', pin: '600028' };
+  const a1 = await as('POST', '/api/account/addresses', home);
+  assert.equal(a1.status, 200);
+  assert.equal(a1.body.address.isDefault, true, 'the first address becomes the default');
+  assert.equal((await as('POST', '/api/account/addresses', home)).body.address.id, a1.body.address.id, 'same address is not saved twice');
+  const a2 = await as('POST', '/api/account/addresses', { ...home, line1: '4 Office Park', pin: '600041', makeDefault: true });
+  assert.equal(a2.body.address.isDefault, true);
+  let list = (await as('GET', '/api/account/addresses')).body.addresses;
+  assert.deepEqual(list.map((a) => [a.line1, a.isDefault]), [['4 Office Park', true], ['12 Lake View Road', false]]);
+  assert.equal((await as('POST', `/api/account/addresses/${a1.body.address.id}/default`)).status, 200);
+  list = (await as('GET', '/api/account/addresses')).body.addresses;
+  assert.equal(list[0].id, a1.body.address.id);
+  assert.equal((await as('POST', '/api/account/addresses', { ...home, pin: '12345' })).status, 400, 'bad PIN rejected');
+  assert.equal((await as('POST', '/api/account/addresses/00000000-0000-0000-0000-000000000000/default')).status, 404);
+  const anon = await app.inject({ method: 'POST', url: '/api/account/addresses', payload: home, headers: { origin: ORIGIN, host: 'localhost:3000' } });
+  assert.equal(anon.statusCode, 401);
+});

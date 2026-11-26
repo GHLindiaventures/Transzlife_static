@@ -46,7 +46,7 @@ export function Ph({ children, ...rest }) {
 export function ProductImg({ n, alt = '', eager = false }) {
   return (
     <img
-      src={`${import.meta.env.BASE_URL}assets/product-${n}.png`}
+      src={`${import.meta.env.BASE_URL}assets/product-${n}.png?v=2`}
       alt={alt}
       loading={eager ? 'eager' : 'lazy'}
       decoding="async"

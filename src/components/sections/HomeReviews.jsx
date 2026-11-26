@@ -4,8 +4,10 @@ import { loadReviews } from '../../store/data/reviewStore';
 import { fmtDate } from '../../store/utils/format';
 import { PRODUCTS, STORE_ID } from '../../content/site.js';
 
-/** Only genuine reviews rated above 4 stars are featured on the home page (never edited, never invented). */
-const MIN_EXCLUSIVE = 4;
+/** Only genuine, published reviews rated 4 or 5 stars are featured on the home page (never edited, never invented):
+ *  5-star reviews first, then 4-star, newest first within each, at most MAX_SHOWN cards. */
+const MIN_RATING = 4;
+const MAX_SHOWN = 12;
 const initials = (name = '') => name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join('') || '?';
 
 function Card({ r }) {
@@ -28,8 +30,8 @@ function Card({ r }) {
 }
 
 /**
- * Customer reviews for the home page: a compact left-to-right carousel of the newest published reviews
- * rated above 4 stars, from the same review database the product pages use (verified buyers write them
+ * Customer reviews for the home page: a compact left-to-right carousel of the best published reviews
+ * (4 and 5 stars), from the same review database the product pages use (verified buyers write them
  * on each product page).
  */
 export default function HomeReviews() {
@@ -44,8 +46,9 @@ export default function HomeReviews() {
       if (!live) return;
       const seen = new Set();
       const all = lists.flatMap((d) => d.reviews || [])
-        .filter((r) => r.rating > MIN_EXCLUSIVE && r.body && !seen.has(r.id) && seen.add(r.id))
-        .sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+        .filter((r) => r.rating >= MIN_RATING && r.body && !seen.has(r.id) && seen.add(r.id))
+        .sort((a, b) => b.rating - a.rating || String(b.createdAt).localeCompare(String(a.createdAt)))
+        .slice(0, MAX_SHOWN);
       setReviews(all);
     });
     return () => { live = false; };

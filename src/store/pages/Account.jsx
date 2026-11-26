@@ -3,13 +3,13 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   LogOut, Package, ChevronRight, ChevronLeft, Trash2, Heart, Star, PenLine, ShoppingBag, MapPin, Bell, Phone, Mail,
   RotateCcw, MessageCircle, HelpCircle, Plus, Check, Headset, UserRound, Smartphone, ShieldCheck, FileText, Truck,
-  Eye, Leaf, Gift, Monitor,
+  Eye, Leaf, Gift, Monitor, LayoutGrid,
 } from 'lucide-react';
 import { useTitle } from '../components/Common';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { api } from '../lib/api';
-import { statusLabel, rs } from './Checkout';
+import { statusLabel, rs, STATES } from './Checkout';
 import { loadMyReturns, returnTone } from '../data/returnStore';
 import { getProduct, onSale } from '../data/products';
 import { SITE } from '../data/site';
@@ -126,6 +126,8 @@ export default function Account() {
   const [form, setForm] = useState({ name: customer.name || '', email: customer.email || '' });
   const [profileMsg, setProfileMsg] = useState('');
   const [busy, setBusy] = useState('');
+  const [addrOpen, setAddrOpen] = useState(false);
+  const [addrMsg, setAddrMsg] = useState('');
 
   useEffect(() => {
     loadMyReturns().then(setReturns);
@@ -136,12 +138,17 @@ export default function Account() {
     myReviews().then(setRv).catch(() => setRv({ toReview: [], mine: [] }));
   }, []);
 
-  // opening a section: phones start it at the top; wider screens scroll to it
+  // Opening a section shows just that section (phones: as its own screen; wider screens: next to the
+  // side menu). Phones start it at the top; wider screens only scroll if the section's top is hidden
+  // under the header, so the page never jumps down to the footer.
   useEffect(() => {
-    if (!view) return;
-    if (window.matchMedia('(max-width: 749px)').matches) window.scrollTo(0, 0);
-    else document.getElementById(view)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, [view]);
+    if (window.matchMedia('(max-width: 749px)').matches) { if (view) window.scrollTo(0, 0); return; }
+    const layout = document.querySelector('.acx-layout');
+    if (!layout || !params.has('v')) return;
+    const header = (document.querySelector('.header')?.getBoundingClientRect().bottom || 80) + 16;
+    const top = layout.getBoundingClientRect().top;
+    if (top < header) window.scrollTo({ top: window.scrollY + top - header, behavior: 'smooth' });
+  }, [view]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const unsave = async (id) => { await toggleWishlist(id, true); setSaved((ids) => ids.filter((x) => x !== id)); };
   const setReminders = async (on) => {
@@ -165,6 +172,31 @@ export default function Account() {
       await api(`/api/account/addresses/${id}`, { method: 'DELETE', body: {} });
       setAddresses((list) => list.filter((a) => a.id !== id));
     } catch (e) { setError(e.message); }
+  };
+  const addAddress = async (e) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const body = Object.fromEntries([...new FormData(form)].map(([k, v]) => [k, String(v).trim()]));
+    body.makeDefault = body.makeDefault === 'on';
+    setBusy('address'); setError(''); setAddrMsg('');
+    try {
+      const r = await api('/api/account/addresses', { method: 'POST', body });
+      const a = r.address;
+      setAddresses((list) => [a, ...(list || []).filter((x) => x.id !== a.id).map((x) => (a.isDefault ? { ...x, isDefault: false } : x))]
+        .sort((x, y) => Number(y.isDefault) - Number(x.isDefault)));
+      form.reset();
+      setAddrOpen(false);
+      setAddrMsg('Address saved.');
+    } catch (err) { setError(err.message); }
+    finally { setBusy(''); }
+  };
+  const makeDefault = async (id) => {
+    setBusy(id);
+    try {
+      await api(`/api/account/addresses/${id}/default`, { method: 'POST', body: {} });
+      setAddresses((list) => list.map((a) => ({ ...a, isDefault: a.id === id })).sort((x, y) => Number(y.isDefault) - Number(x.isDefault)));
+    } catch (e) { setError(e.message); }
+    finally { setBusy(''); }
   };
   const signOutDevice = async (id) => {
     setBusy(id);
@@ -196,21 +228,22 @@ export default function Account() {
   const deleteHref = `mailto:${SITE.careEmail}?subject=${encodeURIComponent('Please delete my TranzLife account')}&body=${encodeURIComponent(`Please delete my account and personal data for the mobile number +91 ${customer.phone}.`)}`;
 
   const stats = [
-    { href: '#orders', icon: Package, value: orders?.length, label: 'Orders' },
-    { href: '#reviews', icon: Star, value: rv ? mine.length : undefined, label: 'Reviews' },
-    { href: '#saved', icon: Heart, value: saved ? savedProducts.length : undefined, label: 'Saved' },
-    { href: '#addresses', icon: MapPin, value: addresses?.length, label: 'Addresses' },
+    { v: 'orders', icon: Package, value: orders?.length, label: 'Orders' },
+    { v: 'reviews', icon: Star, value: rv ? mine.length : undefined, label: 'Reviews' },
+    { v: 'saved', icon: Heart, value: saved ? savedProducts.length : undefined, label: 'Saved' },
+    { v: 'addresses', icon: MapPin, value: addresses?.length, label: 'Addresses' },
   ];
   const nav = [
-    ['#orders', Package, 'Orders'],
-    ['#returns', RotateCcw, 'Returns'],
-    ['#reviews', Star, 'Reviews'],
-    ['#saved', Heart, 'Saved products'],
-    ['#recent', Eye, 'Recently viewed'],
-    ['#profile', UserRound, 'Profile'],
-    ['#reminders', Bell, 'Reminders'],
-    ['#addresses', MapPin, 'Addresses'],
-    ['#devices', Smartphone, 'Devices & privacy'],
+    ['', LayoutGrid, 'Overview'],
+    ['orders', Package, 'Orders'],
+    ['returns', RotateCcw, 'Returns'],
+    ['reviews', Star, 'Reviews'],
+    ['saved', Heart, 'Saved products'],
+    ['recent', Eye, 'Recently viewed'],
+    ['profile', UserRound, 'Profile'],
+    ['reminders', Bell, 'Reminders'],
+    ['addresses', MapPin, 'Addresses'],
+    ['devices', Smartphone, 'Devices & privacy'],
   ];
   const tiles = [
     ['orders', Package, 'Orders', orders?.length],
@@ -381,7 +414,7 @@ export default function Account() {
             </ul>
           </div>
           <div className="acx-hero__actions">
-            <a className="acx-signout" href="#profile"><PenLine size={16} /> Edit profile</a>
+            <Link className="acx-signout" to="?v=profile"><PenLine size={16} /> Edit profile</Link>
             <button type="button" className="acx-signout" onClick={signOut}><LogOut size={16} /> Sign out</button>
           </div>
         </div>
@@ -392,11 +425,11 @@ export default function Account() {
         <ul className="acx-stats">
           {stats.map((s) => (
             <li key={s.label}>
-              <a href={s.href} className="acx-stat">
+              <Link to={`?v=${s.v}`} className="acx-stat" aria-current={view === s.v ? 'page' : undefined}>
                 <span className="acx-stat__icon" aria-hidden="true"><s.icon size={18} /></span>
                 <strong>{s.value ?? '–'}</strong>
                 <small>{s.label}</small>
-              </a>
+              </Link>
             </li>
           ))}
         </ul>
@@ -407,8 +440,8 @@ export default function Account() {
           {/* ---------- side menu ---------- */}
           <aside className="acx-side">
             <nav className="acx-nav" aria-label="Account sections">
-              {nav.map(([href, Icon, label]) => (
-                <a key={href} href={href}><Icon size={16} aria-hidden="true" /> {label}</a>
+              {nav.map(([key, Icon, label]) => (
+                <Link key={key || 'all'} to={key ? `?v=${key}` : '/account'} aria-current={(view || '') === key ? 'page' : undefined}><Icon size={16} aria-hidden="true" /> {label}</Link>
               ))}
             </nav>
             <div className="acx-help">
@@ -636,17 +669,46 @@ export default function Account() {
                         <small>{a.city}, {a.state} {a.pin}</small>
                         <small className="acx-addr__phone"><Phone size={12} aria-hidden="true" /> {a.phone}</small>
                       </span>
-                      <button type="button" className="acx-addr__remove" onClick={() => removeAddress(a.id)} aria-label={`Remove address for ${a.name}`}><Trash2 size={15} /> Remove</button>
+                      <span className="acx-addr__acts">
+                        {!a.isDefault && <button type="button" className="acx-addr__default" disabled={busy === a.id} onClick={() => makeDefault(a.id)}><Check size={15} /> Make default</button>}
+                        <button type="button" className="acx-addr__remove" onClick={() => removeAddress(a.id)} aria-label={`Remove address for ${a.name}`}><Trash2 size={15} /> Remove</button>
+                      </span>
                     </li>
                   ))}
-                  <li className="acx-addr acx-addr--new">
-                    <span className="acx-addr__icon" aria-hidden="true"><Plus size={16} /></span>
-                    <span className="acx-addr__body">
-                      <strong>Add a new address</strong>
-                      <small>New addresses you use at checkout are saved here automatically.</small>
-                    </span>
-                  </li>
+                  {!addrOpen && (
+                    <li>
+                      <button type="button" className="acx-addr acx-addr--new" onClick={() => { setAddrOpen(true); setAddrMsg(''); }}>
+                        <span className="acx-addr__icon" aria-hidden="true"><Plus size={16} /></span>
+                        <span className="acx-addr__body">
+                          <strong>Add a new address</strong>
+                          <small>Save a home, office or family address to pick it at checkout.</small>
+                        </span>
+                      </button>
+                    </li>
+                  )}
                 </ul>
+              )}
+              {addrMsg && <p className="acx-saved-msg acx-addr-msg" role="status"><Check size={15} /> {addrMsg}</p>}
+              {addrOpen && (
+                <form className="acx-form acx-addr-form" onSubmit={addAddress}>
+                  <h3>New address</h3>
+                  <div className="acx-form__row">
+                    <label><span>Full name</span><input name="name" required minLength={2} maxLength={80} autoComplete="name" defaultValue={customer.name || ''} /></label>
+                    <label><span>Mobile number</span><input name="phone" type="tel" required pattern="[6-9][0-9]{9}" title="10-digit Indian mobile number" autoComplete="tel-national" placeholder="10-digit mobile" defaultValue={customer.phone || ''} /></label>
+                  </div>
+                  <label><span>House / flat, street</span><input name="line1" required minLength={3} maxLength={160} autoComplete="address-line1" /></label>
+                  <label><span>Area, landmark <small>(optional)</small></span><input name="line2" maxLength={160} autoComplete="address-line2" /></label>
+                  <div className="acx-form__row acx-form__row--3">
+                    <label><span>City</span><input name="city" required minLength={2} maxLength={60} autoComplete="address-level2" /></label>
+                    <label><span>State</span><select name="state" required defaultValue="Tamil Nadu" autoComplete="address-level1">{STATES.map((x) => <option key={x}>{x}</option>)}</select></label>
+                    <label><span>PIN code</span><input name="pin" required pattern="[1-9][0-9]{5}" title="6-digit PIN code" inputMode="numeric" autoComplete="postal-code" /></label>
+                  </div>
+                  <label className="acx-check"><input type="checkbox" name="makeDefault" defaultChecked={!addresses?.length} /> <span>Use as my default address</span></label>
+                  <div className="acx-form__foot">
+                    <button type="submit" className="acx-btn" disabled={busy === 'address'}>{busy === 'address' ? 'Saving…' : 'Save address'}</button>
+                    <button type="button" className="acx-btn acx-btn--ghost" onClick={() => setAddrOpen(false)}>Cancel</button>
+                  </div>
+                </form>
               )}
             </Card>
 

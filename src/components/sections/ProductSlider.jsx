@@ -13,7 +13,7 @@ const ALL_FORMULATIONS = [
     subTitle: 'Respiratory Clarity & Daily Lung Detox',
     bgWord: 'PULMO',
     bgColor: '#bca7dc', // Soft berry lilac matching Blendy reference & natural berry gummies
-    bottleImg: '/assets/product-4.png',
+    bottleImg: '/assets/product-4.png?v=2',
     alt: 'PulmoClear™ Lung Booster Gummies packaging',
     tag: 'Lung Detox',
     ingredients: [
@@ -34,7 +34,7 @@ const ALL_FORMULATIONS = [
     subTitle: 'Hepatic Protection, Cell Repair & Digestion',
     bgWord: 'LIVER',
     bgColor: '#dfbe95', // Warm golden herbal ochre
-    bottleImg: '/assets/product-5.png',
+    bottleImg: '/assets/product-5.png?v=2',
     alt: 'LiverDetox™ Polyherbal Concoction bottle',
     tag: 'Liver Booster',
     ingredients: [
@@ -55,7 +55,7 @@ const ALL_FORMULATIONS = [
     subTitle: 'Abdominal Soothing & Cramp Relief Ritual',
     bgWord: 'CYCLE',
     bgColor: '#c8b3e6', // Calming orchid lavender
-    bottleImg: '/assets/product-1.png',
+    bottleImg: '/assets/product-1.png?v=2',
     alt: 'CycleRelief™ Menstrual Comfort Roll-On applicator',
     tag: 'Period Care',
     ingredients: [
@@ -76,7 +76,7 @@ const ALL_FORMULATIONS = [
     subTitle: 'Bioactive Stamina, Vitality & Physical Endurance',
     bgWord: 'ENERGY',
     bgColor: '#ad98d6', // Vibrant energized royal violet
-    bottleImg: '/assets/product-2.png',
+    bottleImg: '/assets/product-2.png?v=2',
     alt: 'TranzLife Energy Booster™ bottle',
     tag: 'Active Vitality',
     ingredients: [
@@ -97,7 +97,7 @@ const ALL_FORMULATIONS = [
     subTitle: 'Morning Awakening & Vitality Self-Care Ritual',
     bgWord: 'REVIVA',
     bgColor: '#e8bfa1', // Warm sunrise apricot peach
-    bottleImg: '/assets/product-3.png',
+    bottleImg: '/assets/product-3.png?v=2',
     alt: 'Reviva™ Botanical Massage Roll-On applicator',
     tag: 'Vitality Ritual',
     ingredients: [
@@ -118,7 +118,7 @@ const ALL_FORMULATIONS = [
     subTitle: 'Fast-Acting Nicotine & Smoking Urge Relief',
     bgWord: 'BREATHE',
     bgColor: '#9ecfc5', // Crisp cooling peppermint teal
-    bottleImg: '/assets/product-6.png',
+    bottleImg: '/assets/product-6.png?v=2',
     alt: 'BreatheFree™ Aromatherapy Inhaler',
     tag: 'Quit Smoking Support',
     ingredients: [
