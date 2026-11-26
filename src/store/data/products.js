@@ -84,7 +84,7 @@ export const PRODUCTS = [
     accent: '#7a3b12',
     tint: '#f6efe6',
     concerns: ['liver'],
-    images: ['/img/p/liver-v2.webp'],
+    images: ['/img/p/liver-v3.webp'],
     brochure: '/brochures/liver-booster.pdf',
     highlights: ['11 Ayurvedic botanicals', 'Bhumyamalaki, Kalmegh & Kutki', 'No added colours or sugar', 'Mixed flavour, 500 ml'],
     summary:
@@ -216,7 +216,7 @@ export const PRODUCTS = [
     accent: '#e0701a',
     tint: '#fdf1e5',
     concerns: ['blood-sugar'],
-    images: ['/img/p/reviva-v2.webp'],
+    images: ['/img/p/reviva-v3.webp'],
     brochure: '/brochures/reviva.pdf',
     highlights: ['Dill & Eucalyptus essential oils', 'Gentle massage roll-on', 'Portable 50 ml pack', 'ISO 9001:2015 & GMP certified'],
     summary:

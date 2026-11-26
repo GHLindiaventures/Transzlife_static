@@ -1,7 +1,7 @@
 // Turns the final product photos in /final_product into every image the site uses for those products:
 //
-//   public/assets/products/showcase-<key>-v2.jpg  1024×1024 home-page card + first product-page slide
-//   public/img/p/<key>-v2.webp                    product photo (shop cards, cart, account, gallery)
+//   public/assets/products/showcase-<key>-v3.jpg  1024×1024 home-page card + first product-page slide
+//   public/img/p/<key>-v<ver>.webp                product photo (shop cards, cart, account, gallery)
 //   public/assets/product-<n>.png                 transparent cut-out (mega menu, drawer, home slider)
 //
 //   node scripts/gallery/import-final-products.mjs
@@ -9,8 +9,9 @@
 //
 // Photos on a plain background (gummies, inhaler) get a real cut-out: the background is flood-filled
 // from the image edges, so it follows soft gradients. Lifestyle scenes (liver, reviva) keep their scene
-// and the "cut-out" is a rounded crop of the product. New file names (-v2) so browsers and the
-// database (migration 020) never show a cached old photo.
+// and the "cut-out" is a rounded crop of the product. `scene` is a square lifestyle shot (product on a
+// stone, greenery behind) used for the showcase. New file names per version so browsers and the
+// database (migrations 020, 022) never show a cached old photo.
 
 import sharp from 'sharp';
 import { dirname, join, resolve } from 'node:path';
@@ -22,12 +23,12 @@ const PUB = join(ROOT, 'public');
 
 /* crop boxes are fractions of the source image: [left, top, width, height] */
 const PHOTOS = [
-  { key: 'pulmoclear', n: 4, file: 'Lung Booster Gummies.png', plain: true },
-  { key: 'breathefree', n: 6, file: 'Tranzlife Calm Inhaler Product Mockup.png', plain: true },
-  // scene: box + bottle on the left two thirds (the slogan on the right is left out of the square)
-  { key: 'liver', n: 5, file: 'Tranzlife Liver Booster Product Display.png', square: [0, 0, 2 / 3, 1], product: [0.11, 0.04, 0.58, 0.92] },
-  // portrait scene: the bottle is centred
-  { key: 'reviva', n: 3, file: 'TranzLife Reviva Natural Roll-On Label.png', square: [0, 0.1, 1, 2 / 3], product: [0.1, 0.02, 0.8, 0.86] },
+  // plain-background pack shots: real cut-outs; the showcase is the matching lifestyle scene
+  { key: 'pulmoclear', n: 4, ver: 2, file: 'Lung Booster Gummies.png', plain: true, scene: 'new-pulmo.jpeg' },
+  { key: 'breathefree', n: 6, ver: 2, file: 'Tranzlife Calm Inhaler Product Mockup.png', plain: true, scene: 'new-inhaler.jpeg' },
+  // lifestyle scenes only: the product photo / cut-out is a crop around the bottle
+  { key: 'liver', n: 5, ver: 3, file: 'new-liver.jpeg', scene: 'new-liver.jpeg', product: [0.2, 0.02, 0.6, 0.92] },
+  { key: 'reviva', n: 3, ver: 3, file: 'new-reviva.jpeg', scene: 'new-reviva.jpeg', product: [0.2, 0.03, 0.6, 0.91] },
 ];
 
 const box = (meta, [l, t, w, h]) => {
@@ -76,8 +77,8 @@ for (const p of PHOTOS) {
   const meta = await sharp(src).metadata();
 
   // 1) square showcase (home-page card, first slide on the product page)
-  const sq = p.square ? sharp(src).extract(box(meta, p.square)) : sharp(src);
-  await sq.resize(1024, 1024, { fit: 'cover' }).jpeg({ quality: 84, mozjpeg: true }).toFile(join(PUB, `assets/products/showcase-${p.key}-v2.jpg`));
+  const sq = p.scene ? sharp(join(SRC, p.scene)) : p.square ? sharp(src).extract(box(meta, p.square)) : sharp(src);
+  await sq.resize(1024, 1024, { fit: 'cover' }).jpeg({ quality: 84, mozjpeg: true }).toFile(join(PUB, `assets/products/showcase-${p.key}-v3.jpg`));
 
   let product, cut;
   if (p.plain) {
@@ -91,7 +92,7 @@ for (const p of PHOTOS) {
     product = await sharp(crop).resize({ width: 1100, withoutEnlargement: true }).webp({ quality: 84 }).toBuffer();
     cut = await roundedCrop(await sharp(crop).resize({ width: 816 }).toBuffer(), 56);
   }
-  await sharp(product).toFile(join(PUB, `img/p/${p.key}-v2.webp`));
+  await sharp(product).toFile(join(PUB, `img/p/${p.key}-v${p.ver}.webp`));
   await sharp(cut).resize(816, 1224, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } }).png({ compressionLevel: 9 }).toFile(join(PUB, `assets/product-${p.n}.png`));
   console.log(`${p.key}: showcase, photo and cut-out written`);
 }

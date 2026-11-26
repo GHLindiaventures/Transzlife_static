@@ -6,7 +6,7 @@
 
 export const SLIDE_COPY = {
   'pulmoclear-gummies': {
-    photo: 'assets/products/showcase-pulmoclear-v2.jpg',
+    photo: 'assets/products/showcase-pulmoclear-v3.jpg',
     illustration: 'assets/illustrations/lungs.webp',
     helps: [
       ['Wind', 'Supports respiratory wellness'],
@@ -19,7 +19,7 @@ export const SLIDE_COPY = {
     madeForTitle: 'Care for your lungs, every day',
   },
   'liver-booster': {
-    photo: 'assets/products/showcase-liver-v2.jpg',
+    photo: 'assets/products/showcase-liver-v3.jpg',
     card: true, // the pack photo is a lifestyle scene: shown in a framed card
     illustration: 'assets/illustrations/liver-botanical.webp',
     helps: [
@@ -48,7 +48,7 @@ export const SLIDE_COPY = {
     madeForTitle: 'Comfort for every cycle',
   },
   'reviva-roll-on': {
-    photo: 'assets/products/showcase-reviva-v2.jpg',
+    photo: 'assets/products/showcase-reviva-v3.jpg',
     card: true, // white pack on white: shows the lifestyle photo instead
     illustration: 'assets/illustrations/reviva.webp',
     illustrationPhoto: true,
@@ -76,7 +76,7 @@ export const SLIDE_COPY = {
     madeForTitle: 'For days that ask for more',
   },
   'breathefree-inhaler': {
-    photo: 'assets/products/showcase-breathefree-v2.jpg',
+    photo: 'assets/products/showcase-breathefree-v3.jpg',
     card: true, // white pack on white: shows the lifestyle photo instead
     illustration: 'assets/illustrations/inhaler.webp',
     illustrationPhoto: true,

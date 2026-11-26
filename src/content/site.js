@@ -25,7 +25,7 @@ export const BRAND = {
 export const PRODUCTS = [
   {
     id: 'gummies',
-    showcase: 'assets/products/showcase-pulmoclear-v2.jpg',
+    showcase: 'assets/products/showcase-pulmoclear-v3.jpg',
     compare: { kind: "cutout", before: { src: "illustrations/lungs-before.webp", label: "Before", sub: "Everyday pollutants", alt: "Illustration of discoloured lungs burdened by everyday pollutants" }, after: { src: "illustrations/lungs.webp", label: "After", sub: "Supported with Lung Booster", alt: "Illustration of healthy, clear lungs" } }, photo: 4, ingredients: ['Tulsi', 'Vasaka', 'Licorice Root', 'Sukku (Dry Ginger)', 'Thippili (Long Pepper)', 'Vitamin C, D3 & Zinc'], dosage: 'Follow the serving size on the pack; do not exceed the recommended daily intake', name: 'PulmoClear™ Lung Booster Gummies', short: 'PulmoClear™', tag: 'Lung Detox',
     price: 549, size: '60 Gummies',
     desc: 'Botanical-based wellness gummies combining traditional Ayurvedic herbs (Tulsi, Vasaka, Licorice, Dry Ginger, Long Pepper and more) with Vitamin C, D3 and Zinc, to support respiratory wellness and everyday health. Natural berry flavour, 60 gummies.',
@@ -33,7 +33,7 @@ export const PRODUCTS = [
   },
   {
     id: 'liver',
-    showcase: 'assets/products/showcase-liver-v2.jpg',
+    showcase: 'assets/products/showcase-liver-v3.jpg',
     compare: { kind: "cutout", before: { src: "illustrations/liver-before.webp", label: "Before", sub: "Everyday strain", alt: "Illustration of a dull, mottled liver under everyday strain" }, after: { src: "illustrations/liver-botanical.webp", label: "After", sub: "Supported with Liver Booster", alt: "Illustration of a smooth, healthy liver" } }, photo: 5, ingredients: ['Bhumyamalaki 500mg', 'Kalmegh 400mg', 'Kutki 400mg', 'Punarnava 300mg', 'Bhringraj 300mg', 'Daruharidra 200mg'], dosage: 'Adults: 10 ml (2 tsp) twice daily after meals', name: 'Liver Booster (LiverDetox™) Polyherbal Concoction', short: 'LiverDetox™', tag: 'Liver Booster',
     price: 900, size: '500 ml Polyherbal Concoction',
     desc: '100% Ayurvedic polyherbal concoction of 11 traditional botanicals, including Bhumyamalaki, Kalmegh, Kutki, Punarnava and Daruharidra, designed to support normal liver function, digestive wellness and overall well-being. No added colours or sugar.',
@@ -49,7 +49,7 @@ export const PRODUCTS = [
   },
   {
     id: 'reviva',
-    showcase: 'assets/products/showcase-reviva-v2.jpg',
+    showcase: 'assets/products/showcase-reviva-v3.jpg',
     compare: { kind: "scene", before: { src: "illustrations/reviva-before.webp", label: "Before", sub: "A heavy start", alt: "A tired man sitting on the edge of his bed in dim morning light, rubbing his neck" }, after: { src: "illustrations/reviva.webp", label: "After", sub: "With the Reviva ritual", alt: "The same man refreshed and smiling in warm sunlight, holding a roll-on bottle" } }, photo: 3, ingredients: ['Dill essential oil', 'Eucalyptus essential oil', 'Massage roll-on', 'External use'], dosage: 'Roll gently around the belly button every morning on an empty stomach; use daily', name: 'Reviva™ Roll-On', short: 'Reviva™', tag: 'Botanical Massage Roll-On',
     price: 399, size: '50 ml Massage Roll-On',
     desc: 'Botanical massage roll-on for an everyday wellness and vitality ritual. A practical massage roll-on designed to complement a daily self-care routine with a refreshing topical application.',
@@ -65,7 +65,7 @@ export const PRODUCTS = [
   },
   {
     id: 'inhaler',
-    showcase: 'assets/products/showcase-breathefree-v2.jpg',
+    showcase: 'assets/products/showcase-breathefree-v3.jpg',
     compare: { kind: "scene", before: { src: "illustrations/inhaler-before.webp", label: "Before", sub: "The urge hits", alt: "A stressed man on a grey city terrace, hand on his forehead, holding a cigarette pack" }, after: { src: "illustrations/inhaler.webp", label: "After", sub: "With BreatheFree", alt: "The same man calm on a green, sunlit terrace, breathing in from a small white inhaler, the cigarette pack crushed and set aside" } }, photo: 6, ingredients: ['Peppermint Oil', 'Eucalyptus Oil', 'Lavender Oil', 'Lemon Oil', 'Black Pepper Oil', 'Tulsi Oil'], dosage: 'Remove the cap, place near each nostril and take slow, deep inhalations whenever cravings or stress hit', name: 'BreatheFree™ Aromatherapy Inhaler', short: 'BreatheFree™', tag: 'Quit Smoking',
     price: 249, size: 'Pocket Inhaler',
     desc: 'Essential oil-based, non-addictive aromatherapy inhaler to support your journey towards a smoke-free lifestyle. Peppermint, Eucalyptus, Lavender, Lemon, Black Pepper and Tulsi oils help manage cravings and stress, and promote relaxation and breathing comfort.',
