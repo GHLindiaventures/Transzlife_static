@@ -58,7 +58,26 @@ export function createAuth({ db, env, log, twilio }) {
   }
 
   // ---- one-time codes ----------------------------------------------------
+  // SMS pumping: bots request codes for many different numbers so someone earns from each SMS we
+  // pay for. The per-number limit does not stop that, so there are also hourly caps per IP and for
+  // the whole site (a real shop sends far fewer codes than this; raise OTP_GLOBAL_PER_HOUR if not).
+  const num = (v, d) => { const n = Number.parseInt(v, 10); return Number.isFinite(n) && n > 0 ? n : d; };
+  const perIpHour = num(env.OTP_PER_IP_PER_HOUR, 10);
+  const globalHour = num(env.OTP_GLOBAL_PER_HOUR, 150);
+  let warnedAt = 0;
+
   async function requestCode(phone, ip) {
+    const { rows: [counts] } = await db.query(
+      `SELECT count(*)::int AS site, count(*) FILTER (WHERE ip = $1)::int AS mine
+         FROM otp_codes WHERE created_at > now() - interval '1 hour'`, [ip || '']);
+    if (counts.mine >= perIpHour) throw Object.assign(new Error('Too many sign-in codes have been requested from your network. Please try again in an hour.'), { status: 429 });
+    if (counts.site >= globalHour) {
+      if (Date.now() - warnedAt > 10 * 60_000) {
+        warnedAt = Date.now();
+        log.error?.(`[auth] site-wide sign-in code limit reached (${globalHour}/hour, OTP_GLOBAL_PER_HOUR): possible SMS pumping, check the SMS provider logs`);
+      }
+      throw Object.assign(new Error('Sign-in is very busy right now. Please try again in a little while or message us on WhatsApp.'), { status: 429 });
+    }
     const recent = (await db.query(
       `SELECT created_at FROM otp_codes WHERE phone = $1 AND created_at > now() - interval '1 hour' ORDER BY created_at DESC`, [phone])).rows;
     if (recent.length >= MAX_CODES_PER_HOUR) throw Object.assign(new Error('Too many codes requested for this number. Please try again in an hour.'), { status: 429 });
@@ -140,6 +159,7 @@ export function createAuth({ db, env, log, twilio }) {
     if (!row) return;
     const { session_id, last_seen_at, ...customer } = row;
     req.customer = customer;
+    req.sessionId = session_id;          // "this device" in Manage devices
     // touch at most every 10 minutes
     if (Date.now() - new Date(last_seen_at).getTime() > 600_000) {
       db.query('UPDATE sessions SET last_seen_at = now() WHERE id = $1', [session_id]).catch(() => {});

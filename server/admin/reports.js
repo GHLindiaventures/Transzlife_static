@@ -12,9 +12,9 @@ export const RANGES = { today: 1, '7d': 7, '30d': 30, '90d': 90 };
 export const STAGES = {
   all: null,
   awaiting_payment: ['pending_payment'],
-  to_pack: ['confirmed'],
+  to_pack: ['confirmed', 'processing'],
   ready_to_ship: ['packed'],
-  in_transit: ['shipped', 'out_for_delivery'],
+  in_transit: ['shipped', 'in_transit', 'out_for_delivery'],
   delivered: ['delivered'],
   returns: ['rto', 'returned'],
   cancelled: ['cancelled', 'refunded'],
@@ -172,8 +172,10 @@ export default async function reportRoutes(app, { db, G, parse, env, ops }) {
   // ---- Order stage counts for the tabs ----
   app.get('/api/admin/orders/counts', G('view'), async () => {
     const by = (await db.query('SELECT status, COUNT(*) AS n FROM orders GROUP BY status')).rows.reduce((m, r) => ({ ...m, [r.status]: num(r.n) }), {});
+    const delayed = num((await db.query(`SELECT COUNT(*) AS n FROM orders WHERE is_delayed = true AND status NOT IN ('delivered', 'cancelled', 'returned', 'rto')`)).rows[0]?.n);
     const counts = {};
     for (const [stage, statuses] of Object.entries(STAGES)) counts[stage] = statuses ? statuses.reduce((s, st) => s + (by[st] || 0), 0) : Object.values(by).reduce((a, n) => a + n, 0);
+    counts.delayed = delayed;
     return { counts };
   });
 

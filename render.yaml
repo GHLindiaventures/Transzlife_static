@@ -19,7 +19,7 @@ services:
     name: transzlife-web
     runtime: node
     plan: free                      # free instances sleep when idle (~1 min cold start); use starter or above to avoid that
-    buildCommand: npm ci && npm run build
+    buildCommand: npm ci --include=dev && npm run build   # vite and friends are devDependencies
     startCommand: npm start
     healthCheckPath: /api/health
     envVars:

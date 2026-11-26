@@ -16,7 +16,7 @@ import { quote } from './pricing.js';
 export const EVENT_NAMES = [
   'page_view', 'product_click', 'add_to_cart', 'remove_from_cart', 'cart_view', 'begin_checkout', 'checkout_payment',
   'place_order_click', 'payment_failed', 'share', 'wishlist_add', 'wishlist_remove', 'search', 'chat_open',
-  'brochure_download', 'whatsapp_click', 'compare_add', 'review_submit', 'review_helpful',
+  'brochure_download', 'whatsapp_click', 'compare_add', 'review_submit', 'review_helpful', 'vitals',
 ];
 
 const BOT = /bot|crawl|spider|slurp|bingpreview|facebookexternalhit|whatsapp\/|telegrambot|embedly|quora link|pinterestbot|vkshare|w3c_validator|lighthouse|pagespeed|headless|phantomjs|puppeteer|playwright|selenium|python-requests|curl\/|wget|httpclient|axios|node-fetch|go-http|java\//i;
@@ -63,7 +63,7 @@ const batch = z.object({
     n: z.enum(EVENT_NAMES),
     p: str(300).optional(),
     pid: slug.optional(),
-    props: z.record(z.union([z.string().max(120), z.number(), z.boolean(), z.null()])).optional(),
+    props: z.record(z.string().max(60), z.union([z.string().max(120), z.number(), z.boolean(), z.null()])).optional(),
   })).min(1).max(40),
 });
 const cartBody = z.object({

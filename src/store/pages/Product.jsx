@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { setBuyNow, BUY_NOW_URL } from '../lib/checkoutIntent';
+import { rememberViewed } from '../lib/recent';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Check, Download, ShieldCheck, Eye, TrendingUp, Truck, RotateCcw, Leaf, ArrowRight, Lock, Pill, Clock, Package, Lightbulb, Hand, Briefcase, MapPin, Sparkles, FileText, FlaskConical, Sprout, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getProduct, onSale, PRODUCTS, PACKS } from '../data/products';
@@ -96,8 +97,9 @@ export default function Product() {
   const navigate = useNavigate();
   const [pack, setPack] = useState(1);
   const [qty, setQty] = useState(1);
-  useTitle(p?.name);
+  useTitle(p?.name, p ? `${p.summary || p.tagline}`.slice(0, 160) : undefined);
   useEffect(() => { setPack(1); setQty(1); }, [id]);
+  useEffect(() => { if (p) rememberViewed(p.id); }, [p?.id]);   // eslint-disable-line react-hooks/exhaustive-deps
   const EMPTY = { summary: { avg: 0, total: 0, counts: [0, 0, 0, 0, 0] }, reviews: [], mine: null, canReview: null, signedIn: false };
   const [reviewData, setReviewData] = useState(EMPTY);
   const reloadReviews = useCallback(() => { if (p) loadReviews(p.id).then(setReviewData); }, [p?.id]);   // eslint-disable-line react-hooks/exhaustive-deps

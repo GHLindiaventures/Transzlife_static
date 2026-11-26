@@ -4,6 +4,7 @@ import Featured from '../components/sections/Featured.jsx';
 import ProductSlider from '../components/sections/ProductSlider.jsx';
 import { Sep, Rich, Banner, Benefits, Strip, ImageWithText, Brands, BgVideo, HelpCta } from '../components/sections/Blocks.jsx';
 import { useSiteContent } from '../store/lib/siteContent.js';
+import { usePageMeta } from '../lib/pageMeta.js';
 
 const HomeReviews = lazy(() => import('../components/sections/HomeReviews.jsx'));
 
@@ -37,6 +38,7 @@ function Section({ s }) {
 }
 
 export default function Home() {
+  usePageMeta(null);   // the site defaults from index.html
   const content = useSiteContent();
   const sections = content?.home?.sections?.length ? content.home.sections : DEFAULT;
   return (

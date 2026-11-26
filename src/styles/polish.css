@@ -1481,3 +1481,13 @@ html.ft-fixed .main { margin-bottom: var(--ft-h, 0px); }
 
 /* PHONES: the FAQ page padded its content twice (section + inner wrapper), squeezing it to ~235px on a 320px screen. */
 @media (max-width: 600px) { .faq .faq__wrap { padding-inline: 0 !important; } }
+
+/* page crash fallback (components/ErrorBoundary.jsx) */
+.page-error { max-width: 640px; margin: 0 auto; padding: 89px 21px; text-align: center; }
+.page-error__eyebrow { margin: 0 0 8px; font-size: 13px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: var(--gold-500, #c8921a); }
+.page-error h1 { margin: 0 0 13px; font-size: clamp(28px, 4vw, 40px); line-height: 1.15; color: var(--green-900, #173f24); }
+.page-error p { margin: 0 auto 21px; color: var(--ink-soft, #4b5a50); line-height: 1.6; }
+.page-error__actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 13px; }
+
+/* newsletter status line under the home-page sign-up form */
+.news__msg { min-height: 1.5em; margin: 10px 0 0; font-size: 14px; }

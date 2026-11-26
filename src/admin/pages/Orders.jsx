@@ -7,10 +7,10 @@ import { Badge, CODSTATUS, Empty, ErrorBox, Loading, METHOD, Notice, PAYSTATUS, 
 
 // Flipkart-style pipeline tabs (server: STAGES in server/admin/reports.js)
 const STAGES = [
-  ['all', 'All'], ['to_pack', 'To pack'], ['ready_to_ship', 'Ready to ship'], ['in_transit', 'In transit'],
-  ['delivered', 'Delivered'], ['returns', 'Returns'], ['awaiting_payment', 'Awaiting payment'], ['cancelled', 'Cancelled'],
+  ['all', 'All'], ['to_pack', 'To pack'], ['ready_to_ship', 'Ready to ship'], ['in_transit', 'Pending deliveries'],
+  ['delayed', 'Delayed'], ['delivered', 'Delivered'], ['returns', 'Returns'], ['awaiting_payment', 'Awaiting payment'], ['cancelled', 'Cancelled'],
 ];
-const HOT = new Set(['to_pack', 'ready_to_ship']);
+const HOT = new Set(['to_pack', 'ready_to_ship', 'delayed']);
 // what can be done in bulk from each tab
 const BULK = { to_pack: ['packed', 'Mark packed', PackageCheck], ready_to_ship: ['shipped', 'Mark shipped', Truck], in_transit: ['delivered', 'Mark delivered', PackageCheck] };
 
@@ -91,11 +91,15 @@ export function OrderList() {
                 <tbody>{rows.map((o) => (
                   <tr key={o.order_number} className={`is-click ${picked.has(o.order_number) ? 'is-picked' : ''}`} onClick={() => setPeek(o.order_number)}>
                     <td className="cb" onClick={(e) => e.stopPropagation()}><input type="checkbox" checked={picked.has(o.order_number)} onChange={() => toggle(o.order_number)} aria-label={`Select ${o.order_number}`} /></td>
-                    <td className="adm-ordercell"><strong>{o.order_number}</strong><span className="adm-sub">{dt(o.created_at)}</span></td>
+                    <td className="adm-ordercell"><strong>{o.order_number}</strong><span className="adm-sub">{dt(o.created_at)}{o.tracking_id ? ` · ${o.tracking_id}` : ''}</span></td>
                     <td>{o.customer}<span className="adm-sub">{[o.city, o.phone].filter(Boolean).join(' · ')}</span></td>
                     <td data-hide-sm><span className="adm-clamp" title={o.products}>{o.items} item{o.items === 1 ? '' : 's'} · {o.products}</span></td>
-                    <td>{METHOD[o.payment_method]}<span className="adm-sub"><Badge map={PAYSTATUS} value={o.payment_status} /></span>{o.cod_confirmation && o.cod_confirmation !== 'confirmed' && ['confirmed', 'packed'].includes(o.status) && <span className="adm-sub"><Badge map={CODSTATUS} value={o.cod_confirmation} /></span>}</td>
-                    <td><Badge value={o.status} /></td>
+                    <td>{METHOD[o.payment_method]}<span className="adm-sub"><Badge map={PAYSTATUS} value={o.payment_status} /></span>{o.cod_confirmation && o.cod_confirmation !== 'confirmed' && ['confirmed', 'processing', 'packed'].includes(o.status) && <span className="adm-sub"><Badge map={CODSTATUS} value={o.cod_confirmation} /></span>}</td>
+                    <td>
+                      <Badge value={o.status} />
+                      {o.is_delayed && o.status !== 'delivered' && <span className="adm-sub"><Badge map={{ delayed: ['Delayed', 'bad'] }} value="delayed" /></span>}
+                      {o.courier_name && <span className="adm-sub">{o.courier_name}{o.awb_number ? ` · ${o.awb_number}` : ''}</span>}
+                    </td>
                     <td className="num"><strong>{rs(o.total)}</strong></td>
                   </tr>
                 ))}</tbody>
@@ -122,7 +126,7 @@ export function OrderList() {
 
 // ---- shared pieces ----------------------------------------------------------
 const STEPS = [['confirmed', 'Confirmed'], ['packed', 'Packed'], ['shipped', 'Shipped'], ['delivered', 'Delivered']];
-const ORDER_OF = { pending_payment: -1, confirmed: 0, packed: 1, shipped: 2, out_for_delivery: 2.5, delivered: 3 };
+const ORDER_OF = { pending_payment: -1, confirmed: 0, processing: 0.5, packed: 1, shipped: 2, in_transit: 2.3, out_for_delivery: 2.7, delivered: 3 };
 function Stepper({ status }) {
   const stopped = ['cancelled', 'refunded', 'rto', 'returned'].includes(status);
   const at = ORDER_OF[status] ?? 3;
@@ -137,39 +141,58 @@ function Stepper({ status }) {
 }
 
 const ACTION_LABEL = {
-  packed: 'Mark packed', shipped: 'Mark shipped', out_for_delivery: 'Out for delivery', delivered: 'Mark delivered',
+  processing: 'Start processing', packed: 'Mark packed', shipped: 'Mark shipped', in_transit: 'Mark in transit',
+  out_for_delivery: 'Out for delivery', delivered: 'Mark delivered',
   confirmed: 'Back to "to pack"', cancelled: 'Cancel order', rto: 'Returned to us (RTO)', returned: 'Mark returned',
 };
 
-/** Status buttons (+ reason / restock form). Used on the order page and in the quick-view drawer. */
+/** Status buttons (+ courier / tracking / reason / restock form). Used on the order page and in the quick-view drawer. */
 function StatusActions({ o, onDone, act }) {
   const [pending, setPending] = useState(null);
   const [note, setNote] = useState('');
+  const [courierName, setCourierName] = useState(o.courierName || '');
+  const [awbNumber, setAwbNumber] = useState(o.awbNumber || '');
+  const [location, setLocation] = useState('');
   const [restock, setRestock] = useState(true);
   const move = async (status) => {
-    const needsForm = ['cancelled', 'rto', 'returned', 'shipped'].includes(status);
-    if (needsForm && pending !== status) { setPending(status); setNote(''); setRestock(true); return; }
-    const r = await act.run(() => api(`/api/admin/orders/${o.number}/status`, { method: 'POST', body: { status, note, restock } }),
-      (res) => (res.refundSuggested ? 'Order cancelled. It was paid online: issue a refund from the order page.' : `Order moved to "${STATUS[status][0]}".`));
-    if (r) { setPending(null); setNote(''); onDone(); }
+    const needsForm = ['cancelled', 'rto', 'returned', 'shipped', 'in_transit', 'out_for_delivery'].includes(status);
+    if (needsForm && pending !== status) {
+      setPending(status); setNote(''); setLocation(''); setRestock(true);
+      setCourierName(o.courierName || ''); setAwbNumber(o.awbNumber || '');
+      return;
+    }
+    const body = { status, note, restock, ...(location ? { location } : {}), ...(status === 'shipped' ? { courierName, awbNumber } : {}) };
+    const r = await act.run(() => api(`/api/admin/orders/${o.number}/status`, { method: 'POST', body }),
+      (res) => (res.refundSuggested ? 'Order cancelled. It was paid online: issue a refund from the order page.' : `Order moved to "${STATUS[status]?.[0] || status}".`));
+    if (r) { setPending(null); setNote(''); setLocation(''); onDone(); }
   };
   if (!o.next.length) return null;
+  const isShip = ['shipped', 'in_transit', 'out_for_delivery'].includes(pending);
   return (
     <div>
       <div className="adm-actions">
         {o.next.map((s) => (
-          <button key={s} className={`adm-btn ${s === 'cancelled' || s === 'rto' ? 'is-danger is-ghost' : s === 'confirmed' ? 'is-ghost' : ''}`} disabled={act.busy} onClick={() => move(s)}>{ACTION_LABEL[s] || s}</button>
+          <button key={s} className={`adm-btn ${s === 'cancelled' || s === 'rto' ? 'is-danger is-ghost' : s === 'confirmed' || s === 'processing' ? 'is-ghost' : ''}`} disabled={act.busy} onClick={() => move(s)}>{ACTION_LABEL[s] || s}</button>
         ))}
       </div>
       {pending && (
         <div className="adm-form adm-pending">
-          <label>{pending === 'cancelled' ? 'Reason for cancelling (required)' : pending === 'shipped' ? 'Courier and tracking number (sent to the customer)' : 'Note (optional)'}
+          {pending === 'shipped' && (
+            <div className="adm-pair">
+              <label>Courier partner<input value={courierName} onChange={(e) => setCourierName(e.target.value)} placeholder="e.g. Delhivery, Blue Dart, DTDC" /></label>
+              <label>AWB / tracking number<input value={awbNumber} onChange={(e) => setAwbNumber(e.target.value)} placeholder="e.g. 7845123690" /></label>
+            </div>
+          )}
+          {isShip && (
+            <label>Hub / location (optional)<input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Chennai Hub" /></label>
+          )}
+          <label>{pending === 'cancelled' ? 'Reason for cancelling (required)' : isShip ? 'Delivery note (sent to customer)' : 'Note (optional)'}
             <input value={note} onChange={(e) => setNote(e.target.value)} maxLength={500} autoFocus
-              placeholder={pending === 'cancelled' ? 'e.g. Customer asked to cancel' : pending === 'shipped' ? 'e.g. DTDC, AWB 7845123690' : 'e.g. Courier returned: address not found'} />
+              placeholder={pending === 'cancelled' ? 'e.g. Customer asked to cancel' : isShip ? 'e.g. Dispatched from Chennai warehouse' : 'e.g. Courier returned: address not found'} />
           </label>
           {(pending === 'rto' || pending === 'returned') && <label className="adm-check"><input type="checkbox" checked={restock} onChange={(e) => setRestock(e.target.checked)} /> Put the items back in stock</label>}
           <div className="adm-actions">
-            <button className={`adm-btn ${pending === 'shipped' ? '' : 'is-danger'}`} disabled={act.busy || (pending === 'cancelled' && !note.trim())} onClick={() => move(pending)}>Confirm: {ACTION_LABEL[pending]}</button>
+            <button className={`adm-btn ${isShip ? '' : 'is-danger'}`} disabled={act.busy || (pending === 'cancelled' && !note.trim())} onClick={() => move(pending)}>Confirm: {ACTION_LABEL[pending]}</button>
             <button className="adm-btn is-ghost" onClick={() => setPending(null)}>Back</button>
           </div>
         </div>
@@ -310,10 +333,18 @@ export function OrderDetail() {
             <h2 className="adm-h2">Timeline</h2>
             <ol className="adm-timeline">
               {events.map((e, i) => (
-                <li key={i}><Badge value={e.to_status} /> <span className="adm-muted">{dt(e.created_at)} · {e.actor.replace(/^staff:/, '')}</span>{e.note && <p>{e.note}</p>}</li>
+                <li key={i}>
+                  <Badge value={e.to_status} />{' '}
+                  <span className="adm-muted">
+                    {dt(e.created_at)} · {e.actor.replace(/^staff:/, '')}{e.location ? ` · ${e.location}` : ''}
+                  </span>
+                  {e.note && <p>{e.note}</p>}
+                </li>
               ))}
             </ol>
           </section>
+
+          <ShipmentEditor o={o} act={act} onSaved={reload} />
         </div>
 
         <div className="adm-stack" style={{ marginBottom: 0 }}>
@@ -372,6 +403,69 @@ export function OrderDetail() {
         </div>
       </div>
     </>
+  );
+}
+
+/** Courier, AWB, Expected Delivery Date, Delay flag, and live courier sync. */
+function ShipmentEditor({ o, act, onSaved }) {
+  const { staff } = useAdmin();
+  const canEdit = can(staff, 'orders.edit');
+  const [f, setF] = useState({
+    courierName: o.courierName || '',
+    awbNumber: o.awbNumber || '',
+    trackingUrl: o.trackingUrl || '',
+    estimatedDeliveryAt: o.estimatedDeliveryAt ? String(o.estimatedDeliveryAt).slice(0, 10) : '',
+    isDelayed: !!o.isDelayed,
+    delayReason: o.delayReason || '',
+  });
+  useEffect(() => {
+    setF({
+      courierName: o.courierName || '',
+      awbNumber: o.awbNumber || '',
+      trackingUrl: o.trackingUrl || '',
+      estimatedDeliveryAt: o.estimatedDeliveryAt ? String(o.estimatedDeliveryAt).slice(0, 10) : '',
+      isDelayed: !!o.isDelayed,
+      delayReason: o.delayReason || '',
+    });
+  }, [o.courierName, o.awbNumber, o.trackingUrl, o.estimatedDeliveryAt, o.isDelayed, o.delayReason]);
+
+  const save = async (e) => {
+    e.preventDefault();
+    if (await act.run(() => api(`/api/admin/orders/${o.number}/shipment`, { method: 'PATCH', body: f }), 'Shipment details updated.')) onSaved();
+  };
+  const sync = async () => {
+    const r = await act.run(() => api(`/api/admin/orders/${o.number}/sync-tracking`, { method: 'POST', body: {} }),
+      (res) => res.message || (res.synced ? `Synced: ${res.status}` : 'No new courier scans.'));
+    if (r?.synced) onSaved();
+  };
+
+  return (
+    <section className="adm-card">
+      <div className="adm-card__head">
+        <div>
+          <h2 className="adm-h2"><Truck size={17} /> Shipment &amp; tracking</h2>
+          <p className="adm-muted">Tracking ID: <code>{o.trackingId}</code> · <a href={`/track/${o.trackingId}`} target="_blank" rel="noreferrer">Customer tracking page ↗</a></p>
+        </div>
+        {canEdit && o.awbNumber && (
+          <button type="button" className="adm-btn is-ghost is-sm" disabled={act.busy} onClick={sync}>Sync courier</button>
+        )}
+      </div>
+      <form className="adm-form" onSubmit={save}>
+        <div className="adm-pair">
+          <label>Courier partner<input value={f.courierName} disabled={!canEdit} onChange={(e) => setF((s) => ({ ...s, courierName: e.target.value }))} placeholder="e.g. Delhivery, Blue Dart, DTDC" /></label>
+          <label>AWB / waybill<input value={f.awbNumber} disabled={!canEdit} onChange={(e) => setF((s) => ({ ...s, awbNumber: e.target.value }))} placeholder="e.g. 7845123690" /></label>
+        </div>
+        <div className="adm-pair">
+          <label>Expected delivery date<input type="date" value={f.estimatedDeliveryAt} disabled={!canEdit} onChange={(e) => setF((s) => ({ ...s, estimatedDeliveryAt: e.target.value }))} /></label>
+          <label>Courier tracking URL (optional)<input value={f.trackingUrl} disabled={!canEdit} onChange={(e) => setF((s) => ({ ...s, trackingUrl: e.target.value }))} placeholder="https://..." /></label>
+        </div>
+        <label className="adm-check"><input type="checkbox" checked={f.isDelayed} disabled={!canEdit} onChange={(e) => setF((s) => ({ ...s, isDelayed: e.target.checked }))} /> Shipment is delayed (notifies customer)</label>
+        {f.isDelayed && (
+          <label>Delay reason<input value={f.delayReason} disabled={!canEdit} onChange={(e) => setF((s) => ({ ...s, delayReason: e.target.value }))} placeholder="e.g. Weather delay at hub" /></label>
+        )}
+        {canEdit && <button className="adm-btn is-sm" disabled={act.busy}>Save shipment</button>}
+      </form>
+    </section>
   );
 }
 

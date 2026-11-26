@@ -108,6 +108,10 @@ async function send(text){
   try {
     const res = await fetch(API, { method:'POST', headers:{ 'Content-Type':'application/json' },
       body:JSON.stringify({ messages:msgs.map(({ role, content }) => ({ role, content })) }) });
+    if (res.status === 429){
+      const why = await res.json().catch(() => ({}));
+      throw Object.assign(new Error('busy'), { friendly: why.error });
+    }
     if (!res.ok || !res.body) throw new Error(res.status);
     reply.products = (res.headers.get('X-Products') || '').split(',').filter(id => CATALOG.some(p => p.id === id));
     reply.suggest = (res.headers.get('X-Suggest') || '').split('|').map(s => s.trim()).filter(Boolean).slice(0, 6);
@@ -123,7 +127,9 @@ async function send(text){
     msgs.push(reply);
   } catch(err){
     row.classList.remove('typing');
-    body.innerHTML = '<p>Sorry, I can\'t connect right now. Please try again in a minute, or reach the team through the Contact page.</p>';
+    const note = document.createElement('p');
+    note.textContent = err.friendly || 'Sorry, I can\'t connect right now. Please try again in a minute, or reach the team through the Contact page.';
+    body.replaceChildren(note);
     msgs.pop();     // let them resend the same message
   }
   save(); scrollDown();

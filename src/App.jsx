@@ -35,8 +35,10 @@ const Checkout = checkout('Checkout');
 const OrderSuccess = checkout('OrderSuccess');
 const Login = lazy(() => import('./store/pages/Login'));
 const Account = lazy(() => import('./store/pages/Account'));
+const TrackOrder = lazy(() => import('./store/pages/TrackOrder'));
 /* Staff dashboard: its own chunk, outside the site layout (no header, footer or chat) */
 const AdminApp = lazy(() => import('./admin/AdminApp'));
+const NotFound = lazy(() => import('./store/pages/NotFound'));
 
 const page = (el) => <Suspense fallback={<div className="page-loading" aria-busy="true" />}>{el}</Suspense>;
 
@@ -87,8 +89,11 @@ export default function App() {
               <Route path="checkout" element={<RequireAuth>{page(<Checkout />)}</RequireAuth>} />
               <Route path="order/:id" element={<RequireAuth>{page(<OrderSuccess />)}</RequireAuth>} />
               <Route path="account" element={<RequireAuth>{page(<Account />)}</RequireAuth>} />
+              <Route path="track" element={page(<TrackOrder />)} />
+              <Route path="track/:id" element={page(<TrackOrder />)} />
+              {/* unknown URLs: a real 404 page (the server also answers these with status 404) */}
+              <Route path="*" element={page(<NotFound />)} />
             </Route>
-            <Route path="*" element={<Home />} />
           </Route>
         </Routes>
         <StoreOverlays />

@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom';
 import { Leaf, ShieldCheck, Recycle, HeartHandshake, CheckCircle2, ArrowRight, Sprout, Wind, Droplets } from 'lucide-react';
 import '../styles/content.css';
+import { usePageMeta } from '../lib/pageMeta.js';
 
 export default function Sustainability() {
+  usePageMeta('Sustainability', 'How TranzLife sources Ayurvedic botanicals responsibly: direct partnerships with farmers, clean manufacturing and recyclable packaging.');
   return (
     <div className="sustain-page">
       {/* Hero Banner */}

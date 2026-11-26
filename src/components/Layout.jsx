@@ -7,6 +7,7 @@ import Drawer from './Drawer.jsx';
 import Footer from './Footer.jsx';
 import ConsentBanner from './ConsentBanner.jsx';
 import LiveVisitors from './LiveVisitors.jsx';
+import ErrorBoundary from './ErrorBoundary.jsx';
 import { installTracking, track } from '../store/lib/track.js';
 
 export default function Layout() {
@@ -98,7 +99,10 @@ export default function Layout() {
       <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
 
       <main id="main" className="main" ref={mainRef} tabIndex={-1}>
-        <Outlet />
+        {/* a crash in one page shows a friendly message, not a blank screen; a new page starts fresh */}
+        <ErrorBoundary key={pathname}>
+          <Outlet />
+        </ErrorBoundary>
       </main>
 
       <Footer ref={footerRef} />

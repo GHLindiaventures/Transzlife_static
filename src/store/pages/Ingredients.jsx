@@ -9,7 +9,7 @@ import IngredientCarousel from '../../components/IngredientCarousel';
 
 export default function Ingredients() {
   useCatalog();
-  useTitle('Ingredient library');
+  useTitle('Ingredient library', 'Every ingredient in TranzLife products: Ayurvedic herbs, essential oils and micronutrients, with their traditional uses.');
   const [type, setType] = useState('');
   const [q, setQ] = useState('');
   const { hash } = useLocation();

@@ -64,7 +64,7 @@ function ShopNav({ concern, format, set }) {
 
 export default function Shop() {
   useCatalog();
-  useTitle('Shop all products');
+  useTitle('Shop all products', 'Shop TranzLife Ayurvedic, plant-based wellness products for lungs, liver, period comfort, quitting smoking and everyday energy. Free shipping above ₹999.');
   const [params, setParams] = useSearchParams();
   const q = params.get('q') || '';
   const concern = params.get('concern') || '';

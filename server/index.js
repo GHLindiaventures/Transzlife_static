@@ -11,6 +11,7 @@ import { extname, join, normalize, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import Fastify from 'fastify';
 import { createChatApi } from './chat-api.js';
+import { createClientIp } from './client-ip.js';
 import { buildShopApp } from './shop/app.js';
 
 const ROOT = resolve(fileURLToPath(new URL('../dist', import.meta.url)));
@@ -25,15 +26,50 @@ if (!serveSite) console.warn('dist/ not found: serving the APIs only. Run `npm r
 const chat = createChatApi(process.env);
 
 // Security headers on every page and file (the API adds its own in shop/app.js).
-// HSTS only when hosted (HTTPS); no CSP yet (inline JSON-LD, Razorpay checkout): see the production checklist.
+// HSTS only when hosted (HTTPS).
 const HOSTED = process.env.NODE_ENV === 'production' || !!process.env.RENDER;
+
+// Content-Security-Policy: only our own scripts, plus what the site really loads from elsewhere.
+// Inline JSON-LD (<script type="application/ld+json">) is data, not code, so it is not affected.
+// React's style={...} attributes need 'unsafe-inline' for styles only (never for scripts).
+// Extra origins (e.g. a chat API on another domain) can be added with CSP_CONNECT_EXTRA / CSP_IMG_EXTRA.
+const originOf = (u) => { try { return new URL(u).origin; } catch { return ''; } };
+const extra = (name) => String(process.env[name] || '').split(',').map((s) => s.trim()).filter(Boolean);
+const MEDIA_STORE = originOf(process.env.AWS_ENDPOINT_URL_S3);     // product / review photos (shop/media.js)
+const RAZORPAY = ['https://checkout.razorpay.com', 'https://api.razorpay.com'];
+const CSP = [
+  "default-src 'self'",
+  `script-src 'self' ${RAZORPAY[0]}`,
+  "style-src 'self' 'unsafe-inline'",
+  `img-src 'self' data: blob: https://images.unsplash.com https://images.pexels.com https://*.razorpay.com ${MEDIA_STORE} ${extra('CSP_IMG_EXTRA').join(' ')}`,
+  "media-src 'self' blob: https://videos.pexels.com",
+  "font-src 'self' data:",
+  `connect-src 'self' ${RAZORPAY.join(' ')} https://lumberjack.razorpay.com ${MEDIA_STORE} ${extra('CSP_CONNECT_EXTRA').join(' ')}`,
+  `frame-src ${RAZORPAY.join(' ')} https://www.google.com https://maps.google.com`,
+  "object-src 'none'",
+  "base-uri 'self'",
+  `form-action 'self' ${RAZORPAY[1]}`,
+  "frame-ancestors 'self'",
+  ...(HOSTED ? ['upgrade-insecure-requests'] : []),
+].map((d) => d.replace(/\s+/g, ' ').trim()).join('; ');
+
 const SECURITY = {
   'X-Content-Type-Options': 'nosniff',
   'X-Frame-Options': 'SAMEORIGIN',
   'Referrer-Policy': 'strict-origin-when-cross-origin',
   'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
+  'Content-Security-Policy': CSP,
   ...(HOSTED ? { 'Strict-Transport-Security': 'max-age=31536000; includeSubDomains' } : {}),
 };
+
+// Pages the React app knows. Anything else still gets the app (which shows its 404 page),
+// but with HTTP status 404 so search engines do not index it as a copy of the home page.
+const KNOWN_PAGE = new RegExp('^/(' + [
+  '', 'about', 'science', 'sustainability', 'faq', 'contact', 'certifications',
+  'shop', 'products(/[^/]+)?', 'product/[^/]+', 'concerns(/[^/]+)?', 'ingredients',
+  'blogs?(/[^/]+)?', 'journal(/[^/]+)?', 'policies/[^/]+',
+  'cart', 'login', 'checkout', 'order/[^/]+', 'account', 'admin(/.*)?',
+].join('|') + ')/?$');
 // Text files are compressed (Brotli, else gzip). Build files never change, so each is compressed once and kept.
 const COMPRESSIBLE = new Set(['.html', '.js', '.css', '.json', '.svg', '.txt', '.xml']);
 const packed = new Map();          // `${file}|${encoding}` -> Buffer (fingerprinted build files only)
@@ -52,13 +88,26 @@ function serveFile(req, res){
   try { path = decodeURIComponent(req.url.split('?')[0]); } catch(e){ res.writeHead(400, SECURITY); return res.end(); }
   let file = normalize(join(ROOT, path));
   if (file !== ROOT && !file.startsWith(ROOT + sep)){ res.writeHead(403, SECURITY); return res.end(); }
-  if (!existsSync(file) || statSync(file).isDirectory()) file = join(ROOT, 'index.html');
+  let status = 200;
+  if (!existsSync(file) || statSync(file).isDirectory()) {
+    // a missing file (has an extension) or an unknown page: the app's 404 page, with a real 404 status
+    if (extname(path) || !KNOWN_PAGE.test(path)) status = 404;
+    file = join(ROOT, 'index.html');
+  }
   const ext = extname(file).toLowerCase();
   const immutable = file.includes(`${sep}assets${sep}`) && FINGERPRINT.test(file);
   const headers = { ...SECURITY, 'Content-Type': TYPES[ext] || 'application/octet-stream',
     'Cache-Control': immutable ? 'public, max-age=31536000, immutable' : ext === '.html' ? 'no-cache' : 'public, max-age=86400' };
+  if (ext === '.jpg' || ext === '.jpeg' || ext === '.png') {
+    // a lighter WebP copy made at build time (scripts/webp-variants.mjs), for browsers that take it
+    headers.Vary = 'Accept';
+    if (/image\/webp/.test(String(req.headers.accept || '')) && existsSync(`${file}.webp`)) {
+      file = `${file}.webp`;
+      headers['Content-Type'] = 'image/webp';
+    }
+  }
   if (!COMPRESSIBLE.has(ext)) {
-    res.writeHead(200, headers);
+    res.writeHead(status, headers);
     if (req.method === 'HEAD') return res.end();
     return createReadStream(file).pipe(res);
   }
@@ -76,13 +125,15 @@ function serveFile(req, res){
   }
   headers.Vary = 'Accept-Encoding';
   headers['Content-Length'] = body.length;
-  res.writeHead(200, headers);
+  res.writeHead(status, headers);
   res.end(req.method === 'HEAD' ? undefined : body);
 }
 
-// One HTTP server: the chat handler sees each request first and passes everything else to Fastify.
+// One HTTP server: the visitor's real IP is settled first (see client-ip.js), then the chat handler
+// sees each request and passes everything else to Fastify.
+const applyClientIp = createClientIp(process.env);
 const serverFactory = (fastifyHandler) =>
-  createServer((req, res) => chat.handle(req, res, () => fastifyHandler(req, res)));
+  createServer((req, res) => { applyClientIp(req); chat.handle(req, res, () => fastifyHandler(req, res)); });
 
 let app;
 try {

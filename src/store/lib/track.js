@@ -175,7 +175,24 @@ export function installTracking() {
     chatOpen = now;
   }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
 
-  const leave = () => flush({ leaving: true });
+  // Real-user Core Web Vitals (LCP, CLS, INP) for consenting visitors, sent once on page leave.
+  let lcp = 0, cls = 0, inp = 0, vitalsSent = false;
+  if (typeof PerformanceObserver === 'function') {
+    const observe = (type, opts, cb) => {
+      try { const o = new PerformanceObserver((list) => list.getEntries().forEach(cb)); o.observe({ type, buffered: true, ...opts }); } catch { /* unsupported */ }
+    };
+    observe('largest-contentful-paint', {}, (e) => { if (e.startTime > lcp) lcp = Math.round(e.startTime); });
+    observe('layout-shift', {}, (e) => { if (!e.hadRecentInput) cls += e.value; });
+    observe('event', { durationThreshold: 40 }, (e) => { if (e.interactionId && e.duration > inp) inp = Math.round(e.duration); });
+  }
+
+  const leave = () => {
+    if (!vitalsSent && getConsent() === 'all' && (lcp > 0 || cls > 0 || inp > 0)) {
+      vitalsSent = true;
+      track('vitals', { lcp: lcp || null, cls: Math.round(cls * 1000) / 1000, inp: inp || null });
+    }
+    flush({ leaving: true });
+  };
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') leave(); });
   window.addEventListener('pagehide', leave);
 }

@@ -11,6 +11,7 @@ import { createOrders } from './orders.js';
 import shopRoutes from './routes.js';
 import adminRoutes from '../admin/routes.js';
 import catalogPublic from './catalog.js';
+import enquiryRoutes from './enquiries.js';
 import { writeOffExpired } from './batches.js';
 import trackRoutes from './track.js';
 import { createReminders } from './reminders.js';
@@ -20,13 +21,15 @@ import opsWebhooks, { createOps } from './ops.js';
 import seoRoutes from './seo.js';
 import customerReturnRoutes from './returns.js';
 import presenceRoutes, { createPresence } from './presence.js';
+import { createHealth } from '../admin/health.js';
+import { createCourier } from './courier.js';
 
 const UNSAFE = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
 export async function buildShopApp({ env = process.env, db, fastifyOptions = {}, logger = true } = {}) {
   const app = Fastify({
     logger: logger && { level: env.LOG_LEVEL || 'info', redact: ['req.headers.cookie', 'req.headers.authorization', 'res.headers["set-cookie"]'] },
-    trustProxy: true,            // Render terminates HTTPS in front of us
+    trustProxy: 1,               // one proxy (Render); server/client-ip.js has already reduced X-Forwarded-For to the trusted address
     bodyLimit: 64 * 1024,
     ...fastifyOptions,
   });
@@ -41,6 +44,8 @@ export async function buildShopApp({ env = process.env, db, fastifyOptions = {},
   const reminders = createReminders({ db, twilio, env, log });
   const presence = createPresence();
   const ops = createOps({ db, twilio, env, log });
+  const courier = createCourier({ db, notifier, env, log });
+  const health = createHealth({ db, razorpay, twilio, media: { configured: !!(env.S3_BUCKET || env.R2_BUCKET) }, env, log });
 
   // JSON only (no text/plain or form posts, which other sites could submit). The webhook route
   // also keeps the exact raw body, needed to check Razorpay's signature.
@@ -77,8 +82,15 @@ export async function buildShopApp({ env = process.env, db, fastifyOptions = {},
     return payload;
   });
 
-  await app.register(shopRoutes, { db, auth, orders, razorpay, notifier, ops, log });
-  await app.register(adminRoutes, { db, razorpay, twilio, notifier, reminders, presence, ops, auth: { mode: auth.mode }, log, env });
+  app.addHook('onResponse', async (req, reply) => {
+    health.recordRequest({ statusCode: reply.statusCode, durationMs: reply.elapsedTime || 0 });
+  });
+  app.addHook('onError', async (req, reply, err) => {
+    await health.recordError(req, err);
+  });
+
+  await app.register(shopRoutes, { db, auth, orders, razorpay, notifier, ops, courier, log });
+  await app.register(adminRoutes, { db, razorpay, twilio, notifier, reminders, presence, ops, health, courier, auth: { mode: auth.mode }, log, env });
   await app.register(trackRoutes, { db, log });
   await app.register(reviewRoutes, { db, env, log });
   await app.register(customerReturnRoutes, { db, env, log });
@@ -87,18 +99,32 @@ export async function buildShopApp({ env = process.env, db, fastifyOptions = {},
   await app.register(opsWebhooks, { ops, env, log });
   await app.register(seoRoutes, { db, env });
   await app.register(catalogPublic, { db });
+  await app.register(enquiryRoutes, { db, log });
 
-  // free stock held by payments that were never completed
+  // free stock held by payments that were never completed, and record job heartbeats
+  const trackJob = (key, label, intervalMin, fn) => {
+    const t0 = Date.now();
+    return fn()
+      .then(() => health.recordHeartbeat(key, label, intervalMin, 'ok', Date.now() - t0))
+      .catch((e) => {
+        log.error(e, `[${key}] sweep failed`);
+        return health.recordHeartbeat(key, label, intervalMin, 'error', Date.now() - t0, e.message);
+      });
+  };
+  let tick = 0;
   const sweep = setInterval(() => {
-    orders.releaseExpired().catch((e) => log.error(e, '[orders] sweep failed'));
-    writeOffExpired(db, log).catch((e) => log.error(e, '[batches] expiry sweep failed'));
-    reminders.sweep().catch((e) => log.error(e, '[reminders] sweep failed'));
-    reminders.prune().catch((e) => log.error(e, '[analytics] prune failed'));
-    ops.sweep().catch((e) => log.error(e, '[ops] sweep failed'));
+    tick += 1;
+    trackJob('orders.release', 'Expired-payment stock release', 5, () => orders.releaseExpired());
+    trackJob('batches.expiry', 'Expired-batch write-off', 5, () => writeOffExpired(db, log));
+    trackJob('reminders.sweep', 'Cart & refill reminders', 5, () => reminders.sweep());
+    trackJob('analytics.prune', 'Analytics & session clean-up', 5, () => reminders.prune());
+    trackJob('ops.sweep', 'COD check & daily summary', 5, () => ops.sweep());
+    trackJob('courier.overdue', 'Overdue delivery check', 5, () => courier.flagOverdueShipments());
+    if (tick % 2 === 0) health.sweep().catch((e) => log.error(e, '[health] sweep failed'));
   }, 5 * 60_000);
   sweep.unref();
   app.addHook('onClose', async () => { clearInterval(sweep); await db.close?.(); });
 
-  app.shop = { db, auth, orders, razorpay, twilio, notifier, reminders, presence, ops };
+  app.shop = { db, auth, orders, razorpay, twilio, notifier, reminders, presence, ops, health, courier };
   return app;
 }

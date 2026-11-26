@@ -15,8 +15,9 @@ export const dt = (iso) => (iso ? new Date(iso).toLocaleString('en-IN', { day: '
 export const d = (iso) => (iso ? new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—');
 
 export const STATUS = {
-  pending_payment: ['Awaiting payment', 'warn'], confirmed: ['To pack', 'info'], packed: ['Packed', 'info'],
-  shipped: ['Shipped', 'go'], out_for_delivery: ['Out for delivery', 'go'], delivered: ['Delivered', 'ok'],
+  pending_payment: ['Awaiting payment', 'warn'], confirmed: ['Confirmed', 'info'], processing: ['Processing', 'info'],
+  packed: ['Packed', 'info'], shipped: ['Shipped', 'go'], in_transit: ['In transit', 'go'],
+  out_for_delivery: ['Out for delivery', 'go'], delivered: ['Delivered', 'ok'],
   cancelled: ['Cancelled', 'off'], refunded: ['Refunded', 'off'], returned: ['Returned', 'off'], rto: ['Returned to us (RTO)', 'off'],
 };
 export const PAYSTATUS = {

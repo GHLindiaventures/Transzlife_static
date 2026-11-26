@@ -1,4 +1,5 @@
-import { Fragment, useEffect, useRef } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
+import { honeypotProps, isEmail, subscribe } from '../../lib/forms.js';
 import { Link } from 'react-router-dom';
 import { Media, Slot, Ph, range } from '../ui.jsx';
 import {
@@ -277,19 +278,37 @@ export function HelpCta() {
 }
 
 export function Newsletter({ small = false }) {
+  const [email, setEmail] = useState('');
+  const [hp, setHp] = useState('');
+  const [state, setState] = useState('idle'); // idle | sending | done | error | offline
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    if (!isEmail(email)) { setState('error'); return; }
+    setState('sending');
+    try { await subscribe(email, 'home', hp); setState('done'); setEmail(''); }
+    catch (err) { setState(err.status === 400 ? 'error' : 'offline'); }
+  };
   return (
     <section className={`news${small ? ' news--sm' : ''}`}>
       <Media className="media--fill news__bg" />
       <div className="news__card" data-reveal>
         <Slot as="h2" className="slot--news-title">{NEWSLETTER.title}</Slot>
         <Slot as="p" className="slot--news-p">{NEWSLETTER.text}</Slot>
-        <form className="news__form" onSubmit={(e) => e.preventDefault()}>
+        <form className="news__form" onSubmit={onSubmit} noValidate>
+          <input {...honeypotProps} value={hp} onChange={(e) => setHp(e.target.value)} />
           <label className="news__field">
             <span className="visually-hidden">{NEWSLETTER.email}</span>
-            <input type="email" autoComplete="email" placeholder={NEWSLETTER.email} />
+            <input type="email" autoComplete="email" placeholder={NEWSLETTER.email} value={email}
+              onChange={(e) => { setEmail(e.target.value); if (state !== 'idle') setState('idle'); }}
+              aria-invalid={state === 'error' ? 'true' : undefined} />
           </label>
-          <button className="btn btn--dark news__send" type="submit"><Slot className="slot--btn-sm">{NEWSLETTER.button}</Slot></button>
+          <button className="btn btn--dark news__send" type="submit" disabled={state === 'sending'}><Slot className="slot--btn-sm">{state === 'done' ? 'Subscribed' : NEWSLETTER.button}</Slot></button>
         </form>
+        <p className="news__msg" role="status" aria-live="polite">
+          {state === 'done' && 'Thanks! You are on the list.'}
+          {state === 'error' && 'Please enter a valid email address.'}
+          {state === 'offline' && 'We could not sign you up right now. Please try again in a moment.'}
+        </p>
       </div>
     </section>
   );

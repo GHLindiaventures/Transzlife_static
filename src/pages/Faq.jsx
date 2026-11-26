@@ -3,8 +3,10 @@ import { Search, AlertCircle } from 'lucide-react';
 import { Slot } from '../components/ui.jsx';
 import { Sep, PageBanner } from '../components/sections/Blocks.jsx';
 import { FAQ, PHOTOS } from '../content/site.js';
+import { usePageMeta } from '../lib/pageMeta.js';
 
 export default function Faq() {
+  usePageMeta('FAQs', 'Answers to common questions about TranzLife products, ingredients, orders, shipping, returns and payments.');
   const [open, setOpen] = useState(null);
   const [cat, setCat] = useState('all');
   const [query, setQuery] = useState('');
