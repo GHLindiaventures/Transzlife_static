@@ -10,8 +10,8 @@ import { allocateFefo } from './batches.js';
 
 export const PAYMENT_WINDOW_MIN = 30;
 
-const addEvent = (t, orderId, from, to, actor, note = null) =>
-  t.query('INSERT INTO order_events (order_id, from_status, to_status, actor, note) VALUES ($1,$2,$3,$4,$5)', [orderId, from, to, actor, note]);
+const addEvent = (t, orderId, from, to, actor, note = null, location = null, source = 'system') =>
+  t.query('INSERT INTO order_events (order_id, from_status, to_status, actor, note, location, source) VALUES ($1,$2,$3,$4,$5,$6,$7)', [orderId, from, to, actor, note, location, source]);
 
 async function orderUnits(t, orderId) {
   return (await t.query('SELECT product_id, SUM(pack * qty)::int AS units FROM order_items WHERE order_id = $1 GROUP BY product_id', [orderId])).rows;
@@ -55,12 +55,14 @@ export function createOrders({ db, razorpay, log, notifier }) {
       const status = online ? 'pending_payment' : 'confirmed';
       const n = (await t.query(`SELECT nextval('order_number_seq') AS n`)).rows[0].n;
       const orderNumber = `TZL-${String(n).padStart(6, '0')}`;
+      const trackingId = `TRK-${orderNumber}`;
+      const edd = !online ? new Date(Date.now() + 5 * 86400e3).toISOString() : null;
       const order = (await t.query(
-        `INSERT INTO orders (order_number, customer_id, idempotency_key, email, phone, ship_address,
-           subtotal, discount, shipping, tax, total, payment_method, status, payment_status)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) RETURNING *`,
-        [orderNumber, customer.id, idempotencyKey || null, email || null, address.phone, JSON.stringify(address),
-          q.subtotal, q.discount, q.shipping, q.tax, q.total, paymentMethod, status, online ? 'pending' : 'cod_pending'])).rows[0];
+        `INSERT INTO orders (order_number, tracking_id, customer_id, idempotency_key, email, phone, ship_address,
+           subtotal, discount, shipping, tax, total, payment_method, status, payment_status, estimated_delivery_at, original_edd_at)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$16) RETURNING *`,
+        [orderNumber, trackingId, customer.id, idempotencyKey || null, email || null, address.phone, JSON.stringify(address),
+          q.subtotal, q.discount, q.shipping, q.tax, q.total, paymentMethod, status, online ? 'pending' : 'cod_pending', edd])).rows[0];
       for (const l of q.lines) {
         await t.query(
           `INSERT INTO order_items (order_id, product_id, name, size, pack, qty, unit_price, unit_mrp, line_total, list_price, offer_id)
@@ -76,7 +78,7 @@ export function createOrders({ db, razorpay, log, notifier }) {
       for (const d of saved.values()) {
         await t.query('INSERT INTO order_discounts (order_id, kind, ref_id, label, amount) VALUES ($1,$2,$3,$4,$5)', [order.id, d.kind, d.ref, d.label, d.amount]);
       }
-      await addEvent(t, order.id, null, status, 'customer', online ? 'Order placed, awaiting payment' : 'Order placed (cash on delivery)');
+      await addEvent(t, order.id, null, status, 'customer', online ? 'Order placed, awaiting payment' : 'Order placed (cash on delivery)', address.city || null, 'customer');
       if (!online) { await commitStock(t, { ...order, status: 'pending_payment' }, orderNumber); order.stock_committed = true; }
       return { order, created: true };
     });
@@ -112,10 +114,14 @@ export function createOrders({ db, razorpay, log, notifier }) {
         [pay.id, providerPaymentId, method || null, raw ? JSON.stringify(raw) : null]);
       await commitStock(t, order, order.order_number);
       const late = order.status !== 'pending_payment';
+      const edd = new Date(Date.now() + 5 * 86400e3).toISOString();
       const updated = (await t.query(
-        `UPDATE orders SET payment_status = 'paid', status = 'confirmed', updated_at = now() WHERE id = $1 RETURNING *`, [order.id])).rows[0];
+        `UPDATE orders SET payment_status = 'paid', status = 'confirmed',
+                estimated_delivery_at = COALESCE(estimated_delivery_at, $2),
+                original_edd_at = COALESCE(original_edd_at, $2),
+                updated_at = now() WHERE id = $1 RETURNING *`, [order.id, edd])).rows[0];
       await addEvent(t, order.id, order.status, 'confirmed', actor,
-        late ? `Payment received after the order had been ${order.status}; please check stock` : 'Payment received');
+        late ? `Payment received after the order had been ${order.status}; please check stock` : 'Payment received & order confirmed', null, actor === 'razorpay' ? 'system' : 'customer');
       changed = true;
       return updated;
     });
@@ -150,12 +156,26 @@ export function createOrders({ db, razorpay, log, notifier }) {
 
   // ---- reading -----------------------------------------------------------
   const PUBLIC = (o, items = [], events = []) => ({
-    number: o.order_number, status: o.status, paymentStatus: o.payment_status, paymentMethod: o.payment_method,
-    createdAt: o.created_at, email: o.email, phone: o.phone,
+    number: o.order_number,
+    trackingId: o.tracking_id || `TRK-${o.order_number}`,
+    status: o.status,
+    paymentStatus: o.payment_status,
+    paymentMethod: o.payment_method,
+    createdAt: o.created_at,
+    email: o.email,
+    phone: o.phone,
+    courierName: o.courier_name || null,
+    awbNumber: o.awb_number || null,
+    trackingUrl: o.tracking_url || null,
+    estimatedDeliveryAt: o.estimated_delivery_at || null,
+    originalEddAt: o.original_edd_at || null,
+    isDelayed: !!o.is_delayed,
+    delayReason: o.delay_reason || null,
+    deliveredAt: o.delivered_at || null,
     address: typeof o.ship_address === 'string' ? JSON.parse(o.ship_address) : o.ship_address,
     subtotal: o.subtotal, discount: o.discount, shipping: o.shipping, tax: o.tax, total: o.total,
     items: items.map((i) => ({ id: i.product_id, name: i.name, size: i.size, pack: i.pack, qty: i.qty, unit: i.unit_price, total: i.line_total })),
-    timeline: events.map((e) => ({ status: e.to_status, note: e.note, at: e.created_at })),
+    timeline: events.map((e) => ({ status: e.to_status, note: e.note, location: e.location || null, source: e.source || 'system', at: e.created_at })),
   });
 
   async function getForCustomer(customerId, number) {

@@ -20,6 +20,7 @@ import opsWebhooks, { createOps } from './ops.js';
 import seoRoutes from './seo.js';
 import presenceRoutes, { createPresence } from './presence.js';
 import { createHealth } from '../admin/health.js';
+import { createCourier } from './courier.js';
 
 const UNSAFE = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
@@ -41,6 +42,7 @@ export async function buildShopApp({ env = process.env, db, fastifyOptions = {},
   const reminders = createReminders({ db, twilio, env, log });
   const presence = createPresence();
   const ops = createOps({ db, twilio, env, log });
+  const courier = createCourier({ db, notifier, env, log });
   const health = createHealth({ db, razorpay, twilio, media: { configured: !!(env.S3_BUCKET || env.R2_BUCKET) }, env, log });
 
   // JSON only (no text/plain or form posts, which other sites could submit). The webhook route
@@ -85,8 +87,8 @@ export async function buildShopApp({ env = process.env, db, fastifyOptions = {},
     await health.recordError(req, err);
   });
 
-  await app.register(shopRoutes, { db, auth, orders, razorpay, notifier, ops, log });
-  await app.register(adminRoutes, { db, razorpay, twilio, notifier, reminders, presence, ops, health, auth: { mode: auth.mode }, log, env });
+  await app.register(shopRoutes, { db, auth, orders, razorpay, notifier, ops, courier, log });
+  await app.register(adminRoutes, { db, razorpay, twilio, notifier, reminders, presence, ops, health, courier, auth: { mode: auth.mode }, log, env });
   await app.register(trackRoutes, { db, log });
   await app.register(reviewRoutes, { db, env, log });
   await app.register(presenceRoutes, { presence });
@@ -113,11 +115,12 @@ export async function buildShopApp({ env = process.env, db, fastifyOptions = {},
     trackJob('reminders.sweep', 'Cart & refill reminders', 5, () => reminders.sweep());
     trackJob('analytics.prune', 'Analytics & session clean-up', 5, () => reminders.prune());
     trackJob('ops.sweep', 'COD check & daily summary', 5, () => ops.sweep());
+    trackJob('courier.overdue', 'Overdue delivery check', 5, () => courier.flagOverdueShipments());
     if (tick % 2 === 0) health.sweep().catch((e) => log.error(e, '[health] sweep failed'));
   }, 5 * 60_000);
   sweep.unref();
   app.addHook('onClose', async () => { clearInterval(sweep); await db.close?.(); });
 
-  app.shop = { db, auth, orders, razorpay, twilio, notifier, reminders, presence, ops, health };
+  app.shop = { db, auth, orders, razorpay, twilio, notifier, reminders, presence, ops, health, courier };
   return app;
 }

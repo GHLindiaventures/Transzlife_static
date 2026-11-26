@@ -21,9 +21,9 @@ const date = (iso) => new Date(iso).toLocaleDateString('en-IN', { day: 'numeric'
 const initials = (name = '') => name.trim().split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase() || '').join('') || 'T';
 const greeting = () => { const h = new Date().getHours(); return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening'; };
 
-// Delivery progress shown on each order (out for delivery counts as past "Shipped").
+// Delivery progress shown on each order.
 const STEPS = [['confirmed', 'Confirmed'], ['packed', 'Packed'], ['shipped', 'Shipped'], ['delivered', 'Delivered']];
-const STEP_OF = { confirmed: 0, packed: 1, shipped: 2, out_for_delivery: 2, delivered: 3 };
+const STEP_OF = { confirmed: 0, processing: 0, packed: 1, shipped: 2, in_transit: 2, out_for_delivery: 2, delivered: 3 };
 
 function OrderProgress({ status }) {
   const at = STEP_OF[status];
@@ -198,7 +198,13 @@ export default function Account() {
                           <span className={`acx-badge ${badgeClass(o.status)}`}>{statusLabel(o.status)}</span>
                         </div>
                         <OrderProgress status={o.status} />
+                        {o.estimatedDeliveryAt && o.status !== 'delivered' && !['cancelled', 'returned', 'rto'].includes(o.status) && (
+                          <p className="acx-muted" style={{ fontSize: 12.5, margin: '6px 0 0' }}>
+                            {o.isDelayed ? 'Delayed · ' : ''}Expected delivery: <strong>{new Date(o.estimatedDeliveryAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</strong>
+                          </p>
+                        )}
                         <div className="acx-order__actions">
+                          <Link className="acx-btn acx-btn--ghost" to={`/track/${o.trackingId || o.number}`}>Track order <ChevronRight size={14} /></Link>
                           <Link className="acx-btn acx-btn--ghost" to={`/order/${o.number}`}>View details <ChevronRight size={14} /></Link>
                           {canReorder && <button type="button" className="acx-btn" onClick={() => buyAgain(o)}><RotateCcw size={15} /> Buy again</button>}
                         </div>

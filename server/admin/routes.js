@@ -26,9 +26,11 @@ const PAGE = 25;
 // which status an order may move to next
 export const FLOW = {
   pending_payment: ['cancelled'],
-  confirmed: ['packed', 'cancelled'],
-  packed: ['shipped', 'confirmed', 'cancelled'],
-  shipped: ['out_for_delivery', 'delivered', 'rto'],
+  confirmed: ['processing', 'packed', 'cancelled'],
+  processing: ['packed', 'cancelled'],
+  packed: ['shipped', 'processing', 'cancelled'],
+  shipped: ['in_transit', 'out_for_delivery', 'delivered', 'rto'],
+  in_transit: ['out_for_delivery', 'delivered', 'rto'],
   out_for_delivery: ['delivered', 'rto'],
   delivered: ['returned'],
   rto: [], returned: [], cancelled: [], refunded: [],
@@ -46,7 +48,7 @@ const like = (s) => `%${String(s).replace(/[%_\\]/g, (c) => '\\' + c)}%`;
 const staffOut = (s) => ({ id: s.id, email: s.email, name: s.name, role: s.role, mustChangePassword: s.must_change_password,
   totpEnabled: s.totp_enabled, permissions: permsOf(s.role) });
 
-export default async function adminRoutes(app, { db, razorpay, twilio, notifier, reminders, presence, ops, health, auth: authInfo, log, env }) {
+export default async function adminRoutes(app, { db, razorpay, twilio, notifier, reminders, presence, ops, health, courier, auth: authInfo, log, env }) {
   const auth = createAdminAuth({ db, env });
   const G = (perm, opts) => ({ preHandler: auth.guard(perm, opts) });
   const tight = (max) => ({ config: { rateLimit: { max, timeWindow: '15 minutes' } } });
@@ -151,7 +153,9 @@ export default async function adminRoutes(app, { db, razorpay, twilio, notifier,
   // ======================================================================
   function orderFilters(q) {
     const where = [], params = [];
-    if (q.stage && STAGES[q.stage]) { params.push(STAGES[q.stage]); where.push(`o.status = ANY($${params.length})`); }
+    if (q.stage === 'delayed') {
+      where.push(`o.is_delayed = true AND o.status NOT IN ('delivered', 'cancelled', 'returned', 'rto')`);
+    } else if (q.stage && STAGES[q.stage]) { params.push(STAGES[q.stage]); where.push(`o.status = ANY($${params.length})`); }
     else if (q.status && q.status !== 'all') { params.push(q.status); where.push(`o.status = $${params.length}`); }
     if (q.payment && q.payment !== 'all') { params.push(q.payment); where.push(`o.payment_method = $${params.length}`); }
     if (q.from) { params.push(q.from); where.push(`o.created_at >= $${params.length}::date`); }
@@ -159,7 +163,7 @@ export default async function adminRoutes(app, { db, razorpay, twilio, notifier,
     if (q.q) {
       params.push(like(String(q.q).trim().slice(0, 80)));
       const p = `$${params.length}`;
-      where.push(`(o.order_number ILIKE ${p} OR c.name ILIKE ${p} OR c.phone ILIKE ${p} OR o.phone ILIKE ${p} OR c.email ILIKE ${p})`);
+      where.push(`(o.order_number ILIKE ${p} OR COALESCE(o.tracking_id, '') ILIKE ${p} OR COALESCE(o.awb_number, '') ILIKE ${p} OR c.name ILIKE ${p} OR c.phone ILIKE ${p} OR o.phone ILIKE ${p} OR c.email ILIKE ${p})`);
     }
     return { sql: where.length ? `WHERE ${where.join(' AND ')}` : '', params };
   }
@@ -169,7 +173,8 @@ export default async function adminRoutes(app, { db, razorpay, twilio, notifier,
     const f = orderFilters(req.query);
     const total = Number((await db.query(`SELECT COUNT(*) AS n FROM orders o JOIN customers c ON c.id = o.customer_id ${f.sql}`, f.params)).rows[0].n);
     const rows = (await db.query(`
-      SELECT o.order_number, o.status, o.payment_status, o.payment_method, o.total, o.created_at, o.cod_confirmation,
+      SELECT o.order_number, o.tracking_id, o.status, o.payment_status, o.payment_method, o.total, o.created_at, o.cod_confirmation,
+             o.courier_name, o.awb_number, o.estimated_delivery_at, o.is_delayed,
              c.name AS customer, c.phone, o.ship_address->>'city' AS city, o.ship_address->>'state' AS state,
              (SELECT SUM(qty) FROM order_items i WHERE i.order_id = o.id) AS items,
              (SELECT string_agg(i.name, ', ') FROM order_items i WHERE i.order_id = o.id) AS products
@@ -210,7 +215,7 @@ export default async function adminRoutes(app, { db, razorpay, twilio, notifier,
     if (!o) return reply.code(404).send({ error: 'Order not found.' });
     const [items, events, payments, refunds, customer, notifications] = await Promise.all([
       db.query('SELECT product_id, name, size, pack, qty, unit_price, unit_mrp, line_total FROM order_items WHERE order_id = $1 ORDER BY id', [o.id]),
-      db.query('SELECT from_status, to_status, note, actor, created_at FROM order_events WHERE order_id = $1 ORDER BY created_at, id', [o.id]),
+      db.query('SELECT from_status, to_status, note, location, source, actor, created_at FROM order_events WHERE order_id = $1 ORDER BY created_at, id', [o.id]),
       db.query('SELECT provider_order_id, provider_payment_id, amount, method, status, error, created_at FROM payments WHERE order_id = $1 ORDER BY created_at', [o.id]),
       db.query(`SELECT r.amount, r.reason, r.method, r.status, r.provider_refund_id, r.created_at, s.email AS staff
                   FROM refunds r LEFT JOIN staff_users s ON s.id = r.staff_id WHERE r.order_id = $1 ORDER BY r.created_at`, [o.id]),
@@ -221,8 +226,12 @@ export default async function adminRoutes(app, { db, razorpay, twilio, notifier,
     const refunded = refunds.rows.filter((r) => r.status !== 'failed').reduce((s, r) => s + r.amount, 0);
     return {
       order: {
-        number: o.order_number, status: o.status, paymentStatus: o.payment_status, paymentMethod: o.payment_method,
+        number: o.order_number, trackingId: o.tracking_id || `TRK-${o.order_number}`,
+        status: o.status, paymentStatus: o.payment_status, paymentMethod: o.payment_method,
         createdAt: o.created_at, email: o.email, phone: o.phone, cancelReason: o.cancel_reason, staffNote: o.staff_note,
+        courierName: o.courier_name || '', awbNumber: o.awb_number || '', trackingUrl: o.tracking_url || '',
+        estimatedDeliveryAt: o.estimated_delivery_at || null, originalEddAt: o.original_edd_at || null,
+        isDelayed: !!o.is_delayed, delayReason: o.delay_reason || '', deliveredAt: o.delivered_at || null,
         codConfirmation: o.cod_confirmation, codConfirmedAt: o.cod_confirmed_at, codConfirmedBy: o.cod_confirmed_by,
         address: typeof o.ship_address === 'string' ? JSON.parse(o.ship_address) : o.ship_address,
         subtotal: o.subtotal, discount: o.discount, shipping: o.shipping, tax: o.tax, total: o.total, refunded,
@@ -249,6 +258,13 @@ export default async function adminRoutes(app, { db, razorpay, twilio, notifier,
     status: z.enum(Object.keys(FLOW)),
     note: z.string().trim().max(500).optional().default(''),
     restock: z.boolean().optional().default(true),
+    courierName: z.string().trim().max(80).optional(),
+    awbNumber: z.string().trim().max(80).optional(),
+    trackingUrl: z.string().trim().max(300).optional(),
+    estimatedDeliveryAt: z.string().trim().max(40).optional(),
+    location: z.string().trim().max(120).optional(),
+    isDelayed: z.boolean().optional(),
+    delayReason: z.string().trim().max(240).optional(),
   });
 
   /** Moves one order to a new status (same rules for single and bulk changes). Notifies the customer. */
@@ -260,27 +276,77 @@ export default async function adminRoutes(app, { db, razorpay, twilio, notifier,
       if (body.status === 'cancelled' && !body.note) throw fail('Give a reason for cancelling.');
       const sets = ['status = $2', 'updated_at = now()'];
       const params = [o.id, body.status];
+      if (body.courierName !== undefined) { params.push(body.courierName || null); sets.push(`courier_name = $${params.length}`); }
+      if (body.awbNumber !== undefined) { params.push(body.awbNumber || null); sets.push(`awb_number = $${params.length}`); }
+      if (body.trackingUrl !== undefined) { params.push(body.trackingUrl || null); sets.push(`tracking_url = $${params.length}`); }
+      if (body.estimatedDeliveryAt) {
+        const d = new Date(body.estimatedDeliveryAt);
+        if (!Number.isNaN(d.getTime())) { params.push(d.toISOString()); sets.push(`estimated_delivery_at = $${params.length}`); }
+      }
+      if (body.isDelayed !== undefined) { params.push(body.isDelayed); sets.push(`is_delayed = $${params.length}`); }
+      if (body.delayReason !== undefined) { params.push(body.delayReason || null); sets.push(`delay_reason = $${params.length}`); }
       if (body.status === 'cancelled') {
         await returnStock(t, o, 'cancel');
         params.push(body.note); sets.push(`cancel_reason = $${params.length}`);
         if (o.payment_status === 'pending') sets.push(`payment_status = 'expired'`);
       }
       if ((body.status === 'rto' || body.status === 'returned') && body.restock) await returnStock(t, o, 'return');
-      // cash collected on delivery
-      if (body.status === 'delivered' && o.payment_method === 'cod' && o.payment_status === 'cod_pending') sets.push(`payment_status = 'paid'`);
+      if (body.status === 'delivered') {
+        sets.push(`delivered_at = COALESCE(delivered_at, now())`, `is_delayed = false`);
+        if (o.payment_method === 'cod' && o.payment_status === 'cod_pending') sets.push(`payment_status = 'paid'`);
+      }
       await t.query(`UPDATE orders SET ${sets.join(', ')} WHERE id = $1`, params);
-      await t.query('INSERT INTO order_events (order_id, from_status, to_status, note, actor) VALUES ($1,$2,$3,$4,$5)',
-        [o.id, o.status, body.status, body.note || null, `staff:${req.staff.email}`]);
-      await audit(t.query, req, 'order.status', 'order', o.order_number, { status: o.status }, { status: body.status, note: body.note || undefined });
+      const evNote = body.note || (body.courierName && body.awbNumber ? `${body.courierName} · AWB ${body.awbNumber}` : null);
+      await t.query('INSERT INTO order_events (order_id, from_status, to_status, note, location, source, actor) VALUES ($1,$2,$3,$4,$5,$6,$7)',
+        [o.id, o.status, body.status, evNote, body.location || null, 'staff', `staff:${req.staff.email}`]);
+      await audit(t.query, req, 'order.status', 'order', o.order_number, { status: o.status }, { status: body.status, note: evNote || undefined, awb: body.awbNumber || undefined });
       return { id: o.id, from: o.status, paid: o.payment_status === 'paid' && o.payment_method !== 'cod' };
     });
-    notifier?.notify(result.id, body.status, body.status === 'shipped' ? body.note : undefined);
+    notifier?.notify(result.id, body.status, body.status === 'shipped' ? (body.note || (body.awbNumber ? `AWB ${body.awbNumber}` : undefined)) : undefined);
     return { refundSuggested: body.status === 'cancelled' && result.paid };
   }
 
   app.post('/api/admin/orders/:number/status', G('orders.edit'), async (req, reply) => {
     const body = parse(statusBody, req.body, reply); if (!body) return;
     return { ok: true, ...(await changeStatus(req, req.params.number, body)) };
+  });
+
+  app.patch('/api/admin/orders/:number/shipment', G('orders.edit'), async (req, reply) => {
+    const body = parse(z.object({
+      courierName: z.string().trim().max(80).optional().default(''),
+      awbNumber: z.string().trim().max(80).optional().default(''),
+      trackingUrl: z.string().trim().max(300).optional().default(''),
+      estimatedDeliveryAt: z.string().trim().max(40).optional().default(''),
+      isDelayed: z.boolean().optional().default(false),
+      delayReason: z.string().trim().max(240).optional().default(''),
+      location: z.string().trim().max(120).optional().default(''),
+    }), req.body, reply); if (!body) return;
+    const o = await loadOrder(db.query, req.params.number);
+    if (!o) return reply.code(404).send({ error: 'Order not found.' });
+    const edd = body.estimatedDeliveryAt ? new Date(body.estimatedDeliveryAt) : null;
+    if (edd && Number.isNaN(edd.getTime())) return reply.code(400).send({ error: 'Invalid expected delivery date.' });
+    await db.query(
+      `UPDATE orders SET courier_name = $2, awb_number = $3, tracking_url = $4,
+              estimated_delivery_at = COALESCE($5, estimated_delivery_at),
+              is_delayed = $6, delay_reason = $7, updated_at = now()
+        WHERE id = $1`,
+      [o.id, body.courierName || null, body.awbNumber || null, body.trackingUrl || null,
+        edd ? edd.toISOString() : null, body.isDelayed, body.delayReason || null],
+    );
+    if (body.isDelayed && !o.is_delayed) {
+      await db.query(
+        `INSERT INTO order_events (order_id, from_status, to_status, note, location, source, actor) VALUES ($1,$2,$2,$3,$4,'staff',$5)`,
+        [o.id, o.status, `Delivery delayed${body.delayReason ? `: ${body.delayReason}` : ''}`, body.location || null, `staff:${req.staff.email}`],
+      );
+      notifier?.notify(o.id, 'delayed');
+    }
+    await audit(db.query, req, 'order.shipment', 'order', o.order_number, null, { courier: body.courierName, awb: body.awbNumber, delayed: body.isDelayed });
+    return { ok: true };
+  });
+
+  app.post('/api/admin/orders/:number/sync-tracking', G('orders.edit'), async (req, reply) => {
+    if (!courier) return reply.code(503).send({ error: 'Courier sync unavailable.' });
+    return courier.syncShipment(req.params.number);
   });
 
   // Bulk: move several orders at once. Each order is its own transaction; one failure doesn't stop the rest.

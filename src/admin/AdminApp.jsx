@@ -193,7 +193,7 @@ function Shell({ children }) {
         <button onClick={() => setOpen(true)}><MoreHorizontal size={20} />More</button>
       </nav>
       {open && <button className="adm-overlay" aria-label="Close menu" onClick={() => setOpen(false)} style={{ border: 0 }} />}
-      {open && <button className="adm-icon" onClick={() => setOpen(false)} aria-label="Close menu" style={{ position: 'fixed', top: 12, left: 290, zIndex: 61, color: '#fff' }}><X size={22} /></button>}
+      {open && <button className="adm-icon" onClick={() => setOpen(false)} aria-label="Close menu" style={{ position: 'fixed', top: 12, left: 'min(290px, calc(100vw - 46px))', zIndex: 61, color: '#fff' }}><X size={22} /></button>}
       {palette && <CommandPalette onClose={() => setPalette(false)} />}
     </div>
   );

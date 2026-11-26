@@ -119,7 +119,7 @@ test('order updates by SMS: confirmed once, then shipped / delivered from the ad
   const confirm = calls.filter((c) => c.url.endsWith('/Messages.json'));
   assert.equal(confirm.length, 1);
   assert.equal(confirm[0].form.MessagingServiceSid, 'MGsender1');
-  assert.match(confirm[0].form.Body, new RegExp(`Thank you Meera! Your order ${n} for ₹949 is confirmed \\(cash on delivery\\).*https://shop.example/order/${n}`));
+  assert.match(confirm[0].form.Body, new RegExp(`Thank you Meera! Your order ${n} for ₹949 is confirmed \\(cash on delivery\\).*https://shop.example/track/TRK-${n}`));
 
   // staff moves it along
   await t.db.query(`INSERT INTO staff_users (email, name, role, password_hash, must_change_password, totp_enabled, totp_secret) VALUES ('o@x.test','O','owner',$1,false,true,'GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ')`, [await hashPassword('Pass-word-123')]);

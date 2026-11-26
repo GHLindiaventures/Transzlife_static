@@ -43,7 +43,7 @@ function parse(schema, data, reply) {
 
 const customerOut = (c) => c && { phone: c.phone, name: c.name, email: c.email, marketingConsent: !!c.marketing_consent };
 
-export default async function shopRoutes(app, { db, auth, orders, razorpay, notifier, ops, log }) {
+export default async function shopRoutes(app, { db, auth, orders, razorpay, notifier, ops, courier, log }) {
   const signedIn = { preHandler: auth.requireCustomer };
   const tight = (max, minutes = 15) => ({ config: { rateLimit: { max, timeWindow: `${minutes} minutes` } } });
 
@@ -169,6 +169,39 @@ export default async function shopRoutes(app, { db, auth, orders, razorpay, noti
     const o = await orders.getForCustomer(req.customer.id, String(req.params.number).slice(0, 20));
     if (!o) return reply.code(404).send({ error: 'Order not found.' });
     return { order: o.public };
+  });
+
+  // ---- public order delivery tracking (by tracking ID, order number, or AWB) ----
+  app.get('/api/track/:id', tight(60, 10), async (req, reply) => {
+    if (!courier) return reply.code(404).send({ error: 'Tracking unavailable.' });
+    const id = String(req.params.id || '').trim().slice(0, 40);
+    let full = false;
+    if (req.customer) {
+      const owned = (await db.query(
+        `SELECT 1 FROM orders WHERE customer_id = $1 AND (upper(tracking_id) = upper($2) OR upper(order_number) = upper($2) OR upper(awb_number) = upper($2)) LIMIT 1`,
+        [req.customer.id, id],
+      )).rows.length > 0;
+      full = owned;
+    }
+    const tracking = await courier.getPublicTracking(id, { full });
+    if (!tracking) return reply.code(404).send({ error: 'No order found with that tracking ID or order number.' });
+    return { tracking };
+  });
+
+  app.post('/api/webhooks/courier/:provider', { config: { skipOriginCheck: true } }, async (req, reply) => {
+    if (!courier?.verifyWebhook(req.params.provider, req)) return reply.code(401).send({ error: 'Invalid courier webhook token.' });
+    const b = req.body || {};
+    const r = await courier.applyCourierUpdate({
+      awb: b.awb || b.awb_number || b.waybill,
+      orderNumber: b.order_id || b.order_number,
+      trackingId: b.tracking_id,
+      rawStatus: b.current_status || b.status || b.scan_status,
+      location: b.location || b.city || b.scans?.[0]?.location,
+      note: b.note || b.activity || b.scans?.[0]?.activity,
+      edd: b.etd || b.edd || b.estimated_delivery_at,
+      courierName: b.courier_name || req.params.provider,
+    });
+    return r;
   });
 
   app.post('/api/orders/:number/pay', { ...signedIn, ...tight(10) }, async (req, reply) => {

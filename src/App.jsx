@@ -35,6 +35,7 @@ const Checkout = checkout('Checkout');
 const OrderSuccess = checkout('OrderSuccess');
 const Login = lazy(() => import('./store/pages/Login'));
 const Account = lazy(() => import('./store/pages/Account'));
+const TrackOrder = lazy(() => import('./store/pages/TrackOrder'));
 /* Staff dashboard: its own chunk, outside the site layout (no header, footer or chat) */
 const AdminApp = lazy(() => import('./admin/AdminApp'));
 
@@ -87,6 +88,8 @@ export default function App() {
               <Route path="checkout" element={<RequireAuth>{page(<Checkout />)}</RequireAuth>} />
               <Route path="order/:id" element={<RequireAuth>{page(<OrderSuccess />)}</RequireAuth>} />
               <Route path="account" element={<RequireAuth>{page(<Account />)}</RequireAuth>} />
+              <Route path="track" element={page(<TrackOrder />)} />
+              <Route path="track/:id" element={page(<TrackOrder />)} />
             </Route>
             <Route path="*" element={<Home />} />
           </Route>
