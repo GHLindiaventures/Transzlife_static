@@ -1,0 +1,30 @@
+/* Shared price style (components/PriceTag.jsx): bold dark-green price, small grey struck MRP, small rounded yellow "% off" pill.
+   Sizes scale with the box the price sits in (container query), so a narrow 2-up phone card and a wide desktop card both stay on one line
+   where they can; only when even the smallest size cannot fit does the pill drop to the next line, never clipping or overlapping. */
+.ptag.ptag:not(#tl-a):not(#tl-b) { container-type: inline-size; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: inherit; gap: 4px 8px; margin: 0; line-height: 1.15; min-width: 0; max-width: 100%; }
+.ptag.ptag:not(#tl-a):not(#tl-b) .ptag__now { font-weight: 800; font-size: 26px; letter-spacing: -.01em; color: var(--green-900, #123b24); white-space: nowrap; font-variant-numeric: lining-nums tabular-nums; }
+.ptag.ptag:not(#tl-a):not(#tl-b) .ptag__mrp { font-weight: 500; font-size: 15px; color: #8b908c; text-decoration: line-through; text-decoration-thickness: 1px; white-space: nowrap; }
+.ptag.ptag:not(#tl-a):not(#tl-b) .ptag__off { align-self: center; padding: 3px 9px; border-radius: 999px; background: #f9e7a0; border: 1px solid #ecd06f; color: #5f4700; font-size: 12px; font-weight: 800; letter-spacing: .03em; text-transform: uppercase; line-height: 1.2; white-space: nowrap; }
+.ptag.ptag--lg:not(#tl-a):not(#tl-b) .ptag__now { font-size: 36px; }
+.ptag.ptag--lg:not(#tl-a):not(#tl-b) .ptag__mrp { font-size: 19px; }
+.ptag.ptag--lg:not(#tl-a):not(#tl-b) .ptag__off { font-size: 13px; padding: 4px 11px; }
+@container (max-width: 250px) {
+  .ptag__now { font-size: 22px !important; }
+  .ptag__mrp { font-size: 13px !important; }
+  .ptag__off { font-size: 11px !important; padding: 2px 7px !important; }
+}
+@container (max-width: 170px) {
+  .ptag__now { font-size: 19px !important; }
+  .ptag__mrp { font-size: 12px !important; }
+  .ptag__off { font-size: 10px !important; padding: 2px 6px !important; letter-spacing: .02em; }
+}
+@media (max-width: 520px) { .ptag.ptag--lg:not(#tl-a):not(#tl-b) .ptag__now { font-size: 30px; } .ptag.ptag--lg:not(#tl-a):not(#tl-b) .ptag__mrp { font-size: 16px; } }
+
+/* shop cards: the price gets its own full-width row, with the button under it (same arrangement as the home cards) */
+.ptag.ptag:not(#tl-a):not(#tl-b) { width: 100%; }
+.tl-store:not(#tl-a):not(#tl-b) .pcard__foot { flex-direction: column; align-items: stretch; gap: 12px; }
+.tl-store:not(#tl-a):not(#tl-b) .pcard__foot .pcard__pricing { width: 100%; }
+.tl-store:not(#tl-a):not(#tl-b) .pcard__foot > .btn { width: 100%; justify-content: center; }
+@media (max-width: 400px) { .tl-store:not(#tl-a):not(#tl-b) .pcard__foot > .btn { padding-inline: 8px; font-size: 13px; white-space: nowrap; } }
+/* home cards are centred (as in the reference) */
+.ptag.ptag.pcard__price:not(#tl-a):not(#tl-b) { justify-content: center; }

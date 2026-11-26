@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom';
 import { useCart, packPrice } from '../context/CartContext';
 import { PACKS, onSale } from '../data/products';
-import { inrDigits, pctOff } from '../utils/format';
+import { inrDigits } from '../utils/format';
 import Stars from './pdp/Stars';
+import PriceTag from '../../components/PriceTag.jsx';
 import '../styles/reviews.css';
 
 /** A price with a smaller, raised ₹ and lining, equal-width digits. */
@@ -24,13 +25,11 @@ export function bestPack(product) {
 export default function ProductCard({ product: p }) {
   const { add } = useCart();
   const sale = onSale(p);
-  const off = sale ? pctOff(p.price, p.mrp) : 0;
   const best = sale ? bestPack(p) : null;
   return (
     <article className="pcard" style={{ '--p-accent': p.accent, '--tint': p.tint }}>
       <Link to={`/products/${p.id}`} className="pcard__media" aria-label={p.name}>
         {p.badge && <span className="pcard__badge" style={p.badgeStyle ? { background: p.badgeStyle.bg, color: p.badgeStyle.fg } : undefined}>{p.badge}</span>}
-        {off > 0 && <span className="pcard__off">{off}% off</span>}
         <img src={p.images[0]} alt={p.name} loading="lazy" className="pcard__img" />
         {p.images[1] && <img src={p.images[1]} alt="" loading="lazy" className="pcard__img pcard__img--alt" />}
       </Link>
@@ -47,10 +46,7 @@ export default function ProductCard({ product: p }) {
           {sale ? (
             <>
               <div className="pcard__pricing">
-                <p className="price">
-                  <strong><Money value={p.price} /></strong>
-                  {p.mrp > p.price && <s>MRP <Money value={p.mrp} /></s>}
-                </p>
+                <PriceTag price={p.price} mrp={p.mrp} />
                 {best && best.each < p.price && (
                   <p className="pcard__deal">or <Money value={best.each} /> each in a pack of {best.qty}</p>
                 )}
