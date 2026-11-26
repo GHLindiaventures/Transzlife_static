@@ -1,5 +1,5 @@
-import { photo } from './photos';
-import { BLOG_ARTICLES } from './blogArticles';
+import { photo } from './photos.js';
+import { BLOG_ARTICLES } from './blogArticles.js';
 // Blog / wellness journal articles. General education only.
 const JOURNAL = [
   {

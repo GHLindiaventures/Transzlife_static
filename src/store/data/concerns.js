@@ -1,4 +1,4 @@
-import { photo } from './photos';
+import { photo } from './photos.js';
 // "Shop by concern" + wellness education pages.
 // Content is general health education. Products are positioned as support for
 // a healthy routine, never as a cure.
