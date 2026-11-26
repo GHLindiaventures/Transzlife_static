@@ -950,7 +950,8 @@ html {
 /* hero: never show an empty slide while the loop silently snaps back to the first slide */
 .hero.is-snap .hero__content > * { transition: none !important; opacity: 1 !important; transform: none !important; }
 @media (max-width: 749px) {
-  .hero .hero__bg { transform: none !important; }   /* no scroll parallax on phones: it pushes the picture out of its box */
+  .hero .hero__bg { transform: none !important; }   /* the box stays put on phones; only the picture inside drifts (capped in Hero.jsx) */
+  .hero .hero__slide .hero__bg > img { transform: translate3d(0, var(--hero-py, 0px), 0); will-change: transform; }
 }
 
 /* ---------------- benefits cards on phones: every card the same size ---------------- */
@@ -1343,7 +1344,7 @@ html.ft-fixed .main { margin-bottom: var(--ft-h, 0px); }
 .hr__nav:disabled { opacity: 0; pointer-events: none; }
 .hr__nav--prev { left: clamp(2px, 1.2vw, 14px); }
 .hr__nav--next { right: clamp(2px, 1.2vw, 14px); }
-.hr__empty { max-width: 520px; margin: 0 auto; padding: 16px 20px; display: flex; align-items: center; gap: 14px; border-radius: 18px; color: var(--green-900, #0c3320);
+.hr__empty { max-width: 520px; margin: 0 auto; width: calc(100% - 32px); padding: 16px 20px; display: flex; align-items: center; gap: 14px; border-radius: 18px; color: var(--green-900, #0c3320);
   border: 1px solid rgba(255, 255, 255, .85); background: linear-gradient(135deg, rgba(255, 255, 255, .9), rgba(246, 243, 220, .85)); box-shadow: 0 14px 28px -20px rgba(15, 47, 29, .35); }
 .hr__empty svg { flex: none; color: var(--gold-600, #c8921a); }
 .hr__empty p { margin: 0; font-size: 14.5px; line-height: 1.5; }
@@ -1442,3 +1443,41 @@ html.ft-fixed .main { margin-bottom: var(--ft-h, 0px); }
   .wc__content { padding-top: 56px; padding-bottom: 36px; }
   .wc__media { min-height: 380px; }
 }
+
+/* ======================================================================
+   PHONES: smoother scrolling
+   - parallax stays, but only as transform on a couple of pictures (hero, lab section), driven by one rAF write each
+   - the expensive effects (blur behind glass, a fixed page background) are dropped; the header keeps its glass
+   ====================================================================== */
+@media (max-width: 749px) {
+  .bgvideo__fixed .bgvideo__bg > img { transform: translate3d(0, var(--bgv-y, 0px), 0) scale(1.2); will-change: transform; }
+  body { background-attachment: scroll; }
+  *:not(.header):not(.header *):not(.drawer):not(.ch-panel):not(.rtn-dialog):not(dialog) { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+}
+
+/* PHONES: long button labels wrap instead of forcing the page wider than the screen (e.g. "Bought X? Sign in to review"). */
+@media (max-width: 560px) {
+  .tl-store:not(#tl-a):not(#tl-b) .btn { white-space: normal; max-width: 100%; text-align: center; }
+  .tl-store:not(#tl-a):not(#tl-b) .rv-grid { grid-template-columns: minmax(0, 1fr); }
+  .tl-store:not(#tl-a):not(#tl-b) .rv-main { min-width: 0; }
+}
+
+/* SMALL PHONES: the centred wordmark ran under the shop/account/cart icons. Below 440px it sits right after the menu button
+   and scales with the screen; the three icons get slightly smaller tap boxes so the row always fits (320px and up). */
+@media (max-width: 440px) {
+  .header__logo, .header__logo:hover { left: 72px; transform: translateY(-50%); }
+  .header__logo:hover { transform: translateY(-50%) scale(1.02); }
+  .logo__text { font-size: clamp(19px, 6.1vw, 26px); }
+  .header__right { gap: 2px; }
+  .header__right .header__cta--icon { min-width: 34px; min-height: 34px; }
+  .header__right .icon-btn { min-width: 36px; min-height: 36px; }
+}
+
+/* SMALL PHONES: the two-up benefit cards were too narrow for icon + title side by side ("INNOVAT/E", "GMP CERTIFIE/D"), so the title goes under the icon. */
+@media (max-width: 400px) {
+  .benefits .benefit { grid-template-columns: minmax(0, 1fr); grid-template-areas: "i" "t" "p"; align-items: start; }
+  .benefits .benefit .slot--b-title { overflow-wrap: normal; word-break: normal; hyphens: none; }
+}
+
+/* PHONES: the FAQ page padded its content twice (section + inner wrapper), squeezing it to ~235px on a 320px screen. */
+@media (max-width: 600px) { .faq .faq__wrap { padding-inline: 0 !important; } }

@@ -42,7 +42,9 @@ export default function Hero() {
     let visible = true;
     const update = () => {
       raf = 0;
-      hero.style.setProperty('--hero-py', `${(window.scrollY * 0.3).toFixed(1)}px`);
+      // desktop: the whole picture drifts; phones: a gentle, capped drift of the picture only (see polish.css), so it stays inside its box
+      const phone = window.innerWidth < 750;
+      hero.style.setProperty('--hero-py', `${(phone ? Math.min(window.scrollY * 0.12, 56) : window.scrollY * 0.3).toFixed(1)}px`);
     };
     const onScroll = () => { if (visible && !raf) raf = requestAnimationFrame(update); };
     const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting; if (visible) onScroll(); }, { rootMargin: '80px' });
