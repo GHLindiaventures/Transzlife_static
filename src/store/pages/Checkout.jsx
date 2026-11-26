@@ -1,14 +1,12 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
-import { Trash2, Lock, ShieldCheck, Truck, CheckCircle2, ArrowLeft, Smartphone, CreditCard, Landmark, Banknote, Clock, XCircle, MapPin, Plus } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Trash2, Lock, ShieldCheck, Truck, CheckCircle2, ArrowLeft, Smartphone, CreditCard, Landmark, Banknote, Clock, MapPin, Plus } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { QtyStepper, FreeShipBar } from '../components/CartDrawer';
 import { Breadcrumbs, useTitle } from '../components/Common';
 import { SITE } from '../data/site';
 import { inr } from '../utils/format';
 import { getProduct } from '../data/products';
-import ReturnSection from '../components/ReturnSection';
-import { loadOrderReturns } from '../data/returnStore';
 import { useAuth } from '../context/AuthContext';
 import { api, newIdempotencyKey } from '../lib/api';
 import { getBuyNow, clearBuyNow } from '../lib/checkoutIntent';
@@ -431,75 +429,3 @@ const STATUS_LABEL = {
 export const statusLabel = (s) => STATUS_LABEL[s] || s;
 export const PAY_LABEL = { upi: 'UPI', card: 'Card', netbanking: 'Net banking', cod: 'Cash on delivery' };
 export { rs };
-
-/** Order confirmation / order details (loaded from the server; only the owner can see it). */
-export function OrderSuccess() {
-  const { id } = useParams();
-  const { customer } = useAuth();
-  const [order, setOrder] = useState(null);
-  const [error, setError] = useState('');
-  useTitle(order?.status === 'confirmed' ? 'Order confirmed' : 'Your order');
-
-  const { hash } = useLocation();
-  const [returnsData, setReturnsData] = useState(null);
-
-  // Load the order and (for delivered orders) its returns together, then show the page in one go:
-  // no blank screen, then half a page, then the returns block popping in underneath.
-  useEffect(() => {
-    let live = true;
-    setOrder(null); setReturnsData(null); setError('');
-    api(`/api/orders/${encodeURIComponent(id)}`)
-      .then(async (r) => {
-        const o = r.order;
-        const rd = ['delivered', 'returned'].includes(o.status) ? await loadOrderReturns(o.number).catch(() => null) : null;
-        if (live) { setReturnsData(rd); setOrder(o); }
-      })
-      .catch((e) => { if (live) setError(e.message); });
-    return () => { live = false; };
-  }, [id]);
-
-  // #returns link (from My account): go straight to the returns block once it is on the page
-  useLayoutEffect(() => {
-    if (!order || hash !== '#returns') return;
-    const el = document.getElementById('returns');
-    if (el) el.scrollIntoView({ block: 'start' });
-  }, [order, hash]);
-
-  if (error) {
-    return (
-      <section className="container empty-page">
-        <h1>Order not found</h1>
-        <p>{error}</p>
-        <Link to="/account" className="btn btn--lg">My orders</Link>
-      </section>
-    );
-  }
-  if (!order) return <div className="page-loading" aria-busy="true" />;
-
-  const ok = ['confirmed', 'packed', 'shipped', 'out_for_delivery', 'delivered'].includes(order.status);
-  const Icon = ok ? CheckCircle2 : order.status === 'cancelled' ? XCircle : Clock;
-  return (
-    <section className="container success-page">
-      <Icon size={56} strokeWidth={1.4} />
-      <h1>{ok && order.status !== 'delivered' ? `Thank you, ${(customer?.name || '').split(' ')[0]}!` : statusLabel(order.status)}</h1>
-      <p className="lead">Order <strong>#{order.number}</strong> · {statusLabel(order.status)}</p>
-      <div className="success-card">
-        <ul>
-          {order.items.map((it) => <li key={it.id + it.pack}><span>{it.qty} × {it.name}{it.pack > 1 ? ` (pack of ${it.pack})` : ''}</span><span>{rs(it.total)}</span></li>)}
-        </ul>
-        {order.discount > 0 && <p className="success-card__total"><span>Prepaid discount</span><span>−{rs(order.discount)}</span></p>}
-        <p className="success-card__total"><span>Shipping</span><span>{order.shipping ? rs(order.shipping) : 'Free'}</span></p>
-        <p className="success-card__total"><span>Total</span><strong>{rs(order.total)}</strong></p>
-        <p>Delivering to {order.address.name}, {order.address.line1}, {order.address.city} {order.address.pin}</p>
-        <p>Payment: {PAY_LABEL[order.paymentMethod] || order.paymentMethod}{order.paymentStatus === 'paid' ? ' (paid)' : ''}</p>
-      </div>
-      {ok && <p>We'll share tracking details as soon as it ships. Questions? Message us on <a href={SITE.whatsapp} target="_blank" rel="noreferrer">WhatsApp</a>.</p>}
-      {order.status === 'pending_payment' && <p>We haven't received the payment yet. If money was deducted, the order will be confirmed automatically within a few minutes.</p>}
-      <ReturnSection order={order} initial={returnsData} />
-      <div className="success-actions">
-        <Link to="/account" className="btn btn--lg btn--ghost">My orders</Link>
-        <Link to="/shop" className="btn btn--lg">Continue shopping</Link>
-      </div>
-    </section>
-  );
-}

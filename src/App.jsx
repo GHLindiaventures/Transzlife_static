@@ -60,7 +60,7 @@ const Policy = content('Policy');
 const checkout = (name) => lazy(() => import('./store/pages/Checkout').then((m) => ({ default: m[name] })));
 const Cart = checkout('Cart');
 const Checkout = checkout('Checkout');
-const OrderSuccess = checkout('OrderSuccess');
+const OrderSuccess = lazy(() => import('./store/pages/OrderDetails'));   // order details + confirmation
 const Login = lazy(() => import('./store/pages/Login'));
 const Account = lazy(() => import('./store/pages/Account'));
 const TrackOrder = lazy(() => import('./store/pages/TrackOrder'));
