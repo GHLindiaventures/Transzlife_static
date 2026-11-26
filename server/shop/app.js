@@ -19,6 +19,7 @@ import reviewRoutes from './reviews.js';
 import contentRoutes from './content.js';
 import opsWebhooks, { createOps } from './ops.js';
 import seoRoutes from './seo.js';
+import customerReturnRoutes from './returns.js';
 import presenceRoutes, { createPresence } from './presence.js';
 
 const UNSAFE = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
@@ -81,6 +82,7 @@ export async function buildShopApp({ env = process.env, db, fastifyOptions = {},
   await app.register(adminRoutes, { db, razorpay, twilio, notifier, reminders, presence, ops, auth: { mode: auth.mode }, log, env });
   await app.register(trackRoutes, { db, log });
   await app.register(reviewRoutes, { db, env, log });
+  await app.register(customerReturnRoutes, { db, env, log });
   await app.register(presenceRoutes, { presence });
   await app.register(contentRoutes, { db });
   await app.register(opsWebhooks, { ops, env, log });

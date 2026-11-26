@@ -13,14 +13,12 @@
 .chat [hidden]{display:none !important}
 .chat{
   --f-chat:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;
+  /* A full-viewport layer with NO transform: a transform here makes .chat the containing block of the fixed
+     .ch-panel, which squeezed the panel into a ~50px strip on phones. The launcher and panel are placed by
+     chat-widget.js with --lx/--ly (px), so the launcher can be dragged anywhere. */
   position:fixed;
+  inset:0;
   z-index:66;
-  right:max(20px,env(safe-area-inset-right,0px));
-  top:50%;
-  transform:translateY(-50%);
-  display:flex;
-  flex-direction:column;
-  align-items:flex-end;
   color:var(--ink);
   font-family:var(--f-chat);
   font-stretch:normal;
@@ -35,7 +33,10 @@
 
 /* ---------- Tulsi Floating Launcher ---------- */
 .ch-launcher-wrap{
-  position:relative;
+  position:absolute;
+  left:var(--lx,calc(100vw - 98px));
+  top:var(--ly,calc(50vh - 39px));
+  touch-action:none;
   display:flex;
   align-items:center;
   justify-content:flex-end;
@@ -54,6 +55,12 @@
   -webkit-tap-highlight-color:transparent;
   transition:opacity .25s,transform .3s var(--ease);
 }
+.chat.is-dragging .ch-fab{cursor:grabbing;transition:none}
+.chat.is-dragging{user-select:none}
+.ch-fab{cursor:grab}
+/* launcher near the left edge: the welcome bubble opens to its right instead */
+.ch-launcher-wrap.is-left .ch-welcome{right:auto;left:calc(100% + 14px);transform-origin:left center}
+.ch-launcher-wrap.is-left .ch-welcome-tail{right:auto;left:-8px;border-left:0;border-right:8px solid #ffffff}
 .ch-fab:focus-visible{outline:2px solid var(--sage);outline-offset:2px;border-radius:14px}
 .ch-fab:active{transform:scale(.95)}
 .chat.open .ch-fab{
@@ -272,13 +279,15 @@
 
 /* ---------- Chat Panel (Dialog) ---------- */
 .ch-panel{
-  position:fixed;
-  right:max(20px,env(safe-area-inset-right,0px));
-  top:50%;
-  transform:translateY(-50%) scale(.96);
-  transform-origin:right center;
+  position:absolute;
+  left:var(--px,auto);
+  top:var(--py,auto);
+  right:var(--pr,max(20px,env(safe-area-inset-right,0px)));
+  bottom:var(--pb,auto);
+  transform:scale(.96);
+  transform-origin:center;
   width:min(390px,calc(100vw - 32px));
-  height:min(600px,calc(100svh - 40px));
+  height:min(600px,calc(100svh - 32px));
   display:flex;
   flex-direction:column;
   background:var(--panel-2);
@@ -296,7 +305,7 @@
   opacity:1;
   visibility:visible;
   pointer-events:auto;
-  transform:translateY(-50%) scale(1);
+  transform:none;
   transition:opacity .3s,transform .45s var(--ease),visibility 0s;
 }
 
@@ -371,11 +380,6 @@
 .ch-note{font-size:11.5px;color:var(--faint);text-align:center;padding:8px 14px 12px}
 
 @media (max-width:620px){
-  .chat{
-    right:max(16px,env(safe-area-inset-right,0px));
-    top:50%;
-    transform:translateY(-50%);
-  }
   .ch-fab{
     width:66px;
     height:66px;
@@ -405,19 +409,21 @@
     border-right:0;
   }
 
-  /* centered dialog sheet on mobile */
+  /* phones: a bottom sheet that always fits the screen, whatever the launcher position */
   .ch-panel{
-    right:14px;
-    left:14px;
+    left:12px;
+    right:12px;
+    top:auto;
+    bottom:max(12px,env(safe-area-inset-bottom,0px));
     width:auto;
-    height:min(580px,calc(100svh - 40px));
-    min-height:360px;
+    height:min(620px,calc(100svh - 24px - env(safe-area-inset-bottom,0px)));
+    min-height:0;
     border-radius:22px;
-    top:50%;
-    transform:translateY(-50%) scale(.96);
+    transform:translateY(18px) scale(.98);
+    transform-origin:bottom center;
   }
   .chat.open .ch-panel{
-    transform:translateY(-50%) scale(1);
+    transform:none;
   }
   .ch-head{gap:10px;padding:10px 8px 10px 12px}
   .ch-av.big{width:34px;height:34px}
@@ -435,7 +441,7 @@
 }
 /* very short screens (landscape phones): use most of the height, but never cover the top bar */
 @media (max-width:620px) and (max-height:600px){
-  .ch-panel{height:calc(100svh - 84px);min-height:0}
+  .ch-panel{height:calc(100svh - 24px)}
 }
 @media (prefers-reduced-motion:reduce){
   .ch-panel,.chat.open .ch-panel{transition:opacity .2s,visibility 0s}

@@ -151,7 +151,8 @@ const Footer = forwardRef(function Footer(_, ref) {
     let h = 0;
     const measure = () => {
       h = el.offsetHeight;
-      el.style.setProperty('--ftr', Math.round(Math.min(h, window.innerHeight * 0.7)) + 'px');
+      // no lag on phones: the footer is one screen tall and the page can't scroll far enough to finish the reveal, leaving a gap
+      el.style.setProperty('--ftr', window.innerWidth <= 640 ? '0px' : Math.round(Math.min(h, window.innerHeight * 0.7)) + 'px');
       const fixed = desktop.matches && h > 0 && h <= window.innerHeight;
       const root = document.documentElement;
       root.classList.toggle('ft-fixed', fixed);

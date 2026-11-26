@@ -6,9 +6,13 @@ import { Undo2, X, PackageCheck, CheckCircle2 } from 'lucide-react';
 import { api } from '../../store/lib/api';
 import { Badge, Empty, ErrorBox, Loading, Notice, PageHead, can, dt, rs, toPaise, useAction, useAdmin, useApi } from '../ui';
 
-export const RSTATUS = { requested: ['On its way back', 'info'], received: ['Received: decide', 'warn'], resolved: ['Resolved', 'ok'], rejected: ['Rejected', 'off'] };
+export const RSTATUS = {
+  requested: ['Requested', 'warn'], under_review: ['Under review', 'info'], approved: ['Approved', 'info'], pickup_scheduled: ['Pickup scheduled', 'info'],
+  received: ['Returned: decide', 'warn'], refund_initiated: ['Refund initiated', 'warn'], resolved: ['Completed', 'ok'], rejected: ['Rejected', 'off'],
+};
+const BEFORE = ['requested', 'under_review', 'approved', 'pickup_scheduled'];
 const RESOLUTION = { refund: 'Refunded', replacement: 'Replacement sent', no_action: 'Closed, no action' };
-const TABS = [['open', 'Open'], ['requested', 'On the way back'], ['received', 'Received'], ['resolved', 'Resolved'], ['rejected', 'Rejected'], ['all', 'All']];
+const TABS = [['open', 'Open'], ['requested', 'Requested'], ['under_review', 'Under review'], ['approved', 'Approved'], ['pickup_scheduled', 'Pickup'], ['received', 'Returned'], ['refund_initiated', 'Refund'], ['resolved', 'Completed'], ['rejected', 'Rejected'], ['all', 'All']];
 
 export default function Returns() {
   const [params, setParams] = useSearchParams();
@@ -21,7 +25,7 @@ export default function Returns() {
 
   return (
     <>
-      <PageHead title="Returns" sub="Log returns customers ask for, check what comes back, then refund or replace." />
+      <PageHead title="Returns" sub="Customers request returns from their account. Review, approve, schedule the pickup, check what comes back, then refund or replace." />
       <div className="adm-tabs" role="tablist">
         {TABS.map(([k, label]) => {
           const n = k === 'all' ? null : c[k];
@@ -86,7 +90,13 @@ function ReturnDrawer({ id, onClose, onChanged }) {
     if (res) done();
   };
   const reject = async () => { const res = await act.run(() => api(`/api/admin/returns/${id}/reject`, { method: 'POST', body: { note } }), 'Return rejected.'); if (res) { setRejecting(false); done(); } };
-  const step = !r ? 0 : r.status === 'requested' ? 1 : r.status === 'received' ? 2 : 3;
+  const step = !r ? 0 : BEFORE.includes(r.status) ? 1 : r.status === 'received' ? 2 : 3;
+  const [pickup, setPickup] = useState('');
+  const advance = async (to) => {
+    const res = await act.run(() => api(`/api/admin/returns/${id}/advance`, { method: 'POST', body: { to, note, ...(to === 'pickup_scheduled' ? { pickupAt: pickup } : {}) } }), 'Updated. The customer sees the new status.');
+    if (res) { setNote(''); done(); }
+  };
+  const refundDone = async () => { const res = await act.run(() => api(`/api/admin/returns/${id}/refund-complete`, { method: 'POST', body: {} }), 'Refund marked as completed.'); if (res) done(); };
 
   return (
     <>
@@ -102,25 +112,34 @@ function ReturnDrawer({ id, onClose, onChanged }) {
           {!data ? <Loading /> : (
             <>
               <div className={`adm-stepper ${r.status === 'rejected' ? 'is-stopped' : ''}`} style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
-                {['Requested', 'Received & checked', 'Resolved'].map((l, i) => <span key={l} className={`adm-step ${step > i ? 'is-done' : ''}`}>{l}</span>)}
+                {['Requested & approved', 'Returned & checked', 'Refund / closed'].map((l, i) => <span key={l} className={`adm-step ${step > i ? 'is-done' : ''}`}>{l}</span>)}
               </div>
               <div className="adm-card">
                 <dl className="adm-kv">
                   <dt>Order</dt><dd><Link to={`/admin/orders/${r.order_number}`}>{r.order_number}</Link> · {r.payment_method === 'cod' ? 'Cash on delivery' : 'Paid online'}</dd>
                   <dt>Customer</dt><dd><Link to={`/admin/customers/${r.customer_id}`}>{r.customer}</Link> · +91 {r.phone}</dd>
                   <dt>Reason</dt><dd>{data.reasons[r.reason]}{r.reason_note ? `: ${r.reason_note}` : ''}</dd>
-                  <dt>Logged</dt><dd>{dt(r.created_at)}{r.created_by_email ? ` by ${r.created_by_email}` : ''}</dd>
+                  <dt>Logged</dt><dd>{dt(r.created_at)}{r.created_by_email ? ` by ${r.created_by_email}` : r.source === 'customer' ? ' by the customer' : ''}</dd>
+                  {r.pickup_at && <><dt>Pickup</dt><dd>{dt(r.pickup_at)}{r.pickup_note ? ` · ${r.pickup_note}` : ''}</dd></>}
+                  {r.reject_reason && <><dt>Rejected because</dt><dd>{r.reject_reason}</dd></>}
                   {r.received_at && <><dt>Received</dt><dd>{dt(r.received_at)}</dd></>}
                   {r.resolution && <><dt>Outcome</dt><dd>{RESOLUTION[r.resolution]}{r.refund_amount ? ` · ${rs(r.refund_amount)}` : ''}</dd></>}
                 </dl>
                 {r.staff_note && <p className="adm-muted" style={{ marginTop: 10, whiteSpace: 'pre-line' }}>{r.staff_note}</p>}
+                {data.photos.length > 0 && <div className="adm-row" style={{ marginTop: 10, gap: 8, flexWrap: 'wrap' }}>{data.photos.map((p) => <a key={p.id} href={p.url} target="_blank" rel="noreferrer"><img src={p.thumb_url || p.url} alt="Customer photo" style={{ width: 72, height: 72, objectFit: 'cover', borderRadius: 8 }} /></a>)}</div>}
               </div>
+              {data.events.length > 0 && (
+                <div className="adm-card">
+                  <h3 className="adm-h3" style={{ marginTop: 0 }}>History</h3>
+                  <ul className="adm-list">{data.events.map((e, i) => <li key={i} className="adm-row"><span>{data.labels[e.status] || e.status}{e.note ? <span className="adm-sub">{e.note}</span> : null}</span><span className="adm-sub">{dt(e.created_at)} · {e.actor.replace('staff:', '')}</span></li>)}</ul>
+                </div>
+              )}
               <div className="adm-card">
                 <h3 className="adm-h3" style={{ marginTop: 0 }}>Items</h3>
                 <ul className="adm-list">{data.items.map((i) => (
                   <li key={i.id} className="adm-row">
                     <span>{i.qty} × {i.name}<span className="adm-sub">{i.size}{i.pack > 1 ? ` · pack of ${i.pack}` : ''} · {rs(i.unit_price * i.qty)}</span></span>
-                    {r.status === 'requested' && editable ? (
+                    {BEFORE.includes(r.status) && editable ? (
                       <select value={cond[i.id] || 'resellable'} onChange={(e) => setCond({ ...cond, [i.id]: e.target.value })} aria-label={`Condition of ${i.name}`} style={{ width: 'auto' }}>
                         <option value="resellable">Resellable: back to stock</option><option value="damaged">Damaged</option><option value="expired">Expired</option>
                       </select>
@@ -128,18 +147,29 @@ function ReturnDrawer({ id, onClose, onChanged }) {
                   </li>
                 ))}</ul>
               </div>
-              {editable && (r.status === 'requested' || r.status === 'received') && (
+              {editable && (BEFORE.includes(r.status) || r.status === 'received' || r.status === 'refund_initiated') && (
                 <div className="adm-card adm-form">
-                  <label>Note (optional)<input value={note} onChange={(e) => setNote(e.target.value)} maxLength={500} placeholder={r.status === 'requested' ? 'e.g. Parcel arrived, seal intact' : 'e.g. Refunded to UPI'} /></label>
-                  {r.status === 'requested' && !rejecting && (
+                  <label>Note (optional)<input value={note} onChange={(e) => setNote(e.target.value)} maxLength={500} placeholder={BEFORE.includes(r.status) ? 'Shown to the customer, e.g. Photo received' : 'e.g. Refunded to UPI'} /></label>
+                  {r.status === 'approved' && (
+                    <div className="adm-row" style={{ alignItems: 'flex-end' }}>
+                      <label style={{ flex: 1 }}>Pickup date<input type="date" value={pickup} onChange={(e) => setPickup(e.target.value)} /></label>
+                      <button className="adm-btn is-gold" disabled={act.busy || !pickup} onClick={() => advance('pickup_scheduled')}>Schedule pickup</button>
+                    </div>
+                  )}
+                  {BEFORE.includes(r.status) && !rejecting && (
                     <div className="adm-actions">
+                      {r.status === 'requested' && <button className="adm-btn is-ghost" disabled={act.busy} onClick={() => advance('under_review')}>Start review</button>}
+                      {['requested', 'under_review'].includes(r.status) && <button className="adm-btn is-gold" disabled={act.busy} onClick={() => advance('approved')}>Approve</button>}
                       <button className="adm-btn" disabled={act.busy} onClick={receive}><PackageCheck size={16} /> Items received</button>
                       <button className="adm-btn is-ghost" onClick={() => setRejecting(true)}>Reject return</button>
                     </div>
                   )}
+                  {r.status === 'refund_initiated' && can(staff, 'refunds') && (
+                    <div className="adm-actions"><button className="adm-btn is-gold" disabled={act.busy} onClick={refundDone}>Refund reached the customer: mark completed</button></div>
+                  )}
                   {rejecting && (
                     <div className="adm-actions">
-                      <button className="adm-btn is-danger" disabled={act.busy || note.trim().length < 3} onClick={reject}>Confirm reject (reason in the note)</button>
+                      <button className="adm-btn is-danger" disabled={act.busy || note.trim().length < 3} onClick={reject}>Confirm reject (the note is the reason the customer sees)</button>
                       <button className="adm-btn is-ghost" onClick={() => setRejecting(false)}>Back</button>
                     </div>
                   )}

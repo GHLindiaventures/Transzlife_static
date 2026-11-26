@@ -9,6 +9,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { api } from '../lib/api';
 import { statusLabel, rs } from './Checkout';
+import { loadMyReturns, returnTone } from '../data/returnStore';
 import { getProduct, onSale } from '../data/products';
 import { SITE } from '../data/site';
 import { inr } from '../utils/format';   // product prices are in rupees; order totals (rs) are in paise
@@ -70,6 +71,7 @@ export default function Account() {
   const { add } = useCart();
   const navigate = useNavigate();
   const [orders, setOrders] = useState(null);
+  const [returns, setReturns] = useState([]);
   const [addresses, setAddresses] = useState(null);
   const [rv, setRv] = useState(null);
   const [saved, setSaved] = useState(null);
@@ -77,6 +79,7 @@ export default function Account() {
   const [error, setError] = useState('');
 
   useEffect(() => {
+    loadMyReturns().then(setReturns);
     api('/api/orders').then((r) => setOrders(r.orders)).catch((e) => { setError(e.message); setOrders([]); });
     api('/api/account/addresses').then((r) => setAddresses(r.addresses)).catch(() => setAddresses([]));
     mergeWishlist().then(setSaved);
@@ -198,6 +201,11 @@ export default function Account() {
                           <span className={`acx-badge ${badgeClass(o.status)}`}>{statusLabel(o.status)}</span>
                         </div>
                         <OrderProgress status={o.status} />
+                        {returns.filter((r) => r.orderNumber === o.number).map((r) => (
+                          <Link key={r.id} className="acx-return" to={`/order/${o.number}#returns`}>
+                            <RotateCcw size={14} aria-hidden="true" /> Return {r.number}: <span className={`acx-badge ${returnTone(r)}`}>{r.label}</span>
+                          </Link>
+                        ))}
                         <div className="acx-order__actions">
                           <Link className="acx-btn acx-btn--ghost" to={`/order/${o.number}`}>View details <ChevronRight size={14} /></Link>
                           {canReorder && <button type="button" className="acx-btn" onClick={() => buyAgain(o)}><RotateCcw size={15} /> Buy again</button>}

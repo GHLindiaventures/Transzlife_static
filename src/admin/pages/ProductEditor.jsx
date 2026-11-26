@@ -19,6 +19,7 @@ const toForm = (p) => ({
   name: p.name, short: p.short, tagline: p.tagline, format: p.format, size: p.size, badge: p.badge || '',
   accent: p.accent || '#1f6b3c', tint: p.tint || '#eef4ea', concerns: p.concerns || [], sortOrder: p.sortOrder,
   price: p.price / 100, mrp: p.mrp / 100, gstRate: p.gstRate ?? '', hsnCode: p.hsnCode || '', lowStockAt: p.lowStockAt,
+  returnable: p.returnable !== false, returnDays: p.returnDays ?? '',
   content: {
     summary: '', highlights: [], description: [], benefits: [], routine: [], howToUse: [], whoFor: [], precautions: [], faqs: [], ingredients: [], ...p.content,
   },
@@ -33,6 +34,7 @@ function toPatch(f) {
     accent: f.accent, tint: f.tint, concerns: f.concerns, sortOrder: Number(f.sortOrder) || 0,
     price: toPaise(f.price), mrp: toPaise(f.mrp), gstRate: f.gstRate === '' ? null : Number(f.gstRate), hsnCode: f.hsnCode.trim() || null,
     lowStockAt: Number(f.lowStockAt) || 0,
+    returnable: !!f.returnable, returnDays: f.returnDays === '' ? null : Number(f.returnDays),
     content: {
       summary: c.summary.trim(), highlights: clean(c.highlights), description: clean(c.description), benefits: clean(c.benefits),
       routine: clean(c.routine), howToUse: clean(c.howToUse), whoFor: clean(c.whoFor), precautions: clean(c.precautions),
@@ -463,6 +465,12 @@ function Stock({ data, form, set, staff, onChange }) {
         <h2 className="adm-h2">Low-stock alert</h2>
         <label>Warn me when available stock is at or below<input type="number" min="0" value={form.lowStockAt} onChange={(e) => set('lowStockAt', e.target.value)} disabled={!can(staff, 'products.edit')} /></label>
         <p className="adm-muted">Saved with "Save changes".</p>
+      </section>
+      <section className="adm-card adm-form" style={{ maxWidth: 460 }}>
+        <h2 className="adm-h2">Return policy</h2>
+        <label style={{ display: 'flex', gap: 8, alignItems: 'center' }}><input type="checkbox" checked={!!form.returnable} onChange={(e) => set('returnable', e.target.checked)} disabled={!can(staff, 'products.edit')} /> Customers can return this product</label>
+        <label>Return window for this product (days after delivery)<input type="number" min="0" max="90" placeholder="Shop-wide window" value={form.returnDays} onChange={(e) => set('returnDays', e.target.value)} disabled={!can(staff, 'products.edit') || !form.returnable} /></label>
+        <p className="adm-muted">Leave the days empty to use the shop-wide window (Settings). Customers see why a product cannot be returned. Saved with "Save changes".</p>
       </section>
       {recall && <Recall id={recall} onClose={() => setRecall(null)} />}
     </>

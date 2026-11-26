@@ -169,6 +169,68 @@ function openChat(){
   else open(true);
 }
 
+// ---- Draggable launcher -------------------------------------------------------------------------------
+// The launcher can be dragged anywhere in the viewport (mouse or touch). Its position is kept in
+// localStorage, re-clamped when the window changes, and double-clicking the launcher resets it.
+// The chat panel is placed next to the launcher so it is always completely on screen; phones use a
+// bottom sheet instead (CSS).
+const POS_KEY = 'tl-chat-pos-v1';
+const MOBILE = 620, EDGE = 8;
+let pos = null, dragged = false, rootEl = null;
+const fabSize = () => (innerWidth <= MOBILE ? 66 : 78);
+const clamp = (v, lo, hi) => Math.min(Math.max(v, lo), Math.max(lo, hi));
+const defaultPos = () => ({ x: innerWidth - fabSize() - (innerWidth <= MOBILE ? 16 : 20), y: Math.round(innerHeight / 2 - fabSize() / 2) });
+function readPos(){ try { const v = JSON.parse(localStorage.getItem(POS_KEY) || 'null'); return v && Number.isFinite(v.x) && Number.isFinite(v.y) ? v : null; } catch { return null; } }
+function savePos(){ try { localStorage.setItem(POS_KEY, JSON.stringify(pos)); } catch {} }
+function applyPos(){
+  if (!rootEl) return;
+  const s = fabSize();
+  pos = { x: clamp(pos.x, EDGE, innerWidth - s - EDGE), y: clamp(pos.y, EDGE, innerHeight - s - EDGE) };
+  rootEl.style.setProperty('--lx', pos.x + 'px');
+  rootEl.style.setProperty('--ly', pos.y + 'px');
+  $('.ch-launcher-wrap', rootEl).classList.toggle('is-left', pos.x < 320);   // welcome bubble opens toward the screen centre
+  placePanel();
+}
+/** Desktop/tablet: the panel sits beside the launcher (right edges aligned) and is clamped fully inside the viewport. */
+function placePanel(){
+  const st = rootEl.style;
+  if (innerWidth <= MOBILE){ ['--px', '--py', '--pr', '--pb'].forEach(k => st.removeProperty(k)); return; }
+  const pw = Math.min(390, innerWidth - 32), ph = Math.min(600, innerHeight - 32), s = fabSize();
+  st.setProperty('--px', clamp(pos.x + s - pw, 16, innerWidth - pw - 16) + 'px');
+  st.setProperty('--py', clamp(pos.y + s / 2 - ph / 2, 16, innerHeight - ph - 16) + 'px');
+  st.setProperty('--pr', 'auto');
+  st.setProperty('--pb', 'auto');
+}
+function setupDrag(root){
+  rootEl = root;
+  pos = readPos() || defaultPos();
+  applyPos();
+  const fab = $('.ch-fab', root);
+  let start = null;
+  fab.addEventListener('pointerdown', (e) => {
+    if (e.button > 0) return;
+    start = { id: e.pointerId, px: e.clientX, py: e.clientY, x: pos.x, y: pos.y, moved: false };
+  });
+  fab.addEventListener('pointermove', (e) => {
+    if (!start || e.pointerId !== start.id) return;
+    const dx = e.clientX - start.px, dy = e.clientY - start.py;
+    if (!start.moved && Math.hypot(dx, dy) < 6) return;          // a tap, not a drag
+    if (!start.moved){ start.moved = true; try { fab.setPointerCapture(e.pointerId); } catch {} root.classList.add('is-dragging'); }
+    pos = { x: start.x + dx, y: start.y + dy };
+    applyPos();
+  });
+  const end = (e) => {
+    if (!start || e.pointerId !== start.id) return;
+    if (start.moved){ dragged = true; savePos(); setTimeout(() => { dragged = false; }, 60); }   // swallow the click that ends a drag
+    root.classList.remove('is-dragging');
+    start = null;
+  };
+  fab.addEventListener('pointerup', end);
+  fab.addEventListener('pointercancel', end);
+  fab.addEventListener('dblclick', () => { pos = defaultPos(); try { localStorage.removeItem(POS_KEY); } catch {} applyPos(); });   // reset to the default spot
+  addEventListener('resize', applyPos);
+}
+
 /** Mount the chat once. `navigate` is react-router's navigate, so links stay inside the app. */
 function initChat({ navigate } = {}){
   if (navigate) go = navigate;
@@ -188,7 +250,7 @@ function initChat({ navigate } = {}){
       <div class="ch-list" data-lenis-prevent aria-live="polite"></div>
       <div class="ch-chips">${CHIPS.map(c => `<button type="button">${c}</button>`).join('')}</div>
       <form class="ch-form">
-        <textarea rows="1" placeholder="Ask Tulsi about health, products, or ingredients…" aria-label="Your message" maxlength="1500"></textarea>
+        <textarea rows="1" placeholder="Ask about products or health…" aria-label="Your message" maxlength="1500"></textarea>
         <button class="ch-send" type="submit" aria-label="Send">${SEND}</button>
       </form>
       <p class="ch-note">General wellness tips, not medical advice. In an emergency, call 112. We count common topics anonymously to improve our products; your messages are not stored.</p>
@@ -218,6 +280,7 @@ function initChat({ navigate } = {}){
       </button>
     </div>`;
   document.body.append(root);
+  setupDrag(root);
   els = { root, panel:$('.ch-panel', root), list:$('.ch-list', root), chips:$('.ch-chips', root), input:$('textarea', root), send:$('.ch-send', root), fab:$('.ch-fab', root) };
 
   // ---- Greeting: the robot waves once and the welcome bubble appears, then both settle. ----
@@ -270,7 +333,7 @@ function initChat({ navigate } = {}){
 
   // clicking the bubble opens the chat; the x just closes it
   welcomeEl.addEventListener('click', (e) => {
-    if (e.target.closest('.ch-welcome-close')) return;
+    if (e.target.closest('.ch-welcome-close') || dragged) return;
     stopGreeting();
     if (root.classList.contains('min')) minimize(false);
     else open(true);
@@ -287,7 +350,7 @@ function initChat({ navigate } = {}){
   msgs = load(); render();
   els.min = $('.ch-min', root);
   // the round button: opens the chat, expands it if minimized, or closes it
-  els.fab.addEventListener('click', () => root.classList.contains('min') ? minimize(false) : open(!root.classList.contains('open')));
+  els.fab.addEventListener('click', () => { if (dragged) return; root.classList.contains('min') ? minimize(false) : open(!root.classList.contains('open')); });
   $('.ch-x', root).addEventListener('click', () => open(false));
   els.min.addEventListener('click', e => { e.stopPropagation(); minimize(!root.classList.contains('min')); });
   // tapping the minimized bar (anywhere but its buttons) expands it again

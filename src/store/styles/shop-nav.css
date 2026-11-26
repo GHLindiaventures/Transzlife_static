@@ -1,0 +1,50 @@
+/* Shop page: category + format filters as a circular control on the left (pages/Shop.jsx > ShopNav).
+   Hand-written (store.css is generated). Scoped like the rest of the store; the extra :not()s out-rank the generated resets. */
+.tl-store:not(#tl-a):not(#tl-b) .shop.shop--solo { display: block; position: relative; }
+
+.tl-store:not(#tl-a):not(#tl-b) .shopnav {
+  /* sticky dock that takes no layout space; the circle sits in the left gutter of the page */
+  position: sticky; top: calc(var(--header-h, 58px) + var(--announcement-h, 34px) + 22px); height: 0; z-index: 30;
+  --nav-left: calc((100% - 100vw) / 2 + 22px);   /* 14px from the screen edge, whatever the page gutter */
+}
+.tl-store:not(#tl-a):not(#tl-b) .shopnav__btn {
+  position: absolute; left: var(--nav-left); top: 0; width: 58px; height: 58px; border-radius: 50%; padding: 0;
+  display: grid; place-items: center; align-content: center; gap: 1px; cursor: pointer;
+  color: #fff; background: radial-gradient(circle at 30% 25%, #2e7d4a, var(--forest, #173f24) 70%);
+  border: 2px solid rgba(255, 255, 255, .85); box-shadow: 0 14px 26px -12px rgba(15, 47, 29, .7), 0 0 0 4px rgba(239, 192, 74, .28);
+  transition: transform .3s var(--ease, ease), box-shadow .3s;
+}
+.tl-store:not(#tl-a):not(#tl-b) .shopnav__btn:hover, .tl-store:not(#tl-a):not(#tl-b) .shopnav.is-open .shopnav__btn { transform: scale(1.06); box-shadow: 0 18px 30px -12px rgba(15, 47, 29, .75), 0 0 0 5px rgba(239, 192, 74, .45); }
+.tl-store:not(#tl-a):not(#tl-b) .shopnav__label { font-size: 9.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; line-height: 1; }
+.tl-store:not(#tl-a):not(#tl-b) .shopnav__count {
+  position: absolute; top: -4px; right: -4px; min-width: 20px; height: 20px; border-radius: 10px; padding: 0 5px; display: grid; place-items: center;
+  font-size: 11px; font-weight: 800; color: #3a2700; background: linear-gradient(135deg, #f6e3a1, #e0a826); border: 2px solid #fff;
+}
+.tl-store:not(#tl-a):not(#tl-b) .shopnav__panel {
+  position: absolute; left: var(--nav-left); top: 0; width: min(290px, calc(100vw - 24px)); max-height: calc(100vh - var(--header-h, 58px) - var(--announcement-h, 34px) - 60px); overflow-y: auto; overscroll-behavior: contain;
+  padding: 74px 16px 18px; display: grid; gap: 22px; border-radius: 30px 30px 24px 24px; z-index: -1;
+  background: linear-gradient(160deg, #ffffff, #f6f3dc); border: 1px solid #fff;
+  box-shadow: 0 30px 60px -24px rgba(15, 47, 29, .5), 0 4px 12px rgba(15, 47, 29, .08);
+  clip-path: inset(0 100% 0 0 round 30px); opacity: 0; visibility: hidden; transform: translateX(-14px);
+  transition: clip-path .4s var(--ease, ease), opacity .25s, transform .4s var(--ease, ease), visibility 0s .4s;
+}
+.tl-store:not(#tl-a):not(#tl-b) .shopnav.is-open .shopnav__panel { clip-path: inset(0 0 0 0 round 30px); opacity: 1; visibility: visible; transform: none; transition: clip-path .4s var(--ease, ease), opacity .25s, transform .4s var(--ease, ease), visibility 0s; }
+@media (prefers-reduced-motion: reduce) { .tl-store .shopnav__panel, .tl-store .shopnav__btn { transition: none; } }
+/* medium widths: the page gutter is narrower than the circle, so the products make room for it */
+@media (min-width: 750px) and (max-width: 1340px) { .tl-store:not(#tl-a):not(#tl-b) .shop.shop--solo { padding-left: 100px; } .tl-store:not(#tl-a):not(#tl-b) .shopnav { --nav-left: calc((100% - 100vw) / 2 + 20px); } }
+/* phones: the circle floats at the bottom-left and the panel opens upward from it */
+@media (max-width: 749px) {
+  .tl-store:not(#tl-a):not(#tl-b) .shopnav { position: fixed; top: auto; left: 12px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); height: 0; --nav-left: 0px; }
+  .tl-store:not(#tl-a):not(#tl-b) .shopnav__btn { top: auto; bottom: 0; width: 52px; height: 52px; }
+  .tl-store:not(#tl-a):not(#tl-b) .shopnav__panel {
+    top: auto; bottom: 0; width: min(300px, calc(100vw - 24px)); max-height: min(70vh, 560px); padding: 18px 14px 74px; border-radius: 26px;
+    clip-path: inset(100% 0 0 0 round 26px); transform: translateY(14px);
+  }
+  .tl-store:not(#tl-a):not(#tl-b) .shopnav.is-open .shopnav__panel { clip-path: inset(0 0 0 0 round 26px); }
+}
+
+/* the generated mobile rules turn .filters__group into a horizontal chip row; inside the panel it stays a vertical list at every width */
+.tl-store:not(#tl-a):not(#tl-b):not(#tl-c) .shopnav__panel .filters__group { flex-direction: column; flex-wrap: wrap; overflow: visible; gap: 2px; padding: 0; align-items: stretch; }
+.tl-store:not(#tl-a):not(#tl-b):not(#tl-c) .shopnav__panel .filters__group h3 { margin: 0 0 8px; }
+.tl-store:not(#tl-a):not(#tl-b):not(#tl-c) .shopnav__panel .filters__group button { flex-shrink: 0; width: 100%; text-align: left; border: 0; border-radius: 10px; background: transparent; padding: 8px 12px; font-size: .92rem; }
+.tl-store:not(#tl-a):not(#tl-b):not(#tl-c) .shopnav__panel .filters__group button.is-active { background: var(--forest, #173f24); color: #fff; }
