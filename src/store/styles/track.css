@@ -46,18 +46,21 @@
   color: #1b2a20;
 }
 
-.trk-btn {
-  border: 0;
-  background: #175a32;
-  color: #fff;
+.trk-btn,
+.tl-store .trk-btn {
+  border: 0 !important;
+  background: #175a32 !important;
+  color: #fff !important;
   font-weight: 700;
   font-size: 14px;
   padding: 9px 18px;
   border-radius: 999px;
   cursor: pointer;
+  flex: none;
 }
 
-.trk-btn:hover { background: #1f7442; }
+.trk-btn:hover,
+.tl-store .trk-btn:hover { background: #1f7442 !important; }
 
 .trk-layout {
   display: grid;
@@ -70,6 +73,9 @@
   border-radius: 18px;
   padding: 22px 24px;
   box-shadow: 0 4px 18px rgba(25, 45, 30, 0.04);
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .trk-banner {
@@ -178,14 +184,23 @@
   color: #163d25;
 }
 
-/* 8-Stage Horizontal Stepper on Desktop, Vertical on Mobile */
+/* 8-Stage Horizontal Stepper (scrollable on narrow screens) */
+.trk-stepper-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 6px 2px 8px;
+  scrollbar-width: thin;
+}
+
 .trk-stepper {
-  list-style: none;
+  list-style: none !important;
   margin: 0;
   padding: 4px 0 0;
   display: grid;
-  grid-template-columns: repeat(8, minmax(0, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(8, minmax(116px, 1fr));
+  gap: 0;
+  min-width: 928px;
 }
 
 .trk-step {
@@ -195,20 +210,21 @@
   align-items: center;
   text-align: center;
   gap: 8px;
+  padding: 0 6px;
 }
 
 .trk-step:not(:last-child)::after {
   content: "";
   position: absolute;
   top: 16px;
-  left: calc(50% + 18px);
-  right: calc(-50% + 18px);
+  left: calc(50% + 17px);
+  right: calc(-50% + 17px);
   height: 3px;
   background: #e2e7df;
   border-radius: 2px;
 }
 
-.trk-step.is-done:not(:last-child)::after {
+.trk-step.is-done:not(.is-now):not(:last-child)::after {
   background: #1c723e;
 }
 
@@ -344,24 +360,6 @@
 .trk-empty { text-align: center; padding: 48px 24px; display: grid; justify-items: center; gap: 8px; color: #546458; }
 
 @media (max-width: 960px) {
-  .trk-stepper {
-    grid-template-columns: 1fr;
-    gap: 14px;
-  }
-  .trk-step {
-    flex-direction: row;
-    text-align: left;
-    align-items: flex-start;
-    gap: 14px;
-  }
-  .trk-step:not(:last-child)::after {
-    top: 34px;
-    bottom: -14px;
-    left: 16px;
-    right: auto;
-    width: 2px;
-    height: auto;
-  }
   .trk-grid2 {
     grid-template-columns: 1fr;
   }

@@ -150,23 +150,25 @@ export default function TrackOrder() {
             {!stopped && (
               <section className="trk-card" aria-label="Delivery progress">
                 <h3 className="trk-h3">Delivery journey</h3>
-                <ol className="trk-stepper">
-                  {tracking.stages.map((st, idx) => (
-                    <li
-                      key={st.key}
-                      className={`trk-step ${st.completed ? 'is-done' : ''} ${st.current ? 'is-now' : ''}`}
-                      aria-current={st.current ? 'step' : undefined}
-                    >
-                      <div className="trk-step__dot" aria-hidden="true">
-                        {st.completed ? <CheckCircle2 size={18} /> : <span>{idx + 1}</span>}
-                      </div>
-                      <div className="trk-step__body">
-                        <strong>{st.label}</strong>
-                        <span>{st.at ? fmtDateTime(st.at) : st.desc}</span>
-                      </div>
-                    </li>
-                  ))}
-                </ol>
+                <div className="trk-stepper-wrap">
+                  <ol className="trk-stepper">
+                    {tracking.stages.map((st, idx) => (
+                      <li
+                        key={st.key}
+                        className={`trk-step ${st.completed ? 'is-done' : ''} ${st.current ? 'is-now' : ''}`}
+                        aria-current={st.current ? 'step' : undefined}
+                      >
+                        <div className="trk-step__dot" aria-hidden="true">
+                          {st.completed ? <CheckCircle2 size={18} /> : <span>{idx + 1}</span>}
+                        </div>
+                        <div className="trk-step__body">
+                          <strong>{st.label}</strong>
+                          <span>{st.at ? fmtDateTime(st.at) : st.desc}</span>
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
               </section>
             )}
 
