@@ -32,6 +32,7 @@ export async function createDb(env = process.env, { log = console, memory = fals
     const pool = new pg.Pool({
       connectionString,
       max: Number(env.DB_POOL_MAX || 10),
+      statement_timeout: Number(env.DB_STATEMENT_TIMEOUT_MS || 15000),
       ssl: env.PGSSL === 'true' ? { rejectUnauthorized: false } : undefined,
     });
     pool.on('error', (e) => log.error?.('[db] idle client error', e.message));

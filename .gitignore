@@ -12,6 +12,7 @@ Tranz-life/
 gemini-bot/.env
 gemini-bot/node_modules/
 /data/
+backups/
 
 # Old website kept here only as a reference copy
 Tranz_Life_zip/

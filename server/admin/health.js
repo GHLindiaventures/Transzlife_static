@@ -340,8 +340,9 @@ export function createHealth({ db, razorpay, twilio, media, env = process.env, l
   async function checkWebVitals() {
     const rows = (await db.query(`
       SELECT props->>'lcp' AS lcp, props->>'cls' AS cls, props->>'inp' AS inp
-        FROM analytics_events
-       WHERE event = 'vitals' AND created_at > now() - interval '7 days'
+        FROM events
+       WHERE name = 'vitals' AND created_at > now() - interval '7 days'
+       ORDER BY created_at DESC
        LIMIT 500`)).rows;
     if (!rows.length) {
       return { group_key: 'speed', check_key: 'speed.vitals', label: 'Real-user speed (Core Web Vitals)', status: 'ok', summary: 'Collecting visitor telemetry (no samples in last 7d yet)', details: { count: 0 } };
@@ -422,9 +423,12 @@ export function createHealth({ db, razorpay, twilio, media, env = process.env, l
     const t0 = Date.now();
     try {
       await runAllChecks({ force: false, notifyCritical: true });
-      // Prune history: 30 days for health_checks, 14 days for error_log
+      // Prune history: 30 days for health_checks, 14 days for error_log, plus expired auth rows
       await db.query(`DELETE FROM health_checks WHERE checked_at < now() - interval '30 days'`);
       await db.query(`DELETE FROM error_log WHERE created_at < now() - interval '14 days'`);
+      await db.query(`DELETE FROM otp_codes WHERE expires_at < now() - interval '1 day'`);
+      await db.query(`DELETE FROM sessions WHERE expires_at < now()`);
+      await db.query(`DELETE FROM staff_sessions WHERE expires_at < now()`);
       await recordHeartbeat('health.sweep', 'System health & log prune', 10, 'ok', Date.now() - t0);
     } catch (e) {
       await recordHeartbeat('health.sweep', 'System health & log prune', 10, 'error', Date.now() - t0, e.message);

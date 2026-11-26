@@ -14,6 +14,9 @@ export async function migrate(db, log = console) {
     if (done.has(name)) continue;
     const sql = readFileSync(DIR + name, 'utf8');
     await db.tx(async (t) => {
+      if (db.kind === 'postgres') await t.query('SELECT pg_advisory_xact_lock(7249101)');
+      const already = (await t.query('SELECT 1 FROM schema_migrations WHERE name = $1', [name])).rows.length > 0;
+      if (already) return;
       // statements are separated by a line containing only "-- ;;" so each one runs on its own
       // (PGlite's parameterised query takes one statement at a time), all inside one transaction
       for (const stmt of sql.split(/^--\s*;;\s*$/m).map((s) => s.trim()).filter(Boolean)) await t.query(stmt);
