@@ -1490,3 +1490,16 @@ html.ft-fixed .main { margin-bottom: var(--ft-h, 0px); }
   .header__logo:hover { transform: translateY(-50%) scale(1.02); }
   .header__logo .logo__text { font-size: 22px; }
 }
+
+/* Shop menu: products stand on the menu like the slider (solo cut-outs): a soft shadow that follows the
+   product's shape, plus a small ground shadow under it. */
+.mega__inner--shop .mega__card .media--product { position: relative; overflow: visible; }
+.mega__inner--shop .mega__card .media--product > img {
+  z-index: 1; box-sizing: border-box; padding: 2% 4% 7%; object-fit: contain;
+  filter: drop-shadow(0 14px 14px rgba(15, 47, 29, .22)) drop-shadow(0 3px 4px rgba(15, 47, 29, .14));
+}
+.mega__inner--shop .mega__card .media--product::after {
+  content: ""; position: absolute; left: 50%; bottom: 0; width: 56%; height: 9%; transform: translateX(-50%);
+  border-radius: 50%; background: radial-gradient(ellipse at center, rgba(15, 47, 29, .30), rgba(15, 47, 29, 0) 70%);
+  filter: blur(4px); z-index: 0; pointer-events: none;
+}

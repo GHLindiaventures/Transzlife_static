@@ -25,11 +25,96 @@ const PUB = join(ROOT, 'public');
 const PHOTOS = [
   // plain-background pack shots: real cut-outs; the showcase is the matching lifestyle scene
   { key: 'pulmoclear', n: 4, ver: 2, file: 'Lung Booster Gummies.png', plain: true, scene: 'new-pulmo.jpeg' },
-  { key: 'breathefree', n: 6, ver: 2, file: 'Tranzlife Calm Inhaler Product Mockup.png', plain: true, scene: 'new-inhaler.jpeg' },
-  // lifestyle scenes only: the product photo / cut-out is a crop around the bottle
-  { key: 'liver', n: 5, ver: 3, file: 'new-liver.jpeg', scene: 'new-liver.jpeg', product: [0.2, 0.02, 0.6, 0.92] },
-  { key: 'reviva', n: 3, ver: 3, file: 'new-reviva.jpeg', scene: 'new-reviva.jpeg', product: [0.2, 0.03, 0.6, 0.91] },
+  // the menu / slider cut-out is the inhaler alone (the pack shot also has the box)
+  { key: 'breathefree', n: 6, ver: 2, file: 'Tranzlife Calm Inhaler Product Mockup.png', plain: true, scene: 'new-inhaler.jpeg',
+    solo: { file: 'Tranzlife Calm Inhaler Product Mockup.png', crop: [0.6, 0.08, 0.34, 0.86], bg: 'edges' } },
+  // lifestyle scenes only: the product photo is a crop around the bottle; the cut-out is the bottle alone
+  { key: 'liver', n: 5, ver: 3, file: 'new-liver.jpeg', scene: 'new-liver.jpeg', product: [0.2, 0.02, 0.6, 0.92],
+    solo: { file: 'Tranzlife Liver Booster Product Display.png', crop: [0.475, 0.03, 0.2, 0.9], bg: 'cream', solid: { mirror: 0.2 } } },
+  { key: 'reviva', n: 3, ver: 3, file: 'new-reviva.jpeg', scene: 'new-reviva.jpeg', product: [0.2, 0.03, 0.6, 0.91],
+    solo: { file: 'TranzLife Reviva Natural Roll-On Label.png', crop: [0.18, 0, 0.64, 0.862], bg: 'greenery', solid: {} } },
 ];
+
+/* What counts as background for the solo cut-outs (colours behind each product in its photo). */
+const spread = (c) => Math.max(...c) - Math.min(...c);
+const BG_TESTS = {
+  edges: null,                                                                  // plain white: match the edge colours
+  greenery: (c) => (c[1] > c[0] + 4 && c[1] >= c[2]) || spread(c) < 16,        // leaves / bokeh, grey marble
+  cream: (c) => c[2] > 140 && c[1] - c[2] < 38 && c[0] - c[2] < 55,            // cream wall + soft shadows (glass is yellow-green)
+};
+
+/**
+ * The product alone, on transparent: flood-fill the background from the crop edges, keep the biggest
+ * piece, fill holes inside it (labels, highlights), clear anything wider than the product's body
+ * (stray leaves / marble at the base) and feather the edge by a pixel.
+ */
+async function soloCut({ file, crop, bg, solid }) {
+  const src = join(SRC, file);
+  const { data, info } = await sharp(src).extract(box(await sharp(src).metadata(), crop)).removeAlpha().raw().toBuffer({ resolveWithObject: true });
+  const W = info.width, H = info.height, N = W * H;
+  const px = (i) => [data[i * 3], data[i * 3 + 1], data[i * 3 + 2]];
+  const d = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+  const test = BG_TESTS[bg];
+  const edge = [];
+  for (let x = 0; x < W; x += 4) edge.push(px(x), px((H - 1) * W + x));
+  for (let y = 0; y < H; y += 4) edge.push(px(y * W), px(y * W + W - 1));
+  const isBg = test || ((c) => edge.some((e) => d(c, e) < 70));
+  const step = test ? (bg === 'cream' ? 20 : 22) : 9;
+  const nb = (i) => { const x = i % W, y = (i / W) | 0; return [x > 0 ? i - 1 : -1, x < W - 1 ? i + 1 : -1, y > 0 ? i - W : -1, y < H - 1 ? i + W : -1]; };
+  const flood = (mask, seedOk, grow) => {
+    const q = new Int32Array(N); let h = 0, t = 0;
+    const seed = (i) => { if (!mask[i] && seedOk(i)) { mask[i] = 1; q[t++] = i; } };
+    for (let x = 0; x < W; x++) { seed(x); seed((H - 1) * W + x); }
+    for (let y = 0; y < H; y++) { seed(y * W); seed(y * W + W - 1); }
+    while (h < t) { const i = q[h++]; for (const j of nb(i)) if (j >= 0 && !mask[j] && grow(i, j)) { mask[j] = 1; q[t++] = j; } }
+  };
+  // 1) background reachable from the edges
+  const back = new Uint8Array(N);
+  flood(back, (i) => isBg(px(i)), (i, j) => d(px(j), px(i)) < step && isBg(px(j)));
+  // 2) biggest foreground piece
+  const lab = new Int32Array(N).fill(-1); let best = -1, bestN = 0;
+  for (let s = 0, id = 0; s < N; s++) {
+    if (back[s] || lab[s] >= 0) continue;
+    const q = [s]; lab[s] = id; let n = 0;
+    while (q.length) { const i = q.pop(); n++; for (const j of nb(i)) if (j >= 0 && !back[j] && lab[j] < 0) { lab[j] = id; q.push(j); } }
+    if (n > bestN) { bestN = n; best = id; }
+    id++;
+  }
+  const fg = (i) => lab[i] === best;
+  // 3) fill holes: only what the border can reach stays transparent
+  const outside = new Uint8Array(N);
+  flood(outside, (i) => !fg(i), (i, j) => !fg(j));
+  // 4) nothing wider than the body (measured over the middle 60% of the height)
+  let lo = W, hi = 0;
+  for (let y = Math.round(H * 0.2); y < H * 0.8; y++) for (let x = 0; x < W; x++) if (!outside[y * W + x]) { lo = Math.min(lo, x); hi = Math.max(hi, x); }
+  const m = Math.round(W * 0.01); lo = Math.max(0, lo - m); hi = Math.min(W - 1, hi + m);
+  const alpha = Buffer.alloc(N);
+  for (let i = 0; i < N; i++) { const x = i % W; alpha[i] = !outside[i] && x >= lo && x <= hi ? 255 : 0; }
+  // bottles are solid side to side: fill each row between its first and last opaque pixel, so glass that
+  // matched the wall colour doesn't leave bites in the outline
+  if (solid) {
+    const L = new Int32Array(H).fill(-1), R = new Int32Array(H).fill(-1);
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (alpha[y * W + x]) { if (L[y] < 0) L[y] = x; R[y] = x; }
+    // a symmetric bottle (mirror: the share of the height from where the body starts below the cap): the right
+    // edge is the left edge mirrored about the centre line measured on the label, so glass that matched the
+    // wall colour on one side can't leave bites or leftovers
+    let c = null;
+    if (solid.mirror != null) {
+      const mids = [];
+      for (let y = Math.round(H * 0.5); y < H * 0.85; y++) if (L[y] >= 0) mids.push((L[y] + R[y]) / 2);
+      mids.sort((p, q) => p - q); c = mids[mids.length >> 1];
+    }
+    for (let y = 0; y < H; y++) {
+      if (L[y] < 0) continue;
+      if (c != null && y < H * solid.mirror) continue;          // the (slanted) cap stays exactly as cut
+      const l = L[y], r = c != null ? Math.round(2 * c - l) : R[y];
+      for (let x = 0; x < W; x++) alpha[y * W + x] = x >= l && x <= r ? 255 : 0;
+    }
+  }
+  const soft = await sharp(alpha, { raw: { width: W, height: H, channels: 1 } }).blur(1).extractChannel(0).raw().toBuffer();
+  const png = await sharp(data, { raw: { width: W, height: H, channels: 3 } }).joinChannel(soft, { raw: { width: W, height: H, channels: 1 } }).png().toBuffer();
+  return sharp(png).trim({ threshold: 1 }).png().toBuffer();
+}
 
 const box = (meta, [l, t, w, h]) => {
   const left = Math.round(l * meta.width), top = Math.round(t * meta.height);
@@ -92,6 +177,7 @@ for (const p of PHOTOS) {
     product = await sharp(crop).resize({ width: 1100, withoutEnlargement: true }).webp({ quality: 84 }).toBuffer();
     cut = await roundedCrop(await sharp(crop).resize({ width: 816 }).toBuffer(), 56);
   }
+  if (p.solo) cut = await soloCut(p.solo);   // menus / home slider: the product alone
   await sharp(product).toFile(join(PUB, `img/p/${p.key}-v${p.ver}.webp`));
   await sharp(cut).resize(816, 1224, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } }).png({ compressionLevel: 9 }).toFile(join(PUB, `assets/product-${p.n}.png`));
   console.log(`${p.key}: showcase, photo and cut-out written`);
