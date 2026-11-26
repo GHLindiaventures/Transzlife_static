@@ -24,6 +24,7 @@ const productPatch = z.object({
   lowStockAt: z.number().int().min(0).max(100000), badge: str(30).nullable(), accent: z.string().regex(/^#[0-9a-fA-F]{6}$/).nullable(),
   tint: z.string().regex(/^#[0-9a-fA-F]{6}$/).nullable(), concerns: z.array(z.string().max(40)).max(10), sortOrder: z.number().int().min(0).max(10000),
   content: contentSchema, compliance: complianceSchema,
+  returnable: z.boolean(), returnDays: z.number().int().min(0).max(90).nullable(),     // return policy: eligible at all / days after delivery (null = shop-wide window)
 }).partial();
 
 /** What a complete product listing needs. Score = share of checks passed. */
@@ -107,7 +108,7 @@ export default async function catalogRoutes(app, { db, G, parse, audit, env, log
         id: p.id, name: p.name, short: p.short || '', tagline: p.tagline || '', format: p.format || '', size: p.size || '',
         price: p.price, mrp: p.mrp, active: p.active, gstRate: p.gst_rate == null ? null : Number(p.gst_rate), hsnCode: p.hsn_code || '',
         badge: p.badge, accent: p.accent, tint: p.tint, concerns: p.concerns || [], sortOrder: p.sort_order,
-        content: p.content || {}, compliance: p.compliance || {}, updatedAt: p.updated_at,
+        content: p.content || {}, compliance: p.compliance || {}, updatedAt: p.updated_at, returnable: p.returnable, returnDays: p.return_days,
         onHand: p.on_hand, reserved: p.reserved, available: p.available, lowStockAt: p.low_stock_at,
       },
       media: mediaRows, batches, unbatched: Math.max(0, p.on_hand - batchedUnits),
@@ -153,12 +154,13 @@ export default async function catalogRoutes(app, { db, G, parse, audit, env, log
         tint: body.tint === undefined ? p.tint : body.tint, concerns: body.concerns ?? p.concerns, sort_order: body.sortOrder ?? p.sort_order,
         content: body.content ? { ...(p.content || {}), ...body.content } : p.content,
         compliance: body.compliance ? { ...(p.compliance || {}), ...body.compliance } : p.compliance,
+        returnable: body.returnable ?? p.returnable, return_days: body.returnDays === undefined ? p.return_days : body.returnDays,
       };
       if (next.price > next.mrp) throw fail('Price cannot be more than the MRP.');
       await t.query(`UPDATE products SET name=$2, short=$3, tagline=$4, format=$5, size=$6, price=$7, mrp=$8, active=$9, gst_rate=$10, hsn_code=$11,
-                       badge=$12, accent=$13, tint=$14, concerns=$15, sort_order=$16, content=$17, compliance=$18, updated_at=now() WHERE id=$1`,
+                       badge=$12, accent=$13, tint=$14, concerns=$15, sort_order=$16, content=$17, compliance=$18, returnable=$19, return_days=$20, updated_at=now() WHERE id=$1`,
         [p.id, next.name, next.short, next.tagline, next.format, next.size, next.price, next.mrp, next.active, next.gst_rate, next.hsn_code,
-          next.badge, next.accent, next.tint, next.concerns, next.sort_order, JSON.stringify(next.content), JSON.stringify(next.compliance)]);
+          next.badge, next.accent, next.tint, next.concerns, next.sort_order, JSON.stringify(next.content), JSON.stringify(next.compliance), next.returnable, next.return_days]);
       if (body.lowStockAt !== undefined) await t.query('UPDATE inventory SET low_stock_at = $2 WHERE product_id = $1', [p.id, body.lowStockAt]);
       // audit only the fields that changed
       const before = {}, after = {};

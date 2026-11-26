@@ -14,14 +14,17 @@
   --glass-shadow-lg: 0 8px 24px rgba(15, 47, 29, .12), inset 0 1px 0 rgba(255, 255, 255, .75);
 }
 
-/* ---- colour glows behind the page so the blur has something to show ---- */
+/* ---- colour glows behind the page so the blur has something to show ----
+   The glows are painted in a 1700px tile that repeats down the page. Each glow must sit fully INSIDE the tile
+   (centre at least 0.7 x its radius from the top / bottom edge): when a glow touched the edge it was cut off and
+   left a hard horizontal line every 1700px. */
 .main {
   background-color: var(--bg);
   background-image:
-    radial-gradient(520px 420px at 6% 6%, rgba(224, 168, 38, .30), transparent 70%),
-    radial-gradient(620px 520px at 96% 22%, rgba(35, 128, 73, .22), transparent 70%),
+    radial-gradient(520px 420px at 6% 20%, rgba(224, 168, 38, .30), transparent 70%),
+    radial-gradient(620px 520px at 96% 28%, rgba(35, 128, 73, .22), transparent 70%),
     radial-gradient(560px 460px at 12% 62%, rgba(239, 192, 74, .26), transparent 70%),
-    radial-gradient(640px 520px at 90% 90%, rgba(26, 107, 60, .20), transparent 70%);
+    radial-gradient(640px 520px at 90% 76%, rgba(26, 107, 60, .20), transparent 70%);
   background-size: 100% 1700px;
   background-repeat: repeat-y;
 }

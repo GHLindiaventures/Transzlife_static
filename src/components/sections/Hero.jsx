@@ -152,22 +152,23 @@ export default function Hero() {
               aria-hidden={!isCurrent}
               inert={isCurrent ? undefined : ''}
             >
+              {/* only the first slide loads up front; the others fill in as they come up (the gradient matches meanwhile) */}
               <Media className="media--fill hero__bg" style={{ background: s.bg }}>
                 <img
                   src={`${BASE}assets/${s.image}`}
                   alt={s.alt}
                   width="2000"
                   height="1116"
-                  loading="eager"
+                  loading={index === 1 ? 'eager' : 'lazy'}
                   decoding="async"
-                  fetchpriority={index === 1 ? 'high' : undefined}
+                  fetchpriority={index === 1 ? 'high' : 'low'}
                 />
               </Media>
               <div className="hero__shade" />
               <div className="hero__content page-pad">
                 <Slot as="p" className="slot--eyebrow-w">{s.eyebrow}</Slot>
-                {/* the first slide carries the page's main heading */}
-                <Slot as={originalIndex === 0 ? 'h1' : 'h2'} className="slot--hero-title">
+                {/* the real first slide carries the page's only h1 (its loop clone at the end gets an h2) */}
+                <Slot as={index === 1 ? 'h1' : 'h2'} className="slot--hero-title">
                   <span className="hero__title-word">{s.title}</span>
                 </Slot>
                 <Slot as="p" className="slot--hero-sub">{s.sub}</Slot>

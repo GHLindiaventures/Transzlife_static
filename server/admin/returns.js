@@ -1,6 +1,8 @@
-// Returns: requested (staff log it when a customer asks) -> received & inspected (per item:
-// resellable / damaged / expired; resellable units go back on sale, into the same batch)
-// -> resolved (refund / replacement / no action) or rejected. Everything is audited.
+// Returns. A return starts when a customer asks for one in their account (or staff log it for them):
+//   requested -> under_review -> approved -> pickup_scheduled -> received ("Returned") -> refund_initiated -> resolved
+// or rejected (with a reason) before the items arrive. At "received" staff inspect every item
+// (resellable / damaged / expired; resellable units go back on sale, into the same batch) and then refund,
+// replace or close. Every step is recorded in return_events (the history customers and staff both see) and audited.
 import { z } from 'zod';
 import { restockItemUnits } from '../shop/batches.js';
 import { can } from './auth.js';
@@ -9,7 +11,26 @@ export const RETURN_REASONS = {
   damaged: 'Arrived damaged or leaking', wrong_item: 'Wrong item sent', expired: 'Expired or near expiry',
   not_effective: 'Did not suit / no effect', allergy: 'Allergy or side effect', changed_mind: 'Changed mind', other: 'Other',
 };
+/** Reasons where the customer should attach a photo of the product / parcel. */
+export const PHOTO_REASONS = ['damaged', 'wrong_item', 'expired'];
+
+/** What the customer sees for each internal status. */
+export const RETURN_STATUS_LABEL = {
+  requested: 'Return Requested', under_review: 'Under Review', approved: 'Approved', pickup_scheduled: 'Pickup Scheduled',
+  received: 'Returned', refund_initiated: 'Refund Initiated', resolved: 'Refund Completed', rejected: 'Rejected',
+};
+export const returnLabel = (r) => (r.status === 'resolved' && r.resolution === 'replacement' ? 'Replacement Sent'
+  : r.status === 'resolved' && r.resolution === 'no_action' ? 'Closed' : RETURN_STATUS_LABEL[r.status] || r.status);
+/** Statuses before the items are back with us. */
+export const BEFORE_RECEIPT = ['requested', 'under_review', 'approved', 'pickup_scheduled'];
+const CLOSED = ['resolved', 'rejected'];
+const ADVANCE = { under_review: ['requested'], approved: ['requested', 'under_review'], pickup_scheduled: ['approved'] };
+
 const fail = (message, status = 400) => Object.assign(new Error(message), { status });
+
+export async function logReturnEvent(q, returnId, status, note, actor) {
+  await q('INSERT INTO return_events (return_id, status, note, actor) VALUES ($1,$2,$3,$4)', [returnId, status, note || null, actor]);
+}
 
 export default async function returnRoutes(app, { db, G, parse, audit, issueRefund, loadOrder }) {
   // packs of each order item already in a (non-rejected) return
@@ -19,14 +40,16 @@ export default async function returnRoutes(app, { db, G, parse, audit, issueRefu
 
   app.get('/api/admin/returns/counts', G('view'), async () => {
     const r = (await db.query(`SELECT status, COUNT(*) AS n FROM returns GROUP BY status`)).rows.reduce((m, x) => ({ ...m, [x.status]: Number(x.n) }), {});
-    return { counts: { open: (r.requested || 0) + (r.received || 0), requested: r.requested || 0, received: r.received || 0, resolved: r.resolved || 0, rejected: r.rejected || 0 } };
+    const n = (k) => r[k] || 0;
+    return { counts: { open: Object.keys(r).filter((k) => !CLOSED.includes(k)).reduce((s, k) => s + r[k], 0), requested: n('requested'), under_review: n('under_review'),
+      approved: n('approved'), pickup_scheduled: n('pickup_scheduled'), received: n('received'), refund_initiated: n('refund_initiated'), resolved: n('resolved'), rejected: n('rejected') } };
   });
 
   app.get('/api/admin/returns', G('view'), async (req) => {
     const status = String(req.query.status || 'open');
-    const where = status === 'open' ? `r.status IN ('requested','received')` : status === 'all' ? 'TRUE' : 'r.status = $1';
+    const where = status === 'open' ? `r.status NOT IN ('resolved','rejected')` : status === 'all' ? 'TRUE' : 'r.status = $1';
     const rows = (await db.query(`
-      SELECT r.id, r.return_number, r.status, r.reason, r.resolution, r.refund_amount, r.created_at, r.received_at, r.resolved_at,
+      SELECT r.id, r.return_number, r.status, r.reason, r.resolution, r.refund_amount, r.source, r.created_at, r.received_at, r.resolved_at,
              o.order_number, o.payment_method, c.id AS customer_id, c.name AS customer, c.phone,
              (SELECT SUM(ri.qty) FROM return_items ri WHERE ri.return_id = r.id)::int AS packs,
              (SELECT string_agg(i.name, ', ') FROM return_items ri JOIN order_items i ON i.id = ri.order_item_id WHERE ri.return_id = r.id) AS products
@@ -45,16 +68,18 @@ export default async function returnRoutes(app, { db, G, parse, audit, issueRefu
     const items = (await db.query(`
       SELECT ri.id, ri.order_item_id, ri.qty, ri.condition, ri.restocked, i.name, i.size, i.pack, i.unit_price
         FROM return_items ri JOIN order_items i ON i.id = ri.order_item_id WHERE ri.return_id = $1 ORDER BY ri.id`, [id])).rows;
+    const events = (await db.query('SELECT status, note, actor, created_at FROM return_events WHERE return_id = $1 ORDER BY created_at, id', [id])).rows;
+    const photos = (await db.query('SELECT id, url, thumb_url FROM return_photos WHERE return_id = $1 ORDER BY created_at', [id])).rows;
     const refunded = Number((await db.query(`SELECT COALESCE(SUM(amount), 0) AS n FROM refunds WHERE order_id = $1 AND status <> 'failed'`, [r.order_id])).rows[0].n);
     const value = items.reduce((s, i) => s + i.unit_price * i.qty, 0);
-    return { ret: r, items, suggestedRefund: Math.max(0, Math.min(value, r.order_total - refunded)), refundable: r.order_total - refunded };
+    return { ret: r, items, events, photos, suggestedRefund: Math.max(0, Math.min(value, r.order_total - refunded)), refundable: r.order_total - refunded };
   }
 
   app.get('/api/admin/returns/:id', G('view'), async (req, reply) => {
     const id = parse(z.string().uuid(), req.params.id, reply); if (!id) return;
     const full = await loadReturn(id);
     if (!full) return reply.code(404).send({ error: 'Return not found.' });
-    return { ...full, reasons: RETURN_REASONS };
+    return { ...full, reasons: RETURN_REASONS, labels: RETURN_STATUS_LABEL };
   });
 
   // what can still be returned on an order (for the "Start a return" form)
@@ -86,13 +111,34 @@ export default async function returnRoutes(app, { db, G, parse, audit, issueRefu
       const n = (await t.query(`SELECT nextval('return_number_seq') AS n`)).rows[0].n;
       const number = `RET-${String(n).padStart(6, '0')}`;
       const r = (await t.query(
-        `INSERT INTO returns (return_number, order_id, status, reason, reason_note, created_by) VALUES ($1,$2,'requested',$3,$4,$5) RETURNING id`,
+        `INSERT INTO returns (return_number, order_id, status, reason, reason_note, created_by, source) VALUES ($1,$2,'requested',$3,$4,$5,'staff') RETURNING id`,
         [number, o.id, body.reason, body.note || null, req.staff.id])).rows[0];
       for (const it of body.items) await t.query('INSERT INTO return_items (return_id, order_item_id, qty) VALUES ($1,$2,$3)', [r.id, it.orderItemId, it.qty]);
+      await logReturnEvent(t.query, r.id, 'requested', `Logged by staff: ${RETURN_REASONS[body.reason]}`, `staff:${req.staff.email}`);
       await t.query('INSERT INTO order_events (order_id, from_status, to_status, note, actor) VALUES ($1,$2,$2,$3,$4)',
         [o.id, o.status, `Return ${number} requested: ${RETURN_REASONS[body.reason]}${body.note ? ` (${body.note})` : ''}`, `staff:${req.staff.email}`]);
       await audit(t.query, req, 'return.create', 'order', o.order_number, null, { return: number, reason: body.reason, items: body.items.length });
       return { ok: true, id: r.id, number };
+    });
+  });
+
+  // review -> approve -> schedule the pickup (each step is optional for returns that are logged by hand)
+  app.post('/api/admin/returns/:id/advance', G('orders.edit'), async (req, reply) => {
+    const id = parse(z.string().uuid(), req.params.id, reply); if (!id) return;
+    const body = parse(z.object({
+      to: z.enum(Object.keys(ADVANCE)), note: z.string().trim().max(500).optional().default(''),
+      pickupAt: z.string().datetime({ offset: true }).or(z.string().regex(/^\d{4}-\d{2}-\d{2}$/)).optional(),
+    }), req.body, reply); if (!body) return;
+    if (body.to === 'pickup_scheduled' && !body.pickupAt) return reply.code(400).send({ error: 'Choose the pickup date.', code: 'invalid' });
+    return db.tx(async (t) => {
+      const r = (await t.query('SELECT r.*, o.order_number FROM returns r JOIN orders o ON o.id = r.order_id WHERE r.id = $1 FOR UPDATE OF r', [id])).rows[0];
+      if (!r) throw fail('Return not found.', 404);
+      if (!ADVANCE[body.to].includes(r.status)) throw fail(`A return that is "${RETURN_STATUS_LABEL[r.status]}" cannot move to "${RETURN_STATUS_LABEL[body.to]}".`, 409);
+      await t.query(`UPDATE returns SET status = $2::text, pickup_at = COALESCE($3::timestamptz, pickup_at), pickup_note = COALESCE(NULLIF($4::text, ''), pickup_note) WHERE id = $1`,
+        [id, body.to, body.to === 'pickup_scheduled' ? body.pickupAt : null, body.to === 'pickup_scheduled' ? body.note : '']);
+      await logReturnEvent(t.query, id, body.to, body.to === 'pickup_scheduled' ? `Pickup on ${body.pickupAt.slice(0, 10)}${body.note ? `: ${body.note}` : ''}` : body.note, `staff:${req.staff.email}`);
+      await audit(t.query, req, 'return.advance', 'order', r.order_number, { status: r.status }, { return: r.return_number, status: body.to });
+      return { ok: true };
     });
   });
 
@@ -106,7 +152,7 @@ export default async function returnRoutes(app, { db, G, parse, audit, issueRefu
     const result = await db.tx(async (t) => {
       const r = (await t.query('SELECT * FROM returns WHERE id = $1 FOR UPDATE', [id])).rows[0];
       if (!r) throw fail('Return not found.', 404);
-      if (r.status !== 'requested') throw fail('This return has already been received.', 409);
+      if (!BEFORE_RECEIPT.includes(r.status)) throw fail('This return has already been received.', 409);
       const items = (await t.query('SELECT ri.*, i.pack FROM return_items ri JOIN order_items i ON i.id = ri.order_item_id WHERE ri.return_id = $1', [id])).rows;
       const cond = new Map(body.items.map((i) => [i.id, i.condition]));
       if (items.some((i) => !cond.has(Number(i.id)))) throw fail('Choose the condition of every item.');
@@ -119,6 +165,7 @@ export default async function returnRoutes(app, { db, G, parse, audit, issueRefu
         restocked += back;
       }
       await t.query(`UPDATE returns SET status = 'received', received_at = now(), staff_note = NULLIF(concat_ws(E'\\n', staff_note, $2::text), '') WHERE id = $1`, [id, body.note || null]);
+      await logReturnEvent(t.query, id, 'received', `Items received and checked${body.note ? `: ${body.note}` : ''}`, `staff:${req.staff.email}`);
       // every item of the order came back -> the order itself is "returned"
       const o = (await t.query('SELECT * FROM orders WHERE id = $1 FOR UPDATE', [r.order_id])).rows[0];
       const done = await alreadyReturned(t.query, o.id);
@@ -145,20 +192,39 @@ export default async function returnRoutes(app, { db, G, parse, audit, issueRefu
     const full = await loadReturn(id);
     if (!full) return reply.code(404).send({ error: 'Return not found.' });
     const r = full.ret;
-    if (r.status !== 'received') throw fail(r.status === 'requested' ? 'Mark the items as received first.' : 'This return is already closed.', 409);
+    if (r.status !== 'received') throw fail(BEFORE_RECEIPT.includes(r.status) ? 'Mark the items as received first.' : 'This return is already closed.', 409);
     let refund = null;
     if (body.resolution === 'refund') {
       if (!can(req.staff, 'refunds')) throw fail('Your role does not allow refunds.', 403);
       refund = await issueRefund(req, r.order_number, { amount: body.amount ?? full.suggestedRefund, reason: `Return ${r.return_number}: ${RETURN_REASONS[r.reason]}` });
     }
+    // a refund that the payment provider has not finished yet is "Refund Initiated"; staff (or an instant / manual refund) complete it
+    const next = body.resolution === 'refund' && refund.status !== 'processed' ? 'refund_initiated' : 'resolved';
     await db.tx(async (t) => {
       const cur = (await t.query('SELECT status FROM returns WHERE id = $1 FOR UPDATE', [id])).rows[0];
       if (cur.status !== 'received') throw fail('This return is already closed.', 409);
-      await t.query(`UPDATE returns SET status = 'resolved', resolution = $2, refund_amount = $3, resolved_at = now(),
-                       staff_note = NULLIF(concat_ws(E'\\n', staff_note, $4::text), '') WHERE id = $1`, [id, body.resolution, refund?.amount ?? null, body.note || null]);
+      await t.query(`UPDATE returns SET status = $5::text, resolution = $2::text, refund_amount = $3::int, resolved_at = CASE WHEN $5::text = 'resolved' THEN now() END,
+                       staff_note = NULLIF(concat_ws(E'\\n', staff_note, $4::text), '') WHERE id = $1`, [id, body.resolution, refund?.amount ?? null, body.note || null, next]);
+      const what = body.resolution === 'refund' ? (next === 'resolved' ? 'Refund completed' : 'Refund initiated') : body.resolution === 'replacement' ? 'Replacement being sent' : 'Closed, no further action';
+      await logReturnEvent(t.query, id, next, `${what}${body.note ? `: ${body.note}` : ''}`, `staff:${req.staff.email}`);
       await audit(t.query, req, 'return.resolve', 'order', r.order_number, null, { return: r.return_number, resolution: body.resolution, refund: refund?.amount });
     });
     return { ok: true, refund };
+  });
+
+  // the money has reached the customer
+  app.post('/api/admin/returns/:id/refund-complete', G('refunds'), async (req, reply) => {
+    const id = parse(z.string().uuid(), req.params.id, reply); if (!id) return;
+    return db.tx(async (t) => {
+      const r = (await t.query('SELECT r.*, o.order_number, o.id AS oid FROM returns r JOIN orders o ON o.id = r.order_id WHERE r.id = $1 FOR UPDATE OF r', [id])).rows[0];
+      if (!r) throw fail('Return not found.', 404);
+      if (r.status !== 'refund_initiated') throw fail('This return has no refund waiting to be completed.', 409);
+      await t.query(`UPDATE refunds SET status = 'processed' WHERE order_id = $1 AND status = 'pending'`, [r.oid]);
+      await t.query(`UPDATE returns SET status = 'resolved', resolved_at = now() WHERE id = $1`, [id]);
+      await logReturnEvent(t.query, id, 'resolved', 'Refund completed', `staff:${req.staff.email}`);
+      await audit(t.query, req, 'return.refund_complete', 'order', r.order_number, null, { return: r.return_number });
+      return { ok: true };
+    });
   });
 
   app.post('/api/admin/returns/:id/reject', G('orders.edit'), async (req, reply) => {
@@ -167,8 +233,9 @@ export default async function returnRoutes(app, { db, G, parse, audit, issueRefu
     return db.tx(async (t) => {
       const r = (await t.query('SELECT r.*, o.order_number FROM returns r JOIN orders o ON o.id = r.order_id WHERE r.id = $1 FOR UPDATE OF r', [id])).rows[0];
       if (!r) throw fail('Return not found.', 404);
-      if (r.status !== 'requested') throw fail(r.status === 'received' ? 'Items were already received: resolve it with "no action" instead.' : 'This return is already closed.', 409);
-      await t.query(`UPDATE returns SET status = 'rejected', resolved_at = now(), staff_note = $2 WHERE id = $1`, [id, body.note]);
+      if (!BEFORE_RECEIPT.includes(r.status)) throw fail(r.status === 'received' ? 'Items were already received: resolve it with "no action" instead.' : 'This return is already closed.', 409);
+      await t.query(`UPDATE returns SET status = 'rejected', resolved_at = now(), reject_reason = $2, staff_note = NULLIF(concat_ws(E'\\n', staff_note, $2::text), '') WHERE id = $1`, [id, body.note]);
+      await logReturnEvent(t.query, id, 'rejected', body.note, `staff:${req.staff.email}`);
       await audit(t.query, req, 'return.reject', 'order', r.order_number, null, { return: r.return_number, note: body.note });
       return { ok: true };
     });

@@ -717,8 +717,8 @@ hr {
    pointer-events: none;
 }
 
-.nav__item:hover>.mega,
-.nav__item:focus-within>.mega,
+/* open state is driven by Header.jsx (hover, tap, keyboard) so it also closes after a click / route change;
+   a CSS :hover / :focus-within would keep it open while the pointer or focus is still inside */
 .nav__item.is-open>.mega {
    opacity: 1;
    visibility: visible;

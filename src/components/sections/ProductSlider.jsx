@@ -258,7 +258,7 @@ export default function ProductSlider({ productIds }) {
                 '--ing-blur': ing.blur ? `${ing.blur}px` : '0px',
               }}
             >
-              <img src={ing.src} alt="" className="blendy-item-img" />
+              <img src={ing.src} alt="" className="blendy-item-img" loading="lazy" decoding="async" />
             </div>
           ))}
         </div>
@@ -274,7 +274,8 @@ export default function ProductSlider({ productIds }) {
             src={current.bottleImg}
             alt={current.alt}
             className="blendy-hero-bottle"
-            loading="eager"
+            loading="lazy"
+            decoding="async"
           />
         </div>
       </div>

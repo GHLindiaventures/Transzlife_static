@@ -454,7 +454,8 @@ export const PRODUCTS = [
 
 export const getProduct = (id) => PRODUCTS.find((p) => p.id === id);
 /** Products without a confirmed price are shown but cannot be added to the cart yet. */
-export const onSale = (p) => p?.price != null;
+export const hasPrice = (p) => Number.isFinite(p?.price) && p.price > 0;
+export const onSale = hasPrice;
 
 // Pack options shown on the product page (savings are placeholders).
 export const PACKS = [

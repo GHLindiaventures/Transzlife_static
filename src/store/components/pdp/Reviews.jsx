@@ -167,7 +167,7 @@ function Lightbox({ item, onClose }) {
 }
 
 /* ---------------- write / edit a review ---------------- */
-function WriteReview({ open, product, mine, onClose, onSaved }) {
+function WriteReview({ open, product, mine, startRating = 0, onClose, onSaved }) {
   const ref = useRef(null);
   const fileRef = useRef(null);
   const [rating, setRating] = useState(0);
@@ -182,7 +182,8 @@ function WriteReview({ open, product, mine, onClose, onSaved }) {
     const d = ref.current;
     if (!d) return;
     if (open) {
-      setRating(mine?.rating || 0); setTitle(mine?.title || ''); setBody(mine?.body || ''); setErrors({});
+      // ?rating=4 (a star tapped on the account page) pre-picks the stars for a new review
+      setRating(mine?.rating || (startRating >= 1 && startRating <= 5 ? startRating : 0)); setTitle(mine?.title || ''); setBody(mine?.body || ''); setErrors({});
       setPhotos(mine ? mine.media.map((m, k) => ({ id: mine.photoIds[k], thumb: m.thumb })) : []);
       if (!d.open) d.showModal();
     }
@@ -411,6 +412,7 @@ export default function Reviews({ product, data, onChanged }) {
         open={writing}
         product={product}
         mine={data.mine}
+        startRating={Number(new URLSearchParams(search).get('rating')) || 0}
         onClose={() => setWriting(false)}
         onSaved={(r) => {
           setWriting(false); setFilter('all'); setSort('recent');

@@ -4,6 +4,7 @@ import { ShieldCheck, Truck, Leaf, FlaskConical } from 'lucide-react';
 import { CERTIFICATIONS } from '../data/site';
 import { Accordion as UIAccordion, AccordionItem, AccordionTrigger, AccordionContent } from './ui/accordion.jsx';
 import LogoLoop from './rb/LogoLoop';
+import { usePageMeta } from '../../lib/pageMeta';
 
 // Fade/slide content in when it scrolls into view.
 export function Reveal({ as: Tag = 'div', className = '', delay = 0, children, ...rest }) {
@@ -117,8 +118,7 @@ export function PageHero({ eyebrow, title, text, image, tint }) {
   );
 }
 
-export function useTitle(title) {
-  useEffect(() => {
-    document.title = title ? `${title} | TranzLife Biosciences` : 'TranzLife Biosciences | Plant-Powered Wellness, Backed by Science';
-  }, [title]);
+/** Page title ("<title> | TranzLife Biosciences") and, optionally, its own meta description. */
+export function useTitle(title, description) {
+  usePageMeta(title, description);
 }

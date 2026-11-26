@@ -3,6 +3,8 @@ import { Link, useLocation } from 'react-router-dom';
 import { MapPin, Phone, Mail, Clock, Send, PhoneCall, Headset, Navigation, MessageCircle, Plus, Check, ArrowLeft } from 'lucide-react';
 import { CONTACT, PHOTOS, PRODUCTS, PHOTO_EXT } from '../content/site.js';
 import '../styles/contact.css';
+import { usePageMeta } from '../lib/pageMeta.js';
+import { CONTACT_ENDPOINT, honeypotProps, postForm } from '../lib/forms.js';
 
 const BASE = import.meta.env.BASE_URL;
 const telHref = (n) => `tel:${n.replace(/[^\d+]/g, '')}`;
@@ -10,7 +12,7 @@ const waHref = (text) => `https://wa.me/${CONTACT.whatsapp}${text ? `?text=${enc
 const mapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(CONTACT.mapQuery)}`;
 const mapsEmbed = `https://www.google.com/maps?q=${encodeURIComponent(CONTACT.mapQuery)}&output=embed`;
 
-const EMPTY = { name: '', email: '', phone: '', topic: '', city: '', product: '', method: 'Phone', message: '', consent: false };
+const EMPTY = { name: '', email: '', phone: '', topic: '', city: '', product: '', method: 'Phone', message: '', consent: false, website: '' };
 
 /** Plain-text version of the enquiry, used for the WhatsApp / email hand-off. */
 function enquiryText(v) {
@@ -44,7 +46,6 @@ function EnquiryForm() {
   const [errors, setErrors] = useState({});
   const [status, setStatus] = useState('idle'); // idle | sending | sent | handoff
   const id = useId();
-  const endpoint = import.meta.env.VITE_CONTACT_ENDPOINT;
 
   const set = (k) => (e) => {
     const val = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
@@ -60,15 +61,14 @@ function EnquiryForm() {
       e.currentTarget.querySelector('[aria-invalid="true"]')?.focus();
       return;
     }
-    // With a form endpoint configured (VITE_CONTACT_ENDPOINT), send it there.
-    // Without one, hand the enquiry to WhatsApp or email so it is never lost.
-    if (!endpoint) { setStatus('handoff'); return; }
+    // Sent to our server (validated + stored). If it cannot be reached, hand the enquiry to
+    // WhatsApp or email so it is never lost.
     setStatus('sending');
     try {
-      const res = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(v) });
-      if (!res.ok) throw new Error(String(res.status));
+      await postForm(CONTACT_ENDPOINT, v);
       setStatus('sent');
-    } catch {
+    } catch (err) {
+      if (err.status === 400) { setErrors({ message: err.message }); setStatus('idle'); return; }
       setStatus('handoff');
     }
   };
@@ -111,6 +111,7 @@ function EnquiryForm() {
 
   return (
     <form className="ct-form" onSubmit={onSubmit} noValidate>
+      <input {...honeypotProps} value={v.website} onChange={set('website')} />
       <div className="ct-form__head">
         <h2>{CONTACT.form.title}</h2>
         <p>{CONTACT.form.text}</p>
@@ -255,6 +256,7 @@ function Faq() {
 
 /* ---------------- page ---------------- */
 export default function Contact() {
+  usePageMeta('Contact us', 'Contact TranzLife Biosciences in Chennai: call, email or WhatsApp our wellness team, or send an enquiry about products, orders or partnerships.');
   const photo = PHOTOS.contactBanner;
   return (
     <div className="ct">

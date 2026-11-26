@@ -7,6 +7,7 @@ import { Breadcrumbs, useTitle } from '../components/Common';
 import { SITE } from '../data/site';
 import { inr } from '../utils/format';
 import { getProduct } from '../data/products';
+import ReturnSection from '../components/ReturnSection';
 import { useAuth } from '../context/AuthContext';
 import { api, newIdempotencyKey } from '../lib/api';
 import { getBuyNow, clearBuyNow } from '../lib/checkoutIntent';
@@ -448,6 +449,7 @@ export function OrderSuccess() {
       </div>
       {ok && <p>We'll share tracking details as soon as it ships. Questions? Message us on <a href={SITE.whatsapp} target="_blank" rel="noreferrer">WhatsApp</a>.</p>}
       {order.status === 'pending_payment' && <p>We haven't received the payment yet. If money was deducted, the order will be confirmed automatically within a few minutes.</p>}
+      <ReturnSection order={order} />
       <div className="success-actions">
         <Link to="/account" className="btn btn--lg btn--ghost">My orders</Link>
         <Link to="/shop" className="btn btn--lg">Continue shopping</Link>

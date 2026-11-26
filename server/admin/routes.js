@@ -573,6 +573,8 @@ export default async function adminRoutes(app, { db, razorpay, twilio, notifier,
       stock_alert_days: z.number().int().min(3).max(90).optional(),
       daily_summary: z.object({ enabled: z.boolean(), phones: z.array(z.string().regex(/^[6-9]\d{9}$/, 'Enter 10-digit mobile numbers.')).max(5), hour: z.number().int().min(6).max(22) }).optional(),
       review_request_days: z.number().int().min(2).max(60).optional(),
+      returns_enabled: z.boolean().optional(),                                   // customers can request returns from their account
+      return_window_days: z.number().int().min(0).max(90).optional(),            // days after delivery (a product can override it)
     }), req.body, reply); if (!body) return;
     const before = await loadSettings(db.query);
     for (const [k, v] of Object.entries(body)) {

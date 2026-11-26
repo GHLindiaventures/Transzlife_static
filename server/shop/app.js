@@ -11,6 +11,7 @@ import { createOrders } from './orders.js';
 import shopRoutes from './routes.js';
 import adminRoutes from '../admin/routes.js';
 import catalogPublic from './catalog.js';
+import enquiryRoutes from './enquiries.js';
 import { writeOffExpired } from './batches.js';
 import trackRoutes from './track.js';
 import { createReminders } from './reminders.js';
@@ -18,6 +19,7 @@ import reviewRoutes from './reviews.js';
 import contentRoutes from './content.js';
 import opsWebhooks, { createOps } from './ops.js';
 import seoRoutes from './seo.js';
+import customerReturnRoutes from './returns.js';
 import presenceRoutes, { createPresence } from './presence.js';
 import { createHealth } from '../admin/health.js';
 import { createCourier } from './courier.js';
@@ -27,7 +29,7 @@ const UNSAFE = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 export async function buildShopApp({ env = process.env, db, fastifyOptions = {}, logger = true } = {}) {
   const app = Fastify({
     logger: logger && { level: env.LOG_LEVEL || 'info', redact: ['req.headers.cookie', 'req.headers.authorization', 'res.headers["set-cookie"]'] },
-    trustProxy: true,            // Render terminates HTTPS in front of us
+    trustProxy: 1,               // one proxy (Render); server/client-ip.js has already reduced X-Forwarded-For to the trusted address
     bodyLimit: 64 * 1024,
     ...fastifyOptions,
   });
@@ -91,11 +93,13 @@ export async function buildShopApp({ env = process.env, db, fastifyOptions = {},
   await app.register(adminRoutes, { db, razorpay, twilio, notifier, reminders, presence, ops, health, courier, auth: { mode: auth.mode }, log, env });
   await app.register(trackRoutes, { db, log });
   await app.register(reviewRoutes, { db, env, log });
+  await app.register(customerReturnRoutes, { db, env, log });
   await app.register(presenceRoutes, { presence });
   await app.register(contentRoutes, { db });
   await app.register(opsWebhooks, { ops, env, log });
   await app.register(seoRoutes, { db, env });
   await app.register(catalogPublic, { db });
+  await app.register(enquiryRoutes, { db, log });
 
   // free stock held by payments that were never completed, and record job heartbeats
   const trackJob = (key, label, intervalMin, fn) => {

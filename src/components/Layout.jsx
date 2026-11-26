@@ -7,6 +7,7 @@ import Drawer from './Drawer.jsx';
 import Footer from './Footer.jsx';
 import ConsentBanner from './ConsentBanner.jsx';
 import LiveVisitors from './LiveVisitors.jsx';
+import ErrorBoundary from './ErrorBoundary.jsx';
 import { installTracking, track } from '../store/lib/track.js';
 
 export default function Layout() {
@@ -75,7 +76,8 @@ export default function Layout() {
       const footer = footerRef.current, main = mainRef.current;
       if (!footer || !main) return;
       const h = footer.offsetHeight;
-      const canFix = h <= window.innerHeight;
+      // not on phones: the URL bar resizing innerHeight would flip fixed/normal mid-scroll
+      const canFix = h <= window.innerHeight && window.innerWidth > 640;
       footer.classList.toggle('is-fixed', canFix);
       main.style.marginBottom = canFix ? `${h}px` : '';
     };
@@ -97,7 +99,10 @@ export default function Layout() {
       <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
 
       <main id="main" className="main" ref={mainRef} tabIndex={-1}>
-        <Outlet />
+        {/* a crash in one page shows a friendly message, not a blank screen; a new page starts fresh */}
+        <ErrorBoundary key={pathname}>
+          <Outlet />
+        </ErrorBoundary>
       </main>
 
       <Footer ref={footerRef} />

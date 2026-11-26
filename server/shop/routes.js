@@ -8,6 +8,9 @@
 //   PATCH  /api/account                     { name, email }
 //   GET    /api/account/addresses           saved addresses
 //   DELETE /api/account/addresses/:id
+//   GET    /api/account/devices             signed-in devices (sessions), this one marked
+//   DELETE /api/account/devices/:id         sign out one device
+//   POST   /api/account/devices/sign-out-others
 //   POST   /api/checkout/quote              { items, paymentMethod }  -> server-calculated totals
 //   POST   /api/checkout/place              place order (signed in)   -> order (+ Razorpay details)
 //   POST   /api/checkout/verify             Razorpay success callback -> order confirmed
@@ -39,6 +42,16 @@ function parse(schema, data, reply) {
   if (r.success) return r.data;
   reply.code(400).send({ error: r.error.issues[0]?.message || 'Invalid request.', code: 'invalid' });
   return null;
+}
+
+// "Chrome on Android" from a user-agent string, for Manage devices (no library needed for this much)
+export function deviceName(ua = '') {
+  ua = String(ua || '');
+  const browser = /Edg\//.test(ua) ? 'Edge' : /OPR\/|Opera/.test(ua) ? 'Opera' : /SamsungBrowser/.test(ua) ? 'Samsung Internet'
+    : /Firefox\//.test(ua) ? 'Firefox' : /Chrome\//.test(ua) ? 'Chrome' : /Safari\//.test(ua) ? 'Safari' : '';
+  const os = /iPhone/.test(ua) ? 'iPhone' : /iPad/.test(ua) ? 'iPad' : /Android/.test(ua) ? 'Android'
+    : /Windows/.test(ua) ? 'Windows' : /Mac OS X|Macintosh/.test(ua) ? 'Mac' : /Linux/.test(ua) ? 'Linux' : '';
+  return browser && os ? `${browser} on ${os}` : browser || os || 'Unknown device';
 }
 
 const customerOut = (c) => c && { phone: c.phone, name: c.name, email: c.email, marketingConsent: !!c.marketing_consent };
@@ -95,6 +108,26 @@ export default async function shopRoutes(app, { db, auth, orders, razorpay, noti
     const id = parse(z.string().uuid(), req.params.id, reply); if (!id) return;
     await db.query('DELETE FROM addresses WHERE id = $1 AND customer_id = $2', [id, req.customer.id]);
     return { ok: true };
+  });
+
+  // ---- devices (Manage devices on the account page) ----------------------
+  app.get('/api/account/devices', signedIn, async (req) => ({
+    devices: (await db.query(
+      `SELECT id, user_agent, created_at, last_seen_at FROM sessions
+        WHERE customer_id = $1 AND expires_at > now() ORDER BY last_seen_at DESC LIMIT 20`, [req.customer.id])).rows
+      .map((s) => ({ id: s.id, device: deviceName(s.user_agent), signedInAt: s.created_at, lastSeen: s.last_seen_at, current: s.id === req.sessionId })),
+  }));
+
+  app.delete('/api/account/devices/:id', signedIn, async (req, reply) => {
+    const id = parse(z.string().uuid(), req.params.id, reply); if (!id) return;
+    if (id === req.sessionId) return reply.code(400).send({ error: 'Use Log out to sign out of this device.' });
+    await db.query('DELETE FROM sessions WHERE id = $1 AND customer_id = $2', [id, req.customer.id]);
+    return { ok: true };
+  });
+
+  app.post('/api/account/devices/sign-out-others', signedIn, async (req) => {
+    const { rowCount } = await db.query('DELETE FROM sessions WHERE customer_id = $1 AND id <> $2', [req.customer.id, req.sessionId]);
+    return { ok: true, signedOut: rowCount };
   });
 
   // ---- checkout ----------------------------------------------------------
