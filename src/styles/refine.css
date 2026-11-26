@@ -495,3 +495,29 @@ main.main,main.main > .tl-store{display:flow-root}
   flex-shrink:0;
 }
 
+
+/* Marquee banner, drawn in two halves: each half scrolls by its own width (one smaller layer each),
+   instead of one huge strip that GPUs could not rasterise in full, so some words never appeared. */
+.banner__marquee {
+  animation: none !important;
+  will-change: auto !important;
+  /* start at the left edge: centred, the strip began ~4,500px off-screen and its end only reached
+     mid-screen late in each loop, leaving the right half empty */
+  align-self: flex-start !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+.banner__marquee-group {
+  will-change: transform;
+  animation: banner-half 24s linear infinite !important;
+}
+@keyframes banner-half {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-100%, 0, 0); }
+}
+@media (max-width: 749px) {
+  .banner__marquee-group { animation-duration: 16s !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .banner__marquee-group { animation: none !important; }
+}

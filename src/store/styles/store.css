@@ -1917,3 +1917,12 @@
 .tl-store:not(#tl-a):not(#tl-b) .pack span .money__sym { font-size: .7em; vertical-align: .3em; }
 .tl-store:not(#tl-a):not(#tl-b) .pack__save { font-style: normal; font-size: .72rem; font-weight: 700; color: var(--forest-2); }
 .tl-store:not(#tl-a):not(#tl-b) .cart__prepaid { margin: 0 0 8px; padding: 8px 12px; border-radius: 10px; background: var(--leaf-soft); color: var(--forest); font-size: .84rem; }
+
+/* Product-page questions: open quickly and show the answer at once (it used to take .45s and the text
+   faded in after a delay, which read as lag). Only the open row's height animates; no shadow transition. */
+.tl-store:not(#tl-a):not(#tl-b) .faq2__item { transition: border-color .2s; contain: layout paint; }
+.tl-store:not(#tl-a):not(#tl-b) .faq2__a { transition: grid-template-rows .26s cubic-bezier(.2, .7, .2, 1); }
+.tl-store:not(#tl-a):not(#tl-b) .faq2__a p { transform: none; transition: opacity .18s ease; }
+.tl-store:not(#tl-a):not(#tl-b) .faq2__item.is-on .faq2__a p { transition-delay: 0s; }
+.tl-store:not(#tl-a):not(#tl-b) .faq2__icon { transition: transform .26s cubic-bezier(.2, .7, .2, 1), background .2s, color .2s; }
+@media (prefers-reduced-motion: reduce) { .tl-store:not(#tl-a):not(#tl-b) .faq2__a { transition: none; } }

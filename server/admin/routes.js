@@ -19,6 +19,7 @@ import contentAdminRoutes from './content.js';
 import siteDocAdminRoutes from './site-docs.js';
 import discountRoutes from './discounts.js';
 import healthAdminRoutes from './health.js';
+import enquiryAdminRoutes from './enquiries.js';
 import { refreshRating } from '../shop/reviews.js';
 import { restoreStock } from '../shop/batches.js';
 
@@ -623,6 +624,7 @@ export default async function adminRoutes(app, { db, razorpay, twilio, notifier,
   await offerRoutes(app, { db, G, parse, audit });
   await contentAdminRoutes(app, { db, G, parse, audit });
   await siteDocAdminRoutes(app, { db, G, parse, audit });
+  await enquiryAdminRoutes(app, { db, G, parse, audit });
   await discountRoutes(app, { db, G });
   if (health) await healthAdminRoutes(app, { health, G });
 

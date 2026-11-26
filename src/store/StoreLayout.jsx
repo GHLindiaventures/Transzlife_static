@@ -5,6 +5,7 @@ import CartDrawer from './components/CartDrawer';
 import './styles/tailwind.css';
 import './styles/store.css';
 import './styles/host.css';
+import './styles/phi.css';   // golden-ratio layout + spacing (loaded last)
 
 /*
  * The TranzLife store pages (shop, product pages, cart, checkout, concerns, ingredients, journal),

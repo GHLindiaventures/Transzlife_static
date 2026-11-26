@@ -13,7 +13,7 @@ import { Completeness } from './Products';
 
 const TABS = [['basics', 'Basics'], ['photos', 'Photos'], ['pricing', 'Pricing'], ['stock', 'Stock & batches'], ['ingredients', 'Ingredients'], ['content', 'Product page'], ['label', 'Label & compliance']];
 const CERTS = ['AYUSH GMP', 'ISO 9001:2015', 'ISO 22000', 'FSSAI licensed', 'WHO-GMP', 'Vegan', 'Gluten free', 'Cruelty free', 'Halal'];
-const PACKS = [[1, 0], [2, 5], [3, 10]];
+const DEFAULT_PACKS = [{ qty: 1, label: 'Pack of 1', discountPct: 0 }, { qty: 2, label: 'Pack of 2', discountPct: 5 }, { qty: 3, label: 'Pack of 3', discountPct: 10 }];
 
 const toForm = (p) => ({
   name: p.name, short: p.short, tagline: p.tagline, format: p.format, size: p.size, badge: p.badge || '',
@@ -174,6 +174,10 @@ function Basics({ form, set }) {
 }
 
 function Pricing({ form, set }) {
+  const { data: pricing } = useApi('/api/admin/pricing');
+  const { data: settingsData } = useApi('/api/admin/settings');
+  const packs = pricing?.packs?.length ? pricing.packs : DEFAULT_PACKS;
+  const prepaidPct = Number(settingsData?.settings?.prepaid_discount_pct ?? 5);
   const price = Number(form.price) || 0, mrp = Number(form.mrp) || 0;
   const over = price > mrp;
   return (
@@ -194,8 +198,8 @@ function Pricing({ form, set }) {
       <section className="adm-card">
         <h2 className="adm-h2">What customers pay</h2>
         <table className="adm-table is-compact">
-          <thead><tr><th>Pack</th><th className="num">Price</th><th className="num">Prepaid (−5%)</th></tr></thead>
-          <tbody>{PACKS.map(([n, off]) => { const v = Math.round(price * n * (1 - off / 100)); return <tr key={n}><td>Pack of {n}{off ? <span className="adm-sub">{off}% pack saving</span> : null}</td><td className="num">₹{v.toLocaleString('en-IN')}</td><td className="num">₹{(v - Math.round(v * 0.05)).toLocaleString('en-IN')}</td></tr>; })}</tbody>
+          <thead><tr><th>Pack</th><th className="num">Price</th><th className="num">Prepaid (−{prepaidPct}%)</th></tr></thead>
+          <tbody>{packs.map((k) => { const v = Math.round(price * k.qty * (1 - k.discountPct / 100)); return <tr key={k.qty}><td>{k.label || `Pack of ${k.qty}`}{k.discountPct ? <span className="adm-sub">{k.discountPct}% pack saving</span> : null}</td><td className="num">₹{v.toLocaleString('en-IN')}</td><td className="num">₹{(v - Math.round(v * (prepaidPct / 100))).toLocaleString('en-IN')}</td></tr>; })}</tbody>
         </table>
         <p className="adm-muted" style={{ marginTop: 10 }}>Pack savings, the prepaid discount and shipping are set in Settings and apply to every product.</p>
       </section>

@@ -71,8 +71,10 @@ export function LeafIcon({ className = 'banner__leaf-icon' }) {
 /** Full-width banner with a scrolling headline and a button. */
 export function Banner() {
   const cleanWords = BANNER.words.map((w) => w.replace(/\.+$/, ''));
-  // Repeat sequence 3 times in each half to ensure seamless width on all displays
-  const sequence = [...cleanWords, ...cleanWords, ...cleanWords];
+  // Each half holds the words twice: wider than any screen (so the loop is seamless) but small enough
+  // for the browser to draw as one layer. Three copies per half made a 16,000px+ strip that browsers
+  // sometimes left partly undrawn (words missing at the right).
+  const sequence = [...cleanWords, ...cleanWords];
 
   return (
     <section className="banner">

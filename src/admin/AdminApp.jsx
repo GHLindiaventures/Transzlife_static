@@ -4,7 +4,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import {
   Home, Package, Boxes, Users, CreditCard, UserCog, History, Settings, LogOut, Menu, X, ShieldCheck,
-  Search, Bell, Moon, Sun, MoreHorizontal, Activity as ActivityIcon, ArrowRight, User, CheckCircle2, Undo2, BarChart3, Sprout, Star, BadgePercent, Megaphone, TicketPercent, ShieldCheck as Shield, FileText } from 'lucide-react';
+  Search, Bell, Moon, Sun, MoreHorizontal, Activity as ActivityIcon, ArrowRight, User, CheckCircle2, Undo2, BarChart3, Sprout, Star, BadgePercent, Megaphone, TicketPercent, ShieldCheck as Shield, Mail, FileText,
+} from 'lucide-react';
 import { api } from '../store/lib/api';
 import { markStaffBrowser } from '../store/lib/track';
 import { AdminContext, can, ErrorBox, initials, rs, useAdmin, useTheme, STATUS } from './ui';
@@ -25,6 +26,7 @@ import Discounts from './pages/Discounts';
 import Ingredients from './pages/Ingredients';
 import Compliance from './pages/Compliance';
 import Staff from './pages/Staff';
+import Enquiries from './pages/Enquiries';
 import { Activity, SettingsPage } from './pages/System';
 import SystemHealth from './pages/SystemHealth';
 import './admin.css';
@@ -81,6 +83,7 @@ export default function AdminApp() {
                     <Route path="discounts" element={<Discounts />} />
                     <Route path="ingredients" element={<Ingredients />} />
                     <Route path="compliance" element={<Compliance />} />
+                    <Route path="enquiries" element={<Enquiries />} />
                     {can(staff, 'staff') && <Route path="staff" element={<Staff />} />}
                     <Route path="activity" element={<Activity />} />
                     <Route path="health" element={<SystemHealth />} />
@@ -136,7 +139,7 @@ function Shell({ children }) {
     ['Catalog', [['/admin/products', 'Products & stock', Boxes], ['/admin/pricing', 'Pricing & offers', BadgePercent], ['/admin/reviews', 'Reviews', Star, { count: live.reviews, title: `${live.reviews} waiting for a check` }], ['/admin/ingredients', 'Ingredients', Sprout], ['/admin/compliance', 'Licences & certificates', Shield]]],
     ['Marketing', [['/admin/content', 'Website content', Megaphone], ['/admin/site-text', 'Site text', FileText]]],
     ['Insights', [['/admin/analytics', 'Sales analytics', BarChart3], ['/admin/visitors', 'Visitors & carts', ActivityIcon], ['/admin/discounts', 'Discounts & campaigns', TicketPercent]]],
-    ['People', [['/admin/customers', 'Customers', Users], can(staff, 'staff') && ['/admin/staff', 'Staff', UserCog]]],
+    ['People', [['/admin/customers', 'Customers', Users], ['/admin/enquiries', 'Enquiries & newsletter', Mail], can(staff, 'staff') && ['/admin/staff', 'Staff', UserCog]]],
     ['Settings', [['/admin/settings', 'Store settings', Settings], ['/admin/health', 'System health', ShieldCheck], ['/admin/activity', 'Activity log', History]]],
   ];
 
@@ -236,7 +239,7 @@ function CommandPalette({ onClose }) {
   const [active, setActive] = useState(0);
   const pages = [
     ['Home', '/admin', Home], ['Orders', '/admin/orders', Package], ['Orders to pack', '/admin/orders?stage=to_pack', Package],
-    ['Products & stock', '/admin/products', Boxes], ['Customers', '/admin/customers', Users], ['Returns', '/admin/returns', Undo2], ['Analytics', '/admin/analytics', BarChart3], ['Ingredients', '/admin/ingredients', Sprout], ['Licences & certificates', '/admin/compliance', Shield], ['Payments', '/admin/payments', CreditCard],
+    ['Products & stock', '/admin/products', Boxes], ['Customers', '/admin/customers', Users], ['Enquiries & newsletter', '/admin/enquiries', Mail], ['Returns', '/admin/returns', Undo2], ['Analytics', '/admin/analytics', BarChart3], ['Ingredients', '/admin/ingredients', Sprout], ['Licences & certificates', '/admin/compliance', Shield], ['Payments', '/admin/payments', CreditCard],
     can(staff, 'staff') && ['Staff', '/admin/staff', UserCog], ['Activity log', '/admin/activity', History], ['Settings', '/admin/settings', Settings],
   ].filter(Boolean);
 
@@ -250,7 +253,7 @@ function CommandPalette({ onClose }) {
   const items = [
     ...(res?.orders || []).map((o) => ({ group: 'Orders', key: o.order_number, icon: Package, title: o.order_number, sub: o.name, meta: `${STATUS[o.status]?.[0] || o.status} · ${rs(o.total)}`, to: `/admin/orders/${o.order_number}` })),
     ...(res?.customers || []).map((c) => ({ group: 'Customers', key: c.id, icon: User, title: c.name || '(no name yet)', sub: `+91 ${c.phone}${c.email ? ` · ${c.email}` : ''}`, to: `/admin/customers/${c.id}` })),
-    ...(res?.products || []).map((p) => ({ group: 'Products', key: p.id, icon: Boxes, title: p.name, sub: p.size, meta: `${p.available} available`, to: '/admin/products' })),
+    ...(res?.products || []).map((p) => ({ group: 'Products', key: p.id, icon: Boxes, title: p.name, sub: p.size, meta: `${p.available} available`, to: `/admin/products/${p.id}` })),
     ...pages.filter(([t]) => !q || t.toLowerCase().includes(q.toLowerCase())).map(([t, to, I]) => ({ group: 'Go to', key: to, icon: I, title: t, to })),
   ];
   const go = (it) => { onClose(); navigate(it.to); };

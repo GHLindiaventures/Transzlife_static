@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import { createDb } from '../db/index.js';
 import { buildShopApp } from './app.js';
 import { TEST_TWILIO_ENV } from './test-twilio.js';
+import { hashPassword, newTotpSecret, totpCode } from '../admin/crypto.js';
 
 const ORIGIN = 'http://localhost:3000';
 let app, db;
@@ -69,4 +70,41 @@ test('newsletter: sign-up is stored once, repeats are fine', async () => {
   const { rows } = await db.query("SELECT email, source FROM newsletter_subscribers WHERE email = 'reader@example.com'");
   assert.deepEqual(rows, [{ email: 'reader@example.com', source: 'home' }]);
   assert.equal((await call('/api/newsletter', { email: 'bad' })).status, 400);
+});
+
+test('admin enquiries & newsletter: list, update status, and export csv', async () => {
+  assert.equal((await app.inject({ method: 'GET', url: '/api/admin/enquiries' })).statusCode, 401);
+
+  const secret = newTotpSecret();
+  await db.query(
+    `INSERT INTO staff_users (email, name, role, password_hash, must_change_password, totp_secret, totp_enabled)
+     VALUES ('owner@tranzlife.in', 'Owner', 'owner', $1, false, $2, true)`,
+    [await hashPassword('StrongPass!2026'), secret],
+  );
+  const login = await app.inject({
+    method: 'POST', url: '/api/admin/auth/login',
+    headers: { origin: ORIGIN, host: 'localhost:3000' },
+    payload: { email: 'owner@tranzlife.in', password: 'StrongPass!2026', code: totpCode(secret) },
+  });
+  assert.equal(login.statusCode, 200);
+  const cookie = login.headers['set-cookie'];
+
+  const list = await app.inject({ method: 'GET', url: '/api/admin/enquiries?status=new', headers: { cookie } });
+  assert.equal(list.statusCode, 200);
+  const body = list.json();
+  assert.ok(body.rows.length >= 1);
+  assert.equal(body.newsletter.total, 1);
+
+  const id = body.rows[0].id;
+  const patch = await app.inject({
+    method: 'PATCH', url: `/api/admin/enquiries/${id}`,
+    headers: { cookie, origin: ORIGIN, host: 'localhost:3000' },
+    payload: { status: 'handled' },
+  });
+  assert.equal(patch.statusCode, 200);
+  assert.equal(patch.json().status, 'handled');
+
+  const csv = await app.inject({ method: 'GET', url: '/api/admin/newsletter.csv', headers: { cookie } });
+  assert.equal(csv.statusCode, 200);
+  assert.match(csv.body, /reader@example\.com/);
 });

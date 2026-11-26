@@ -167,13 +167,13 @@ function ReturnForm({ number, data, onClose, onDone }) {
  * Returns block for the order page: the policy for this order, the "Return Product" button (delivered and
  * eligible only), and every return already made with its live status.
  */
-export default function ReturnSection({ order }) {
-  const [data, setData] = useState(null);
+export default function ReturnSection({ order, initial = null }) {
+  const [data, setData] = useState(initial);
   const [open, setOpen] = useState(false);
   const [sent, setSent] = useState('');
   const delivered = ['delivered', 'returned'].includes(order.status);
   const load = useCallback(() => loadOrderReturns(order.number).then(setData).catch(() => setData(null)), [order.number]);
-  useEffect(() => { if (delivered) load(); }, [delivered, load]);
+  useEffect(() => { if (delivered && !initial) load(); }, [delivered, load, initial]);
 
   if (!delivered || !data) return null;
   const { policy, returns } = data;
