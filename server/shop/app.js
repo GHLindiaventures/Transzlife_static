@@ -46,7 +46,11 @@ export async function buildShopApp({ env = process.env, db, fastifyOptions = {},
   const presence = createPresence();
   const ops = createOps({ db, twilio, env, log });
   const courier = createCourier({ db, notifier, env, log });
-  const health = createHealth({ db, razorpay, twilio, media: { configured: !!(env.S3_BUCKET || env.R2_BUCKET) }, env, log });
+  const health = createHealth({
+    db, razorpay, twilio,
+    media: { configured: !!(env.AWS_ENDPOINT_URL_S3 && env.AWS_ACCESS_KEY_ID && env.AWS_SECRET_ACCESS_KEY) },
+    env, log,
+  });
 
   // JSON only (no text/plain or form posts, which other sites could submit). The webhook route
   // also keeps the exact raw body, needed to check Razorpay's signature.
