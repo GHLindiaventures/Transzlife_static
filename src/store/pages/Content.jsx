@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowRight, Sprout, Microscope, Factory, PackageCheck, FlaskConical, ShieldCheck, Leaf, HeartHandshake, Target, Eye, Phone, Mail, MapPin, Clock, Check, Dna, BrainCircuit } from 'lucide-react';
 import { SITE } from '../data/site';
@@ -136,19 +136,6 @@ export function About() {
 export const BLOGS_URL = '/blogs';
 export const blogUrl = (id) => `${BLOGS_URL}/${id}`;
 
-/** Sets the page's meta description while mounted (helps search results show the excerpt). */
-function useMetaDescription(text) {
-  useEffect(() => {
-    if (!text) return undefined;
-    let tag = document.querySelector('meta[name="description"]');
-    const created = !tag;
-    if (created) { tag = document.createElement('meta'); tag.name = 'description'; document.head.appendChild(tag); }
-    const prev = tag.content;
-    tag.content = text;
-    return () => { if (created) tag.remove(); else tag.content = prev; };
-  }, [text]);
-}
-
 /** Inline text: **bold** and *italic*. */
 function Rich({ text }) {
   const parts = String(text).split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g).filter(Boolean);
@@ -191,8 +178,7 @@ const blocks = (body) => (Array.isArray(body) ? body : [body]);
 
 export function Journal() {
   useCatalog();
-  useTitle('Blogs');
-  useMetaDescription('TranzLife blogs: practical, easy-to-read guides on quitting smoking, lung, liver and menstrual wellness, immunity and everyday Ayurvedic habits.');
+  useTitle('Blogs', 'TranzLife blogs: practical, easy-to-read guides on quitting smoking, lung, liver and menstrual wellness, immunity and everyday Ayurvedic habits.');
   const [cat, setCat] = useState('');
   const cats = [...new Set(ARTICLES.map((a) => a.category))];
   const list = ARTICLES.filter((a) => !cat || a.category === cat);
@@ -242,8 +228,7 @@ export function Article() {
   useCatalog();
   const { id } = useParams();
   const a = getArticle(id);
-  useTitle(a?.title);
-  useMetaDescription(a?.excerpt);
+  useTitle(a?.title, a?.excerpt);
   if (!a) return <NotFound />;
   const concern = getConcern(a.concern);
   const products = PRODUCTS.filter((p) => p.concerns.includes(a.concern)).slice(0, 2);

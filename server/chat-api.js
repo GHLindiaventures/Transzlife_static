@@ -17,6 +17,7 @@ import { readFileSync }   from 'node:fs';
 import { fileURLToPath }  from 'node:url';
 import { dirname, join }  from 'node:path';
 import { GoogleGenAI }    from '@google/genai';
+import { createWindowLimiter } from './client-ip.js';
 
 // ── Ollama-bot imports (used ONLY in the Ollama fallback path) ────────────────
 import { emergencyReply, systemPrompt } from './advisor-prompt.js';
@@ -249,6 +250,29 @@ function readJson(req){
 function createChatApi(env = {}){
   const ORIGIN = env.CHAT_ORIGIN || '';
 
+  // Every chat message costs Gemini quota (and money once billing is on), so it is rate limited:
+  // per visitor (req.clientIp, set in server/index.js from the trusted end of X-Forwarded-For)
+  // and for the whole site, so a script rotating through many addresses still hits a ceiling.
+  const num = (v, d) => { const n = Number.parseInt(v, 10); return Number.isFinite(n) && n > 0 ? n : d; };
+  const perIp  = createWindowLimiter({ limit: num(env.CHAT_PER_IP_10MIN, 30), windowMs: 10 * 60_000 });
+  const siteWide = createWindowLimiter({ limit: num(env.CHAT_GLOBAL_PER_HOUR, 1500), windowMs: 60 * 60_000 });
+  let warnedAt = 0;
+  function overLimit(req, res){
+    const ip = req.clientIp || req.socket?.remoteAddress || 'unknown';
+    const mine = perIp(ip);
+    const all = mine.ok ? siteWide('all') : { ok: true };
+    if (mine.ok && all.ok) return false;
+    if (!all.ok && Date.now() - warnedAt > 10 * 60_000){
+      warnedAt = Date.now();
+      console.error('[chat] site-wide chat limit reached (CHAT_GLOBAL_PER_HOUR): possible abuse, replies paused until the hour resets');
+    }
+    res.writeHead(429, { 'Content-Type': 'application/json', 'Retry-After': String(mine.ok ? all.retryAfter : mine.retryAfter) });
+    res.end(JSON.stringify({ error: mine.ok
+      ? 'Tulsi is very busy right now. Please try again a little later, or message us on WhatsApp.'
+      : 'You have sent a lot of messages in a short time. Please wait a few minutes and try again.' }));
+    return true;
+  }
+
   // Primary: Gemini (standalone — own prompt, own keys)
   const gemini = createGeminiEngine(env);
 
@@ -326,8 +350,9 @@ function createChatApi(env = {}){
       res.setHeader('Vary', 'Origin');
     }
     if (req.method === 'OPTIONS'){ res.writeHead(204); return res.end(); }
-    if (req.method === 'POST' && path === '/api/chat')   return chat(req, res);
+    if (req.method === 'POST' && path === '/api/chat')   return overLimit(req, res) || chat(req, res);
     if (req.method === 'POST' && path === '/api/insight'){
+      if (overLimit(req, res)) return;
       readJson(req).then(b => ollama.insights.enquire(String(b.enquire || ''))).catch(() => {});
       res.writeHead(204); return res.end();
     }

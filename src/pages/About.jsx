@@ -1,5 +1,6 @@
 import { useLayoutEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { usePageMeta } from '../lib/pageMeta.js';
 import html from './about/about-page.html?raw';
 import { initHealInterlude } from './about/heal-interlude.js';
 import { initAboutStory } from './about/about-story.js';
@@ -16,6 +17,7 @@ const TITLE = 'About Us | TranzLife Biosciences - Nature Meets Scientific Innova
  * page scripts animate it; they are started on mount and fully removed on unmount.
  */
 export default function About() {
+  usePageMeta(TITLE, 'The TranzLife Biosciences story: a Chennai company bringing Ayurvedic botanicals and modern science together in everyday wellness products.', { exact: true });
   const ref = useRef(null);
   const navigate = useNavigate();
 

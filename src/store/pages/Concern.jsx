@@ -12,7 +12,7 @@ import NotFound from './NotFound';
 
 export function ConcernsIndex() {
   useCatalog();
-  useTitle('Shop by concern');
+  useTitle('Shop by concern', 'Find the right TranzLife product by health concern: breathing, liver, energy, period comfort, blood sugar, stress or quitting smoking.');
   return (
     <>
       <section className="shop-hero">
@@ -47,7 +47,7 @@ export default function Concern() {
   useCatalog();
   const { id } = useParams();
   const c = getConcern(id);
-  useTitle(c?.title);
+  useTitle(c?.title, c?.intro?.slice(0, 160));
   if (!c) return <NotFound />;
 
   const products = PRODUCTS.filter((p) => p.concerns.includes(c.id));

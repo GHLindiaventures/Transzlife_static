@@ -11,6 +11,7 @@ import { createOrders } from './orders.js';
 import shopRoutes from './routes.js';
 import adminRoutes from '../admin/routes.js';
 import catalogPublic from './catalog.js';
+import enquiryRoutes from './enquiries.js';
 import { writeOffExpired } from './batches.js';
 import trackRoutes from './track.js';
 import { createReminders } from './reminders.js';
@@ -25,7 +26,7 @@ const UNSAFE = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 export async function buildShopApp({ env = process.env, db, fastifyOptions = {}, logger = true } = {}) {
   const app = Fastify({
     logger: logger && { level: env.LOG_LEVEL || 'info', redact: ['req.headers.cookie', 'req.headers.authorization', 'res.headers["set-cookie"]'] },
-    trustProxy: true,            // Render terminates HTTPS in front of us
+    trustProxy: 1,               // one proxy (Render); server/client-ip.js has already reduced X-Forwarded-For to the trusted address
     bodyLimit: 64 * 1024,
     ...fastifyOptions,
   });
@@ -85,6 +86,7 @@ export async function buildShopApp({ env = process.env, db, fastifyOptions = {},
   await app.register(opsWebhooks, { ops, env, log });
   await app.register(seoRoutes, { db, env });
   await app.register(catalogPublic, { db });
+  await app.register(enquiryRoutes, { db, log });
 
   // free stock held by payments that were never completed
   const sweep = setInterval(() => {

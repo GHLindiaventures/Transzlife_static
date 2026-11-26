@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { openConsent } from '../store/lib/track.js';
 import { BRAND, CONTACT, FOOTER, SOCIAL_LINKS } from '../content/site.js';
 import '../styles/footer.css';
+import { honeypotProps, isEmail, subscribe } from '../lib/forms.js';
 
 /* ---------- small inline icons (stroke = currentColor) ---------- */
 const I = {
@@ -62,32 +63,30 @@ function LinkColumn({ title, links, chevrons }) {
   );
 }
 
-/** Newsletter: posts to VITE_NEWSLETTER_ENDPOINT when set, otherwise opens an email to subscribe. */
+/** Newsletter: saved on our server (see server/shop/enquiries.js); an email hand-off if that fails. */
 function Subscribe() {
   const [email, setEmail] = useState('');
   const [state, setState] = useState('idle'); // idle | sending | done | error
-  const endpoint = import.meta.env.VITE_NEWSLETTER_ENDPOINT;
+  const [hp, setHp] = useState('');
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    if (!/^\S+@\S+\.\S+$/.test(email.trim())) { setState('error'); return; }
-    if (!endpoint) {
-      window.location.href = `mailto:${BRAND.email}?subject=${encodeURIComponent('Subscribe me to TranzLife updates')}&body=${encodeURIComponent(`Please add ${email.trim()} to the TranzLife wellness updates.`)}`;
-      setState('done');
-      return;
-    }
+    if (!isEmail(email)) { setState('error'); return; }
     setState('sending');
     try {
-      const res = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify({ email: email.trim() }) });
-      if (!res.ok) throw new Error(String(res.status));
+      await subscribe(email, 'footer', hp);
       setState('done');
-    } catch {
-      setState('error');
+    } catch (err) {
+      if (err.status === 400) { setState('error'); return; }
+      // server unreachable: fall back to an email so the sign-up is not lost
+      window.location.href = `mailto:${BRAND.email}?subject=${encodeURIComponent('Subscribe me to TranzLife updates')}&body=${encodeURIComponent(`Please add ${email.trim()} to the TranzLife wellness updates.`)}`;
+      setState('done');
     }
   };
 
   return (
     <form className="ft-sub" onSubmit={onSubmit} noValidate>
+      <input {...honeypotProps} value={hp} onChange={(e) => setHp(e.target.value)} />
       <label className="ft-sub__field">
         <span className="visually-hidden">Email address</span>
         <Icon name="mail" size={20} />
