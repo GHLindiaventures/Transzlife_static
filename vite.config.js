@@ -31,6 +31,7 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       port: 5173,
+      open: true,
       // shop API (`npm run dev:api`, port 3000). Tulsi chat is answered by the plugin above first.
       proxy: {
         '/api': {
