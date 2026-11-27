@@ -14,6 +14,7 @@ import { api } from '../../store/lib/api';
 import { ErrorBox, Notice, can, dt, useAdmin } from '../ui';
 import { articleExtensions } from '../cms/extensions';
 import Toolbar, { Modal } from '../cms/Toolbar';
+import SeoPanel, { ScoreBadge, useSeoAnalysis } from '../cms/SeoPanel';
 import { POST_STATUS } from './BlogPosts';
 import '../cms/editor.css';
 
@@ -21,8 +22,8 @@ const AUTOSAVE_MS = 2000;
 const SLUG_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 const slugify = (s) => String(s || '').normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase()
   .replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 100).replace(/-+$/g, '');
-const FIELDS = ['title', 'slug', 'excerpt', 'featuredImage', 'featuredImageAlt', 'categoryId', 'authorId', 'concern', 'disclaimer', 'featured', 'tags'];
-const fromPost = (p) => Object.fromEntries(FIELDS.map((k) => [k, p[k] ?? (k === 'tags' ? [] : k === 'featured' ? false : '')]));
+const FIELDS = ['title', 'slug', 'excerpt', 'featuredImage', 'featuredImageAlt', 'categoryId', 'authorId', 'concern', 'disclaimer', 'featured', 'tags', 'seo'];
+const fromPost = (p) => Object.fromEntries(FIELDS.map((k) => [k, k === 'seo' ? structuredClone(p.seo) : p[k] ?? (k === 'tags' ? [] : k === 'featured' ? false : '')]));
 const STATIC_LINKS = ['/', '/shop', '/blogs', '/concerns', '/ingredients', '/about', '/faq', '/contact', '/policies/shipping', '/policies/privacy', '/policies/terms'];
 
 export default function PostEditor() {
@@ -31,19 +32,19 @@ export default function PostEditor() {
   const reload = useCallback(() => {
     setState((s) => ({ ...s, loading: true, error: '' }));
     api(`/api/admin/cms/posts/${id}`)
-      .then((d) => setState({ loading: false, error: '', post: d.post, choices: d.choices }))
+      .then((d) => setState({ loading: false, error: '', post: d.post, choices: d.choices, seoContext: d.seoContext }))
       .catch((e) => setState({ loading: false, error: e.message, post: null, choices: null }));
   }, [id]);
   useEffect(() => { reload(); }, [reload]);
   if (state.error) return <><BackLink /><ErrorBox>{state.error}</ErrorBox></>;
   if (!state.post) return <><BackLink /><p className="adm-muted">Loading the article…</p></>;
   // key: a reload (e.g. after a conflict) starts the editor fresh from the server's copy
-  return <EditorScreen key={`${state.post.id}:${state.post.updatedAt}`} initial={state.post} choices={state.choices} onReload={reload} />;
+  return <EditorScreen key={`${state.post.id}:${state.post.updatedAt}`} initial={state.post} choices={state.choices} seoContext={state.seoContext} onReload={reload} />;
 }
 
 const BackLink = () => <Link to="/admin/blog" className="adm-back"><ArrowLeft size={16} /> All articles</Link>;
 
-function EditorScreen({ initial, choices, onReload }) {
+function EditorScreen({ initial, choices, seoContext, onReload }) {
   const { staff } = useAdmin();
   const navigate = useNavigate();
   const [post, setPost] = useState(initial);             // the server's copy (status, dates, updatedAt)
@@ -55,6 +56,8 @@ function EditorScreen({ initial, choices, onReload }) {
   const [dialog, setDialog] = useState(null);           // link | image | video (toolbar) | preview | delete
   const [menu, setMenu] = useState(false);
   const [words, setWords] = useState(initial.words);
+  const [rev, setRev] = useState(0);                   // bumps on every edit in the text (for the live SEO checks)
+  const [side, setSide] = useState('details');         // sidebar: details | seo
   const [links, setLinks] = useState(STATIC_LINKS);
 
   // edits are counted; a save covers the edits made up to when it started
@@ -74,7 +77,7 @@ function EditorScreen({ initial, choices, onReload }) {
     content: initial.content,
     editable: mayEdit,
     editorProps: { attributes: { class: 'cms-prose', 'aria-label': 'Article text', spellcheck: 'true' } },
-    onUpdate: ({ editor: e }) => { markDirty(); setWords(e.getText().trim().split(/\s+/).filter(Boolean).length); },
+    onUpdate: ({ editor: e }) => { markDirty(); setRev((r) => r + 1); setWords(e.getText().trim().split(/\s+/).filter(Boolean).length); },
   });
 
   const set = (k) => (v) => {
@@ -101,7 +104,7 @@ function EditorScreen({ initial, choices, onReload }) {
       title: f.title, excerpt: f.excerpt, content: editor.getJSON(),
       featuredImage: f.featuredImage.trim() || null, featuredImageAlt: f.featuredImageAlt,
       categoryId: f.categoryId || null, authorId: f.authorId || null, concern: f.concern || null,
-      disclaimer: f.disclaimer.trim() || null, featured: !!f.featured, tags: f.tags,
+      disclaimer: f.disclaimer.trim() || null, featured: !!f.featured, tags: f.tags, seo: f.seo,
       ...(SLUG_RE.test(f.slug) ? { slug: f.slug } : {}),
     };
     if (keepalive) {
@@ -196,6 +199,8 @@ function EditorScreen({ initial, choices, onReload }) {
     return () => window.removeEventListener('resize', fit);
   }, [form.title]);
 
+  const seoForm = useMemo(() => ({ ...form, id: post.id }), [form, post.id]);
+  const analysis = useSeoAnalysis({ editor, form: seoForm, ctx: seoContext, tick: rev });
   const live = post.live;
   const cat = choices.categories.find((c) => c.id === form.categoryId);
 
@@ -213,7 +218,11 @@ function EditorScreen({ initial, choices, onReload }) {
           {mayEdit && <button className="adm-btn is-ghost" type="button" onClick={saveNow} disabled={busy || save.state === 'conflict'}><Check size={16} /> Save</button>}
           {can(staff, 'content.publish') && (live
             ? <button className="adm-btn is-ghost" type="button" onClick={() => status('unpublish', 'Unpublished. The article is a draft again and is no longer on the website.')} disabled={busy}><EyeOff size={16} /> Unpublish</button>
-            : post.status !== 'archived' && <button className="adm-btn is-gold" type="button" onClick={() => status('publish', 'Published. It is live on the website now.')} disabled={busy || save.state === 'conflict'}><Globe size={16} /> Publish</button>)}
+            : post.status !== 'archived' && <button className="adm-btn is-gold" type="button" onClick={() => {
+              // advice only: a low SEO score never blocks publishing
+              if (analysis && analysis.score < 50 && !window.confirm(`The SEO checklist is at ${analysis.score}/100. Publish anyway?\n\nThe SEO tab lists what would help.`)) return;
+              status('publish', 'Published. It is live on the website now.');
+            }} disabled={busy || save.state === 'conflict'}><Globe size={16} /> Publish</button>)}
           <div style={{ position: 'relative' }}>
             <button className="adm-icon" type="button" aria-label="More actions" aria-expanded={menu} onClick={() => setMenu((m) => !m)}><MoreHorizontal size={20} /></button>
             {menu && (
@@ -242,6 +251,14 @@ function EditorScreen({ initial, choices, onReload }) {
         </section>
 
         <aside className="cms-editor__side">
+          <div className="adm-seg cms-sidetabs" role="tablist" aria-label="Article settings">
+            <button type="button" role="tab" aria-selected={side === 'details'} className={side === 'details' ? 'is-on' : ''} onClick={() => setSide('details')}>Details</button>
+            <button type="button" role="tab" aria-selected={side === 'seo'} className={side === 'seo' ? 'is-on' : ''} onClick={() => setSide('seo')}>SEO <ScoreBadge score={analysis?.score} /></button>
+          </div>
+          {side === 'seo' ? (
+            <SeoPanel form={form} setSeo={set('seo')} analysis={analysis} disabled={!mayEdit || !can(staff, 'content.seo')}
+              siteHost={seoContext?.siteOrigin || window.location.origin} />
+          ) : (<>
           <section className="adm-card adm-form">
             <h2 className="adm-h3">Publishing</h2>
             <dl className="adm-kv">
@@ -304,6 +321,7 @@ function EditorScreen({ initial, choices, onReload }) {
               <textarea rows={3} value={form.disclaimer} maxLength={1000} readOnly={!mayEdit} onChange={(e) => set('disclaimer')(e.target.value)} />
             </label>
           </section>
+          </>)}
         </aside>
       </div>
 

@@ -2,7 +2,7 @@
 // open one to edit, duplicate, and act on several at once (publish, unpublish, archive, move, delete).
 import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Copy, ExternalLink, FolderTree, Newspaper, Plus, Search } from 'lucide-react';
+import { Copy, CornerDownRight, ExternalLink, FolderTree, Newspaper, Plus, Search } from 'lucide-react';
 import { api } from '../../store/lib/api';
 import { Badge, Empty, ErrorBox, Loading, Notice, PageHead, Pager, can, d, dt, useAction, useAdmin, useApi } from '../ui';
 
@@ -61,6 +61,7 @@ export default function BlogPosts() {
     <>
       <PageHead title="Blog posts" sub="Every article on the website's Blogs page. Only published articles are visible to visitors.">
         <Link className="adm-btn is-ghost" to="/admin/blog/categories"><FolderTree size={16} /> Categories & tags</Link>
+        <Link className="adm-btn is-ghost" to="/admin/blog/redirects"><CornerDownRight size={16} /> Redirects</Link>
         {mayEdit && <button type="button" className="adm-btn is-gold" onClick={create} disabled={act.busy}><Plus size={16} /> New article</button>}
       </PageHead>
 

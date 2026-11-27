@@ -24,6 +24,7 @@ import WebsiteContent from './pages/WebsiteContent';
 import SiteText from './pages/SiteText';
 import BlogPosts from './pages/BlogPosts';
 import BlogTaxonomy from './pages/BlogTaxonomy';
+import BlogRedirects from './pages/BlogRedirects';
 
 // the article editor (TipTap) is its own chunk: only loaded when an article is opened
 const PostEditor = lazy(() => import('./pages/PostEditor'));
@@ -87,6 +88,7 @@ export default function AdminApp() {
                     <Route path="pricing" element={only('view', <PricingOffers />)} />
                     <Route path="blog" element={only('content.view', <BlogPosts />)} />
                     <Route path="blog/categories" element={only('content.view', <BlogTaxonomy />)} />
+                    <Route path="blog/redirects" element={only('content.view', <BlogRedirects />)} />
                     <Route path="blog/:id" element={only('content.view', <Suspense fallback={<p className="adm-muted">Loading the editor…</p>}><PostEditor /></Suspense>)} />
                     <Route path="content" element={only(['view', 'content.site'], <WebsiteContent />)} />
                     <Route path="site-text" element={only(['view', 'content.site'], <SiteText />)} />

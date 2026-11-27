@@ -20,6 +20,7 @@ import { z } from 'zod';
 import { can } from '../admin/auth.js';
 import { cleanDoc, readingMinutes, renderDoc, safeUrl, slugify } from './render.js';
 import { PUBLIC, SLUG, SUMMARY_COLUMNS, SUMMARY_FROM, postPath, seoOf, summaryOut } from './posts.js';
+import { finalTarget, invalidateRedirects } from './seo-html.js';
 
 const STATUSES = ['draft', 'scheduled', 'published', 'archived'];
 const PAGE = 25;
@@ -109,6 +110,7 @@ export default async function cmsAdminRoutes(app, { db, G, parse, audit, env = {
     await t.query(`INSERT INTO cms_redirects (from_path, to_path, post_id, created_by) VALUES ($1, $2, $3, $4)
       ON CONFLICT (from_path) DO UPDATE SET to_path = EXCLUDED.to_path, post_id = EXCLUDED.post_id`, [from, to, post.id, req.staff.email]);
     await audit(t.query, req, 'cms.redirect_auto', 'cms', post.id, { path: from }, { path: to });
+    invalidateRedirects();
   }
   const wasLive = (p) => !!p.published_at && new Date(p.published_at) <= new Date() && ['published', 'scheduled', 'archived'].includes(p.status);
 
@@ -134,6 +136,20 @@ export default async function cmsAdminRoutes(app, { db, G, parse, audit, env = {
       tags: (await q('SELECT name FROM cms_tags ORDER BY name')).rows.map((r) => r.name),
       concerns: concerns.map((c) => ({ id: c.id, title: c.title })),
     };
+  }
+
+  /** For the editor's live SEO checks: other articles (duplicate titles, descriptions, keywords) and real paths (broken links). */
+  async function seoContext(c) {
+    const others = (await q(`SELECT id, title, COALESCE(seo->>'title', '') AS seo_title, COALESCE(NULLIF(seo->>'description', ''), excerpt) AS description,
+        COALESCE(seo->>'focusKeyword', '') AS focus_keyword FROM cms_posts WHERE status <> 'archived'`)).rows
+      .map((r) => ({ id: r.id, title: r.title, seoTitle: r.seo_title, description: r.description, focusKeyword: r.focus_keyword }));
+    const paths = new Set(['/', '/shop', '/blogs', '/concerns', '/ingredients', '/about', '/faq', '/contact', '/sustainability', '/cart', '/track',
+      '/policies/shipping', '/policies/privacy', '/policies/terms']);
+    for (const r of (await q('SELECT id FROM products WHERE active')).rows) paths.add(`/products/${r.id}`);
+    for (const r of (await q(`SELECT p.slug FROM cms_posts p WHERE ${PUBLIC}`)).rows) paths.add(postPath(r.slug));
+    for (const r of (await q('SELECT from_path FROM cms_redirects')).rows) paths.add(r.from_path);
+    for (const x of c.concerns) paths.add(`/concerns/${x.id}`);
+    return { others, knownPaths: [...paths], siteOrigin };
   }
 
   /** What must be true before a post can go live. */
@@ -189,7 +205,8 @@ export default async function cmsAdminRoutes(app, { db, G, parse, audit, env = {
     const id = parse(uuid, req.params.id, reply); if (!id) return;
     const p = await loadPost(db, id);
     if (!p) return reply.code(404).send({ error: 'Article not found.', code: 'not_found' });
-    return { post: editorOut(p, await tagsOf(db, id)), choices: await choices() };
+    const c = await choices();
+    return { post: editorOut(p, await tagsOf(db, id)), choices: c, seoContext: await seoContext(c) };
   });
 
   app.patch('/api/admin/cms/posts/:id', { ...G('content.edit'), bodyLimit: 3 * 1024 * 1024 }, async (req, reply) => {
@@ -251,6 +268,7 @@ export default async function cmsAdminRoutes(app, { db, G, parse, audit, env = {
       }
       return saved;
     });
+    invalidateRedirects();   // again after commit: a page request during the save may have cached the old list
     return { post: editorOut(out, await tagsOf(db, id)) };
   });
 
@@ -312,6 +330,7 @@ export default async function cmsAdminRoutes(app, { db, G, parse, audit, env = {
     if (!p) throw fail('Article not found.', 404);
     if (p.status === 'published' || p.status === 'scheduled') throw fail('Unpublish this article before deleting it.', 409, 'published');
     await t.query('DELETE FROM cms_redirects WHERE to_path = $1', [postPath(p.slug)]);
+    invalidateRedirects();
     await t.query('DELETE FROM cms_posts WHERE id = $1', [id]);
     await audit(t.query, req, 'cms.post_delete', 'cms', id, { title: p.title, slug: p.slug, status: p.status }, null);
     return p;
@@ -319,6 +338,7 @@ export default async function cmsAdminRoutes(app, { db, G, parse, audit, env = {
   app.delete('/api/admin/cms/posts/:id', G('content.delete'), async (req, reply) => {
     const id = parse(uuid, req.params.id, reply); if (!id) return;
     await db.tx((t) => deletePost(t, req, id));
+    invalidateRedirects();
     return { ok: true };
   });
 
@@ -352,6 +372,7 @@ export default async function cmsAdminRoutes(app, { db, G, parse, audit, env = {
         skipped.push({ id, title: title || '(untitled)', reason: e.status && e.status < 500 ? e.message : 'Something went wrong.' });
       }
     }
+    invalidateRedirects();
     return { done, skipped };
   });
 
@@ -371,6 +392,54 @@ export default async function cmsAdminRoutes(app, { db, G, parse, audit, env = {
       },
       related: related.map(summaryOut),
     };
+  });
+
+  // ---------------------------------------------------------------- redirects
+  // Old address -> new address on this site. Automatic ones come from changing a live article's URL; others
+  // can be added by hand (e.g. an old page from the previous website). Never a chain: a new redirect points
+  // straight to the final address, and redirects that led to its old address are repointed.
+  const sitePath = z.string().trim().max(300)
+    // a full address on this site (https://www.tranzlife.in/old-page) becomes its path
+    .transform((v) => { if (siteOrigin && v.startsWith(siteOrigin)) { try { const u = new URL(v); return u.pathname + u.search; } catch { /* keep */ } } return v; })
+    .refine((v) => /^\/(?!\/)[^\s]*$/.test(v), 'Use an address on this site, starting with / (like /blogs/old-name).')
+    .transform((v) => (v.length > 1 ? v.replace(/\/+$/, '') : v))
+    .refine((v) => !/^\/(api|admin|assets)(\/|$)/.test(v), 'Addresses under /api, /admin and /assets cannot be redirected.');
+
+  app.get('/api/admin/cms/redirects', G('content.view'), async () => ({
+    redirects: (await q(`SELECT r.id, r.from_path, r.to_path, r.status_code, r.hits, r.last_hit_at, r.created_by, r.created_at, p.title AS post_title
+      FROM cms_redirects r LEFT JOIN cms_posts p ON p.id = r.post_id ORDER BY r.created_at DESC`)).rows
+      .map((r) => ({ id: r.id, fromPath: r.from_path, toPath: r.to_path, statusCode: r.status_code, hits: r.hits, lastHitAt: r.last_hit_at,
+        createdBy: r.created_by, createdAt: r.created_at, automatic: !!r.post_title, postTitle: r.post_title || null })),
+  }));
+
+  app.post('/api/admin/cms/redirects', G('content.redirects'), async (req, reply) => {
+    const b = parse(z.object({ fromPath: sitePath, toPath: sitePath, statusCode: z.union([z.literal(301), z.literal(302)]).optional().default(301) }), req.body, reply); if (!b) return;
+    if (b.fromPath === b.toPath) throw fail('The old and new address are the same.');
+    const out = await db.tx(async (t) => {
+      const live = (await t.query(`SELECT p.title FROM cms_posts p WHERE ${PUBLIC} AND $1 = '/blogs/' || p.slug`, [b.fromPath])).rows[0];
+      if (live) throw fail(`${b.fromPath} is the address of the live article “${live.title}”. Change that article's URL first.`, 409);
+      const map = new Map((await t.query('SELECT from_path, to_path, status_code FROM cms_redirects')).rows.map((r) => [r.from_path, { to: r.to_path, code: r.status_code }]));
+      map.delete(b.fromPath);
+      const end = finalTarget(map, b.toPath)?.to || b.toPath;
+      if (end === b.fromPath) throw fail('That would send visitors in a circle back to the old address.', 409);
+      await t.query('UPDATE cms_redirects SET to_path = $2 WHERE to_path = $1', [b.fromPath, end]);   // no chains
+      const r = (await t.query(`INSERT INTO cms_redirects (from_path, to_path, status_code, created_by) VALUES ($1, $2, $3, $4)
+        ON CONFLICT (from_path) DO UPDATE SET to_path = EXCLUDED.to_path, status_code = EXCLUDED.status_code, post_id = NULL RETURNING id`,
+      [b.fromPath, end, b.statusCode, req.staff.email])).rows[0];
+      await audit(t.query, req, 'cms.redirect_save', 'cms', r.id, null, { from: b.fromPath, to: end, code: b.statusCode });
+      return { id: r.id, fromPath: b.fromPath, toPath: end, statusCode: b.statusCode };
+    });
+    invalidateRedirects();
+    return { redirect: out };
+  });
+
+  app.delete('/api/admin/cms/redirects/:id', G('content.redirects'), async (req, reply) => {
+    const id = parse(uuid, req.params.id, reply); if (!id) return;
+    const r = (await q('DELETE FROM cms_redirects WHERE id = $1 RETURNING from_path, to_path', [id])).rows[0];
+    if (!r) return reply.code(404).send({ error: 'Redirect not found.' });
+    await audit(q, req, 'cms.redirect_delete', 'cms', id, { from: r.from_path, to: r.to_path }, null);
+    invalidateRedirects();
+    return { ok: true };
   });
 
   // ---------------------------------------------------------------- categories, tags, bylines

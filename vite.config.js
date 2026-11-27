@@ -30,11 +30,14 @@ export default defineConfig(({ mode }) => {
       },
     },
     server: {
+      // 127.0.0.1, not "localhost": on Windows Node resolves "localhost" to IPv6 (::1) while the API listens on
+      // IPv4, so the API proxy failed and the site showed "could not load". http://localhost:5173 still works.
+      host: '127.0.0.1',
       port: 5173,
       // shop API (`npm run dev:api`, port 3000). Tulsi chat is answered by the plugin above first.
       proxy: {
         '/api': {
-          target: env.SHOP_API_URL || 'http://localhost:3000',
+          target: env.SHOP_API_URL || 'http://127.0.0.1:3000',
           // API server not running: say so, instead of a bare 500
           configure: (proxy) => proxy.on('error', (err, req, res) => {
             if (res.headersSent || typeof res.writeHead !== 'function') return;
