@@ -4,7 +4,8 @@
 // printed on the actual packs (directions, cautions, storage, certifications). Marketing copy uses
 // the document's wellness wording; disease claims printed on some packs (e.g. "support for
 // diabetes", "detoxification") are deliberately not repeated here.
-// Prices are the client's MRPs (24 Nov 2026), sold at MRP; BreatheFree is still a placeholder.
+// Built-in prices: the client's MRPs (24 Nov 2026). Live shops charge the database prices: launch prices
+// 5 to 10% below these MRPs since migration 019 (26 Nov 2026), editable in admin > Pricing & offers.
 // Checkout charges the prices in the database (admin > Products). Migration 009 copies this
 // content into the database for existing shops.
 
@@ -22,7 +23,7 @@ export const PRODUCTS = [
     accent: '#1f6b34',
     tint: '#eaf4e6',
     concerns: ['respiratory', 'quit-smoking'],
-    images: ['/img/p/pulmoclear.webp', '/img/p/pulmoclear-jar.webp'],
+    images: ['/img/p/pulmoclear-v2.webp'],
     brochure: '/brochures/pulmoclear.pdf',
     highlights: ['9 Ayurvedic botanicals', 'Vitamin C, D3 & Zinc', 'Natural berry flavour', '60 gummies per pack'],
     summary:
@@ -83,7 +84,7 @@ export const PRODUCTS = [
     accent: '#7a3b12',
     tint: '#f6efe6',
     concerns: ['liver'],
-    images: ['/img/p/liver.webp'],
+    images: ['/img/p/liver-v3.webp'],
     brochure: '/brochures/liver-booster.pdf',
     highlights: ['11 Ayurvedic botanicals', 'Bhumyamalaki, Kalmegh & Kutki', 'No added colours or sugar', 'Mixed flavour, 500 ml'],
     summary:
@@ -215,7 +216,7 @@ export const PRODUCTS = [
     accent: '#e0701a',
     tint: '#fdf1e5',
     concerns: ['blood-sugar'],
-    images: ['/img/p/reviva.webp'],
+    images: ['/img/p/reviva-v3.webp'],
     brochure: '/brochures/reviva.pdf',
     highlights: ['Dill & Eucalyptus essential oils', 'Gentle massage roll-on', 'Portable 50 ml pack', 'ISO 9001:2015 & GMP certified'],
     summary:
@@ -334,12 +335,12 @@ export const PRODUCTS = [
     format: 'Aromatherapy Inhaler',
     size: 'Pocket inhaler',
     price: 249,
-    mrp: 299,
+    mrp: 249,
     badge: null,
     accent: '#14806a',
     tint: '#e6f4f0',
     concerns: ['quit-smoking', 'stress', 'respiratory'],
-    images: ['/img/p/breathefree.webp'],
+    images: ['/img/p/breathefree-v2.webp'],
     brochure: null,
     highlights: ['6 essential oils', 'Non-addictive formulation', 'Compact & pocket-sized', 'Discreet, use whenever needed'],
     summary:
@@ -482,7 +483,7 @@ export function markCatalogSettled() {
 }
 
 export function replaceCatalog(list) {
-  if (!Array.isArray(list) || !list.length) return;
+  if (!Array.isArray(list)) return;   // an empty list is real: the database has no products, so the shop shows none
   PRODUCTS.splice(0, PRODUCTS.length, ...list);
   FORMATS.splice(0, FORMATS.length, ...new Set(list.map((p) => p.format).filter(Boolean)));
   version += 1;

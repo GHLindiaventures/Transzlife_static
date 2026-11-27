@@ -77,6 +77,7 @@
 .ft-col a:hover .ft-col__chev{transform:translateX(4px);color:var(--ft-lime)}
 
 /* stay connected card */
+.ft-grid>*{min-width:0}
 .ft-card{margin-left:clamp(8px,1.4vw,24px);padding:clamp(22px,2.2vw,34px);border-radius:24px;
   background:linear-gradient(150deg,rgba(252,250,241,.1),rgba(252,250,241,.035) 55%,rgba(239,192,74,.08));
   border:1px solid rgba(239,192,74,.24);box-shadow:0 30px 60px -30px rgba(8,38,26,.7),inset 0 1px 0 rgba(252,250,241,.14);
@@ -85,7 +86,8 @@
 .ft-card__ic{width:52px;height:52px;border-radius:14px;display:grid;place-items:center;color:var(--ft-lime);background:rgba(239,192,74,.14);border:1px solid rgba(239,192,74,.38)}
 .ft-card h2{font-size:clamp(20px,1.6vw,26px);font-weight:700;color:#fff}
 .ft-card__text{margin:12px 0 20px;max-width:340px;font-size:16px;line-height:1.55;color:var(--ft-text)}
-.ft-sub{display:grid;grid-template-columns:1fr auto;gap:10px}
+.ft-sub{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px}
+@media (max-width:400px){.ft-sub{grid-template-columns:minmax(0,1fr)}.ft-sub__btn{justify-content:center}}
 .ft-sub__field{display:flex;align-items:center;gap:12px;min-height:56px;padding:0 18px;border-radius:14px;background:rgba(252,250,241,.95);color:var(--ink,#0f2f1d);box-shadow:inset 0 1px 2px rgba(8,38,26,.08);transition:box-shadow .25s}
 .ft-sub__field:focus-within{box-shadow:0 0 0 3px rgba(239,192,74,.55)}
 .ft-sub__field input{flex:1;min-width:0;border:0;outline:0;background:none;font:inherit;font-size:15.5px;color:var(--ink,#0f2f1d)}
@@ -101,9 +103,9 @@
 .ft-card__about{display:flex;align-items:center;gap:12px;font-size:17px;font-weight:700;color:#fff;margin-bottom:14px !important}
 .ft-card__about svg{color:var(--ft-lime)}
 .ft-card__list{list-style:none;margin:0;padding:0;display:grid;gap:12px}
-.ft-card__list li{display:grid;grid-template-columns:22px 1fr;gap:14px;align-items:start;font-size:15px;line-height:1.55;color:var(--ft-text)}
+.ft-card__list li{display:grid;grid-template-columns:22px minmax(0,1fr);gap:14px;align-items:start;font-size:15px;line-height:1.55;color:var(--ft-text)}
 .ft-card__list svg{color:var(--ft-lime);margin-top:1px}
-.ft-card__list address{font-style:normal}
+.ft-card__list address{font-style:normal;overflow-wrap:anywhere}
 .ft-card__list a:hover{color:var(--ft-lime-2);text-decoration:underline;text-underline-offset:3px}
 
 /* bottom bar */
@@ -170,7 +172,7 @@
   .ft-decor{height:44px}
   .ft-drop,.ft-leaf{display:none}
   .ft-body{padding:14px 16px 12px}
-  .ft-grid{row-gap:8px;column-gap:0;grid-template-columns:1fr}
+  .ft-grid{row-gap:8px;column-gap:0;grid-template-columns:minmax(0,1fr)}
   .ft-brand{grid-column:1}
   .ft-logo{font-size:34px}
   .ft-brand__tag{margin:6px 0 0;font-size:14px;white-space:normal;text-align:center}
@@ -190,14 +192,15 @@
   .ft-card__head{gap:10px}
   .ft-card h2{font-size:17px}
   .ft-card__text,.ft-card hr{display:none}
-  .ft-sub{grid-template-columns:1fr auto;gap:8px;margin-top:10px}
+  .ft-sub{grid-template-columns:minmax(0,1fr) auto;gap:8px;margin-top:10px}
   .ft-sub__field{min-height:42px;padding:0 12px;gap:8px;border-radius:11px}
   .ft-sub__field svg{width:16px;height:16px}
   .ft-sub__field input{font-size:14px}
   .ft-sub__btn{min-height:42px;padding:0 14px;font-size:14px;border-radius:11px}
+  .ft-sub__btn svg{display:none}
   .ft-card__about{font-size:14px;margin:12px 0 8px !important}
   .ft-card__list{gap:6px}
-  .ft-card__list li{grid-template-columns:18px 1fr;gap:10px;font-size:12.5px;line-height:1.4}
+  .ft-card__list li{grid-template-columns:18px minmax(0,1fr);gap:10px;font-size:12.5px;line-height:1.4}
   .ft-card__list svg{width:16px;height:16px}
   .ft-bottom{margin-top:12px;padding-top:10px;gap:4px}
   .ft-bottom__copy{font-size:11.5px;gap:6px;text-align:center}

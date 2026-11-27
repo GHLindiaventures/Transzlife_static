@@ -5,6 +5,9 @@ import { Megaphone, LayoutTemplate, Plus, Pencil, Trash2, ArrowUp, ArrowDown, Ey
 import { api } from '../../store/lib/api';
 import { ErrorBox, Loading, Notice, PageHead, can, dt, useAction, useAdmin, useApi } from '../ui';
 
+/** The announcement bar always uses the brand colours (same as theme.css on the site). */
+const BAR_COLOURS = { bg: '#124a2c', fg: '#efc04a' };
+
 const SECTION_LABEL = {
   rich: 'Introduction (who we are)', products: 'Product cards (slider)', sep: 'Divider', banner: 'Banner image', benefits: 'Benefits',
   formulations: 'Formulations showcase', strip: 'Trust strip', story: 'Our story (image + text)', video: 'Background video', brands: 'Recognition logos', help: 'Help / contact', reviews: 'Customer reviews',
@@ -35,11 +38,12 @@ export default function WebsiteContent() {
 /* ---------------- announcement bar ---------------- */
 function AnnouncementBar({ data, edit, onChanged }) {
   const [style, setStyle] = useState(data.style);
+  // the bar is always the brand green with gold text on the site; only the speed is editable
   const [editing, setEditing] = useState(null);       // null | 'new' | message
   const act = useAction();
   const fill = (t) => t.replaceAll('{free_shipping}', `₹${Math.round(data.tokens.free_shipping / 100).toLocaleString('en-IN')}`).replaceAll('{prepaid}', `${data.tokens.prepaid}%`);
   const showing = data.announcements.filter((a) => a.status === 'live');
-  const saveStyle = async () => { if (await act.run(() => api('/api/admin/announcements/style', { method: 'PUT', body: style }), 'Bar colours saved.')) onChanged(); };
+  const saveStyle = async () => { if (await act.run(() => api('/api/admin/announcements/style', { method: 'PUT', body: { ...style, ...BAR_COLOURS } }), 'Bar speed saved.')) onChanged(); };
   const move = async (i, j) => {
     const ids = swap(data.announcements, i, j).map((a) => a.id);
     if (await act.run(() => api('/api/admin/announcements/order', { method: 'PUT', body: { ids } }))) onChanged();
@@ -54,7 +58,7 @@ function AnnouncementBar({ data, edit, onChanged }) {
         {edit && <button className="adm-btn is-sm" onClick={() => setEditing('new')}><Plus size={14} /> New message</button>}
       </div>
 
-      <div className="adm-annbar" style={{ background: style.bg, color: style.fg }} aria-label="Preview of the bar">
+      <div className="adm-annbar" style={{ background: BAR_COLOURS.bg, color: BAR_COLOURS.fg }} aria-label="Preview of the bar">
         <div className="adm-annbar__track" style={{ animationDuration: { slow: '45s', normal: '30s', fast: '20s' }[style.speed] }}>
           {[0, 1].map((g) => <span key={g}>{(showing.length ? showing : [{ text: 'Live naturally. Live healthier.' }]).map((a) => fill(a.text)).join('   •   ')}   •   </span>)}
         </div>
@@ -63,10 +67,8 @@ function AnnouncementBar({ data, edit, onChanged }) {
 
       {edit && (
         <div className="adm-pair" style={{ marginTop: 12, alignItems: 'end' }}>
-          <label>Background<input type="color" value={style.bg} onChange={(e) => setStyle({ ...style, bg: e.target.value })} style={{ padding: 4, height: 40 }} /></label>
-          <label>Text<input type="color" value={style.fg} onChange={(e) => setStyle({ ...style, fg: e.target.value })} style={{ padding: 4, height: 40 }} /></label>
           <label>Speed<select value={style.speed} onChange={(e) => setStyle({ ...style, speed: e.target.value })}><option value="slow">Slow</option><option value="normal">Normal</option><option value="fast">Fast</option></select></label>
-          <button className="adm-btn is-ghost is-sm" disabled={act.busy || JSON.stringify(style) === JSON.stringify(data.style)} onClick={saveStyle}><Save size={14} /> Save colours</button>
+          <button className="adm-btn is-ghost is-sm" disabled={act.busy || style.speed === data.style.speed} onClick={saveStyle}><Save size={14} /> Save speed</button>
         </div>
       )}
       <ErrorBox>{act.error}</ErrorBox><Notice>{act.notice}</Notice>

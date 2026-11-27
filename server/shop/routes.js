@@ -7,6 +7,8 @@
 //   POST   /api/auth/logout
 //   PATCH  /api/account                     { name, email }
 //   GET    /api/account/addresses           saved addresses
+//   POST   /api/account/addresses           add an address (returns it; the same address twice is not duplicated)
+//   POST   /api/account/addresses/:id/default  make it the default
 //   DELETE /api/account/addresses/:id
 //   GET    /api/account/devices             signed-in devices (sessions), this one marked
 //   DELETE /api/account/devices/:id         sign out one device
@@ -110,6 +112,25 @@ export default async function shopRoutes(app, { db, auth, orders, razorpay, cash
         WHERE customer_id = $1 ORDER BY is_default DESC, created_at DESC`, [req.customer.id])).rows,
   }));
 
+  const ADDRESS_COLS = 'id, name, phone, line1, line2, city, state, pin, is_default AS "isDefault"';
+  app.post('/api/account/addresses', { ...signedIn, ...tight(30) }, async (req, reply) => {
+    const body = parse(address.extend({ makeDefault: z.boolean().optional() }), req.body, reply); if (!body) return;
+    const { rows: [{ n }] } = await db.query('SELECT count(*)::int AS n FROM addresses WHERE customer_id = $1', [req.customer.id]);
+    if (n >= 20) return reply.code(400).send({ error: 'You can save up to 20 addresses. Remove one you no longer use first.' });
+    const id = await saveAddress(req.customer.id, body);
+    if (body.makeDefault) await setDefaultAddress(req.customer.id, id);
+    const saved = (await db.query(`SELECT ${ADDRESS_COLS} FROM addresses WHERE id = $1`, [id])).rows[0];
+    return { address: saved };
+  });
+
+  app.post('/api/account/addresses/:id/default', signedIn, async (req, reply) => {
+    const id = parse(z.string().uuid(), req.params.id, reply); if (!id) return;
+    const mine = (await db.query('SELECT 1 FROM addresses WHERE id = $1 AND customer_id = $2', [id, req.customer.id])).rows.length;
+    if (!mine) return reply.code(404).send({ error: 'Address not found.' });
+    await setDefaultAddress(req.customer.id, id);
+    return { ok: true };
+  });
+
   app.delete('/api/account/addresses/:id', signedIn, async (req, reply) => {
     const id = parse(z.string().uuid(), req.params.id, reply); if (!id) return;
     await db.query('DELETE FROM addresses WHERE id = $1 AND customer_id = $2', [id, req.customer.id]);
@@ -179,11 +200,15 @@ export default async function shopRoutes(app, { db, auth, orders, razorpay, cash
     const same = (await db.query(
       `SELECT id FROM addresses WHERE customer_id = $1 AND lower(line1) = lower($2) AND pin = $3 AND lower(name) = lower($4)`,
       [customerId, a.line1, a.pin, a.name])).rows[0];
-    if (same) return;
+    if (same) return same.id;
     const first = !(await db.query('SELECT 1 FROM addresses WHERE customer_id = $1 LIMIT 1', [customerId])).rows.length;
-    await db.query(
-      `INSERT INTO addresses (customer_id, name, phone, line1, line2, city, state, pin, is_default) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
-      [customerId, a.name, a.phone, a.line1, a.line2 || null, a.city, a.state, a.pin, first]);
+    return (await db.query(
+      `INSERT INTO addresses (customer_id, name, phone, line1, line2, city, state, pin, is_default) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id`,
+      [customerId, a.name, a.phone, a.line1, a.line2 || null, a.city, a.state, a.pin, first])).rows[0].id;
+  }
+
+  async function setDefaultAddress(customerId, id) {
+    await db.query('UPDATE addresses SET is_default = (id = $2) WHERE customer_id = $1', [customerId, id]);
   }
 
   app.post('/api/checkout/verify', signedIn, async (req, reply) => {

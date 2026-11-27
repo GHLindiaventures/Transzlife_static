@@ -806,6 +806,27 @@
   }
 }
 
+/* PHONES: compact showcase (was a full 100vh screen). Same look, less empty space; desktop untouched. */
+@media (max-width: 600px) {
+  .blendy-hero-stage { height: clamp(440px, 64vh, 540px); height: clamp(440px, 64svh, 540px); min-height: 0; }
+  .blendy-top-nav { height: 50px; }
+  .blendy-center-stage { padding: 76px 0 54px; box-sizing: border-box; }
+  .blendy-backdrop-word { top: 68px; }
+  .blendy-word-text { font-size: clamp(2.6rem, 11.5vw, 3.8rem); }
+  .blendy-bottle-wrap { margin-top: clamp(30px, 7vh, 52px); }
+  .blendy-hero-bottle { height: clamp(165px, 28vh, 235px); }
+  .blendy-ground-shadow { width: clamp(110px, 32vw, 150px); height: 14px; }
+  .blendy-botanical-item { width: 38px; height: 38px; }
+  .bzone--top-left-bokeh, .bzone--top-right-bokeh { top: 26%; width: 40px; height: 40px; }
+  .bzone--mid-left, .bzone--mid-right { top: 56%; width: 38px; height: 38px; }
+  .bzone--base-left, .bzone--base-right { bottom: 16%; width: 42px; height: 42px; }
+  .bzone--base-left { left: calc(50% - 74px); }
+  .bzone--base-right { right: calc(50% - 74px); }
+  .blendy-bottom-bar { height: 54px; padding: 0 14px; }
+  .blendy-arrow-btn { width: 34px; height: 34px; }
+  .blendy-cta-link { font-size: 0.82rem; }
+}
+
 /* Accessibility: respect user prefers-reduced-motion */
 @media (prefers-reduced-motion: reduce) {
 

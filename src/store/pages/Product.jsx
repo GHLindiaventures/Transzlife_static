@@ -22,6 +22,7 @@ import { IngredientGrid, UseTabs, FaqList, FaqHelp } from '../components/pdp/Sec
 import Reviews from '../components/pdp/Reviews';
 import ProductInfo from '../components/pdp/ProductInfo';
 import OfferTimer from '../components/OfferTimer';
+import PriceTag from '../../components/PriceTag.jsx';
 import { inr, pctOff, prepaidSaving } from '../utils/format';
 import NotFound from './NotFound';
 
@@ -118,7 +119,6 @@ export default function Product() {
   const sale = onSale(p);
   const unit = sale ? packPrice(p, pack) : null;
   const mrp = sale ? packMrp(p, pack) : null;
-  const off = sale ? pctOff(unit, mrp) : 0;
   const notifyUrl = `${SITE.whatsapp}?text=${encodeURIComponent(`Hi TranzLife, please let me know when ${p.short} is available.`)}`;
   const concerns = p.concerns.map(getConcern).filter(Boolean);
   const ings = p.ingredients.map(getIngredient).filter(Boolean);
@@ -168,10 +168,7 @@ export default function Product() {
 
             {sale ? (
               <>
-                <div className="pdp__price">
-                  <strong><Money value={unit} /></strong>
-                  {mrp > unit && <><s>MRP {inr(mrp)}</s><span className="save">Save {inr(mrp - unit)} ({off}% off)</span></>}
-                </div>
+                <PriceTag price={unit} mrp={mrp} size="lg" className="pdp__price" />
                 {p.offer && <OfferTimer offer={p.offer} />}
                 {viewers && <p className="live-line"><span className="live-line__dot" aria-hidden="true" /><Eye size={15} aria-hidden="true" /> <span><strong>{viewers}</strong> other people are viewing this right now</span></p>}
                 {p.sold30 && <p className="live-line"><TrendingUp size={15} aria-hidden="true" /> <span>Bought <strong>{p.sold30} times</strong> in the last 30 days</span></p>}

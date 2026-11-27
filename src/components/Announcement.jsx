@@ -16,16 +16,16 @@ function Message({ m, hidden }) {
 }
 
 /**
- * The scrolling bar at the top of every page. Messages, links, schedule and colours come from the
+ * The scrolling bar at the top of every page. Messages, links, schedule and speed come from the
  * dashboard (Website content); the built-in list shows until they load, or if they can't.
+ * Colours are always the brand green and gold (theme.css), so the bar never changes colour after loading.
  */
 export default function Announcement() {
   const content = useSiteContent();
   const a = content?.announcement;
   const messages = a ? (a.messages.length ? a.messages : [{ text: 'Live naturally. Live healthier.' }]) : ANNOUNCEMENTS.map((t) => ({ text: fillShopTokens(t) }));
-  const style = a ? { background: a.bg, color: a.fg } : undefined;
   return (
-    <aside className="announcement" id="announcement" aria-label="Announcements" style={style}>
+    <aside className="announcement" id="announcement" aria-label="Announcements">
       <div className="announcement__track" style={a ? { animationDuration: SPEED[a.speed] || SPEED.normal } : undefined}>
         {[0, 1].map((g) => (
           <div className="announcement__group" key={g} aria-hidden={g === 1 || undefined}>

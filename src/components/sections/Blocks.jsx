@@ -1,4 +1,4 @@
-import { Fragment, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import { honeypotProps, isEmail, subscribe } from '../../lib/forms.js';
 import { Link } from 'react-router-dom';
 import { Media, Slot, Ph, range } from '../ui.jsx';
@@ -71,8 +71,10 @@ export function LeafIcon({ className = 'banner__leaf-icon' }) {
 /** Full-width banner with a scrolling headline and a button. */
 export function Banner() {
   const cleanWords = BANNER.words.map((w) => w.replace(/\.+$/, ''));
-  // Repeat sequence 3 times in each half to ensure seamless width on all displays
-  const sequence = [...cleanWords, ...cleanWords, ...cleanWords];
+  // Each half holds the words twice: wider than any screen (so the loop is seamless) but small enough
+  // for the browser to draw as one layer. Three copies per half made a 16,000px+ strip that browsers
+  // sometimes left partly undrawn (words missing at the right).
+  const sequence = [...cleanWords, ...cleanWords];
 
   return (
     <section className="banner">
@@ -200,8 +202,28 @@ export function Brands() {
 
 /** Background-video / Mint showcase block with parallax curtain reveal effect. `small` = the 560px version used on About / Science. */
 export function BgVideo({ small = false, photo = BGVIDEO.photo, eyebrow = BGVIDEO.eyebrow, title = BGVIDEO.title }) {
+  const ref = useRef(null);
+  // phones can't use the fixed-picture trick, so the picture drifts inside the section instead (transform only, one write per frame, only while on screen)
+  useEffect(() => {
+    const sec = ref.current;
+    if (!sec || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
+    let raf = 0, visible = false;
+    const update = () => {
+      raf = 0;
+      if (window.innerWidth >= 750) { sec.style.removeProperty('--bgv-y'); return; }
+      const r = sec.getBoundingClientRect(), vh = window.innerHeight;
+      const p = Math.max(-1, Math.min(1, (r.top + r.height / 2 - vh / 2) / vh));
+      sec.style.setProperty('--bgv-y', `${(p * -34).toFixed(1)}px`);
+    };
+    const onScroll = () => { if (visible && !raf) raf = requestAnimationFrame(update); };
+    const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting; if (visible) onScroll(); }, { rootMargin: '100px' });
+    io.observe(sec);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    return () => { io.disconnect(); window.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onScroll); if (raf) cancelAnimationFrame(raf); };
+  }, []);
   return (
-    <section className={`bgvideo${small ? ' bgvideo--sm' : ''}`}>
+    <section className={`bgvideo${small ? ' bgvideo--sm' : ''}`} ref={ref}>
       <div className="bgvideo__fixed" aria-hidden="true">
         <Media className="media--fill bgvideo__bg" photo={photo} />
         <div className="bgvideo__shade" />

@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Media, Slot, ProductImg } from '../ui.jsx';
-import { PRODUCTS, PRODUCTS_SECTION, STORE_ID, hasPrice, priceLabel, productUrl, mrpOf, offOf } from '../../content/site.js';
+import { PRODUCTS, PRODUCTS_SECTION, STORE_ID, hasPrice, priceLabel, productUrl, mrpOf } from '../../content/site.js';
 import { setBuyNow, BUY_NOW_URL } from '../../store/lib/checkoutIntent';
 import { getProduct as getStoreProduct } from '../../store/data/products';
 import { useCatalog } from '../../store/lib/catalog';
+import PriceTag from '../PriceTag.jsx';
 
 /** Homepage card data + the live price, MRP and stock from the shop catalogue. */
 const withLive = (product) => {
@@ -12,13 +13,13 @@ const withLive = (product) => {
   return live ? { ...product, price: live.price, mrp: live.mrp, stock: live.stock } : product;
 };
 
-const inr = (n) => `₹${n.toLocaleString('en-IN')}`;
 
 /** Price block: final price, struck-out MRP and discount. Pass no product for the empty placeholder version. */
 export function PriceRow({ product: base }) {
-  useCatalog();
+  // until the live prices arrive, show the placeholder: never flash an old built-in price first
+  const loaded = useCatalog() > 0;
   const product = withLive(base);
-  if (!product) {
+  if (!product || !loaded) {
     return (
       <div className="pcard__price">
         <Slot className="slot--price" />
@@ -29,22 +30,7 @@ export function PriceRow({ product: base }) {
   if (!hasPrice(product)) {
     return <p className="pcard__price pcard__price--tba">{priceLabel(product)}</p>;
   }
-  const mrp = mrpOf(product);
-  const off = offOf(product);
-  if (!off) {
-    return (
-      <p className="pcard__price">
-        <span className="pcard__now"><span className="visually-hidden">Price </span>MRP {inr(product.price)}</span>
-      </p>
-    );
-  }
-  return (
-    <p className="pcard__price pcard__price--deal">
-      <span className="pcard__now"><span className="visually-hidden">Price </span>{inr(product.price)}</span>
-      <s className="pcard__mrp"><span className="visually-hidden">MRP </span>{inr(mrp)}</s>
-      <span className="pcard__save">{off}% off</span>
-    </p>
-  );
+  return <PriceTag price={product.price} mrp={mrpOf(product)} className="pcard__price" />;
 }
 
 /** Buy now (like Amazon): just this item, straight to checkout (sign-in first if needed). The cart is untouched. */
@@ -121,13 +107,14 @@ function useCardFront(trackRef, enabled) {
         return;
       }
 
-      const viewCenter = window.innerWidth / 2;
+      const trackRect = track.getBoundingClientRect();
+      const viewCenter = trackRect.left + trackRect.width / 2;
       let closest = null;
       let closestDist = Infinity;
 
       cards.forEach((card) => {
         const rect = card.getBoundingClientRect();
-        if (rect.right < 8 || rect.left > window.innerWidth - 8) return;
+        if (rect.right < trackRect.left + 8 || rect.left > trackRect.right - 8) return;
         const dist = Math.abs(rect.left + rect.width / 2 - viewCenter);
         if (dist < closestDist) {
           closestDist = dist;
@@ -145,12 +132,14 @@ function useCardFront(trackRef, enabled) {
     };
 
     apply();
+    const initTimer = setTimeout(apply, 80);
     track.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onScroll);
     mqMobile.addEventListener('change', onScroll);
     mqReduce.addEventListener('change', onScroll);
     return () => {
       if (frame) cancelAnimationFrame(frame);
+      clearTimeout(initTimer);
       track.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onScroll);
       mqMobile.removeEventListener('change', onScroll);
@@ -207,13 +196,21 @@ export default function Featured({ headline = PRODUCTS_SECTION.headline, sub = P
   const getMetrics = useCallback(() => {
     const el = trackRef.current;
     if (!el) return null;
-    const card = el.querySelector('.pcard');
-    if (!card) return null;
+    const cards = el.children;
+    const first = cards[0];
+    const startCard = cards[COUNT] || first;
+    if (!first || !startCard) return null;
     const style = window.getComputedStyle(el);
     const gap = parseFloat(style.columnGap || style.gap) || 16;
-    const stepWidth = card.offsetWidth + gap;
+    const cardW = first.offsetWidth;
+    const stepWidth = cardW + gap;
     const singleSetWidth = stepWidth * COUNT;
-    return { stepWidth, singleSetWidth };
+    const isMobile = window.matchMedia('(max-width: 749px)').matches;
+    const padLeft = parseFloat(style.paddingLeft) || 0;
+    const restScroll = isMobile
+      ? startCard.offsetLeft - (el.clientWidth - cardW) / 2
+      : startCard.offsetLeft - padLeft;
+    return { stepWidth, singleSetWidth, restScroll };
   }, [COUNT]);
 
   // Start scroll at middle set (Set 1) so user can scroll left or right indefinitely
@@ -225,12 +222,24 @@ export default function Featured({ headline = PRODUCTS_SECTION.headline, sub = P
     const init = () => {
       const m = getMetrics();
       if (m && m.singleSetWidth > 0) {
-        el.scrollLeft = m.singleSetWidth;
+        const prevBehavior = el.style.scrollBehavior;
+        const prevSnap = el.style.scrollSnapType;
+        el.style.scrollBehavior = 'auto';
+        el.style.scrollSnapType = 'none';
+        el.scrollLeft = m.restScroll;
+        requestAnimationFrame(() => {
+          el.style.scrollBehavior = prevBehavior;
+          el.style.scrollSnapType = prevSnap;
+        });
       }
     };
     init();
-    const t = setTimeout(init, 50);
-    return () => clearTimeout(t);
+    const t = setTimeout(init, 60);
+    window.addEventListener('resize', init);
+    return () => {
+      clearTimeout(t);
+      window.removeEventListener('resize', init);
+    };
   }, [isSlider, getMetrics]);
 
   // Handle scroll events: seamless wrapping and tracking active product index
@@ -247,10 +256,10 @@ export default function Featured({ headline = PRODUCTS_SECTION.headline, sub = P
         if (!m || m.singleSetWidth <= 0 || isJumpingRef.current) return;
 
         const { scrollLeft } = el;
-        const { singleSetWidth, stepWidth } = m;
+        const { singleSetWidth, stepWidth, restScroll } = m;
 
         // When scrolling past the middle set into the 3rd set, wrap back silently
-        if (scrollLeft >= singleSetWidth * 2) {
+        if (scrollLeft >= restScroll + singleSetWidth) {
           isJumpingRef.current = true;
           el.style.scrollBehavior = 'auto';
           el.style.scrollSnapType = 'none';
@@ -260,7 +269,7 @@ export default function Featured({ headline = PRODUCTS_SECTION.headline, sub = P
             el.style.scrollSnapType = '';
             isJumpingRef.current = false;
           });
-        } else if (scrollLeft < singleSetWidth * 0.5) {
+        } else if (scrollLeft < restScroll - singleSetWidth * 0.5) {
           // When scrolling backwards into the 1st set, wrap forward silently
           isJumpingRef.current = true;
           el.style.scrollBehavior = 'auto';
@@ -273,8 +282,8 @@ export default function Featured({ headline = PRODUCTS_SECTION.headline, sub = P
           });
         }
 
-        // Calculate currently centered product (0..COUNT-1)
-        const rel = ((el.scrollLeft - singleSetWidth) % singleSetWidth + singleSetWidth) % singleSetWidth;
+        // Calculate currently active product (0..COUNT-1)
+        const rel = ((el.scrollLeft - restScroll) % singleSetWidth + singleSetWidth) % singleSetWidth;
         const currentCard = Math.round(rel / stepWidth) % COUNT;
         setActiveIdx(currentCard);
       });

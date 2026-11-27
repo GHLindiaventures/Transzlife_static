@@ -276,7 +276,13 @@ export function initAboutStory(root, { top: offset = () => 0 } = {}){
     else { scenes.forEach((el, k) => { if (el.getBoundingClientRect().top - off < vh * .5) i = k + 1; }); }
     if (i !== railOn){
       railOn = i;
-      railLinks.forEach((a, k) => { a.classList.toggle('is-on', k === i); if (k === i) a.setAttribute('aria-current', 'step'); else a.removeAttribute('aria-current'); });
+      railLinks.forEach((a, k) => {
+        const on = k === i;
+        a.classList.toggle('is-on', on);
+        a.parentElement?.classList.toggle('is-on', on);
+        if (on) a.setAttribute('aria-current', 'step');
+        else a.removeAttribute('aria-current');
+      });
       rail.classList.toggle('on-dark', i >= 1 && i <= N && S[i - 1].dark);
     }
     const rp = (y / max).toFixed(4);

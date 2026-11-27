@@ -8,9 +8,10 @@
 // kept when it is at least 10% smaller than the original.
 import { readdirSync, statSync, unlinkSync } from 'node:fs';
 import { join, extname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 
-const ROOT = new URL('../dist/', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1');
+const ROOT = fileURLToPath(new URL('../dist/', import.meta.url));
 const MIN_BYTES = 30 * 1024;          // small icons are not worth it
 const MAX_WIDTH = 1920;
 

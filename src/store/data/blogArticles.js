@@ -10,7 +10,7 @@
 // (BreatheFree, not "Craving Control"; PulmoClear has no giloy), and the Rasayana Elite
 // line points to an on-sale product instead.
 
-import { photo } from './photos';
+import { photo } from './photos.js';
 
 // figures: [{ after: section index, src, alt, caption }] are shown after that section.
 const fig = (after, key, alt, caption) => ({ after, src: photo(key, 1200), alt, caption });

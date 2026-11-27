@@ -950,7 +950,8 @@ html {
 /* hero: never show an empty slide while the loop silently snaps back to the first slide */
 .hero.is-snap .hero__content > * { transition: none !important; opacity: 1 !important; transform: none !important; }
 @media (max-width: 749px) {
-  .hero .hero__bg { transform: none !important; }   /* no scroll parallax on phones: it pushes the picture out of its box */
+  .hero .hero__bg { transform: none !important; }   /* the box stays put on phones; only the picture inside drifts (capped in Hero.jsx) */
+  .hero .hero__slide .hero__bg > img { transform: translate3d(0, var(--hero-py, 0px), 0); will-change: transform; }
 }
 
 /* ---------------- benefits cards on phones: every card the same size ---------------- */
@@ -1343,7 +1344,7 @@ html.ft-fixed .main { margin-bottom: var(--ft-h, 0px); }
 .hr__nav:disabled { opacity: 0; pointer-events: none; }
 .hr__nav--prev { left: clamp(2px, 1.2vw, 14px); }
 .hr__nav--next { right: clamp(2px, 1.2vw, 14px); }
-.hr__empty { max-width: 520px; margin: 0 auto; padding: 16px 20px; display: flex; align-items: center; gap: 14px; border-radius: 18px; color: var(--green-900, #0c3320);
+.hr__empty { max-width: 520px; margin: 0 auto; width: calc(100% - 32px); padding: 16px 20px; display: flex; align-items: center; gap: 14px; border-radius: 18px; color: var(--green-900, #0c3320);
   border: 1px solid rgba(255, 255, 255, .85); background: linear-gradient(135deg, rgba(255, 255, 255, .9), rgba(246, 243, 220, .85)); box-shadow: 0 14px 28px -20px rgba(15, 47, 29, .35); }
 .hr__empty svg { flex: none; color: var(--gold-600, #c8921a); }
 .hr__empty p { margin: 0; font-size: 14.5px; line-height: 1.5; }
@@ -1443,6 +1444,44 @@ html.ft-fixed .main { margin-bottom: var(--ft-h, 0px); }
   .wc__media { min-height: 380px; }
 }
 
+/* ======================================================================
+   PHONES: smoother scrolling
+   - parallax stays, but only as transform on a couple of pictures (hero, lab section), driven by one rAF write each
+   - the expensive effects (blur behind glass, a fixed page background) are dropped; the header keeps its glass
+   ====================================================================== */
+@media (max-width: 749px) {
+  .bgvideo__fixed .bgvideo__bg > img { transform: translate3d(0, var(--bgv-y, 0px), 0) scale(1.2); will-change: transform; }
+  body { background-attachment: scroll; }
+  *:not(.header):not(.header *):not(.drawer):not(.ch-panel):not(.rtn-dialog):not(dialog) { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+}
+
+/* PHONES: long button labels wrap instead of forcing the page wider than the screen (e.g. "Bought X? Sign in to review"). */
+@media (max-width: 560px) {
+  .tl-store:not(#tl-a):not(#tl-b) .btn { white-space: normal; max-width: 100%; text-align: center; }
+  .tl-store:not(#tl-a):not(#tl-b) .rv-grid { grid-template-columns: minmax(0, 1fr); }
+  .tl-store:not(#tl-a):not(#tl-b) .rv-main { min-width: 0; }
+}
+
+/* SMALL PHONES: the centred wordmark ran under the shop/account/cart icons. Below 440px it sits right after the menu button
+   and scales with the screen; the three icons get slightly smaller tap boxes so the row always fits (320px and up). */
+@media (max-width: 440px) {
+  .header__logo, .header__logo:hover { left: 72px; transform: translateY(-50%); }
+  .header__logo:hover { transform: translateY(-50%) scale(1.02); }
+  .logo__text { font-size: clamp(19px, 6.1vw, 26px); }
+  .header__right { gap: 2px; }
+  .header__right .header__cta--icon { min-width: 34px; min-height: 34px; }
+  .header__right .icon-btn { min-width: 36px; min-height: 36px; }
+}
+
+/* SMALL PHONES: the two-up benefit cards were too narrow for icon + title side by side ("INNOVAT/E", "GMP CERTIFIE/D"), so the title goes under the icon. */
+@media (max-width: 400px) {
+  .benefits .benefit { grid-template-columns: minmax(0, 1fr); grid-template-areas: "i" "t" "p"; align-items: start; }
+  .benefits .benefit .slot--b-title { overflow-wrap: normal; word-break: normal; hyphens: none; }
+}
+
+/* PHONES: the FAQ page padded its content twice (section + inner wrapper), squeezing it to ~235px on a 320px screen. */
+@media (max-width: 600px) { .faq .faq__wrap { padding-inline: 0 !important; } }
+
 /* page crash fallback (components/ErrorBoundary.jsx) */
 .page-error { max-width: 640px; margin: 0 auto; padding: 89px 21px; text-align: center; }
 .page-error__eyebrow { margin: 0 0 8px; font-size: 13px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: var(--gold-500, #c8921a); }
@@ -1452,3 +1491,54 @@ html.ft-fixed .main { margin-bottom: var(--ft-h, 0px); }
 
 /* newsletter status line under the home-page sign-up form */
 .news__msg { min-height: 1.5em; margin: 10px 0 0; font-size: 14px; }
+
+/* Reviews: centred when they don't fill the row; still scrolls from the first card when they do
+   (auto margins, unlike justify-content:center, never cut off the start of an overflowing row). */
+.hr__track > .hr__card:first-child { margin-inline-start: auto; }
+.hr__track > .hr__card:last-child { margin-inline-end: auto; }
+
+/* Page placeholder while a page's code or data loads: the page background (never a blank white
+   block), and a small spinner only if loading takes longer than ~0.35s (fast loads show nothing). */
+.page-loading { position: relative; min-height: 61.8vh; background: transparent; }
+.page-loading::after {
+  content: ""; position: absolute; left: 50%; top: 96px; width: 30px; height: 30px; margin-left: -15px; border-radius: 50%;
+  border: 2.5px solid rgba(26, 107, 60, .16); border-top-color: var(--green-700, #1a6b3c);
+  opacity: 0; animation: pl-spin .8s linear infinite, pl-fade .25s ease .35s forwards;
+}
+@keyframes pl-spin { to { transform: rotate(360deg); } }
+@keyframes pl-fade { to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .page-loading::after { animation: pl-fade .25s ease .35s forwards; } }
+
+/* FAQ page: smooth expand. Every question card had a live backdrop blur, so opening one answer made the
+   browser re-blur every card below it on every frame (the lag). The cards keep the same frosted look
+   with a plain translucent fill, and the answer slides in on the compositor (opacity/transform only). */
+.faq__item { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; background: rgba(255, 255, 255, .78); }
+.faq__item.is-open { background: rgba(255, 255, 255, .92); }
+.faq__item:hover { transform: none; }
+.faq__a { animation: faq-open .22s cubic-bezier(.2, .7, .2, 1) both; }
+@keyframes faq-open { from { opacity: 0; transform: translateY(-4px); } }
+@media (prefers-reduced-motion: reduce) { .faq__a { animation: none; } }
+
+/* Contact page questions: quicker open */
+.ct-faq__a { transition-duration: .26s; }
+
+/* Narrow phones: a centred wordmark ran into the shop / account / cart icons. Sit it next to the
+   menu button instead, a touch smaller, so it never overlaps. */
+@media (max-width: 440px) {
+  .header__logo { left: 70px; transform: translateY(-50%); }
+  .header__logo:hover { transform: translateY(-50%) scale(1.02); }
+  .header__logo .logo__text { font-size: 22px; }
+}
+
+/* Shop menu: products stand on the menu like the slider (solo cut-outs): a soft shadow that follows the
+   product's shape, plus a small ground shadow under it. */
+.mega__inner--shop .mega__card .media--product { position: relative; overflow: visible; }
+.mega__inner--shop .mega__card .media--product > img {
+  z-index: 1; box-sizing: border-box; padding: 2% 4% 7%; object-fit: contain;
+  filter: drop-shadow(0 14px 14px rgba(15, 47, 29, .22)) drop-shadow(0 3px 4px rgba(15, 47, 29, .14));
+}
+.mega__inner--shop .mega__card .media--product::after {
+  content: ""; position: absolute; left: 50%; bottom: 0; width: 56%; height: 9%; transform: translateX(-50%);
+  border-radius: 50%; background: radial-gradient(ellipse at center, rgba(15, 47, 29, .30), rgba(15, 47, 29, 0) 70%);
+  filter: blur(4px); z-index: 0; pointer-events: none;
+}

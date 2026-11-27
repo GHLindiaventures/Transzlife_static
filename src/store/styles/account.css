@@ -372,3 +372,50 @@ P button.acx-link { background: none; border: 0; padding: 0; cursor: pointer; }
   .tl-store:not(#tl-a):not(#tl-b) .acm-back a:active { background: #faf8f2; }
   .tl-store:not(#tl-a):not(#tl-b) .acm-back h1 { font-size: 19px; line-height: 1.2; color: var(--ink); }
 }
+
+/* ---- one section at a time on every screen size (?v=...): the side menu opens a section in place,
+        instead of scrolling a long page (which ran into the footer for the last few sections) ---- */
+.tl-store:not(#tl-a):not(#tl-b) .acx-card--off { display: none; }
+.tl-store:not(#tl-a):not(#tl-b) .acx-nav a[aria-current="page"] { background: var(--forest, #1f5130); color: #fff; }
+.tl-store:not(#tl-a):not(#tl-b) .acx-nav a[aria-current="page"] svg { color: #fff; }
+.tl-store:not(#tl-a):not(#tl-b) .acx-stat[aria-current="page"] { border-color: var(--forest, #1f5130); box-shadow: 0 0 0 1px var(--forest, #1f5130) inset; }
+.tl-store:not(#tl-a):not(#tl-b) .acx-main { min-width: 0; align-content: start; }
+
+/* ---- add an address (account) / save an address (checkout) ---- */
+.tl-store:not(#tl-a):not(#tl-b) .acx-addrs > li { display: flex; }
+.tl-store:not(#tl-a):not(#tl-b) .acx-addrs > li > .acx-addr { flex: 1; }
+.tl-store:not(#tl-a):not(#tl-b) button.acx-addr--new { width: 100%; text-align: left; font: inherit; color: inherit; cursor: pointer; transition: border-color .2s, background .2s; }
+.tl-store:not(#tl-a):not(#tl-b) button.acx-addr--new:hover { border-color: var(--forest); background: #f6faf3; }
+.tl-store:not(#tl-a):not(#tl-b) .acx-addr__acts { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex: none; }
+.tl-store:not(#tl-a):not(#tl-b) .acx-addr__default { display: inline-flex; align-items: center; gap: 5px; padding: 6px 10px; border-radius: 10px; font-size: 13px; font-weight: 700; color: var(--forest); background: transparent; border: 0; cursor: pointer; }
+.tl-store:not(#tl-a):not(#tl-b) .acx-addr__default:hover { background: var(--leaf-soft, #eaf4e6); }
+.tl-store:not(#tl-a):not(#tl-b) .acx-addr-form { max-width: 640px; margin-top: 18px; padding: 20px; border: 1px solid var(--line); border-radius: 16px; background: #fcfbf7; }
+.tl-store:not(#tl-a):not(#tl-b) .acx-addr-form h3 { margin: 0; font-size: 17px; color: var(--ink); }
+.tl-store:not(#tl-a):not(#tl-b) .acx-form select { width: 100%; margin: 0; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; font: inherit; font-weight: 500; background: #fff; }
+.tl-store:not(#tl-a):not(#tl-b) .acx-form__row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.tl-store:not(#tl-a):not(#tl-b) .acx-form__row--3 { grid-template-columns: 1fr 1fr .8fr; }
+.tl-store:not(#tl-a):not(#tl-b) .acx-form label.acx-check { display: flex; align-items: center; gap: 10px; font-weight: 600; }
+.tl-store:not(#tl-a):not(#tl-b) .acx-form label.acx-check input { width: 18px; height: 18px; accent-color: var(--forest); }
+.tl-store:not(#tl-a):not(#tl-b) .acx-addr-msg { margin-top: 12px; }
+@media (max-width: 560px) {
+  .tl-store:not(#tl-a):not(#tl-b) .acx-form__row, .tl-store:not(#tl-a):not(#tl-b) .acx-form__row--3 { grid-template-columns: 1fr; }
+}
+.tl-store:not(#tl-a):not(#tl-b) .addr-save { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-top: 4px; }
+.tl-store:not(#tl-a):not(#tl-b) .addr-save .btn { display: inline-flex; align-items: center; gap: 8px; }
+.tl-store:not(#tl-a):not(#tl-b) .addr-save small { color: var(--text-2); font-size: 13px; }
+.tl-store:not(#tl-a):not(#tl-b) .addr-saved { display: flex; align-items: center; gap: 6px; margin: 4px 0 0; font-size: 14px; font-weight: 700; color: var(--leaf, #3f7f2a); }
+
+/* ==== golden ratio (see phi.css): side menu 1 : phi^2, Fibonacci spacing ==== */
+/* ---- account: side menu 1 : phi^2 next to the open section ---- */
+@media (min-width: 990px) {
+  .tl-store:not(#tl-a):not(#tl-b) .acx-layout { grid-template-columns: minmax(220px, 1fr) minmax(0, 2.618fr); gap: var(--g-3); }
+}
+@media (min-width: 750px) { .tl-store:not(#tl-a):not(#tl-b) .acx-card { padding: clamp(21px, 2.6vw, 34px); } }
+.tl-store:not(#tl-a):not(#tl-b) .acx-main { gap: var(--g-3); }
+.tl-store:not(#tl-a):not(#tl-b) .acx-card__head { margin-bottom: var(--g-3); }
+
+
+/* phones: the menu replaces the stat tiles (".acx .acx-stats" above is more specific than the phone rule) */
+@media (max-width: 749px) {
+  .tl-store:not(#tl-a):not(#tl-b) .acx .acx-stats { display: none; }
+}

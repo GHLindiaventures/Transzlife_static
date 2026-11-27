@@ -2,23 +2,22 @@
 // change the product data or scripts/gallery/content.mjs and re-run the script.
 export const GALLERY = {
   "pulmoclear-gummies": [
-    "/assets/products/showcase-gummies.jpg",
-    "/img/gallery/pulmoclear-gummies/01-helps.webp",
-    "/img/p/pulmoclear.webp",
-    "/img/p/pulmoclear-jar.webp",
-    "/img/gallery/pulmoclear-gummies/02-ingredients.webp",
-    "/img/gallery/pulmoclear-gummies/03-made-for.webp",
-    "/img/gallery/pulmoclear-gummies/04-how-to-use.webp",
-    "/img/gallery/pulmoclear-gummies/05-why-tranzlife.webp"
+    "/assets/products/showcase-pulmoclear-v3.jpg",
+    "/img/gallery/pulmoclear-gummies/01-helps.webp?v=3",
+    "/img/p/pulmoclear-v2.webp",
+    "/img/gallery/pulmoclear-gummies/02-ingredients.webp?v=3",
+    "/img/gallery/pulmoclear-gummies/03-made-for.webp?v=3",
+    "/img/gallery/pulmoclear-gummies/04-how-to-use.webp?v=3",
+    "/img/gallery/pulmoclear-gummies/05-why-tranzlife.webp?v=3"
   ],
   "liver-booster": [
-    "/assets/products/showcase-liver.jpg",
-    "/img/gallery/liver-booster/01-helps.webp",
-    "/img/p/liver.webp",
-    "/img/gallery/liver-booster/02-ingredients.webp",
-    "/img/gallery/liver-booster/03-made-for.webp",
-    "/img/gallery/liver-booster/04-how-to-use.webp",
-    "/img/gallery/liver-booster/05-why-tranzlife.webp"
+    "/assets/products/showcase-liver-v3.jpg",
+    "/img/gallery/liver-booster/01-helps.webp?v=3",
+    "/img/p/liver-v3.webp",
+    "/img/gallery/liver-booster/02-ingredients.webp?v=3",
+    "/img/gallery/liver-booster/03-made-for.webp?v=3",
+    "/img/gallery/liver-booster/04-how-to-use.webp?v=3",
+    "/img/gallery/liver-booster/05-why-tranzlife.webp?v=3"
   ],
   "cyclerelief-roll-on": [
     "/assets/products/showcase-rollon.jpg",
@@ -30,13 +29,13 @@ export const GALLERY = {
     "/img/gallery/cyclerelief-roll-on/05-why-tranzlife.webp"
   ],
   "reviva-roll-on": [
-    "/assets/products/showcase-reviva.jpg",
-    "/img/gallery/reviva-roll-on/01-helps.webp",
-    "/img/p/reviva.webp",
-    "/img/gallery/reviva-roll-on/02-ingredients.webp",
-    "/img/gallery/reviva-roll-on/03-made-for.webp",
-    "/img/gallery/reviva-roll-on/04-how-to-use.webp",
-    "/img/gallery/reviva-roll-on/05-why-tranzlife.webp"
+    "/assets/products/showcase-reviva-v3.jpg",
+    "/img/gallery/reviva-roll-on/01-helps.webp?v=3",
+    "/img/p/reviva-v3.webp",
+    "/img/gallery/reviva-roll-on/02-ingredients.webp?v=3",
+    "/img/gallery/reviva-roll-on/03-made-for.webp?v=3",
+    "/img/gallery/reviva-roll-on/04-how-to-use.webp?v=3",
+    "/img/gallery/reviva-roll-on/05-why-tranzlife.webp?v=3"
   ],
   "energy-booster": [
     "/assets/products/showcase-energy.jpg",
@@ -48,13 +47,13 @@ export const GALLERY = {
     "/img/gallery/energy-booster/05-why-tranzlife.webp"
   ],
   "breathefree-inhaler": [
-    "/assets/products/showcase-inhaler.jpg",
-    "/img/gallery/breathefree-inhaler/01-helps.webp",
-    "/img/p/breathefree.webp",
-    "/img/gallery/breathefree-inhaler/02-ingredients.webp",
-    "/img/gallery/breathefree-inhaler/03-made-for.webp",
-    "/img/gallery/breathefree-inhaler/04-how-to-use.webp",
-    "/img/gallery/breathefree-inhaler/05-why-tranzlife.webp"
+    "/assets/products/showcase-breathefree-v3.jpg",
+    "/img/gallery/breathefree-inhaler/01-helps.webp?v=3",
+    "/img/p/breathefree-v2.webp",
+    "/img/gallery/breathefree-inhaler/02-ingredients.webp?v=3",
+    "/img/gallery/breathefree-inhaler/03-made-for.webp?v=3",
+    "/img/gallery/breathefree-inhaler/04-how-to-use.webp?v=3",
+    "/img/gallery/breathefree-inhaler/05-why-tranzlife.webp?v=3"
   ],
   "breathfree-drops": [
     "/img/p/breathfree-drops.jpg",

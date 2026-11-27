@@ -1,0 +1,45 @@
+/* ==========================================================
+   GOLDEN RATIO for the store pages (shop, product, cart, checkout, account, order, tracking,
+   blogs, policies). The rest of the site already follows src/styles/golden.css; these pages came
+   from another project with their own layout numbers. Loaded last in StoreLayout, so it only
+   adjusts proportions and spacing: no colours, content or behaviour change.
+
+   phi = 1.618   1/phi = 0.618   1/phi^2 = 0.382
+   splits   two columns are 1 : phi  (38.2% | 61.8%), side menus 1 : phi^2 (27.6% | 72.4%)
+   space    Fibonacci 8 / 13 / 21 / 34 / 55 / 89
+   type     already a phi scale in store.css (--t-sm … --t-3xl), body line-height 1.618
+   Desktop only (the same breakpoints where each layout is two columns); phones keep one column.
+   ========================================================== */
+.tl-store {
+  --phi: 1.618;
+  --g-1: 8px; --g-2: 13px; --g-3: 21px; --g-4: 34px; --g-5: 55px; --g-6: 89px;
+}
+
+/* ---- two-column page layouts: 1 : phi ---- */
+@media (min-width: 861px) {
+  /* product page: gallery 61.8% | details 38.2% (details never narrower than 400px) */
+  .tl-store:not(#tl-a):not(#tl-b) .pdp__grid,
+  .tl-store:not(#tl-a):not(#tl-b) .pdpx .pdp__grid { grid-template-columns: minmax(0, 1.618fr) minmax(400px, 1fr); gap: var(--g-5); }
+  .tl-store:not(#tl-a):not(#tl-b) .pdp-about__grid,
+  .tl-store:not(#tl-a):not(#tl-b) .body-sci,
+  .tl-store:not(#tl-a):not(#tl-b) .chero__inner,
+  .tl-store:not(#tl-a):not(#tl-b) .ing-hero__inner,
+  .tl-store:not(#tl-a):not(#tl-b) .feature-article { grid-template-columns: minmax(0, 1.618fr) minmax(0, 1fr); gap: var(--g-5); }
+  .tl-store:not(#tl-a):not(#tl-b) .phero__inner:not(:has(> :only-child)) { grid-template-columns: minmax(0, 1.618fr) minmax(0, 1fr); gap: var(--g-5); }
+  .tl-store:not(#tl-a):not(#tl-b) .faq-home,
+  .tl-store:not(#tl-a):not(#tl-b) .story,
+  .tl-store:not(#tl-a):not(#tl-b) .process,
+  .tl-store:not(#tl-a):not(#tl-b) .contact { grid-template-columns: minmax(0, 1fr) minmax(0, 1.618fr); gap: var(--g-5); }
+  /* cart + checkout: items / form 61.8% | order summary 38.2% */
+  .tl-store:not(#tl-a):not(#tl-b) .cart-page__grid,
+  .tl-store:not(#tl-a):not(#tl-b) .checkout__grid { grid-template-columns: minmax(0, 1.618fr) minmax(340px, 1fr); gap: var(--g-4); }
+  /* blog article: text 61.8% | sidebar 38.2% */
+  .tl-store:not(#tl-a):not(#tl-b) .article__layout { grid-template-columns: minmax(0, 1.618fr) minmax(280px, 1fr); gap: var(--g-5); }
+}
+
+/* account and order-tracking proportions live at the end of account.css and track.css (those load later) */
+
+/* ---- order page / confirmation ---- */
+.tl-store:not(#tl-a):not(#tl-b) .success-page { padding: var(--g-5) 0 var(--g-6); gap: var(--g-2); }
+.tl-store:not(#tl-a):not(#tl-b) .success-card { padding: var(--g-3) clamp(21px, 2.6vw, 34px); margin: var(--g-2) 0; }
+.tl-store:not(#tl-a):not(#tl-b) .success-actions { margin-top: var(--g-3); }

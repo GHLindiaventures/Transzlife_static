@@ -16,6 +16,7 @@ import trafficRoutes from './traffic.js';
 import adminReviewRoutes from './reviews.js';
 import offerRoutes from './offers.js';
 import contentAdminRoutes from './content.js';
+import siteDocAdminRoutes from './site-docs.js';
 import discountRoutes from './discounts.js';
 import healthAdminRoutes from './health.js';
 import enquiryAdminRoutes from './enquiries.js';
@@ -663,6 +664,7 @@ export default async function adminRoutes(app, { db, razorpay, cashfree, shippin
   await adminReviewRoutes(app, { db, G, parse, audit, env, log, presence });
   await offerRoutes(app, { db, G, parse, audit });
   await contentAdminRoutes(app, { db, G, parse, audit });
+  await siteDocAdminRoutes(app, { db, G, parse, audit });
   await enquiryAdminRoutes(app, { db, G, parse, audit });
   await discountRoutes(app, { db, G });
   if (health) await healthAdminRoutes(app, { health, G });

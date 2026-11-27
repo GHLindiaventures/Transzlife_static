@@ -1,13 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
-import { Trash2, Lock, ShieldCheck, Truck, CheckCircle2, ArrowLeft, Smartphone, CreditCard, Landmark, Banknote, Clock, XCircle, MapPin, Plus } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Trash2, Lock, ShieldCheck, Truck, CheckCircle2, ArrowLeft, Smartphone, CreditCard, Landmark, Banknote, Clock, MapPin, Plus } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { QtyStepper, FreeShipBar } from '../components/CartDrawer';
 import { Breadcrumbs, useTitle } from '../components/Common';
 import { SITE } from '../data/site';
 import { inr } from '../utils/format';
 import { getProduct } from '../data/products';
-import ReturnSection from '../components/ReturnSection';
 import { useAuth } from '../context/AuthContext';
 import { api, newIdempotencyKey } from '../lib/api';
 import { getBuyNow, clearBuyNow } from '../lib/checkoutIntent';
@@ -98,7 +97,7 @@ const PAY = [
   ['cod', 'Cash on delivery', 'Pay when it arrives', Banknote, false],
 ];
 
-const STATES = ['Andhra Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 'Delhi', 'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jammu & Kashmir', 'Jharkhand', 'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Odisha', 'Puducherry', 'Punjab', 'Rajasthan', 'Tamil Nadu', 'Telangana', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal', 'Other'];
+export const STATES = ['Andhra Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 'Delhi', 'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jammu & Kashmir', 'Jharkhand', 'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Odisha', 'Puducherry', 'Punjab', 'Rajasthan', 'Tamil Nadu', 'Telangana', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal', 'Other'];
 
 const rs = (paise) => inr(Math.round(paise / 100));
 
@@ -211,6 +210,8 @@ export function Checkout() {
   const [quote, setQuote] = useState(null);
   const [addresses, setAddresses] = useState(null);
   const [addrId, setAddrId] = useState('new');
+  const [addrBusy, setAddrBusy] = useState(false);
+  const [addrMsg, setAddrMsg] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [pending, setPending] = useState(null);     // { order, payment } when payment was interrupted
@@ -272,6 +273,21 @@ export function Checkout() {
 
   const methods = config?.methods || [];
   const savedAddr = addresses?.find((a) => a.id === addrId);
+
+  // "Save this address": saves the new address to the account right away and selects it
+  const saveNewAddress = async (e) => {
+    const fields = ['name', 'phone', 'line1', 'line2', 'city', 'state', 'pin'].map((n) => e.currentTarget.form.elements[n]);
+    if (!fields.every((el) => el.reportValidity())) return;
+    const body = Object.fromEntries(fields.map((el) => [el.name, el.value.trim()]));
+    setAddrBusy(true); setAddrMsg(''); setError('');
+    try {
+      const r = await api('/api/account/addresses', { method: 'POST', body });
+      setAddresses((list) => [r.address, ...(list || []).filter((a) => a.id !== r.address.id)]);
+      setAddrId(r.address.id);
+      setAddrMsg('Address saved. We will deliver here.');
+    } catch (err) { setError(err.message); }
+    finally { setAddrBusy(false); }
+  };
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -350,7 +366,7 @@ export function Checkout() {
               <div className="addr-list">
                 {addresses.map((a) => (
                   <label key={a.id} className={`addr-opt ${addrId === a.id ? 'is-active' : ''}`}>
-                    <input type="radio" name="addr" checked={addrId === a.id} onChange={() => setAddrId(a.id)} />
+                    <input type="radio" name="addr" checked={addrId === a.id} onChange={() => { setAddrId(a.id); setAddrMsg(''); }} />
                     <MapPin size={18} strokeWidth={1.6} />
                     <span><strong>{a.name}</strong><small>{a.line1}{a.line2 ? `, ${a.line2}` : ''}, {a.city}, {a.state} {a.pin} · {a.phone}</small></span>
                   </label>
@@ -362,6 +378,7 @@ export function Checkout() {
                 </label>
               </div>
             )}
+            {addrMsg && addrId !== 'new' && <p className="addr-saved" role="status"><CheckCircle2 size={16} /> {addrMsg}</p>}
             {addrId === 'new' && (
               <>
                 <div className="form__row">
@@ -378,6 +395,12 @@ export function Checkout() {
                     </select>
                   </label>
                   <label>PIN code<input name="pin" required pattern="[1-9][0-9]{5}" title="6-digit PIN code" inputMode="numeric" autoComplete="postal-code" /></label>
+                </div>
+                <div className="addr-save">
+                  <button type="button" className="btn btn--ghost" onClick={saveNewAddress} disabled={addrBusy}>
+                    <MapPin size={16} /> {addrBusy ? 'Saving…' : 'Save this address'}
+                  </button>
+                  <small>Or just place the order: a new address is saved to your account with it.</small>
                 </div>
               </>
             )}
@@ -429,54 +452,3 @@ const STATUS_LABEL = {
 export const statusLabel = (s) => STATUS_LABEL[s] || s;
 export const PAY_LABEL = { upi: 'UPI', card: 'Card', netbanking: 'Net banking', cod: 'Cash on delivery' };
 export { rs };
-
-/** Order confirmation / order details (loaded from the server; only the owner can see it). */
-export function OrderSuccess() {
-  const { id } = useParams();
-  const { customer } = useAuth();
-  const [order, setOrder] = useState(null);
-  const [error, setError] = useState('');
-  useTitle(order?.status === 'confirmed' ? 'Order confirmed' : 'Your order');
-
-  useEffect(() => {
-    api(`/api/orders/${encodeURIComponent(id)}`).then((r) => setOrder(r.order)).catch((e) => setError(e.message));
-  }, [id]);
-
-  if (error) {
-    return (
-      <section className="container empty-page">
-        <h1>Order not found</h1>
-        <p>{error}</p>
-        <Link to="/account" className="btn btn--lg">My orders</Link>
-      </section>
-    );
-  }
-  if (!order) return <div className="page-loading" aria-busy="true" />;
-
-  const ok = ['confirmed', 'packed', 'shipped', 'out_for_delivery', 'delivered'].includes(order.status);
-  const Icon = ok ? CheckCircle2 : order.status === 'cancelled' ? XCircle : Clock;
-  return (
-    <section className="container success-page">
-      <Icon size={56} strokeWidth={1.4} />
-      <h1>{ok ? `Thank you, ${(customer?.name || '').split(' ')[0]}!` : statusLabel(order.status)}</h1>
-      <p className="lead">Order <strong>#{order.number}</strong> · {statusLabel(order.status)}</p>
-      <div className="success-card">
-        <ul>
-          {order.items.map((it) => <li key={it.id + it.pack}><span>{it.qty} × {it.name}{it.pack > 1 ? ` (pack of ${it.pack})` : ''}</span><span>{rs(it.total)}</span></li>)}
-        </ul>
-        {order.discount > 0 && <p className="success-card__total"><span>Prepaid discount</span><span>−{rs(order.discount)}</span></p>}
-        <p className="success-card__total"><span>Shipping</span><span>{order.shipping ? rs(order.shipping) : 'Free'}</span></p>
-        <p className="success-card__total"><span>Total</span><strong>{rs(order.total)}</strong></p>
-        <p>Delivering to {order.address.name}, {order.address.line1}, {order.address.city} {order.address.pin}</p>
-        <p>Payment: {PAY_LABEL[order.paymentMethod] || order.paymentMethod}{order.paymentStatus === 'paid' ? ' (paid)' : ''}</p>
-      </div>
-      {ok && <p>We'll share tracking details as soon as it ships. Questions? Message us on <a href={SITE.whatsapp} target="_blank" rel="noreferrer">WhatsApp</a>.</p>}
-      {order.status === 'pending_payment' && <p>We haven't received the payment yet. If money was deducted, the order will be confirmed automatically within a few minutes.</p>}
-      <ReturnSection order={order} />
-      <div className="success-actions">
-        <Link to="/account" className="btn btn--lg btn--ghost">My orders</Link>
-        <Link to="/shop" className="btn btn--lg">Continue shopping</Link>
-      </div>
-    </section>
-  );
-}
