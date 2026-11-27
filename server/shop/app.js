@@ -19,6 +19,7 @@ import { createReminders } from './reminders.js';
 import reviewRoutes from './reviews.js';
 import contentRoutes from './content.js';
 import siteDocRoutes from './site-docs.js';
+import blogPublicRoutes from '../cms/public.js';
 import opsWebhooks, { createOps } from './ops.js';
 import seoRoutes from './seo.js';
 import customerReturnRoutes from './returns.js';
@@ -106,6 +107,7 @@ export async function buildShopApp({ env = process.env, db, fastifyOptions = {},
   await app.register(presenceRoutes, { presence });
   await app.register(contentRoutes, { db });
   await app.register(siteDocRoutes, { db });
+  await app.register(blogPublicRoutes, { db, log });
   await app.register(opsWebhooks, { ops, env, log });
   await app.register(seoRoutes, { db, env });
   await app.register(catalogPublic, { db });

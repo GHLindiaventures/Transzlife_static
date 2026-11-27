@@ -1,11 +1,11 @@
 // The website's text content lives in the database (table site_docs, served by GET /api/content).
+// Blog articles are not here: they live in the blog CMS (cms_posts, /api/blog/*, Blog in the dashboard).
 // This file lists every content document and which code object it fills.
 //   server: the objects below are the STARTING copy; any document missing from the database is created from them once.
 //   browser: at start-up the database copy is written into these same objects in place (src/content/docs.js), so every
 //            page reads database content. Staff edit it in the dashboard (Website content > Site text).
 import * as site from './site.js';
 import { SITE, ANNOUNCEMENTS, CERTIFICATIONS } from '../store/data/site.js';
-import { ARTICLES } from '../store/data/articles.js';
 import { CONCERNS } from '../store/data/concerns.js';
 import { POLICIES } from '../store/data/policies.js';
 
@@ -41,7 +41,6 @@ export const DOCS = {
   'store.SITE': { target: SITE, label: 'Business details (phone, email, address)', group: 'Site' },
   'store.ANNOUNCEMENTS': { target: ANNOUNCEMENTS, label: 'Store announcements (fallback)', group: 'Site' },
   'store.CERTIFICATIONS': { target: CERTIFICATIONS, label: 'Certifications', group: 'Site' },
-  articles: { target: ARTICLES, label: 'Blog articles', group: 'Content' },
   concerns: { target: CONCERNS, label: 'Health concerns pages', group: 'Content' },
   policies: { target: POLICIES, label: 'Policy pages (shipping, privacy, terms)', group: 'Content' },
 };

@@ -20,7 +20,7 @@ const swap = (arr, i, j) => { const a = [...arr]; [a[i], a[j]] = [a[j], a[i]]; r
 export default function WebsiteContent() {
   const { staff } = useAdmin();
   const { data, error, reload } = useApi('/api/admin/content');
-  const edit = can(staff, 'products.edit');
+  const edit = can(staff, 'content.site');
   return (
     <>
       <PageHead title="Website content" sub="The announcement bar and the homepage. Changes show on the site within about a minute." />

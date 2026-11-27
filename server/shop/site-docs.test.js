@@ -13,7 +13,7 @@ test('every site document is created in the database and served by /api/content'
   assert.equal(res.statusCode, 200);
   const { docs } = res.json();
   assert.deepEqual(Object.keys(docs).sort(), Object.keys(DOCS).sort());
-  assert.ok(docs.articles.length > 5, 'blog articles come from the database');
+  assert.ok(!('articles' in docs), 'blog articles live in the blog CMS (/api/blog), not in site text');
   // the database is the only source: an edited document is what the site gets, and a restart does not overwrite it
   await db.query(`UPDATE site_docs SET data = '{"edited":true}'::jsonb WHERE key = 'site.REELS'`);
   const again = await app.inject({ method: 'GET', url: '/api/content' });

@@ -1,3 +1,4 @@
+// SEED DATA ONLY (see the note at the top of articles.js): imported once into the blog CMS, not read by the website.
 // Blog articles from the content team ("Tranzlife Blogs" doc, Nov 2026).
 // Same shape as ARTICLES in articles.js, plus richer bodies:
 //   intro     blocks shown before the first heading

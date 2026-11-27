@@ -31,7 +31,7 @@ function canonicalTag(href) {
  * usePageMeta('FAQs', 'Answers about...')  ->  "FAQs | TranzLife Biosciences" + description + canonical + OG/Twitter tags.
  * usePageMeta(null) -> the site defaults. Pass { exact: true } to use the title as given.
  */
-export function usePageMeta(title, description, { exact = false, image = '', type = 'website', noindex = false } = {}) {
+export function usePageMeta(title, description, { exact = false, image = '', type = 'website', noindex = false, canonical = '' } = {}) {
   useEffect(() => {
     if (!DEFAULT_TITLE) {
       DEFAULT_TITLE = document.title;
@@ -41,15 +41,16 @@ export function usePageMeta(title, description, { exact = false, image = '', typ
     const fullTitle = title ? (exact ? title : `${title} | ${BRAND}`) : DEFAULT_TITLE;
     const desc = description || DEFAULT_DESC;
     const url = `${window.location.origin}${window.location.pathname}`;
+    const canon = canonical ? new URL(canonical, window.location.origin).href : url;
     const img = new URL(image || DEFAULT_OG_IMG, window.location.origin).href;
 
     document.title = fullTitle;
     metaTag('name', 'description', desc);
-    canonicalTag(url);
+    canonicalTag(canon);
     metaTag('property', 'og:type', type);
     metaTag('property', 'og:title', fullTitle);
     metaTag('property', 'og:description', desc);
-    metaTag('property', 'og:url', url);
+    metaTag('property', 'og:url', canon);
     metaTag('property', 'og:image', img);
     metaTag('name', 'twitter:card', 'summary_large_image');
     metaTag('name', 'twitter:title', fullTitle);
@@ -60,5 +61,5 @@ export function usePageMeta(title, description, { exact = false, image = '', typ
       const r = document.querySelector('meta[name="robots"]');
       if (r && r.content === 'noindex, nofollow') r.remove();
     }
-  }, [title, description, exact, image, type, noindex]);
+  }, [title, description, exact, image, type, noindex, canonical]);
 }

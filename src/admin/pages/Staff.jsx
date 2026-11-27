@@ -6,7 +6,10 @@ const ROLE_HELP = {
   owner: 'Everything, including staff and shop settings',
   manager: 'Orders, refunds, products, stock, customers',
   support: 'View everything, add order notes; cannot change orders, prices or stock',
+  content_manager: 'Blogs, images, SEO, redirects and website text; no access to orders, customers or payments',
 };
+export const ROLE_LABEL = { owner: 'Owner', manager: 'Manager', support: 'Support', content_manager: 'Content manager' };
+const roleOptions = ['owner', 'manager', 'content_manager', 'support'].map((r) => <option key={r} value={r}>{ROLE_LABEL[r]}</option>);
 
 /** Owner only: add staff, change roles, deactivate, reset passwords or 2FA. */
 export default function Staff() {
@@ -54,7 +57,7 @@ export default function Staff() {
                 <td><strong>{s.name}</strong>{s.id === me.id && <span className="adm-badge is-info">You</span>}<small className="adm-sub">{s.email}</small></td>
                 <td>
                   <select value={s.role} onChange={(e) => patch(s, { role: e.target.value }, 'Role updated.')} disabled={act.busy} aria-label={`Role for ${s.name}`}>
-                    <option value="owner">Owner</option><option value="manager">Manager</option><option value="support">Support</option>
+                    {roleOptions}
                   </select>
                 </td>
                 <td>{s.totp_enabled ? <span className="adm-badge is-ok">On</span> : <span className="adm-badge is-warn">{s.must_change_password ? 'Not set up yet' : 'Off'}</span>}</td>
@@ -77,11 +80,11 @@ export default function Staff() {
           <label>Name<input required minLength={2} maxLength={80} value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} /></label>
           <label>Email<input type="email" required maxLength={120} value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} /></label>
           <label>Role<select value={form.role} onChange={(e) => setForm((f) => ({ ...f, role: e.target.value }))}>
-            <option value="support">Support</option><option value="manager">Manager</option><option value="owner">Owner</option>
+            {roleOptions}
           </select></label>
           <button className="adm-btn" disabled={act.busy}>Add</button>
         </form>
-        <p className="adm-muted">{form.role[0].toUpperCase() + form.role.slice(1)}: {ROLE_HELP[form.role]}.</p>
+        <p className="adm-muted">{ROLE_LABEL[form.role]}: {ROLE_HELP[form.role]}.</p>
       </section>
     </>
   );

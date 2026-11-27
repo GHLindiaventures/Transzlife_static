@@ -1,3 +1,6 @@
+// SEED DATA ONLY. The website no longer reads this file: blog articles live in the blog CMS (cms_posts),
+// edited in the dashboard under Blog posts. server/cms/legacy.js imports these once into an empty database
+// (a fresh local database or the test database); in production they were imported from the site_docs copy.
 import { photo } from './photos.js';
 import { BLOG_ARTICLES } from './blogArticles.js';
 // Blog / wellness journal articles. General education only.

@@ -29,7 +29,7 @@ const out = (a, now = Date.now()) => ({
 export default async function contentAdminRoutes(app, { db, G, parse, audit }) {
   const q = db.query;
 
-  app.get('/api/admin/content', G('view'), async () => {
+  app.get('/api/admin/content', G(['view', 'content.site']), async () => {
     const settings = await loadSettings(q);
     return {
       announcements: (await q('SELECT * FROM announcements ORDER BY sort, created_at')).rows.map((a) => out(a)),
@@ -42,7 +42,7 @@ export default async function contentAdminRoutes(app, { db, G, parse, audit }) {
     };
   });
 
-  app.post('/api/admin/announcements', G('products.edit'), async (req, reply) => {
+  app.post('/api/admin/announcements', G('content.site'), async (req, reply) => {
     const b = parse(message, req.body, reply); if (!b) return;
     const sort = Number((await q('SELECT COALESCE(MAX(sort), 0) + 10 AS s FROM announcements')).rows[0].s);
     const a = (await q(`INSERT INTO announcements (text, link_url, starts_at, ends_at, active, sort, created_by) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
@@ -51,7 +51,7 @@ export default async function contentAdminRoutes(app, { db, G, parse, audit }) {
     return { announcement: out(a) };
   });
 
-  app.patch('/api/admin/announcements/:id', G('products.edit'), async (req, reply) => {
+  app.patch('/api/admin/announcements/:id', G('content.site'), async (req, reply) => {
     const id = parse(z.string().uuid(), req.params.id, reply); if (!id) return;
     const b = parse(message, req.body, reply); if (!b) return;
     const before = (await q('SELECT * FROM announcements WHERE id = $1', [id])).rows[0];
@@ -62,7 +62,7 @@ export default async function contentAdminRoutes(app, { db, G, parse, audit }) {
     return { announcement: out(a) };
   });
 
-  app.delete('/api/admin/announcements/:id', G('products.edit'), async (req, reply) => {
+  app.delete('/api/admin/announcements/:id', G('content.site'), async (req, reply) => {
     const id = parse(z.string().uuid(), req.params.id, reply); if (!id) return;
     const a = (await q('DELETE FROM announcements WHERE id = $1 RETURNING text', [id])).rows[0];
     if (!a) return reply.code(404).send({ error: 'Message not found.' });
@@ -70,13 +70,13 @@ export default async function contentAdminRoutes(app, { db, G, parse, audit }) {
     return { ok: true };
   });
 
-  app.put('/api/admin/announcements/order', G('products.edit'), async (req, reply) => {
+  app.put('/api/admin/announcements/order', G('content.site'), async (req, reply) => {
     const b = parse(z.object({ ids: z.array(z.string().uuid()).min(1).max(50) }), req.body, reply); if (!b) return;
     await db.tx(async (t) => { for (const [i, id] of b.ids.entries()) await t.query('UPDATE announcements SET sort = $2 WHERE id = $1', [id, (i + 1) * 10]); });
     return { ok: true };
   });
 
-  app.put('/api/admin/announcements/style', G('products.edit'), async (req, reply) => {
+  app.put('/api/admin/announcements/style', G('content.site'), async (req, reply) => {
     const b = parse(z.object({ bg: hex, fg: hex, speed: z.enum(['slow', 'normal', 'fast']) }), req.body, reply); if (!b) return;
     const ratio = contrast(b.bg, b.fg);
     if (ratio < 4.5) return reply.code(400).send({ error: `These colours are hard to read (contrast ${ratio.toFixed(1)}:1, needs at least 4.5:1). Pick a darker background or a lighter text colour.` });
@@ -86,7 +86,7 @@ export default async function contentAdminRoutes(app, { db, G, parse, audit }) {
     return { ok: true, contrast: Number(ratio.toFixed(2)) };
   });
 
-  app.put('/api/admin/home', G('products.edit'), async (req, reply) => {
+  app.put('/api/admin/home', G('content.site'), async (req, reply) => {
     const b = parse(z.object({
       sections: z.array(z.object({
         key: z.enum(SECTION_KEYS), visible: z.boolean(),

@@ -13,6 +13,7 @@ import Fastify from 'fastify';
 import { createChatApi } from './chat-api.js';
 import { createClientIp } from './client-ip.js';
 import { buildShopApp } from './shop/app.js';
+import { VIDEO_ORIGINS } from './cms/render.js';
 
 const ROOT = resolve(fileURLToPath(new URL('../dist', import.meta.url)));
 const PORT = Number(process.env.PORT || 3000);
@@ -46,7 +47,7 @@ const CSP = [
   "media-src 'self' blob: https://videos.pexels.com",
   "font-src 'self' data:",
   `connect-src 'self' ${RAZORPAY.join(' ')} ${CASHFREE.slice(1).join(' ')} https://lumberjack.razorpay.com ${MEDIA_STORE} ${extra('CSP_CONNECT_EXTRA').join(' ')}`,
-  `frame-src ${RAZORPAY.join(' ')} ${CASHFREE.join(' ')} https://www.google.com https://maps.google.com`,
+  `frame-src ${RAZORPAY.join(' ')} ${CASHFREE.join(' ')} https://www.google.com https://maps.google.com ${VIDEO_ORIGINS.join(' ')}`,   // blog video embeds (server/cms/render.js)
   "object-src 'none'",
   "base-uri 'self'",
   `form-action 'self' ${RAZORPAY[1]} ${CASHFREE.slice(1).join(' ')}`,

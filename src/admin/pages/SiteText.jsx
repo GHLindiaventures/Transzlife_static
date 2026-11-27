@@ -14,7 +14,7 @@ export default function SiteText() {
     (data?.docs || []).forEach((d) => { (g[d.group] ||= []).push(d); });
     return g;
   }, [data]);
-  const edit = can(staff, 'products.edit');
+  const edit = can(staff, 'content.site');
   return (
     <>
       <PageHead title="Site text" sub="All wording on the website is stored in the database. Edit a document and save; the site shows it within about 30 seconds." />
@@ -38,14 +38,14 @@ export default function SiteText() {
               </section>
             ))}
           </div>
-          <div className="adm-card">{key ? <Editor docKey={key} edit={edit} /> : <p className="adm-muted">Choose a document on the left.</p>}</div>
+          <div className="adm-card">{key ? <Editor docKey={key} edit={edit && !data.docs.find((x) => x.key === key)?.locked} locked={!!data.docs.find((x) => x.key === key)?.locked} /> : <p className="adm-muted">Choose a document on the left.</p>}</div>
         </div>
       )}
     </>
   );
 }
 
-function Editor({ docKey, edit }) {
+function Editor({ docKey, edit, locked }) {
   const { data, error, reload } = useApi(`/api/admin/site-docs/${encodeURIComponent(docKey)}`);
   const act = useAction();
   const original = useMemo(() => (data ? JSON.stringify(data.data, null, 2) : ''), [data]);
@@ -62,6 +62,7 @@ function Editor({ docKey, edit }) {
   return (
     <>
       <h3 className="adm-h3" style={{ marginTop: 0 }}>{data.label}</h3>
+      {locked && <p className="adm-muted">Read only: this document also controls the shop, so only the owner or a manager can change it.</p>}
       <ErrorBox>{act.error}</ErrorBox>
       {act.notice && <Notice>{act.notice}</Notice>}
       <textarea className="adm-input" style={{ width: '100%', minHeight: 440, fontFamily: 'ui-monospace, Consolas, monospace', fontSize: 13 }} spellCheck={false} value={text} readOnly={!edit} onChange={(e) => setText(e.target.value)} />
