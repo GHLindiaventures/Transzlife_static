@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { api } from '../../store/lib/api';
 import { ErrorBox, Loading, Notice, PageHead, Pager, can, dt, rs, toPaise, useAction, useAdmin, useApi } from '../ui';
@@ -253,6 +253,14 @@ function PaymentGateways({ s, owner, reload }) {
   const [cfOn, setCfOn] = useState(pg.cashfreeEnabled !== false);
   const [active, setActive] = useState(pg.activeProvider || 'razorpay');
 
+  useEffect(() => {
+    if (!s) return;
+    const g = s.payment_gateways || {};
+    setRzOn(g.razorpayEnabled !== false);
+    setCfOn(g.cashfreeEnabled !== false);
+    setActive(g.activeProvider || 'razorpay');
+  }, [s]);
+
   const save = async (e) => {
     e.preventDefault();
     const body = { payment_gateways: { razorpayEnabled: rzOn, cashfreeEnabled: cfOn, activeProvider: active } };
@@ -310,7 +318,7 @@ function CompanyBank({ s, owner, reload }) {
     <section className="adm-card">
       <h2 className="adm-h2">Invoice bank details</h2>
       {!s ? <Loading /> : (
-        <form className="adm-form" onSubmit={save}>
+        <form key={JSON.stringify(bank)} className="adm-form" onSubmit={save}>
           <label>Account holder&apos;s name<input name="accountHolder" defaultValue={bank.accountHolder || ''} disabled={!owner} placeholder="TranzLife Wellness Pvt Ltd" /></label>
           <div className="adm-pair">
             <label>Bank name<input name="bankName" defaultValue={bank.bankName || ''} disabled={!owner} placeholder="HDFC Bank" /></label>
@@ -351,7 +359,7 @@ function MarketingSeo({ s, owner, reload }) {
     <section className="adm-card">
       <h2 className="adm-h2">SEO &amp; marketing tags</h2>
       {!s ? <Loading /> : (
-        <form className="adm-form" onSubmit={save}>
+        <form key={JSON.stringify(m)} className="adm-form" onSubmit={save}>
           <div className="adm-pair">
             <label>Google Tag Manager ID<input name="gtmId" defaultValue={m.gtmId || ''} disabled={!owner} placeholder="GTM-XXXXXXX" /></label>
             <label>Google Analytics (GA4) ID<input name="ga4Id" defaultValue={m.ga4Id || ''} disabled={!owner} placeholder="G-XXXXXXXXXX" /></label>
@@ -414,6 +422,19 @@ function NotificationManager({ s, owner, reload }) {
   });
   const [templates, setTemplates] = useState(cfg.templates || {});
 
+  useEffect(() => {
+    if (!s) return;
+    const c = s.notification_config || {};
+    setChannels({
+      email: c.channels?.email !== false,
+      sms: Boolean(c.channels?.sms),
+      whatsapp: c.channels?.whatsapp !== false,
+    });
+    setAdminEvents(Object.fromEntries(ADMIN_EVENT_LABELS.map(([k]) => [k, c.adminEvents?.[k] !== false])));
+    setCustomerEvents(Object.fromEntries(CUSTOMER_EVENT_LABELS.map(([k]) => [k, c.customerEvents?.[k] !== false])));
+    setTemplates(c.templates || {});
+  }, [s]);
+
   const save = async (e) => {
     e.preventDefault();
     const f = new FormData(e.currentTarget);
@@ -441,7 +462,7 @@ function NotificationManager({ s, owner, reload }) {
     <section className="adm-card" style={{ gridColumn: '1 / -1' }}>
       <h2 className="adm-h2">Notifications &amp; templates</h2>
       {!s ? <Loading /> : (
-        <form className="adm-form" onSubmit={save}>
+        <form key={JSON.stringify(cfg.adminRecipients || {})} className="adm-form" onSubmit={save}>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
             <label className="adm-check"><input type="checkbox" checked={channels.email} onChange={(e) => setChannels({ ...channels, email: e.target.checked })} disabled={!owner} /> Email</label>
             <label className="adm-check"><input type="checkbox" checked={channels.whatsapp} onChange={(e) => setChannels({ ...channels, whatsapp: e.target.checked })} disabled={!owner} /> WhatsApp</label>
