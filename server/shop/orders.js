@@ -7,6 +7,7 @@
 //   abandoned     -> reserved -= units           (after PAYMENT_WINDOW_MIN)
 import { quote, ONLINE_METHODS, PricingError } from './pricing.js';
 import { allocateFefo } from './batches.js';
+import { ensureInvoiceNumber } from './invoice.js';
 
 export const PAYMENT_WINDOW_MIN = 30;
 
@@ -31,7 +32,7 @@ async function commitStock(t, order, ref) {
   await t.query('UPDATE orders SET stock_committed = true WHERE id = $1', [order.id]);
 }
 
-export function createOrders({ db, razorpay, cashfree, log, notifier, env = process.env }) {
+export function createOrders({ db, razorpay, cashfree, log, notifier, realtime, env = process.env }) {
   /** Creates the order inside one transaction. Returns { order, created }. */
   async function place({ customer, items, paymentMethod, address, email, idempotencyKey }) {
     return db.tx(async (t) => {
@@ -79,15 +80,36 @@ export function createOrders({ db, razorpay, cashfree, log, notifier, env = proc
         await t.query('INSERT INTO order_discounts (order_id, kind, ref_id, label, amount) VALUES ($1,$2,$3,$4,$5)', [order.id, d.kind, d.ref, d.label, d.amount]);
       }
       await addEvent(t, order.id, null, status, 'customer', online ? 'Order placed, awaiting payment' : 'Order placed (cash on delivery)', address.city || null, 'customer');
-      if (!online) { await commitStock(t, { ...order, status: 'pending_payment' }, orderNumber); order.stock_committed = true; }
+      if (!online) {
+        await commitStock(t, { ...order, status: 'pending_payment' }, orderNumber);
+        order.stock_committed = true;
+        const inv = await ensureInvoiceNumber(t.query, order.id, order.created_at);
+        if (inv) { order.invoice_number = inv.invoiceNumber; order.invoice_issued_at = inv.issuedAt; }
+      }
       return { order, created: true };
     });
+    if (res?.created && res.order) {
+      realtime?.publish('order', {
+        orderNumber: res.order.order_number,
+        trackingId: res.order.tracking_id,
+        customerId: res.order.customer_id,
+        status: res.order.status,
+        paymentStatus: res.order.payment_status,
+      });
+    }
+    return res;
   }
 
   /** Starts (or restarts) an online payment for a pending order. */
   async function startPayment(order, customer) {
     if (order.status !== 'pending_payment' || order.payment_status === 'paid') throw Object.assign(new Error('This order does not need payment.'), { status: 409 });
-    const useCashfree = !!(cashfree?.enabled && (!razorpay.enabled || String(env.PAYMENT_PROVIDER || '').toLowerCase() === 'cashfree'));
+    const gwRow = (await db.query(`SELECT value FROM settings WHERE key = 'payment_gateways'`)).rows[0];
+    const gw = gwRow ? (typeof gwRow.value === 'string' ? JSON.parse(gwRow.value) : gwRow.value) : {};
+    const rpActive = razorpay.enabled && gw.razorpayEnabled !== false;
+    const cfActive = !!cashfree?.enabled && gw.cashfreeEnabled !== false;
+    if (!rpActive && !cfActive) throw Object.assign(new Error('Online payments are currently disabled. Please choose Cash on delivery.'), { status: 400 });
+    const preferred = gw.activeProvider || env.PAYMENT_PROVIDER || 'razorpay';
+    const useCashfree = cfActive && (!rpActive || String(preferred).toLowerCase() === 'cashfree');
     if (useCashfree) {
       const site = String(env.SITE_URL || '').replace(/\/$/, '');
       const cf = await cashfree.createOrder({
@@ -144,10 +166,23 @@ export function createOrders({ db, razorpay, cashfree, log, notifier, env = proc
                 updated_at = now() WHERE id = $1 RETURNING *`, [order.id, edd])).rows[0];
       await addEvent(t, order.id, order.status, 'confirmed', actor,
         late ? `Payment received after the order had been ${order.status}; please check stock` : 'Payment received & order confirmed', null, actor === 'razorpay' ? 'system' : 'customer');
+      const inv = await ensureInvoiceNumber(t.query, order.id);
+      if (inv) { updated.invoice_number = inv.invoiceNumber; updated.invoice_issued_at = inv.issuedAt; }
       changed = true;
       return updated;
     });
-    if (changed) notifier?.notify(result.id, 'confirmed');
+    if (changed) {
+      notifier?.notify(result.id, 'confirmed');
+      notifier?.notifyAdmin?.('payment_confirmed', { orderNumber: result.order_number, total: result.total, paymentMethod: method || result.payment_method });
+      realtime?.publish('order', {
+        orderNumber: result.order_number,
+        trackingId: result.tracking_id,
+        customerId: result.customer_id,
+        status: result.status,
+        paymentStatus: result.payment_status,
+      });
+      realtime?.publish('payment', { orderNumber: result.order_number, customerId: result.customer_id, status: 'paid' });
+    }
     return result;
   }
 
@@ -156,6 +191,8 @@ export function createOrders({ db, razorpay, cashfree, log, notifier, env = proc
       `UPDATE payments SET status = CASE WHEN status = 'paid' THEN status ELSE 'failed' END,
               provider_payment_id = COALESCE(provider_payment_id, $2), error = $3, raw = $4, updated_at = now()
         WHERE provider_order_id = $1`, [providerOrderId, providerPaymentId || null, error || null, raw ? JSON.stringify(raw) : null]);
+    notifier?.notifyAdmin?.('payment_failed', { providerOrderId, reason: error || 'Payment failed' });
+    realtime?.publish('payment', { providerOrderId, status: 'failed' });
   }
 
   /** Cancels unpaid online orders older than the payment window and frees their stock. */
@@ -180,6 +217,8 @@ export function createOrders({ db, razorpay, cashfree, log, notifier, env = proc
   const PUBLIC = (o, items = [], events = []) => ({
     number: o.order_number,
     trackingId: o.tracking_id || `TRK-${o.order_number}`,
+    invoiceNumber: o.invoice_number || null,
+    invoiceIssuedAt: o.invoice_issued_at || null,
     status: o.status,
     paymentStatus: o.payment_status,
     paymentMethod: o.payment_method,

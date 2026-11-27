@@ -26,6 +26,7 @@ import presenceRoutes, { createPresence } from './presence.js';
 import { createHealth } from '../admin/health.js';
 import { createCourier } from './courier.js';
 import { createShipping } from './shipping.js';
+import { createRealtimeHub, realtimeRoutes } from '../lib/realtime.js';
 
 const UNSAFE = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
@@ -43,12 +44,13 @@ export async function buildShopApp({ env = process.env, db, fastifyOptions = {},
   const cashfree = createCashfree(env);
   const twilio = createTwilio(env, { log });
   const auth = createAuth({ db, env, log, twilio });
+  const realtime = createRealtimeHub({ log });
   const notifier = createNotifier({ db, twilio, env, log });
-  const orders = createOrders({ db, razorpay, cashfree, log, notifier, env });
+  const orders = createOrders({ db, razorpay, cashfree, log, notifier, realtime, env });
   const reminders = createReminders({ db, twilio, env, log });
   const presence = createPresence();
   const ops = createOps({ db, twilio, env, log });
-  const courier = createCourier({ db, notifier, env, log });
+  const courier = createCourier({ db, notifier, realtime, env, log });
   const shipping = createShipping({ db, env, log });
   const health = createHealth({
     db, razorpay, twilio,
@@ -98,8 +100,9 @@ export async function buildShopApp({ env = process.env, db, fastifyOptions = {},
     await health.recordError(req, err);
   });
 
-  await app.register(shopRoutes, { db, auth, orders, razorpay, cashfree, shipping, notifier, ops, courier, log, env });
-  await app.register(adminRoutes, { db, razorpay, cashfree, shipping, twilio, notifier, reminders, presence, ops, health, courier, auth: { mode: auth.mode }, log, env });
+  await app.register(realtimeRoutes, { realtime });
+  await app.register(shopRoutes, { db, auth, orders, razorpay, cashfree, shipping, notifier, ops, courier, realtime, log, env });
+  await app.register(adminRoutes, { db, razorpay, cashfree, shipping, twilio, notifier, reminders, presence, ops, health, courier, realtime, auth: { mode: auth.mode }, log, env });
   await app.register(trackRoutes, { db, log });
   await app.register(reviewRoutes, { db, env, log });
   await app.register(customerReturnRoutes, { db, env, log });
@@ -134,8 +137,9 @@ export async function buildShopApp({ env = process.env, db, fastifyOptions = {},
     if (tick % 2 === 0) health.sweep().catch((e) => log.error(e, '[health] sweep failed'));
   }, 5 * 60_000);
   sweep.unref();
-  app.addHook('onClose', async () => { clearInterval(sweep); await db.close?.(); });
+  app.addHook('preClose', () => { realtime.close(); });
+  app.addHook('onClose', async () => { clearInterval(sweep); realtime.close(); await db.close?.(); });
 
-  app.shop = { db, auth, orders, razorpay, cashfree, shipping, twilio, notifier, reminders, presence, ops, health, courier };
+  app.shop = { db, auth, orders, razorpay, cashfree, shipping, twilio, notifier, reminders, presence, ops, health, courier, realtime };
   return app;
 }

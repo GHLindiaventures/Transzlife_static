@@ -38,15 +38,16 @@ const extra = (name) => String(process.env[name] || '').split(',').map((s) => s.
 const MEDIA_STORE = originOf(process.env.AWS_ENDPOINT_URL_S3);     // product / review photos (shop/media.js)
 const RAZORPAY = ['https://checkout.razorpay.com', 'https://api.razorpay.com'];
 const CASHFREE = ['https://sdk.cashfree.com', 'https://api.cashfree.com', 'https://sandbox.cashfree.com'];
+const MARKETING = ['https://www.googletagmanager.com', 'https://www.google-analytics.com', 'https://connect.facebook.net', 'https://www.facebook.com'];
 const CSP = [
   "default-src 'self'",
-  `script-src 'self' ${RAZORPAY[0]} ${CASHFREE[0]}`,
+  `script-src 'self' ${RAZORPAY[0]} ${CASHFREE[0]} ${MARKETING[0]} ${MARKETING[1]} ${MARKETING[2]}`,
   "style-src 'self' 'unsafe-inline'",
-  `img-src 'self' data: blob: https://images.unsplash.com https://images.pexels.com https://*.razorpay.com https://*.cashfree.com ${MEDIA_STORE} ${extra('CSP_IMG_EXTRA').join(' ')}`,
+  `img-src 'self' data: blob: https://images.unsplash.com https://images.pexels.com https://*.razorpay.com https://*.cashfree.com ${MARKETING[1]} ${MARKETING[3]} ${MEDIA_STORE} ${extra('CSP_IMG_EXTRA').join(' ')}`,
   "media-src 'self' blob: https://videos.pexels.com",
   "font-src 'self' data:",
-  `connect-src 'self' ${RAZORPAY.join(' ')} ${CASHFREE.slice(1).join(' ')} https://lumberjack.razorpay.com ${MEDIA_STORE} ${extra('CSP_CONNECT_EXTRA').join(' ')}`,
-  `frame-src ${RAZORPAY.join(' ')} ${CASHFREE.join(' ')} https://www.google.com https://maps.google.com`,
+  `connect-src 'self' ${RAZORPAY.join(' ')} ${CASHFREE.slice(1).join(' ')} https://lumberjack.razorpay.com ${MARKETING[0]} ${MARKETING[1]} ${MARKETING[3]} ${MEDIA_STORE} ${extra('CSP_CONNECT_EXTRA').join(' ')}`,
+  `frame-src ${RAZORPAY.join(' ')} ${CASHFREE.join(' ')} ${MARKETING[0]} https://www.google.com https://maps.google.com`,
   "object-src 'none'",
   "base-uri 'self'",
   `form-action 'self' ${RAZORPAY[1]} ${CASHFREE.slice(1).join(' ')}`,

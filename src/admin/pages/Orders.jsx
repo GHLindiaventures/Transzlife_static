@@ -125,11 +125,14 @@ export function OrderList() {
 }
 
 // ---- shared pieces ----------------------------------------------------------
-const STEPS = [['confirmed', 'Confirmed'], ['packed', 'Packed'], ['shipped', 'Shipped'], ['delivered', 'Delivered']];
-const ORDER_OF = { pending_payment: -1, confirmed: 0, processing: 0.5, packed: 1, shipped: 2, in_transit: 2.3, out_for_delivery: 2.7, delivered: 3 };
+const STEPS = [['confirmed', 'Confirmed'], ['packed', 'Packed'], ['ready_for_pickup', 'Ready for pickup'], ['shipped', 'Shipped'], ['delivered', 'Delivered']];
+const ORDER_OF = {
+  pending_payment: -1, confirmed: 0, processing: 0.5, packed: 1, ready_for_pickup: 2,
+  shipped: 3, in_transit: 3.4, out_for_delivery: 3.7, delivered: 4,
+};
 function Stepper({ status }) {
-  const stopped = ['cancelled', 'refunded', 'rto', 'returned'].includes(status);
-  const at = ORDER_OF[status] ?? 3;
+  const stopped = ['cancelled', 'refunded', 'refund_initiated', 'rto', 'returned', 'shipment_failed', 'delivery_failed'].includes(status);
+  const at = ORDER_OF[status] ?? 4;
   return (
     <div className={`adm-stepper ${stopped ? 'is-stopped' : ''}`} aria-label={`Progress: ${STATUS[status]?.[0] || status}`}>
       {STEPS.map(([k, label], i) => {
@@ -141,9 +144,11 @@ function Stepper({ status }) {
 }
 
 const ACTION_LABEL = {
-  processing: 'Start processing', packed: 'Mark packed', shipped: 'Mark shipped', in_transit: 'Mark in transit',
-  out_for_delivery: 'Out for delivery', delivered: 'Mark delivered',
-  confirmed: 'Back to "to pack"', cancelled: 'Cancel order', rto: 'Returned to us (RTO)', returned: 'Mark returned',
+  processing: 'Start processing', packed: 'Mark packed', ready_for_pickup: 'Ready for pickup',
+  shipped: 'Mark shipped', in_transit: 'Mark in transit', out_for_delivery: 'Out for delivery',
+  delivered: 'Mark delivered', shipment_failed: 'Mark shipment failed', delivery_failed: 'Delivery failed',
+  confirmed: 'Back to "to pack"', cancelled: 'Cancel order', rto: 'Returned to us (RTO)',
+  returned: 'Mark returned', refund_initiated: 'Initiate refund', refunded: 'Mark refunded',
 };
 
 /** Status buttons (+ courier / tracking / reason / restock form). Used on the order page and in the quick-view drawer. */
@@ -300,7 +305,7 @@ export function OrderDetail() {
         )}
         {o.status === 'delivered' && can(staff, 'orders.edit') && <button className="adm-btn is-ghost no-print" onClick={() => setReturning(true)}><Undo2 size={16} /> Start a return</button>}
         <Link className="adm-btn is-ghost no-print" to={`/admin/orders/print?numbers=${o.number}`}><Printer size={16} /> Packing slip</Link>
-        <a className="adm-btn is-ghost no-print" href={`/api/admin/orders/${o.number}/invoice`} target="_blank" rel="noreferrer"><Printer size={16} /> GST Invoice</a>
+        <a className="adm-btn is-ghost no-print" href={`/api/admin/orders/${o.number}/invoice`} target="_blank" rel="noreferrer"><Printer size={16} /> {o.invoiceNumber ? `Invoice ${o.invoiceNumber}` : 'GST Invoice'}</a>
       </PageHead>
       {returning && <StartReturn number={o.number} onClose={() => setReturning(false)} onCreated={(r) => navigate(`/admin/returns?id=${r.id}`)} />}
       <ErrorBox>{act.error}</ErrorBox>
@@ -430,6 +435,11 @@ function ShipmentEditor({ o, act, onSaved }) {
     });
   }, [o.courierName, o.awbNumber, o.trackingUrl, o.estimatedDeliveryAt, o.isDelayed, o.delayReason]);
 
+  const [provider, setProvider] = useState(o.shippingProvider || 'shiprocket');
+  const [couriers, setCouriers] = useState(null);
+  const [selectedCourier, setSelectedCourier] = useState('');
+  const [checkingRates, setCheckingRates] = useState(false);
+
   const save = async (e) => {
     e.preventDefault();
     if (await act.run(() => api(`/api/admin/orders/${o.number}/shipment`, { method: 'PATCH', body: f }), 'Shipment details updated.')) onSaved();
@@ -439,8 +449,26 @@ function ShipmentEditor({ o, act, onSaved }) {
       (res) => res.message || (res.synced ? `Synced: ${res.status}` : 'No new courier scans.'));
     if (r?.synced) onSaved();
   };
+  const loadCouriers = async () => {
+    setCheckingRates(true);
+    try {
+      const r = await api(`/api/admin/orders/${o.number}/couriers`);
+      setCouriers(r);
+      if (r.couriers?.length) setSelectedCourier(String(r.couriers[0].id));
+      if (r.providers?.length && !r.providers.includes(provider)) setProvider(r.providers[0]);
+    } catch (e) {
+      act.setError(e.message);
+    } finally {
+      setCheckingRates(false);
+    }
+  };
   const bookShipment = async () => {
-    const r = await act.run(() => api(`/api/admin/orders/${o.number}/ship`, { method: 'POST', body: {} }),
+    const picked = couriers?.couriers?.find((c) => String(c.id) === selectedCourier);
+    const body = {
+      provider,
+      ...(picked && Number.isFinite(Number(picked.id)) ? { courierId: Number(picked.id), courierName: picked.name } : {}),
+    };
+    const r = await act.run(() => api(`/api/admin/orders/${o.number}/ship`, { method: 'POST', body }),
       (res) => `Shipment booked via ${res.courierName}${res.awb ? ` (AWB ${res.awb})` : ''}.`);
     if (r) onSaved();
   };
@@ -453,26 +481,76 @@ function ShipmentEditor({ o, act, onSaved }) {
     if (r?.labelUrl) window.open(r.labelUrl, '_blank', 'noopener,noreferrer');
   };
 
+  const PICKUP_LABEL = { not_scheduled: ['Not scheduled', 'muted'], scheduled: ['Pickup scheduled', 'info'], picked_up: ['Picked up', 'ok'] };
+
   return (
     <section className="adm-card">
       <div className="adm-card__head">
         <div>
           <h2 className="adm-h2"><Truck size={17} /> Shipment &amp; tracking</h2>
-          <p className="adm-muted">Tracking ID: <code>{o.trackingId}</code> · <a href={`/track/${o.trackingId}`} target="_blank" rel="noreferrer">Customer tracking page ↗</a></p>
+          <p className="adm-muted">
+            Tracking ID: <code>{o.trackingId}</code> · <a href={`/track/${o.trackingId}`} target="_blank" rel="noreferrer">Customer tracking page ↗</a>
+          </p>
+          <p className="adm-muted" style={{ marginTop: 4 }}>
+            Pickup: <Badge map={PICKUP_LABEL} value={o.pickupStatus || 'not_scheduled'} />
+            {o.shippingProvider && <> · Provider: <strong>{o.shippingProvider}</strong></>}
+            {o.courierCharge != null && <> · Charge: <strong>{rs(o.courierCharge)}</strong></>}
+          </p>
         </div>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-          {canEdit && !o.awbNumber && !['cancelled', 'returned', 'rto', 'delivered'].includes(o.status) && (
-            <button type="button" className="adm-btn is-sm" disabled={act.busy} onClick={bookShipment}>Book shipment (Auto-AWB)</button>
-          )}
           {canEdit && o.awbNumber && (
             <>
-              <button type="button" className="adm-btn is-ghost is-sm" disabled={act.busy} onClick={schedulePickup}>Schedule pickup</button>
+              {o.pickupStatus !== 'picked_up' && (
+                <button type="button" className="adm-btn is-ghost is-sm" disabled={act.busy} onClick={schedulePickup}>Schedule pickup</button>
+              )}
               <button type="button" className="adm-btn is-ghost is-sm" disabled={act.busy} onClick={openLabel}>Shipping label</button>
               <button type="button" className="adm-btn is-ghost is-sm" disabled={act.busy} onClick={sync}>Sync courier</button>
             </>
           )}
         </div>
       </div>
+
+      {canEdit && !o.awbNumber && !['cancelled', 'returned', 'rto', 'delivered', 'refunded'].includes(o.status) && (
+        <div className="adm-pending" style={{ marginBottom: 14 }}>
+          <div className="adm-pair" style={{ alignItems: 'end' }}>
+            <label>
+              Shipping provider
+              <select value={provider} onChange={(e) => setProvider(e.target.value)}>
+                <option value="shiprocket">Shiprocket (Auto-assign / Select courier)</option>
+                <option value="delhivery">Delhivery Direct</option>
+              </select>
+            </label>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <button type="button" className="adm-btn is-ghost is-sm" disabled={checkingRates || act.busy} onClick={loadCouriers}>
+                {checkingRates ? 'Checking rates…' : 'Check couriers & rates'}
+              </button>
+              <button type="button" className="adm-btn is-sm" disabled={act.busy} onClick={bookShipment}>
+                Create shipment &amp; AWB
+              </button>
+            </div>
+          </div>
+          {couriers && (
+            <div style={{ marginTop: 10 }}>
+              {!couriers.serviceable ? (
+                <p className="adm-sub is-bad">Destination PIN code is not serviceable by this provider.</p>
+              ) : couriers.couriers?.length > 0 ? (
+                <label>
+                  Available couriers ({couriers.cod ? 'COD & Prepaid' : 'Prepaid only'})
+                  <select value={selectedCourier} onChange={(e) => setSelectedCourier(e.target.value)}>
+                    {couriers.couriers.map((c) => (
+                      <option key={c.id} value={String(c.id)}>
+                        {c.name}{c.rate != null ? ` — ₹${c.rate}` : ''}{c.days ? ` (${c.days} days)` : ''}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ) : (
+                <p className="adm-muted">Serviceable (estimated {couriers.estimatedDays || 5} days). Click “Create shipment &amp; AWB” to assign automatically.</p>
+              )}
+            </div>
+          )}
+        </div>
+      )}
       <form className="adm-form" onSubmit={save}>
         <div className="adm-pair">
           <label>Courier partner<input value={f.courierName} disabled={!canEdit} onChange={(e) => setF((s) => ({ ...s, courierName: e.target.value }))} placeholder="e.g. Delhivery, Blue Dart, DTDC" /></label>

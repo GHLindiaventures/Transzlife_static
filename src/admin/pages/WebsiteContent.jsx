@@ -21,17 +21,87 @@ export default function WebsiteContent() {
   const { staff } = useAdmin();
   const { data, error, reload } = useApi('/api/admin/content');
   const edit = can(staff, 'products.edit');
+  const isOwner = staff?.role === 'owner';
   return (
     <>
-      <PageHead title="Website content" sub="The announcement bar and the homepage. Changes show on the site within about a minute." />
+      <PageHead title="Website content" sub="The announcement bar, homepage and social links. Changes show on the site within about a minute." />
       <ErrorBox>{error}</ErrorBox>
       {!data ? <Loading /> : (
         <div className="adm-grid2 is-wide-left">
           <AnnouncementBar data={data} edit={edit} onChanged={reload} />
           <Homepage data={data} edit={edit} onChanged={reload} />
+          <SocialLinks owner={isOwner} />
         </div>
       )}
     </>
+  );
+}
+
+/* ---------------- social media links ---------------- */
+const DEFAULT_SOCIAL = [
+  { key: 'facebook', label: 'Facebook', url: '', enabled: false },
+  { key: 'instagram', label: 'Instagram', url: '', enabled: false },
+  { key: 'youtube', label: 'YouTube', url: '', enabled: false },
+  { key: 'linkedin', label: 'LinkedIn', url: '', enabled: false },
+  { key: 'x', label: 'X', url: '', enabled: false },
+];
+
+function SocialLinks({ owner }) {
+  const { data: settings, error, reload } = useApi('/api/admin/settings');
+  const [rows, setRows] = useState(null);
+  const act = useAction();
+
+  useEffect(() => {
+    if (!settings) return;
+    const saved = Array.isArray(settings.social_links) && settings.social_links.length ? settings.social_links : DEFAULT_SOCIAL;
+    setRows(saved.map((r) => ({
+      key: r.key || String(r.label || r.platform || '').toLowerCase().replace(/[^a-z0-9]+/g, '') || 'custom',
+      label: r.label || r.platform || '',
+      url: r.url || '',
+      enabled: r.enabled !== false,
+    })));
+  }, [settings]);
+
+  const update = (i, patch) => setRows((rs) => rs.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
+  const addRow = () => setRows((rs) => [...(rs || []), { key: `custom${(rs || []).length + 1}`, label: '', url: '', enabled: true }]);
+  const removeRow = (i) => setRows((rs) => rs.filter((_, idx) => idx !== i));
+
+  const save = async (e) => {
+    e.preventDefault();
+    const cleaned = (rows || []).filter((r) => r.label.trim()).map((r) => ({
+      key: (r.key || r.label).trim().toLowerCase().replace(/[^a-z0-9_-]+/g, '') || 'social',
+      label: r.label.trim(),
+      url: r.url.trim(),
+      enabled: Boolean(r.enabled && r.url.trim()),
+    }));
+    if (await act.run(() => api('/api/admin/settings', { method: 'PATCH', body: { social_links: cleaned } }), 'Social media links saved.')) reload();
+  };
+
+  return (
+    <section className="adm-card" style={{ gridColumn: '1 / -1' }}>
+      <div className="adm-row">
+        <h2 className="adm-h2">Social media links</h2>
+        {owner && <button type="button" className="adm-btn is-ghost is-sm" onClick={addRow}><Plus size={14} /> Add platform</button>}
+      </div>
+      <ErrorBox>{error}</ErrorBox>
+      {!rows ? <Loading /> : (
+        <form className="adm-form" onSubmit={save}>
+          <div style={{ display: 'grid', gap: 10 }}>
+            {rows.map((r, i) => (
+              <div key={i} style={{ display: 'grid', gridTemplateColumns: 'minmax(120px, 180px) 1fr auto auto', gap: 8, alignItems: 'center' }}>
+                <input value={r.label} onChange={(e) => update(i, { label: e.target.value })} placeholder="Platform" disabled={!owner} />
+                <input value={r.url} onChange={(e) => update(i, { url: e.target.value })} placeholder="https://..." disabled={!owner} />
+                <label className="adm-check"><input type="checkbox" checked={r.enabled} onChange={(e) => update(i, { enabled: e.target.checked })} disabled={!owner} /> Enabled</label>
+                {owner && <button type="button" className="adm-btn is-ghost is-sm" onClick={() => removeRow(i)} aria-label="Remove"><Trash2 size={14} /></button>}
+              </div>
+            ))}
+          </div>
+          <p className="adm-muted">Enabled links appear in the website footer and customer Account page.</p>
+          <ErrorBox>{act.error}</ErrorBox><Notice>{act.notice}</Notice>
+          {owner ? <button className="adm-btn" disabled={act.busy}>Save</button> : <p className="adm-muted">Only an owner can change these.</p>}
+        </form>
+      )}
+    </section>
   );
 }
 

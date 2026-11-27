@@ -22,21 +22,28 @@ import healthAdminRoutes from './health.js';
 import enquiryAdminRoutes from './enquiries.js';
 import { refreshRating } from '../shop/reviews.js';
 import { restoreStock } from '../shop/batches.js';
-import { renderInvoiceHtml } from '../shop/invoice.js';
+import { ensureInvoiceNumber, renderInvoiceHtml } from '../shop/invoice.js';
 
 const PAGE = 25;
 
 // which status an order may move to next
 export const FLOW = {
   pending_payment: ['cancelled'],
-  confirmed: ['processing', 'packed', 'cancelled'],
-  processing: ['packed', 'cancelled'],
-  packed: ['shipped', 'processing', 'cancelled'],
-  shipped: ['in_transit', 'out_for_delivery', 'delivered', 'rto'],
-  in_transit: ['out_for_delivery', 'delivered', 'rto'],
-  out_for_delivery: ['delivered', 'rto'],
-  delivered: ['returned'],
-  rto: [], returned: [], cancelled: [], refunded: [],
+  confirmed: ['processing', 'packed', 'ready_for_pickup', 'cancelled'],
+  processing: ['packed', 'ready_for_pickup', 'cancelled'],
+  packed: ['ready_for_pickup', 'shipped', 'processing', 'cancelled'],
+  ready_for_pickup: ['shipped', 'packed', 'shipment_failed', 'cancelled'],
+  shipment_failed: ['ready_for_pickup', 'packed', 'shipped', 'cancelled'],
+  shipped: ['in_transit', 'out_for_delivery', 'delivery_failed', 'delivered', 'rto'],
+  in_transit: ['out_for_delivery', 'delivery_failed', 'delivered', 'rto'],
+  out_for_delivery: ['delivered', 'delivery_failed', 'rto'],
+  delivery_failed: ['out_for_delivery', 'delivered', 'rto'],
+  delivered: ['returned', 'refund_initiated'],
+  rto: ['refund_initiated', 'refunded'],
+  returned: ['refund_initiated', 'refunded'],
+  cancelled: ['refund_initiated', 'refunded'],
+  refund_initiated: ['refunded'],
+  refunded: [],
 };
 
 function parse(schema, data, reply) {
@@ -51,7 +58,7 @@ const like = (s) => `%${String(s).replace(/[%_\\]/g, (c) => '\\' + c)}%`;
 const staffOut = (s) => ({ id: s.id, email: s.email, name: s.name, role: s.role, mustChangePassword: s.must_change_password,
   totpEnabled: s.totp_enabled, permissions: permsOf(s.role) });
 
-export default async function adminRoutes(app, { db, razorpay, cashfree, shipping, twilio, notifier, reminders, presence, ops, health, courier, auth: authInfo, log, env }) {
+export default async function adminRoutes(app, { db, razorpay, cashfree, shipping, twilio, notifier, reminders, presence, ops, health, courier, realtime, auth: authInfo, log, env }) {
   const auth = createAdminAuth({ db, env });
   const G = (perm, opts) => ({ preHandler: auth.guard(perm, opts) });
   const tight = (max) => ({ config: { rateLimit: { max, timeWindow: '15 minutes' } } });
@@ -230,9 +237,13 @@ export default async function adminRoutes(app, { db, razorpay, cashfree, shippin
     return {
       order: {
         number: o.order_number, trackingId: o.tracking_id || `TRK-${o.order_number}`,
+        invoiceNumber: o.invoice_number || null, invoiceIssuedAt: o.invoice_issued_at || null,
         status: o.status, paymentStatus: o.payment_status, paymentMethod: o.payment_method,
         createdAt: o.created_at, email: o.email, phone: o.phone, cancelReason: o.cancel_reason, staffNote: o.staff_note,
         courierName: o.courier_name || '', awbNumber: o.awb_number || '', trackingUrl: o.tracking_url || '',
+        shippingProvider: o.shipping_provider || '', courierId: o.courier_id || '', shipmentId: o.shipment_id || '',
+        courierCharge: o.courier_charge ?? null, pickupStatus: o.pickup_status || 'not_scheduled',
+        pickupScheduledAt: o.pickup_scheduled_at || null, shippingLabelUrl: o.shipping_label_url || '',
         estimatedDeliveryAt: o.estimated_delivery_at || null, originalEddAt: o.original_edd_at || null,
         isDelayed: !!o.is_delayed, delayReason: o.delay_reason || '', deliveredAt: o.delivered_at || null,
         codConfirmation: o.cod_confirmation, codConfirmedAt: o.cod_confirmed_at, codConfirmedBy: o.cod_confirmed_by,
@@ -352,9 +363,19 @@ export default async function adminRoutes(app, { db, razorpay, cashfree, shippin
     return courier.syncShipment(req.params.number);
   });
 
+  app.get('/api/admin/orders/:number/couriers', G('view'), async (req, reply) => {
+    if (!shipping) return reply.code(503).send({ error: 'Shipping integration unavailable.' });
+    return shipping.getAvailableCouriers(req.params.number, { weightKg: Number(req.query?.weightKg || 0.5) });
+  });
+
   app.post('/api/admin/orders/:number/ship', G('orders.edit'), async (req, reply) => {
     if (!shipping) return reply.code(503).send({ error: 'Shipping integration unavailable.' });
-    const body = parse(z.object({ courierId: z.number().int().optional(), weightKg: z.number().positive().max(30).optional() }), req.body, reply);
+    const body = parse(z.object({
+      provider: z.enum(['shiprocket', 'delhivery', 'manual']).optional(),
+      courierId: z.number().int().optional(),
+      courierName: z.string().trim().max(80).optional(),
+      weightKg: z.number().positive().max(30).optional(),
+    }), req.body, reply);
     if (!body) return;
     const res = await shipping.bookShipment(req.params.number, { ...body, actor: `staff:${req.staff.email}` });
     await audit(db.query, req, 'order.ship_book', 'order', req.params.number, null, res);
@@ -376,12 +397,25 @@ export default async function adminRoutes(app, { db, razorpay, cashfree, shippin
   app.get('/api/admin/orders/:number/invoice', G('view'), async (req, reply) => {
     const o = await loadOrder(db.query, req.params.number);
     if (!o) return reply.code(404).send({ error: 'Order not found.' });
+    const inv = await ensureInvoiceNumber(db.query, o.id, o.created_at);
+    const billedName = req.staff?.name || req.staff?.email || 'Admin';
+    await db.query(
+      `UPDATE orders SET billed_by_name = $2, billed_by_email = $3 WHERE id = $1 AND (billed_by_name IS NULL OR billed_by_name = 'Online Checkout')`,
+      [o.id, billedName, req.staff?.email || null],
+    );
+    const row = {
+      ...o,
+      invoice_number: inv ? inv.invoiceNumber : o.invoice_number,
+      invoice_issued_at: inv ? inv.issuedAt : o.invoice_issued_at,
+      billed_by_name: (!o.billed_by_name || o.billed_by_name === 'Online Checkout') ? billedName : o.billed_by_name,
+    };
+    const settings = await loadSettings(db.query);
     const items = (await db.query(
       `SELECT oi.*, p.gst_rate, p.hsn_code FROM order_items oi LEFT JOIN products p ON p.id = oi.product_id WHERE oi.order_id = $1 ORDER BY oi.id`,
       [o.id],
     )).rows;
     reply.header('Content-Type', 'text/html; charset=utf-8');
-    return renderInvoiceHtml(o, items, env);
+    return renderInvoiceHtml(row, items, env, settings);
   });
 
   // Bulk: move several orders at once. Each order is its own transaction; one failure doesn't stop the rest.
@@ -595,6 +629,51 @@ export default async function adminRoutes(app, { db, razorpay, cashfree, shippin
   });
 
   // ======================================================================
+  // Real-time SSE stream for Admin Dashboard
+  // ======================================================================
+  app.get('/api/admin/events', G('view'), async (req, reply) => {
+    if (!realtime) return reply.code(503).send({ error: 'Real-time hub unavailable.' });
+    realtime.attachAdmin(req, reply);
+  });
+
+  // Broadcast successful admin mutations to connected Admin, Customer, and Public SSE clients
+  const MUTATING = new Set(['POST', 'PATCH', 'PUT', 'DELETE']);
+  app.addHook('onResponse', async (req, reply) => {
+    if (!realtime || !MUTATING.has(req.method) || reply.statusCode >= 400) return;
+    const url = req.url.split('?')[0];
+    if (url.startsWith('/api/admin/auth')) return;
+    if (url.startsWith('/api/admin/content')) { realtime.publish('site_content', {}); return; }
+    if (url.startsWith('/api/admin/settings')) {
+      realtime.publish('settings', {});
+      realtime.publish('site_content', {});
+      return;
+    }
+    if (url.startsWith('/api/admin/products') || url.startsWith('/api/admin/batches') || url.startsWith('/api/admin/offers')) {
+      realtime.publish('product', {});
+      return;
+    }
+    if (url.startsWith('/api/admin/returns')) { realtime.publish('return', {}); return; }
+    if (url.startsWith('/api/admin/reviews')) { realtime.publish('review', {}); return; }
+    if (url.startsWith('/api/admin/enquiries') || url.startsWith('/api/admin/newsletter')) { realtime.publish('enquiry', {}); return; }
+    if (url.startsWith('/api/admin/customers')) { realtime.publish('customer', { customerId: req.params?.id || null }); return; }
+    const m = url.match(/^\/api\/admin\/orders\/([^/]+)/);
+    if (m && m[1] !== 'bulk-status' && m[1] !== 'export') {
+      const o = (await db.query('SELECT order_number, tracking_id, customer_id, status, payment_status FROM orders WHERE order_number = $1', [decodeURIComponent(m[1])]).catch(() => ({ rows: [] }))).rows[0];
+      if (o) {
+        realtime.publish('order', {
+          orderNumber: o.order_number,
+          trackingId: o.tracking_id,
+          customerId: o.customer_id,
+          status: o.status,
+          paymentStatus: o.payment_status,
+        });
+      }
+      return;
+    }
+    if (url.startsWith('/api/admin/orders')) { realtime.publish('order', {}); }
+  });
+
+  // ======================================================================
   // Shop settings (owner only)
   // ======================================================================
   app.get('/api/admin/settings', G('view'), async () => ({ settings: await loadSettings(db.query) }));
@@ -615,6 +694,41 @@ export default async function adminRoutes(app, { db, razorpay, cashfree, shippin
       review_request_days: z.number().int().min(2).max(60).optional(),
       returns_enabled: z.boolean().optional(),                                   // customers can request returns from their account
       return_window_days: z.number().int().min(0).max(90).optional(),            // days after delivery (a product can override it)
+      company_bank: z.object({
+        accountHolder: z.string().trim().max(120),
+        bankName: z.string().trim().max(120),
+        accountNumber: z.string().trim().max(40),
+        branch: z.string().trim().max(120),
+        ifsc: z.string().trim().max(20),
+      }).optional(),
+      payment_gateways: z.object({
+        razorpayEnabled: z.boolean(),
+        cashfreeEnabled: z.boolean(),
+        activeProvider: z.enum(['razorpay', 'cashfree']),
+      }).optional(),
+      marketing_tags: z.object({
+        gtmId: z.string().trim().max(40),
+        ga4Id: z.string().trim().max(40),
+        metaPixelId: z.string().trim().max(40),
+        gscVerification: z.string().trim().max(120),
+        metaDomainVerification: z.string().trim().max(120),
+      }).optional(),
+      social_links: z.array(z.object({
+        key: z.string().trim().min(1).max(30),
+        label: z.string().trim().min(1).max(40),
+        url: z.string().trim().max(300).refine((v) => !v || /^https?:\/\//i.test(v), 'Enter a valid http(s) URL.'),
+        enabled: z.boolean(),
+      })).max(20).optional(),
+      notification_config: z.object({
+        channels: z.object({ email: z.boolean(), sms: z.boolean(), whatsapp: z.boolean() }),
+        adminRecipients: z.object({
+          emails: z.array(z.string().trim().email().max(120)).max(10),
+          phones: z.array(z.string().trim().regex(/^[6-9]\d{9}$/, 'Enter 10-digit mobile numbers.')).max(10),
+        }),
+        adminEvents: z.record(z.string(), z.boolean()),
+        customerEvents: z.record(z.string(), z.boolean()),
+        templates: z.record(z.string(), z.string().max(600)),
+      }).optional(),
     }), req.body, reply); if (!body) return;
     const before = await loadSettings(db.query);
     for (const [k, v] of Object.entries(body)) {
@@ -627,17 +741,21 @@ export default async function adminRoutes(app, { db, razorpay, cashfree, shippin
   // ======================================================================
   // Connected services: is Twilio / Razorpay set up and working (credentials checked live)
   // ======================================================================
-  app.get('/api/admin/integrations', G('view'), async () => ({
-    twilio: await twilio.status(),
-    signInCodes: authInfo.mode,
-    orderMessages: notifier.channel,
-    reminders: reminders?.channel ?? 'off',
-    replyWebhook: env.SITE_URL ? `${String(env.SITE_URL).replace(/\/$/, '')}/api/webhooks/twilio/sms` : null,
-    razorpay: razorpay.enabled,
-    cashfree: !!cashfree?.enabled,
-    shiprocket: !!shipping?.shiprocketEnabled,
-    delhivery: !!shipping?.delhiveryEnabled,
-  }));
+  app.get('/api/admin/integrations', G('view'), async () => {
+    const s = await loadSettings(db.query);
+    return {
+      twilio: await twilio.status(),
+      signInCodes: authInfo.mode,
+      orderMessages: notifier.channel,
+      reminders: reminders?.channel ?? 'off',
+      replyWebhook: env.SITE_URL ? `${String(env.SITE_URL).replace(/\/$/, '')}/api/webhooks/twilio/sms` : null,
+      razorpay: razorpay.enabled,
+      cashfree: !!cashfree?.enabled,
+      paymentGateways: s.payment_gateways || { razorpayEnabled: true, cashfreeEnabled: true, activeProvider: 'razorpay' },
+      shiprocket: !!shipping?.shiprocketEnabled,
+      delhivery: !!shipping?.delhiveryEnabled,
+    };
+  });
 
   // ======================================================================
   // Activity log

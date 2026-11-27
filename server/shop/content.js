@@ -34,7 +34,12 @@ export async function loadSiteContent(q) {
   const style = settings.announcement_style || { bg: '#124a2c', fg: '#efc04a', speed: 'normal' };
   const sections = (await q('SELECT key, title, subtitle, product_ids, visible FROM home_sections ORDER BY sort, key')).rows
     .map((s) => ({ key: s.key, title: s.title || null, subtitle: s.subtitle || null, productIds: s.product_ids, visible: s.visible }));
-  return { announcement: { messages, ...style }, home: { sections } };
+  return {
+    announcement: { messages, ...style },
+    home: { sections },
+    marketing: settings.marketing_tags || {},
+    socialLinks: Array.isArray(settings.social_links) ? settings.social_links : [],
+  };
 }
 
 export default async function contentRoutes(app, { db }) {

@@ -24,7 +24,8 @@ import { z } from 'zod';
 import { PAYMENT_METHODS, quote, PricingError } from './pricing.js';
 import { attributeOrder } from './track.js';
 
-import { renderInvoiceHtml } from './invoice.js';
+import { ensureInvoiceNumber, renderInvoiceHtml } from './invoice.js';
+import { loadSettings } from './pricing.js';
 
 const phone = z.string().trim().regex(/^[6-9]\d{9}$/, 'Enter a valid 10-digit mobile number.');
 const item = z.object({ id: z.string().min(1).max(80), pack: z.number().int().min(1).max(12), qty: z.number().int().min(1).max(10) });
@@ -60,17 +61,28 @@ export function deviceName(ua = '') {
 
 const customerOut = (c) => c && { phone: c.phone, name: c.name, email: c.email, marketingConsent: !!c.marketing_consent };
 
-export default async function shopRoutes(app, { db, auth, orders, razorpay, cashfree, shipping, notifier, ops, courier, log, env = process.env }) {
+export default async function shopRoutes(app, { db, auth, orders, razorpay, cashfree, shipping, notifier, ops, courier, realtime, log, env = process.env }) {
   const signedIn = { preHandler: auth.requireCustomer };
   const tight = (max, minutes = 15) => ({ config: { rateLimit: { max, timeWindow: `${minutes} minutes` } } });
-  const onlineEnabled = razorpay.enabled || !!cashfree?.enabled;
 
-  app.get('/api/shop/config', async () => ({
-    razorpay: razorpay.enabled, razorpayKeyId: razorpay.keyId,
-    cashfree: !!cashfree?.enabled, cashfreeMode: cashfree?.mode || 'sandbox',
-    onlineEnabled,
-    methods: onlineEnabled ? PAYMENT_METHODS : ['cod'],
-  }));
+  async function gatewayState() {
+    const s = await loadSettings(db.query);
+    const gw = s.payment_gateways || {};
+    const rpActive = razorpay.enabled && gw.razorpayEnabled !== false;
+    const cfActive = !!cashfree?.enabled && gw.cashfreeEnabled !== false;
+    return { rpActive, cfActive, onlineEnabled: rpActive || cfActive, activeProvider: gw.activeProvider || 'razorpay' };
+  }
+
+  app.get('/api/shop/config', async () => {
+    const g = await gatewayState();
+    return {
+      razorpay: g.rpActive, razorpayKeyId: g.rpActive ? razorpay.keyId : null,
+      cashfree: g.cfActive, cashfreeMode: cashfree?.mode || 'sandbox',
+      activeProvider: g.activeProvider,
+      onlineEnabled: g.onlineEnabled,
+      methods: g.onlineEnabled ? PAYMENT_METHODS : ['cod'],
+    };
+  });
 
   // ---- sign in -----------------------------------------------------------
   app.post('/api/auth/otp/request', tight(10), async (req, reply) => {
@@ -103,6 +115,7 @@ export default async function shopRoutes(app, { db, auth, orders, razorpay, cash
               marketing_consent_at = CASE WHEN $4 IS NULL THEN marketing_consent_at ELSE now() END
         WHERE id = $1 RETURNING phone, name, email, marketing_consent`,
       [req.customer.id, body.name, body.email ?? '', body.marketingConsent ?? null])).rows[0];
+    realtime?.publish('customer', { customerId: req.customer.id });
     return { customer: customerOut(c) };
   });
 
@@ -120,6 +133,7 @@ export default async function shopRoutes(app, { db, auth, orders, razorpay, cash
     const id = await saveAddress(req.customer.id, body);
     if (body.makeDefault) await setDefaultAddress(req.customer.id, id);
     const saved = (await db.query(`SELECT ${ADDRESS_COLS} FROM addresses WHERE id = $1`, [id])).rows[0];
+    realtime?.publish('customer', { customerId: req.customer.id });
     return { address: saved };
   });
 
@@ -128,12 +142,14 @@ export default async function shopRoutes(app, { db, auth, orders, razorpay, cash
     const mine = (await db.query('SELECT 1 FROM addresses WHERE id = $1 AND customer_id = $2', [id, req.customer.id])).rows.length;
     if (!mine) return reply.code(404).send({ error: 'Address not found.' });
     await setDefaultAddress(req.customer.id, id);
+    realtime?.publish('customer', { customerId: req.customer.id });
     return { ok: true };
   });
 
   app.delete('/api/account/addresses/:id', signedIn, async (req, reply) => {
     const id = parse(z.string().uuid(), req.params.id, reply); if (!id) return;
     await db.query('DELETE FROM addresses WHERE id = $1 AND customer_id = $2', [id, req.customer.id]);
+    realtime?.publish('customer', { customerId: req.customer.id });
     return { ok: true };
   });
 
@@ -172,7 +188,7 @@ export default async function shopRoutes(app, { db, auth, orders, razorpay, cash
       marketingConsent: z.boolean().optional(),
       track: z.object({ v: z.string().uuid(), s: z.string().uuid().optional() }).optional(),
     }), req.body, reply); if (!body) return;
-    if (body.paymentMethod !== 'cod' && !onlineEnabled) {
+    if (body.paymentMethod !== 'cod' && !(await gatewayState()).onlineEnabled) {
       return reply.code(400).send({ error: 'Online payments are not available yet. Please choose Cash on delivery.', code: 'payments_off' });
     }
     const c = req.customer;
@@ -189,7 +205,10 @@ export default async function shopRoutes(app, { db, auth, orders, razorpay, cash
       await attributeOrder(db, order, c.id, body.track).catch((e) => log?.warn?.(`[track] attribution failed: ${e.message}`));
       if (order.status === 'confirmed') {                                             // cash on delivery
         notifier?.notify(order.id, 'confirmed');
+        notifier?.notifyAdmin?.('new_order', { orderNumber: order.order_number, total: order.total, paymentMethod: order.payment_method, customerName: c.name });
         ops?.requestCodConfirmation(order.id).catch((e) => log?.warn?.(`[ops] COD confirmation: ${e.message}`));
+      } else if (order.status === 'pending_payment') {
+        notifier?.notifyAdmin?.('pending_confirmation', { orderNumber: order.order_number, total: order.total, paymentMethod: order.payment_method, customerName: c.name });
       }
     }
     const payment = order.status === 'pending_payment' ? await orders.startPayment(order, c) : null;
@@ -255,12 +274,18 @@ export default async function shopRoutes(app, { db, auth, orders, razorpay, cash
   app.get('/api/orders/:number/invoice', signedIn, async (req, reply) => {
     const o = await orders.getForCustomer(req.customer.id, String(req.params.number).slice(0, 20));
     if (!o) return reply.code(404).send({ error: 'Order not found.' });
+    if (o.row.status === 'pending_payment' || (o.row.status === 'cancelled' && o.row.payment_status !== 'paid')) {
+      return reply.code(409).send({ error: 'Tax invoice is available once the order is confirmed or paid.' });
+    }
+    const inv = await ensureInvoiceNumber(db.query, o.row.id, o.row.created_at);
+    const row = inv ? { ...o.row, invoice_number: inv.invoiceNumber, invoice_issued_at: inv.issuedAt } : o.row;
+    const settings = await loadSettings(db.query);
     const items = (await db.query(
       `SELECT oi.*, p.gst_rate, p.hsn_code FROM order_items oi LEFT JOIN products p ON p.id = oi.product_id WHERE oi.order_id = $1 ORDER BY oi.id`,
       [o.row.id],
     )).rows;
     reply.header('Content-Type', 'text/html; charset=utf-8');
-    return renderInvoiceHtml(o.row, items, env);
+    return renderInvoiceHtml(row, items, env, settings);
   });
 
   app.get('/api/shipping/serviceability', tight(60, 10), async (req, reply) => {

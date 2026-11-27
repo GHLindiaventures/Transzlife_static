@@ -78,9 +78,9 @@ test('order delivery tracking: 8-stage journey, public masked tracking, courier 
     assert.equal(trk.status, 'in_transit');
     assert.equal(trk.courierName, 'Delhivery');
     assert.equal(trk.awbNumber, 'DLV998877');
-    assert.equal(trk.stages.length, 8);
-    assert.equal(trk.stages[5].key, 'in_transit');
-    assert.equal(trk.stages[5].completed, true);
+    assert.equal(trk.stages.length, 9);
+    assert.equal(trk.stages[6].key, 'in_transit');
+    assert.equal(trk.stages[6].completed, true);
     assert.equal(trk.destination.line1, undefined);
     assert.equal(trk.destination.pin, '600***');
 

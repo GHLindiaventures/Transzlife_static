@@ -129,7 +129,7 @@ test('orders: status flow, cancel returns stock, COD delivered = paid, refunds',
   for (const s of ['packed', 'shipped', 'delivered']) assert.equal((await call('owner', 'POST', `/api/admin/orders/${n}/status`, { status: s })).status, 200);
   let detail = (await call('owner', 'GET', `/api/admin/orders/${n}`)).body;
   assert.equal(detail.order.paymentStatus, 'paid', 'cash collected on delivery');
-  assert.deepEqual(detail.order.next, ['returned']);
+  assert.deepEqual(detail.order.next, ['returned', 'refund_initiated']);
 
   const refund = await call('owner', 'POST', `/api/admin/orders/${n}/refund`, { amount: 10000, reason: 'Damaged bottle' });
   assert.equal(refund.body.method, 'manual');

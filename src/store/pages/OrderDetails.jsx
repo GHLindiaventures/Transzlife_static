@@ -9,6 +9,7 @@ import ReturnSection from '../components/ReturnSection';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { api } from '../lib/api';
+import { subscribeCustomerEvents } from '../lib/realtime';
 import { loadOrderReturns } from '../data/returnStore';
 import { getProduct, onSale } from '../data/products';
 import { SITE } from '../data/site';
@@ -22,12 +23,13 @@ const short = (iso) => (iso ? new Date(iso).toLocaleString('en-IN', { day: 'nume
 const STEPS = [
   { key: 'confirmed', label: 'Confirmed', Icon: ClipboardCheck, from: ['confirmed', 'processing'] },
   { key: 'packed', label: 'Packed', Icon: PackageCheck, from: ['packed'] },
+  { key: 'ready_for_pickup', label: 'Ready for pickup', Icon: Package, from: ['ready_for_pickup'] },
   { key: 'shipped', label: 'Shipped', Icon: Truck, from: ['shipped', 'in_transit'] },
   { key: 'out_for_delivery', label: 'Out for delivery', Icon: Navigation, from: ['out_for_delivery'] },
   { key: 'delivered', label: 'Delivered', Icon: CheckCircle2, from: ['delivered', 'returned'] },
 ];
 const STEP_OF = Object.fromEntries(STEPS.flatMap((s, i) => s.from.map((k) => [k, i])));
-const STOPPED = ['cancelled', 'refunded', 'rto'];
+const STOPPED = ['cancelled', 'shipment_failed', 'delivery_failed', 'refund_initiated', 'refunded', 'rto'];
 
 /* Headline per status: tone, icon and a sentence the customer can act on. */
 function headline(o, firstName) {
@@ -35,12 +37,16 @@ function headline(o, firstName) {
     case 'pending_payment': return { tone: 'amber', Icon: Clock, title: 'Waiting for payment', text: 'If money was deducted, the order is confirmed automatically within a few minutes.' };
     case 'confirmed':
     case 'processing': return { tone: 'green', Icon: CheckCircle2, title: firstName ? `Thank you, ${firstName}!` : 'Order confirmed', text: 'Your order is confirmed. We will message you when it ships.' };
-    case 'packed': return { tone: 'amber', Icon: PackageCheck, title: 'Packed and ready', text: 'Your parcel is packed and will be handed to the courier soon.' };
+    case 'packed': return { tone: 'amber', Icon: PackageCheck, title: 'Packed and sealed', text: 'Your parcel is packed and preparing for courier handover.' };
+    case 'ready_for_pickup': return { tone: 'amber', Icon: Package, title: 'Ready for pickup', text: o.courierName ? `Awaiting pickup by ${o.courierName}.` : 'Your parcel is ready for courier pickup.' };
     case 'shipped':
     case 'in_transit': return { tone: 'blue', Icon: Truck, title: 'On the way', text: o.estimatedDeliveryAt ? `Expected by ${day(o.estimatedDeliveryAt)}.` : 'Your parcel is with the courier.' };
     case 'out_for_delivery': return { tone: 'blue', Icon: Navigation, title: 'Out for delivery', text: 'Arriving today. Please keep your phone handy.' };
     case 'delivered': return { tone: 'green', Icon: CheckCircle2, title: 'Delivered', text: o.deliveredAt ? `Delivered on ${day(o.deliveredAt)}.` : 'Your order has been delivered.' };
+    case 'shipment_failed': return { tone: 'red', Icon: XCircle, title: 'Shipment issue', text: 'We ran into a courier booking issue and our team is resolving it.' };
+    case 'delivery_failed': return { tone: 'red', Icon: Clock, title: 'Delivery attempt failed', text: 'The courier could not complete delivery and will reattempt shortly.' };
     case 'returned': return { tone: 'red', Icon: Undo2, title: 'Returned', text: 'This order was returned. Refund details are in the returns section below.' };
+    case 'refund_initiated': return { tone: 'amber', Icon: RotateCcw, title: 'Refund initiated', text: 'Your refund has been initiated and will reach your account in 5 to 7 working days.' };
     case 'refunded': return { tone: 'red', Icon: Undo2, title: 'Refunded', text: 'The refund reaches your account in 5 to 7 working days.' };
     case 'rto': return { tone: 'red', Icon: Undo2, title: 'Returned to us', text: 'The courier could not deliver this order. Message us and we will sort it out.' };
     case 'cancelled': return { tone: 'red', Icon: XCircle, title: 'Cancelled', text: 'This order was cancelled.' };
@@ -88,18 +94,29 @@ export default function OrderDetails() {
   const [copied, setCopied] = useState(false);
   useTitle(order ? `Order #${order.number}` : 'Your order');
 
-  // order + (for delivered orders) its returns load together, then the page shows in one go
+  // order + (for delivered orders) its returns load together, then the page shows in one go,
+  // and refresh live when order or return events arrive over SSE.
   useEffect(() => {
     let live = true;
-    setOrder(null); setReturnsData(null); setError('');
-    api(`/api/orders/${encodeURIComponent(id)}`)
-      .then(async (r) => {
-        const o = r.order;
-        const rd = ['delivered', 'returned'].includes(o.status) ? await loadOrderReturns(o.number).catch(() => null) : null;
-        if (live) { setReturnsData(rd); setOrder(o); }
-      })
-      .catch((e) => { if (live) setError(e.message); });
-    return () => { live = false; };
+    const fetchOrder = (silent = false) => {
+      if (!silent) { setOrder(null); setReturnsData(null); setError(''); }
+      api(`/api/orders/${encodeURIComponent(id)}`)
+        .then(async (r) => {
+          const o = r.order;
+          const rd = ['delivered', 'returned'].includes(o.status) ? await loadOrderReturns(o.number).catch(() => null) : null;
+          if (live) { setReturnsData(rd); setOrder(o); setError(''); }
+        })
+        .catch((e) => { if (live && !silent) setError(e.message); });
+    };
+    fetchOrder(false);
+    const stopSse = subscribeCustomerEvents({
+      onEvent: (ev) => {
+        if (!ev) return;
+        if (ev.type === 'order' && (!ev.orderNumber || ev.orderNumber === id)) fetchOrder(true);
+        if (ev.type === 'return' || ev.type === 'payment') fetchOrder(true);
+      },
+    });
+    return () => { live = false; stopSse(); };
   }, [id]);
 
   // #returns (from My account): straight to the returns block
@@ -149,7 +166,12 @@ export default function OrderDetails() {
             {h.text && <p className="ord-hero__lead">{h.text}</p>}
           </div>
           <div className="ord-hero__actions">
-            {tracked && <Link className="ord-btn" to={`/track/${o.number}`}><Truck size={16} /> Track order</Link>}
+            {tracked && <Link className="ord-btn" to={`/track/${o.trackingId || o.number}`}><Truck size={16} /> Track order</Link>}
+            {o.status !== 'pending_payment' && !(o.status === 'cancelled' && o.paymentStatus !== 'paid') && (
+              <a className="ord-btn ord-btn--ghost" href={`/api/orders/${encodeURIComponent(o.number)}/invoice`} target="_blank" rel="noreferrer">
+                <Receipt size={16} /> {o.invoiceNumber ? `Invoice (${o.invoiceNumber})` : 'GST Invoice'}
+              </a>
+            )}
             {canReorder && <button type="button" className="ord-btn ord-btn--ghost" onClick={buyAgain}><RotateCcw size={16} /> Buy again</button>}
           </div>
         </header>

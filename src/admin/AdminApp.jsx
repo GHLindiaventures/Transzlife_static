@@ -7,8 +7,9 @@ import {
   Search, Bell, Moon, Sun, MoreHorizontal, Activity as ActivityIcon, ArrowRight, User, CheckCircle2, Undo2, BarChart3, Sprout, Star, BadgePercent, Megaphone, TicketPercent, ShieldCheck as Shield, Mail, FileText,
 } from 'lucide-react';
 import { api } from '../store/lib/api';
+import { subscribeAdminEvents } from '../store/lib/realtime';
 import { markStaffBrowser } from '../store/lib/track';
-import { AdminContext, can, ErrorBox, initials, rs, useAdmin, useTheme, STATUS } from './ui';
+import { AdminContext, can, emitAdminSync, ErrorBox, initials, rs, useAdmin, useTheme, STATUS } from './ui';
 import Dashboard from './pages/Dashboard';
 import { OrderList, OrderDetail, PrintSlips } from './pages/Orders';
 import Products from './pages/Products';
@@ -109,6 +110,14 @@ function useLive() {
   }, []);
   useEffect(() => { load(); const t = setInterval(load, 60_000); return () => clearInterval(t); }, [load]);
   useEffect(() => { load(); }, [location.pathname, load]);
+  useEffect(() => {
+    return subscribeAdminEvents({
+      onEvent: (ev) => {
+        emitAdminSync(ev);
+        if (['order', 'payment', 'return', 'review'].includes(ev?.type)) load();
+      },
+    });
+  }, [load]);
   return live;
 }
 

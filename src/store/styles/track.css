@@ -184,7 +184,7 @@
   color: #163d25;
 }
 
-/* 8-Stage Horizontal Stepper (scrollable on narrow screens) */
+/* 9-Stage Horizontal Stepper (scrollable on narrow screens) */
 .trk-stepper-wrap {
   width: 100%;
   overflow-x: auto;
@@ -198,9 +198,9 @@
   margin: 0;
   padding: 4px 0 0;
   display: grid;
-  grid-template-columns: repeat(8, minmax(116px, 1fr));
+  grid-template-columns: repeat(9, minmax(110px, 1fr));
   gap: 0;
-  min-width: 928px;
+  min-width: 990px;
 }
 
 .trk-step {
@@ -229,6 +229,7 @@
 }
 
 .trk-step__dot {
+  position: relative;
   width: 34px;
   height: 34px;
   border-radius: 50%;
@@ -240,6 +241,7 @@
   font-size: 13px;
   font-weight: 700;
   z-index: 1;
+  transition: background-color 0.25s ease, border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .trk-step.is-done .trk-step__dot {
@@ -249,7 +251,27 @@
 }
 
 .trk-step.is-now .trk-step__dot {
-  box-shadow: 0 0 0 5px rgba(28, 114, 62, 0.18);
+  box-shadow: 0 0 0 5px rgba(28, 114, 62, 0.2);
+}
+
+.trk-step.is-now .trk-step__dot::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid rgba(28, 114, 62, 0.55);
+  animation: trkPulse 2s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+  pointer-events: none;
+}
+
+@keyframes trkPulse {
+  0% { transform: scale(0.92); opacity: 0.85; }
+  70% { transform: scale(1.28); opacity: 0; }
+  100% { transform: scale(1.28); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trk-step.is-now .trk-step__dot::after { animation: none; }
 }
 
 .trk-step__body strong {

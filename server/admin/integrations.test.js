@@ -136,15 +136,31 @@ test('Cashfree, Shiprocket outbound shipping, GST invoice, and SEO endpoints', a
   });
   assert.equal(hookRes.statusCode, 200);
 
-  // 7. Admin books Shiprocket shipment, schedules pickup, gets label & GST invoice
+  // 7. Admin checks available couriers, books Shiprocket shipment, prevents duplicate booking, schedules pickup, gets label & GST invoice
+  const couriersRes = await app.inject({
+    method: 'GET', url: `/api/admin/orders/${order.order_number}/couriers`,
+    headers: { cookie: adminCookie },
+  });
+  assert.equal(couriersRes.statusCode, 200);
+  assert.equal(couriersRes.json().couriers[0].name, 'Delhivery Air');
+
   const shipRes = await app.inject({
     method: 'POST', url: `/api/admin/orders/${order.order_number}/ship`,
     headers: { cookie: adminCookie, origin: ORIGIN, host: 'localhost:3000' },
-    payload: {},
+    payload: { provider: 'shiprocket', courierId: 10, courierName: 'Delhivery Air' },
   });
   assert.equal(shipRes.statusCode, 200);
   assert.equal(shipRes.json().awb, 'AWB-SR-1001');
   assert.equal(shipRes.json().courierName, 'Delhivery Air');
+  assert.equal(shipRes.json().status, 'ready_for_pickup');
+
+  // Duplicate shipment booking must be rejected (409)
+  const dupShip = await app.inject({
+    method: 'POST', url: `/api/admin/orders/${order.order_number}/ship`,
+    headers: { cookie: adminCookie, origin: ORIGIN, host: 'localhost:3000' },
+    payload: { provider: 'shiprocket' },
+  });
+  assert.equal(dupShip.statusCode, 409);
 
   const pickupRes = await app.inject({
     method: 'POST', url: `/api/admin/orders/${order.order_number}/pickup`,
@@ -152,6 +168,35 @@ test('Cashfree, Shiprocket outbound shipping, GST invoice, and SEO endpoints', a
     payload: {},
   });
   assert.equal(pickupRes.statusCode, 200);
+  assert.equal(pickupRes.json().pickupStatus, 'scheduled');
+
+  // 9-stage customer tracking check
+  const trkRes = await app.inject({ method: 'GET', url: `/api/track/${order.order_number}` });
+  assert.equal(trkRes.statusCode, 200);
+  assert.equal(trkRes.json().tracking.stages.length, 9);
+  assert.equal(trkRes.json().tracking.pickupStatus, 'scheduled');
+
+  // Webhook exception: delivery_failed -> rto -> refund_initiated -> refunded
+  const failHook = await app.inject({
+    method: 'POST', url: '/api/webhooks/courier/shiprocket',
+    payload: { awb: 'AWB-SR-1001', current_status: 'Delivery Failed', note: 'Customer unavailable' },
+  });
+  assert.equal(failHook.statusCode, 200);
+  assert.equal(failHook.json().status, 'delivery_failed');
+
+  const rtoRes = await app.inject({
+    method: 'POST', url: `/api/admin/orders/${order.order_number}/status`,
+    headers: { cookie: adminCookie, origin: ORIGIN, host: 'localhost:3000' },
+    payload: { status: 'rto', note: 'Returning to warehouse' },
+  });
+  assert.equal(rtoRes.statusCode, 200);
+
+  const refInit = await app.inject({
+    method: 'POST', url: `/api/admin/orders/${order.order_number}/status`,
+    headers: { cookie: adminCookie, origin: ORIGIN, host: 'localhost:3000' },
+    payload: { status: 'refund_initiated', note: 'Initiated after RTO' },
+  });
+  assert.equal(refInit.statusCode, 200);
 
   const labelRes = await app.inject({
     method: 'GET', url: `/api/admin/orders/${order.order_number}/label`,
@@ -166,7 +211,29 @@ test('Cashfree, Shiprocket outbound shipping, GST invoice, and SEO endpoints', a
   });
   assert.equal(invRes.statusCode, 200);
   assert.match(invRes.body, /Tax Invoice/);
-  assert.match(invRes.body, /CGST/);
+  assert.match(invRes.body, /TZL\/\d{2}-\d{2}\/00001/);
+  assert.match(invRes.body, /33AAMCT8943N1ZJ/);
+  assert.match(invRes.body, /CGST Output/);
+  assert.match(invRes.body, /SGST Output/);
+  assert.match(invRes.body, /Amount Chargeable \(in words\)/);
+
+  // Inter-state COD order gets next sequential invoice number and IGST
+  const { order: interOrder } = await app.shop.orders.place({
+    customer: cust,
+    items: [{ id: 'pulmoclear-gummies', pack: 1, qty: 1 }],
+    paymentMethod: 'cod',
+    address: { name: 'Inter Buyer', phone: '9876543219', line1: '100 Brigade Road', city: 'Bengaluru', state: 'Karnataka', pin: '560001' },
+    email: 'cf@example.com',
+    idempotencyKey: 'cf-idem-key-0002',
+  });
+  assert.match(interOrder.invoice_number, /^TZL\/\d{2}-\d{2}\/00002$/);
+  const interInv = await app.inject({
+    method: 'GET', url: `/api/admin/orders/${interOrder.order_number}/invoice`,
+    headers: { cookie: adminCookie },
+  });
+  assert.equal(interInv.statusCode, 200);
+  assert.match(interInv.body, /IGST Output/);
+  assert.doesNotMatch(interInv.body, /CGST Output/);
 
   // 8. Cashfree refund via Admin
   const rfRes = await app.inject({
@@ -176,4 +243,63 @@ test('Cashfree, Shiprocket outbound shipping, GST invoice, and SEO endpoints', a
   });
   assert.equal(rfRes.statusCode, 200);
   assert.equal(rfRes.json().method, 'cashfree');
+
+  // 9. Admin Settings: company_bank, payment_gateways, marketing_tags, social_links, notification_config
+  const settingsPatch = await app.inject({
+    method: 'PATCH', url: '/api/admin/settings',
+    headers: { cookie: adminCookie, origin: ORIGIN, host: 'localhost:3000' },
+    payload: {
+      company_bank: {
+        accountHolder: 'TranzLife Wellness Pvt Ltd',
+        bankName: 'HDFC Bank',
+        accountNumber: '50200012345678',
+        branch: 'Chennai Main',
+        ifsc: 'HDFC0000001',
+      },
+      payment_gateways: { razorpayEnabled: true, cashfreeEnabled: false, activeProvider: 'razorpay' },
+      marketing_tags: {
+        gtmId: 'GTM-TEST123',
+        ga4Id: 'G-TEST123456',
+        metaPixelId: '9876543210',
+        gscVerification: 'gsc-token-1',
+        metaDomainVerification: 'meta-token-1',
+      },
+      social_links: [
+        { key: 'instagram', label: 'Instagram', url: 'https://instagram.com/tranzlife', enabled: true },
+        { key: 'facebook', label: 'Facebook', url: 'https://facebook.com/tranzlife', enabled: false },
+      ],
+      notification_config: {
+        channels: { email: true, sms: false, whatsapp: true },
+        adminRecipients: { emails: ['ops@tranzlife.in'], phones: ['9150394443'] },
+        adminEvents: { new_order: true, payment_failed: true },
+        customerEvents: { confirmed: true, shipped: false },
+        templates: { confirmed: 'Hi {customer_name}, order {order_number} confirmed!' },
+      },
+    },
+  });
+  assert.equal(settingsPatch.statusCode, 200);
+
+  // Invoice includes bank details + Billed By staff name
+  const invWithBank = await app.inject({
+    method: 'GET', url: `/api/admin/orders/${order.order_number}/invoice`,
+    headers: { cookie: adminCookie },
+  });
+  assert.equal(invWithBank.statusCode, 200);
+  assert.match(invWithBank.body, /HDFC Bank/);
+  assert.match(invWithBank.body, /HDFC0000001/);
+  assert.match(invWithBank.body, /Billed By/);
+
+  // Shop config reflects payment_gateways toggle
+  const shopCfg = await app.inject({ method: 'GET', url: '/api/shop/config' });
+  assert.equal(shopCfg.statusCode, 200);
+  assert.equal(shopCfg.json().cashfree, false);
+  assert.equal(shopCfg.json().activeProvider, 'razorpay');
+
+  // Public site-content reflects marketing_tags & enabled social_links
+  const siteContent = await app.inject({ method: 'GET', url: '/api/site-content' });
+  assert.equal(siteContent.statusCode, 200);
+  assert.equal(siteContent.json().marketing.ga4Id, 'G-TEST123456');
+  assert.equal(siteContent.json().marketing.gtmId, 'GTM-TEST123');
+  assert.equal(siteContent.json().socialLinks.length, 2);
+  assert.equal(siteContent.json().socialLinks[0].label, 'Instagram');
 });

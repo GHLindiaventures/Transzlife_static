@@ -13,11 +13,11 @@ export const STAGES = {
   all: null,
   awaiting_payment: ['pending_payment'],
   to_pack: ['confirmed', 'processing'],
-  ready_to_ship: ['packed'],
-  in_transit: ['shipped', 'in_transit', 'out_for_delivery'],
+  ready_to_ship: ['packed', 'ready_for_pickup', 'shipment_failed'],
+  in_transit: ['shipped', 'in_transit', 'out_for_delivery', 'delivery_failed'],
   delivered: ['delivered'],
   returns: ['rto', 'returned'],
-  cancelled: ['cancelled', 'refunded'],
+  cancelled: ['cancelled', 'refund_initiated', 'refunded'],
 };
 
 export default async function reportRoutes(app, { db, G, parse, env, ops }) {

@@ -1,6 +1,26 @@
 // Shared pieces for the admin dashboard.
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { api } from '../store/lib/api';
+import { emitLocalSync } from '../store/lib/realtime';
+
+const syncSubs = new Set();
+export const subscribeAdminSync = (fn) => { syncSubs.add(fn); return () => syncSubs.delete(fn); };
+export const emitAdminSync = (ev) => { syncSubs.forEach((fn) => fn(ev)); };
+
+function inferTopics(path) {
+  if (!path) return [];
+  if (path.startsWith('/api/admin/orders')) return ['order', 'payment', 'shipment', 'return'];
+  if (path.startsWith('/api/admin/payments')) return ['payment', 'order'];
+  if (path.startsWith('/api/admin/returns')) return ['return', 'order'];
+  if (path.startsWith('/api/admin/customers')) return ['customer', 'order'];
+  if (path.startsWith('/api/admin/products')) return ['product', 'inventory'];
+  if (path.startsWith('/api/admin/settings') || path.startsWith('/api/admin/integrations')) return ['settings'];
+  if (path.startsWith('/api/admin/content')) return ['site_content'];
+  if (path.startsWith('/api/admin/reviews')) return ['review'];
+  if (path.startsWith('/api/admin/enquiries')) return ['enquiry'];
+  if (path.startsWith('/api/admin/overview')) return ['order', 'payment', 'return', 'review', 'customer'];
+  return [];
+}
 
 export const AdminContext = createContext(null);
 export const useAdmin = () => useContext(AdminContext);
@@ -16,9 +36,12 @@ export const d = (iso) => (iso ? new Date(iso).toLocaleDateString('en-IN', { day
 
 export const STATUS = {
   pending_payment: ['Awaiting payment', 'warn'], confirmed: ['Confirmed', 'info'], processing: ['Processing', 'info'],
-  packed: ['Packed', 'info'], shipped: ['Shipped', 'go'], in_transit: ['In transit', 'go'],
+  packed: ['Packed', 'info'], ready_for_pickup: ['Ready for pickup', 'info'],
+  shipped: ['Shipped', 'go'], in_transit: ['In transit', 'go'],
   out_for_delivery: ['Out for delivery', 'go'], delivered: ['Delivered', 'ok'],
-  cancelled: ['Cancelled', 'off'], refunded: ['Refunded', 'off'], returned: ['Returned', 'off'], rto: ['Returned to us (RTO)', 'off'],
+  shipment_failed: ['Shipment failed', 'bad'], delivery_failed: ['Delivery failed', 'bad'],
+  cancelled: ['Cancelled', 'off'], refund_initiated: ['Refund initiated', 'warn'],
+  refunded: ['Refunded', 'off'], returned: ['Returned', 'off'], rto: ['Returned to us (RTO)', 'off'],
 };
 export const PAYSTATUS = {
   pending: ['Pending', 'warn'], paid: ['Paid', 'ok'], cod_pending: ['COD, not collected', 'info'], failed: ['Failed', 'bad'],
@@ -36,18 +59,26 @@ export function Badge({ map = STATUS, value }) {
   return <span className={`adm-badge is-${tone}`}>{label}</span>;
 }
 
-/** Fetches JSON from the admin API; `reload()` refetches. */
+/** Fetches JSON from the admin API; `reload()` refetches, and SSE updates refresh silently. */
 export function useApi(path) {
   const [state, setState] = useState({ data: null, error: '', loading: true });
   const seq = useRef(0);
-  const reload = useCallback(() => {
+  const fetchNow = useCallback((silent = false) => {
     if (!path) return;
     const n = ++seq.current;
-    setState((s) => ({ ...s, loading: true }));
+    if (!silent) setState((s) => ({ ...s, loading: true }));
     api(path).then((data) => n === seq.current && setState({ data, error: '', loading: false }))
-      .catch((e) => n === seq.current && setState({ data: null, error: e.message, loading: false }));
+      .catch((e) => n === seq.current && (!silent ? setState({ data: null, error: e.message, loading: false }) : null));
   }, [path]);
-  useEffect(() => { reload(); }, [reload]);
+  const reload = useCallback(() => fetchNow(false), [fetchNow]);
+  useEffect(() => { fetchNow(false); }, [fetchNow]);
+  useEffect(() => {
+    const topics = inferTopics(path);
+    if (!topics.length) return undefined;
+    return subscribeAdminSync((ev) => {
+      if (ev?.type && topics.includes(ev.type)) fetchNow(true);
+    });
+  }, [path, fetchNow]);
   return { ...state, reload };
 }
 
@@ -82,7 +113,12 @@ export function useAction() {
   const [notice, setNotice] = useState('');
   const run = useCallback(async (fn, okMessage) => {
     setBusy(true); setError(''); setNotice('');
-    try { const r = await fn(); if (okMessage) setNotice(typeof okMessage === 'function' ? okMessage(r) : okMessage); return r; }
+    try {
+      const r = await fn();
+      if (okMessage) setNotice(typeof okMessage === 'function' ? okMessage(r) : okMessage);
+      emitLocalSync('site_content');
+      return r;
+    }
     catch (e) { setError(e.message); return null; }
     finally { setBusy(false); }
   }, []);

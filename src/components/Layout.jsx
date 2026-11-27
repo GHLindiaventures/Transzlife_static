@@ -9,9 +9,59 @@ import ConsentBanner from './ConsentBanner.jsx';
 import LiveVisitors from './LiveVisitors.jsx';
 import ErrorBoundary from './ErrorBoundary.jsx';
 import { installTracking, track } from '../store/lib/track.js';
+import { useSiteContent } from '../store/lib/siteContent.js';
+
+const loadedTags = new Set();
+function setVerifyMeta(name, content) {
+  if (!content) return;
+  let tag = document.querySelector(`meta[name="${name}"]`);
+  if (!tag) { tag = document.createElement('meta'); tag.name = name; document.head.appendChild(tag); }
+  tag.content = content;
+}
+
+function loadMarketingTags(m) {
+  if (!m) return;
+  setVerifyMeta('google-site-verification', m.gscVerification);
+  setVerifyMeta('facebook-domain-verification', m.metaDomainVerification);
+  const run = () => {
+    if (m.gtmId && /^GTM-[A-Z0-9]+$/i.test(m.gtmId) && !loadedTags.has(`gtm:${m.gtmId}`)) {
+      loadedTags.add(`gtm:${m.gtmId}`);
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({ 'gtm.start': Date.now(), event: 'gtm.js' });
+      const s = document.createElement('script');
+      s.async = true;
+      s.src = `https://www.googletagmanager.com/gtm.js?id=${encodeURIComponent(m.gtmId)}`;
+      document.head.appendChild(s);
+    }
+    if (m.ga4Id && /^G-[A-Z0-9]+$/i.test(m.ga4Id) && !loadedTags.has(`ga4:${m.ga4Id}`)) {
+      loadedTags.add(`ga4:${m.ga4Id}`);
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = window.gtag || function gtag() { window.dataLayer.push(arguments); };
+      window.gtag('js', new Date());
+      window.gtag('config', m.ga4Id);
+      const s = document.createElement('script');
+      s.async = true;
+      s.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(m.ga4Id)}`;
+      document.head.appendChild(s);
+    }
+    if (m.metaPixelId && /^\d{6,25}$/.test(m.metaPixelId) && !loadedTags.has(`px:${m.metaPixelId}`)) {
+      loadedTags.add(`px:${m.metaPixelId}`);
+      const s = document.createElement('script');
+      s.async = true;
+      s.src = 'https://connect.facebook.net/en_US/fbevents.js';
+      s.onload = () => {
+        if (window.fbq) { window.fbq('init', m.metaPixelId); window.fbq('track', 'PageView'); }
+      };
+      document.head.appendChild(s);
+    }
+  };
+  if ('requestIdleCallback' in window) window.requestIdleCallback(run, { timeout: 2500 });
+  else setTimeout(run, 300);
+}
 
 export default function Layout() {
   const { pathname, hash, key } = useLocation();
+  const siteContent = useSiteContent();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const mainRef = useRef(null);
   const footerRef = useRef(null);
@@ -24,6 +74,7 @@ export default function Layout() {
   // first-party analytics: one page view per page (see src/store/lib/track.js for consent rules)
   useEffect(() => { installTracking(); }, []);
   useEffect(() => { track('page_view'); }, [pathname]);
+  useEffect(() => { loadMarketingTags(siteContent?.marketing); }, [siteContent?.marketing]);
 
   // new page -> start at the top (or at the #section the link points to), close the drawer
   useEffect(() => {

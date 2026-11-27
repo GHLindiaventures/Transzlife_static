@@ -95,6 +95,10 @@ export function SettingsPage() {
           )}
         </section>
         <ReturnPolicy s={s} owner={owner} reload={reload} />
+        <PaymentGateways s={s} owner={owner} reload={reload} />
+        <CompanyBank s={s} owner={owner} reload={reload} />
+        <MarketingSeo s={s} owner={owner} reload={reload} />
+        <NotificationManager s={s} owner={owner} reload={reload} />
         <Reminders s={s} owner={owner} reload={reload} />
         <Operations s={s} owner={owner} reload={reload} />
         <section className="adm-card">
@@ -232,6 +236,259 @@ function ReturnPolicy({ s, owner, reload }) {
           <label style={{ display: 'flex', gap: 8, alignItems: 'center' }}><input name="on" type="checkbox" defaultChecked={s.returns_enabled !== false} disabled={!owner} /> Customers can request returns from their account</label>
           <label>Return window (days after delivery)<input name="days" type="number" min="0" max="90" defaultValue={s.return_window_days ?? 7} disabled={!owner} required /></label>
           <p className="adm-muted">A product can have its own window or be marked not returnable on its page (Products).</p>
+          <ErrorBox>{act.error}</ErrorBox><Notice>{act.notice}</Notice>
+          {owner ? <button className="adm-btn" disabled={act.busy}>Save</button> : <p className="adm-muted">Only an owner can change these.</p>}
+        </form>
+      )}
+    </section>
+  );
+}
+
+/** Payment gateways: enable/disable Razorpay & Cashfree and choose the active provider. */
+function PaymentGateways({ s, owner, reload }) {
+  const act = useAction();
+  const { data: integ } = useApi('/api/admin/integrations');
+  const pg = s?.payment_gateways || {};
+  const [rzOn, setRzOn] = useState(pg.razorpayEnabled !== false);
+  const [cfOn, setCfOn] = useState(pg.cashfreeEnabled !== false);
+  const [active, setActive] = useState(pg.activeProvider || 'razorpay');
+
+  const save = async (e) => {
+    e.preventDefault();
+    const body = { payment_gateways: { razorpayEnabled: rzOn, cashfreeEnabled: cfOn, activeProvider: active } };
+    if (await act.run(() => api('/api/admin/settings', { method: 'PATCH', body }), 'Payment gateway settings saved.')) reload();
+  };
+
+  return (
+    <section className="adm-card">
+      <h2 className="adm-h2">Payment gateways</h2>
+      {!s ? <Loading /> : (
+        <form className="adm-form" onSubmit={save}>
+          <label className="adm-check">
+            <input type="checkbox" checked={rzOn} onChange={(e) => setRzOn(e.target.checked)} disabled={!owner} />
+            Razorpay {integ ? (integ.razorpay ? '(Keys configured)' : '(Keys not set in env)') : ''}
+          </label>
+          <label className="adm-check">
+            <input type="checkbox" checked={cfOn} onChange={(e) => setCfOn(e.target.checked)} disabled={!owner} />
+            Cashfree {integ ? (integ.cashfree ? '(Keys configured)' : '(Keys not set in env)') : ''}
+          </label>
+          <label>
+            Active online payment provider
+            <select value={active} onChange={(e) => setActive(e.target.value)} disabled={!owner}>
+              <option value="razorpay">Razorpay</option>
+              <option value="cashfree">Cashfree</option>
+            </select>
+          </label>
+          <p className="adm-muted">API keys and webhook secrets remain in backend environment variables.</p>
+          <ErrorBox>{act.error}</ErrorBox><Notice>{act.notice}</Notice>
+          {owner ? <button className="adm-btn" disabled={act.busy}>Save</button> : <p className="adm-muted">Only an owner can change these.</p>}
+        </form>
+      )}
+    </section>
+  );
+}
+
+/** Company bank details printed on generated GST invoices. */
+function CompanyBank({ s, owner, reload }) {
+  const act = useAction();
+  const bank = s?.company_bank || {};
+  const save = async (e) => {
+    e.preventDefault();
+    const f = new FormData(e.currentTarget);
+    const body = {
+      company_bank: {
+        accountHolder: String(f.get('accountHolder') || '').trim(),
+        bankName: String(f.get('bankName') || '').trim(),
+        accountNumber: String(f.get('accountNumber') || '').trim(),
+        branch: String(f.get('branch') || '').trim(),
+        ifsc: String(f.get('ifsc') || '').trim().toUpperCase(),
+      },
+    };
+    if (await act.run(() => api('/api/admin/settings', { method: 'PATCH', body }), 'Bank details saved.')) reload();
+  };
+  return (
+    <section className="adm-card">
+      <h2 className="adm-h2">Invoice bank details</h2>
+      {!s ? <Loading /> : (
+        <form className="adm-form" onSubmit={save}>
+          <label>Account holder&apos;s name<input name="accountHolder" defaultValue={bank.accountHolder || ''} disabled={!owner} placeholder="TranzLife Wellness Pvt Ltd" /></label>
+          <div className="adm-pair">
+            <label>Bank name<input name="bankName" defaultValue={bank.bankName || ''} disabled={!owner} placeholder="HDFC Bank" /></label>
+            <label>Branch<input name="branch" defaultValue={bank.branch || ''} disabled={!owner} placeholder="Chennai Main" /></label>
+          </div>
+          <div className="adm-pair">
+            <label>Account number<input name="accountNumber" defaultValue={bank.accountNumber || ''} disabled={!owner} /></label>
+            <label>IFSC code<input name="ifsc" defaultValue={bank.ifsc || ''} disabled={!owner} placeholder="HDFC0000001" /></label>
+          </div>
+          <p className="adm-muted">Shown on customer and admin GST invoices under Company&apos;s Bank Details.</p>
+          <ErrorBox>{act.error}</ErrorBox><Notice>{act.notice}</Notice>
+          {owner ? <button className="adm-btn" disabled={act.busy}>Save</button> : <p className="adm-muted">Only an owner can change these.</p>}
+        </form>
+      )}
+    </section>
+  );
+}
+
+/** SEO & Marketing tracking IDs and domain verification codes. */
+function MarketingSeo({ s, owner, reload }) {
+  const act = useAction();
+  const m = s?.marketing_tags || {};
+  const save = async (e) => {
+    e.preventDefault();
+    const f = new FormData(e.currentTarget);
+    const body = {
+      marketing_tags: {
+        gtmId: String(f.get('gtmId') || '').trim(),
+        ga4Id: String(f.get('ga4Id') || '').trim(),
+        metaPixelId: String(f.get('metaPixelId') || '').trim(),
+        gscVerification: String(f.get('gscVerification') || '').trim(),
+        metaDomainVerification: String(f.get('metaDomainVerification') || '').trim(),
+      },
+    };
+    if (await act.run(() => api('/api/admin/settings', { method: 'PATCH', body }), 'SEO & marketing tags saved.')) reload();
+  };
+  return (
+    <section className="adm-card">
+      <h2 className="adm-h2">SEO &amp; marketing tags</h2>
+      {!s ? <Loading /> : (
+        <form className="adm-form" onSubmit={save}>
+          <div className="adm-pair">
+            <label>Google Tag Manager ID<input name="gtmId" defaultValue={m.gtmId || ''} disabled={!owner} placeholder="GTM-XXXXXXX" /></label>
+            <label>Google Analytics (GA4) ID<input name="ga4Id" defaultValue={m.ga4Id || ''} disabled={!owner} placeholder="G-XXXXXXXXXX" /></label>
+          </div>
+          <label>Meta (Facebook) Pixel ID<input name="metaPixelId" defaultValue={m.metaPixelId || ''} disabled={!owner} placeholder="123456789012345" /></label>
+          <label>Google Search Console verification<input name="gscVerification" defaultValue={m.gscVerification || ''} disabled={!owner} placeholder="Verification token" /></label>
+          <label>Meta domain verification<input name="metaDomainVerification" defaultValue={m.metaDomainVerification || ''} disabled={!owner} placeholder="Verification token" /></label>
+          <p className="adm-muted">Loaded lazily on the storefront without blocking page render.</p>
+          <ErrorBox>{act.error}</ErrorBox><Notice>{act.notice}</Notice>
+          {owner ? <button className="adm-btn" disabled={act.busy}>Save</button> : <p className="adm-muted">Only an owner can change these.</p>}
+        </form>
+      )}
+    </section>
+  );
+}
+
+const ADMIN_EVENT_LABELS = [
+  ['new_order', 'New order received'],
+  ['payment_confirmed', 'Payment confirmed'],
+  ['payment_failed', 'Payment failed'],
+  ['pending_confirmation', 'Pending payment / confirmation'],
+  ['shipment_update', 'Shipment updates'],
+  ['delivery_update', 'Delivery updates'],
+];
+const CUSTOMER_EVENT_LABELS = [
+  ['confirmed', 'Order confirmed'],
+  ['processing', 'Processing'],
+  ['packed', 'Packed'],
+  ['ready_for_pickup', 'Ready for pickup'],
+  ['shipped', 'Shipped'],
+  ['in_transit', 'In transit'],
+  ['out_for_delivery', 'Out for delivery'],
+  ['delivered', 'Delivered'],
+  ['delayed', 'Delayed'],
+  ['delivery_failed', 'Delivery failed'],
+  ['rto', 'Return to origin (RTO)'],
+  ['refund_initiated', 'Refund initiated'],
+  ['refunded', 'Refunded'],
+  ['cancelled', 'Cancelled'],
+];
+
+/** Notification channels, admin alert recipients, event toggles and message templates. */
+function NotificationManager({ s, owner, reload }) {
+  const act = useAction();
+  const cfg = s?.notification_config || {};
+  const [channels, setChannels] = useState({
+    email: cfg.channels?.email !== false,
+    sms: Boolean(cfg.channels?.sms),
+    whatsapp: cfg.channels?.whatsapp !== false,
+  });
+  const [adminEvents, setAdminEvents] = useState(() => {
+    const out = {};
+    for (const [k] of ADMIN_EVENT_LABELS) out[k] = cfg.adminEvents?.[k] !== false;
+    return out;
+  });
+  const [customerEvents, setCustomerEvents] = useState(() => {
+    const out = {};
+    for (const [k] of CUSTOMER_EVENT_LABELS) out[k] = cfg.customerEvents?.[k] !== false;
+    return out;
+  });
+  const [templates, setTemplates] = useState(cfg.templates || {});
+
+  const save = async (e) => {
+    e.preventDefault();
+    const f = new FormData(e.currentTarget);
+    const splitList = (v) => String(v || '').split(',').map((x) => x.trim()).filter(Boolean);
+    const cleanTemplates = {};
+    for (const [k, v] of Object.entries(templates)) {
+      if (typeof v === 'string' && v.trim()) cleanTemplates[k] = v.trim();
+    }
+    const body = {
+      notification_config: {
+        channels,
+        adminRecipients: {
+          emails: splitList(f.get('adminEmails')),
+          phones: splitList(f.get('adminPhones')),
+        },
+        adminEvents,
+        customerEvents,
+        templates: cleanTemplates,
+      },
+    };
+    if (await act.run(() => api('/api/admin/settings', { method: 'PATCH', body }), 'Notification settings saved.')) reload();
+  };
+
+  return (
+    <section className="adm-card" style={{ gridColumn: '1 / -1' }}>
+      <h2 className="adm-h2">Notifications &amp; templates</h2>
+      {!s ? <Loading /> : (
+        <form className="adm-form" onSubmit={save}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
+            <label className="adm-check"><input type="checkbox" checked={channels.email} onChange={(e) => setChannels({ ...channels, email: e.target.checked })} disabled={!owner} /> Email</label>
+            <label className="adm-check"><input type="checkbox" checked={channels.whatsapp} onChange={(e) => setChannels({ ...channels, whatsapp: e.target.checked })} disabled={!owner} /> WhatsApp</label>
+            <label className="adm-check"><input type="checkbox" checked={channels.sms} onChange={(e) => setChannels({ ...channels, sms: e.target.checked })} disabled={!owner} /> SMS</label>
+          </div>
+          <div className="adm-pair">
+            <label>Admin alert emails (comma-separated)<input name="adminEmails" defaultValue={(cfg.adminRecipients?.emails || []).join(', ')} disabled={!owner} placeholder="ops@tranzlife.in" /></label>
+            <label>Admin alert phones (comma-separated)<input name="adminPhones" defaultValue={(cfg.adminRecipients?.phones || []).join(', ')} disabled={!owner} placeholder="9150394443" /></label>
+          </div>
+          <div className="adm-pair">
+            <div>
+              <strong style={{ display: 'block', marginBottom: 6 }}>Admin alerts</strong>
+              <div style={{ display: 'grid', gap: 6 }}>
+                {ADMIN_EVENT_LABELS.map(([k, label]) => (
+                  <label key={k} className="adm-check">
+                    <input type="checkbox" checked={adminEvents[k]} onChange={(e) => setAdminEvents({ ...adminEvents, [k]: e.target.checked })} disabled={!owner} /> {label}
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div>
+              <strong style={{ display: 'block', marginBottom: 6 }}>Customer notifications</strong>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))', gap: 6 }}>
+                {CUSTOMER_EVENT_LABELS.map(([k, label]) => (
+                  <label key={k} className="adm-check">
+                    <input type="checkbox" checked={customerEvents[k]} onChange={(e) => setCustomerEvents({ ...customerEvents, [k]: e.target.checked })} disabled={!owner} /> {label}
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+          <details>
+            <summary style={{ cursor: 'pointer', fontWeight: 600 }}>Custom customer message templates (optional)</summary>
+            <p className="adm-muted" style={{ marginTop: 6 }}>Leave blank for default text. Placeholders: <code>{'{order_number}'}</code>, <code>{'{customer_name}'}</code>, <code>{'{total}'}</code>, <code>{'{courier}'}</code>, <code>{'{awb}'}</code>, <code>{'{edd}'}</code>, <code>{'{tracking_url}'}</code></p>
+            <div style={{ display: 'grid', gap: 8, marginTop: 8 }}>
+              {CUSTOMER_EVENT_LABELS.map(([k, label]) => (
+                <label key={k}>{label}
+                  <input
+                    value={templates[k] || ''}
+                    onChange={(e) => setTemplates({ ...templates, [k]: e.target.value })}
+                    disabled={!owner}
+                    placeholder={`Default ${label.toLowerCase()} message`}
+                  />
+                </label>
+              ))}
+            </div>
+          </details>
           <ErrorBox>{act.error}</ErrorBox><Notice>{act.notice}</Notice>
           {owner ? <button className="adm-btn" disabled={act.busy}>Save</button> : <p className="adm-muted">Only an owner can change these.</p>}
         </form>

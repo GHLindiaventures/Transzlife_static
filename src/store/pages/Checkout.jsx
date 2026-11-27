@@ -445,9 +445,12 @@ export function Checkout() {
 }
 
 const STATUS_LABEL = {
-  pending_payment: 'Awaiting payment', confirmed: 'Confirmed', packed: 'Packed', shipped: 'Shipped',
-  out_for_delivery: 'Out for delivery', delivered: 'Delivered', cancelled: 'Cancelled', refunded: 'Refunded',
-  returned: 'Returned', rto: 'Returned to us',
+  pending_payment: 'Awaiting payment', confirmed: 'Confirmed', processing: 'Processing',
+  packed: 'Packed', ready_for_pickup: 'Ready for pickup', shipped: 'Shipped',
+  in_transit: 'In transit', out_for_delivery: 'Out for delivery', delivered: 'Delivered',
+  shipment_failed: 'Shipment failed', delivery_failed: 'Delivery attempt failed',
+  cancelled: 'Cancelled', refund_initiated: 'Refund initiated', refunded: 'Refunded',
+  returned: 'Returned', rto: 'Returned to us (RTO)',
 };
 export const statusLabel = (s) => STATUS_LABEL[s] || s;
 export const PAY_LABEL = { upi: 'UPI', card: 'Card', netbanking: 'Net banking', cod: 'Cash on delivery' };

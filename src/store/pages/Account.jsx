@@ -9,6 +9,7 @@ import { useTitle } from '../components/Common';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { api } from '../lib/api';
+import { subscribeCustomerEvents } from '../lib/realtime';
 import { statusLabel, rs, STATES } from './Checkout';
 import { loadMyReturns, returnTone } from '../data/returnStore';
 import { getProduct, onSale } from '../data/products';
@@ -17,8 +18,8 @@ import { inr } from '../utils/format';   // product prices are in rupees; order 
 import { mergeWishlist, toggleWishlist } from '../lib/wishlist';
 import { myReviews } from '../data/reviewStore';
 import { recentlyViewed, clearViewed } from '../lib/recent';
-import { SOCIAL } from '../../components/Footer';
-import { SOCIAL_LINKS } from '../../content/site.js';
+import { resolveSocialLinks } from '../../components/Footer';
+import { useSiteContent } from '../lib/siteContent';
 import '../styles/account.css';
 
 const badgeClass = (s) => (s === 'pending_payment' ? 'is-warn' : ['cancelled', 'refunded', 'returned', 'rto'].includes(s) ? 'is-off' : '');
@@ -109,6 +110,7 @@ function Group({ id, title, children }) {
 /** My account: profile, orders, returns, reviews, saved products, reminders, addresses and devices. Signed-in only (RequireAuth). */
 export default function Account() {
   useTitle('My account');
+  const siteContent = useSiteContent();
   const { customer, logout, setCustomer } = useAuth();
   const { add } = useCart();
   const navigate = useNavigate();
@@ -130,13 +132,29 @@ export default function Account() {
   const [addrMsg, setAddrMsg] = useState('');
 
   useEffect(() => {
-    loadMyReturns().then(setReturns);
-    api('/api/orders').then((r) => setOrders(r.orders)).catch((e) => { setError(e.message); setOrders([]); });
-    api('/api/account/addresses').then((r) => setAddresses(r.addresses)).catch(() => setAddresses([]));
+    const loadOrders = () => api('/api/orders').then((r) => setOrders(r.orders)).catch((e) => { setError(e.message); setOrders([]); });
+    const loadAddresses = () => api('/api/account/addresses').then((r) => setAddresses(r.addresses)).catch(() => setAddresses([]));
+    const loadReturns = () => loadMyReturns().then(setReturns);
+
+    loadReturns();
+    loadOrders();
+    loadAddresses();
     api('/api/account/devices').then((r) => setDevices(r.devices)).catch(() => setDevices([]));
     mergeWishlist().then(setSaved);
     myReviews().then(setRv).catch(() => setRv({ toReview: [], mine: [] }));
-  }, []);
+
+    return subscribeCustomerEvents({
+      onEvent: (ev) => {
+        if (!ev) return;
+        if (ev.type === 'order' || ev.type === 'payment') loadOrders();
+        if (ev.type === 'return') { loadReturns(); loadOrders(); }
+        if (ev.type === 'customer') {
+          loadAddresses();
+          api('/api/auth/me').then((r) => { if (r?.customer) setCustomer(r.customer); }).catch(() => {});
+        }
+      },
+    });
+  }, [setCustomer]);
 
   // Opening a section shows just that section (phones: as its own screen; wider screens: next to the
   // side menu). Phones start it at the top; wider screens only scroll if the section's top is hidden
@@ -222,7 +240,7 @@ export default function Account() {
   const toReview = rv?.toReview || [];
   const mine = rv?.mine || [];
   const first = customer.name.split(' ')[0];
-  const socials = SOCIAL.filter((s) => SOCIAL_LINKS[s.label]);
+  const socials = resolveSocialLinks(siteContent);
   // the latest order that is still on its way, shown at the top of the phone menu
   const live = (orders || []).find((o) => o.status === 'pending_payment' || (STEP_OF[o.status] !== undefined && o.status !== 'delivered'));
   const deleteHref = `mailto:${SITE.careEmail}?subject=${encodeURIComponent('Please delete my TranzLife account')}&body=${encodeURIComponent(`Please delete my account and personal data for the mobile number +91 ${customer.phone}.`)}`;
@@ -381,7 +399,7 @@ export default function Account() {
               <h2 id="acm-follow-t">Follow us on</h2>
               <ul className="acm-social">
                 {socials.map((s) => (
-                  <li key={s.label}><a href={SOCIAL_LINKS[s.label]} target="_blank" rel="noopener noreferrer">{s.svg}<span>{s.label}</span></a></li>
+                  <li key={s.key || s.label}><a href={s.url} target="_blank" rel="noopener noreferrer">{s.svg}<span>{s.label}</span></a></li>
                 ))}
               </ul>
             </section>
@@ -492,6 +510,9 @@ export default function Account() {
                         <div className="acx-order__actions">
                           <Link className="acx-btn acx-btn--ghost" to={`/track/${o.trackingId || o.number}`}>Track order <ChevronRight size={14} /></Link>
                           <Link className="acx-btn acx-btn--ghost" to={`/order/${o.number}`}>View details <ChevronRight size={14} /></Link>
+                          {o.status !== 'pending_payment' && !(o.status === 'cancelled' && o.paymentStatus !== 'paid') && (
+                            <a className="acx-btn acx-btn--ghost" href={`/api/orders/${encodeURIComponent(o.number)}/invoice`} target="_blank" rel="noreferrer">Invoice</a>
+                          )}
                           {canReorder && <button type="button" className="acx-btn" onClick={() => buyAgain(o)}><RotateCcw size={15} /> Buy again</button>}
                         </div>
                       </li>

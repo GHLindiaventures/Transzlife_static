@@ -5,6 +5,7 @@ import {
   ClipboardCheck, PackageCheck, Undo2, XCircle, Navigation, Wallet,
 } from 'lucide-react';
 import { api } from '../lib/api';
+import { subscribePublicEvents } from '../lib/realtime';
 import { Breadcrumbs, useTitle } from '../components/Common';
 import '../styles/track.css';
 
@@ -53,13 +54,21 @@ export default function TrackOrder() {
     setQuery(id || '');
     if (!id) { setTracking(null); setLoading(false); setError(''); return; }
     let active = true;
-    setLoading(true);
-    setError('');
-    api(`/api/track/${encodeURIComponent(id)}`)
-      .then((res) => { if (active) setTracking(res.tracking); })
-      .catch((e) => { if (active) { setTracking(null); setError(e.message || 'Could not find that order.'); } })
-      .finally(() => { if (active) setLoading(false); });
-    return () => { active = false; };
+    const fetchTracking = (silent = false) => {
+      if (!silent) { setLoading(true); setError(''); }
+      api(`/api/track/${encodeURIComponent(id)}`)
+        .then((res) => { if (active) { setTracking(res.tracking); setError(''); } })
+        .catch((e) => { if (active && !silent) { setTracking(null); setError(e.message || 'Could not find that order.'); } })
+        .finally(() => { if (active && !silent) setLoading(false); });
+    };
+    fetchTracking(false);
+    const stopSse = subscribePublicEvents({
+      trackId: id,
+      onEvent: (ev) => {
+        if (ev?.type === 'order') fetchTracking(true);
+      },
+    });
+    return () => { active = false; stopSse(); };
   }, [id]);
 
   const onSearch = (e) => {
@@ -76,7 +85,7 @@ export default function TrackOrder() {
     }).catch(() => {});
   };
 
-  const stopped = tracking && ['cancelled', 'refunded', 'rto', 'returned'].includes(tracking.status);
+  const stopped = tracking && ['cancelled', 'shipment_failed', 'delivery_failed', 'refund_initiated', 'refunded', 'rto', 'returned'].includes(tracking.status);
 
   return (
     <div className="trk-page">
@@ -172,7 +181,7 @@ export default function TrackOrder() {
               </div>
             </section>
 
-            {/* 8-Stage Visual Timeline (Amazon / Flipkart style) */}
+            {/* 9-Stage Visual Timeline (Amazon / Flipkart style) */}
             {!stopped && (
               <section className="trk-card" aria-label="Delivery progress">
                 <h3 className="trk-h3">Delivery journey</h3>

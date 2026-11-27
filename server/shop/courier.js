@@ -5,8 +5,9 @@ import { timingSafeEqual } from 'node:crypto';
 export const TRACKING_STAGES = [
   { key: 'placed', label: 'Order Placed', desc: 'Your order has been received' },
   { key: 'confirmed', label: 'Order Confirmed', desc: 'Order verified and confirmed' },
-  { key: 'processing', label: 'Processing / Packing', desc: 'Items are being picked & packed' },
-  { key: 'packed', label: 'Packed', desc: 'Ready for courier handover' },
+  { key: 'processing', label: 'Processing', desc: 'Items are being picked & prepared' },
+  { key: 'packed', label: 'Packed', desc: 'Parcel is packed and sealed' },
+  { key: 'ready_for_pickup', label: 'Ready for Pickup', desc: 'Awaiting courier handover' },
   { key: 'shipped', label: 'Shipped', desc: 'Handed over to delivery partner' },
   { key: 'in_transit', label: 'In Transit', desc: 'Moving through courier network' },
   { key: 'out_for_delivery', label: 'Out for Delivery', desc: 'Delivery agent is on the way' },
@@ -18,17 +19,19 @@ const STATUS_INDEX = {
   confirmed: 1,
   processing: 2,
   packed: 3,
-  shipped: 4,
-  in_transit: 5,
-  out_for_delivery: 6,
-  delivered: 7,
+  ready_for_pickup: 4,
+  shipped: 5,
+  in_transit: 6,
+  out_for_delivery: 7,
+  delivered: 8,
 };
 
 // Map common courier scan statuses (Shiprocket / Delhivery / generic) -> internal statuses
 const COURIER_STATUS_MAP = new Map([
-  ['pickup scheduled', 'packed'],
-  ['ready to ship', 'packed'],
-  ['manifested', 'packed'],
+  ['pickup scheduled', 'ready_for_pickup'],
+  ['ready to ship', 'ready_for_pickup'],
+  ['ready for pickup', 'ready_for_pickup'],
+  ['manifested', 'ready_for_pickup'],
   ['picked up', 'shipped'],
   ['shipped', 'shipped'],
   ['dispatched', 'shipped'],
@@ -42,7 +45,10 @@ const COURIER_STATUS_MAP = new Map([
   ['rto', 'rto'],
   ['rto initiated', 'rto'],
   ['rto delivered', 'rto'],
-  ['undelivered', 'in_transit'],
+  ['undelivered', 'delivery_failed'],
+  ['delivery failed', 'delivery_failed'],
+  ['delivery attempt failed', 'delivery_failed'],
+  ['ndr', 'delivery_failed'],
   ['delayed', 'in_transit'],
 ]);
 
@@ -52,7 +58,7 @@ function safeEqual(a, b) {
   return x.length > 0 && x.length === y.length && timingSafeEqual(x, y);
 }
 
-export function createCourier({ db, notifier, env = process.env, log }) {
+export function createCourier({ db, notifier, realtime, env = process.env, log }) {
   /**
    * Public tracking view by tracking_id (TRK-TZL-xxxxxx), order_number (TZL-xxxxxx), or AWB.
    * Masks full street address & phone unless `full = true` (signed-in owner).
@@ -108,6 +114,10 @@ export function createCourier({ db, notifier, env = process.env, log }) {
       delayReason: o.delay_reason || null,
       deliveredAt: o.delivered_at || null,
       courierName: o.courier_name || null,
+      shippingProvider: o.shipping_provider || null,
+      courierCharge: o.courier_charge ?? null,
+      pickupStatus: o.pickup_status || 'not_scheduled',
+      pickupScheduledAt: o.pickup_scheduled_at || null,
       awbNumber: o.awb_number || null,
       trackingUrl: o.tracking_url || null,
       destination: full
@@ -157,6 +167,11 @@ export function createCourier({ db, notifier, env = process.env, log }) {
       if (nextStatus !== o.status) {
         params.push(nextStatus);
         sets.push(`status = $${params.length}`);
+        if (['shipped', 'in_transit', 'out_for_delivery', 'delivered'].includes(nextStatus)) {
+          sets.push(`pickup_status = 'picked_up'`);
+        } else if (nextStatus === 'ready_for_pickup' && o.pickup_status === 'not_scheduled') {
+          sets.push(`pickup_status = 'scheduled'`);
+        }
         if (nextStatus === 'delivered') {
           sets.push(`delivered_at = COALESCE(delivered_at, now())`, `is_delayed = false`);
           if (o.payment_method === 'cod' && o.payment_status === 'cod_pending') sets.push(`payment_status = 'paid'`);
@@ -188,6 +203,18 @@ export function createCourier({ db, notifier, env = process.env, log }) {
 
     if (!updated) return { ok: false, reason: 'order_not_found' };
     if (notifyEvent) notifier?.notify(updated.id, notifyEvent, courierName ? `via ${courierName}` : undefined);
+    if (mapped) {
+      const adminEvt = ['delivered', 'delivery_failed', 'out_for_delivery'].includes(mapped) ? 'delivery_update' : 'shipment_update';
+      notifier?.notifyAdmin?.(adminEvt, { orderNumber: updated.order_number, status: mapped, courier: courierName, awb });
+    }
+    realtime?.publish('order', {
+      orderNumber: updated.order_number,
+      trackingId: updated.tracking_id,
+      customerId: updated.customer_id,
+      status: mapped || updated.status,
+      courierName: courierName || updated.courier_name,
+      awbNumber: awb || updated.awb_number,
+    });
     return { ok: true, orderNumber: updated.order_number, status: mapped || updated.status };
   }
 
@@ -242,7 +269,7 @@ export function createCourier({ db, notifier, env = process.env, log }) {
   async function flagOverdueShipments() {
     const rows = (await db.query(`
       SELECT id FROM orders
-       WHERE status IN ('confirmed', 'processing', 'packed', 'shipped', 'in_transit', 'out_for_delivery')
+       WHERE status IN ('confirmed', 'processing', 'packed', 'ready_for_pickup', 'shipped', 'in_transit', 'out_for_delivery', 'delivery_failed')
          AND estimated_delivery_at IS NOT NULL
          AND estimated_delivery_at < now()
          AND is_delayed = false`)).rows;
@@ -258,7 +285,7 @@ export function createCourier({ db, notifier, env = process.env, log }) {
     if (!env.SHIPROCKET_TOKEN && !env.DELHIVERY_TOKEN) return 0;
     const rows = (await db.query(
       `SELECT order_number FROM orders
-        WHERE awb_number IS NOT NULL AND status IN ('packed', 'shipped', 'in_transit', 'out_for_delivery')
+        WHERE awb_number IS NOT NULL AND status IN ('packed', 'ready_for_pickup', 'shipped', 'in_transit', 'out_for_delivery', 'delivery_failed')
         ORDER BY updated_at ASC LIMIT $1`,
       [limit],
     )).rows;
