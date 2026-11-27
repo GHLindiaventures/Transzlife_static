@@ -37,18 +37,19 @@ const originOf = (u) => { try { return new URL(u).origin; } catch { return ''; }
 const extra = (name) => String(process.env[name] || '').split(',').map((s) => s.trim()).filter(Boolean);
 const MEDIA_STORE = originOf(process.env.AWS_ENDPOINT_URL_S3);     // product / review photos (shop/media.js)
 const RAZORPAY = ['https://checkout.razorpay.com', 'https://api.razorpay.com'];
+const CASHFREE = ['https://sdk.cashfree.com', 'https://api.cashfree.com', 'https://sandbox.cashfree.com'];
 const CSP = [
   "default-src 'self'",
-  `script-src 'self' ${RAZORPAY[0]}`,
+  `script-src 'self' ${RAZORPAY[0]} ${CASHFREE[0]}`,
   "style-src 'self' 'unsafe-inline'",
-  `img-src 'self' data: blob: https://images.unsplash.com https://images.pexels.com https://*.razorpay.com ${MEDIA_STORE} ${extra('CSP_IMG_EXTRA').join(' ')}`,
+  `img-src 'self' data: blob: https://images.unsplash.com https://images.pexels.com https://*.razorpay.com https://*.cashfree.com ${MEDIA_STORE} ${extra('CSP_IMG_EXTRA').join(' ')}`,
   "media-src 'self' blob: https://videos.pexels.com",
   "font-src 'self' data:",
-  `connect-src 'self' ${RAZORPAY.join(' ')} https://lumberjack.razorpay.com ${MEDIA_STORE} ${extra('CSP_CONNECT_EXTRA').join(' ')}`,
-  `frame-src ${RAZORPAY.join(' ')} https://www.google.com https://maps.google.com`,
+  `connect-src 'self' ${RAZORPAY.join(' ')} ${CASHFREE.slice(1).join(' ')} https://lumberjack.razorpay.com ${MEDIA_STORE} ${extra('CSP_CONNECT_EXTRA').join(' ')}`,
+  `frame-src ${RAZORPAY.join(' ')} ${CASHFREE.join(' ')} https://www.google.com https://maps.google.com`,
   "object-src 'none'",
   "base-uri 'self'",
-  `form-action 'self' ${RAZORPAY[1]}`,
+  `form-action 'self' ${RAZORPAY[1]} ${CASHFREE.slice(1).join(' ')}`,
   "frame-ancestors 'self'",
   ...(HOSTED ? ['upgrade-insecure-requests'] : []),
 ].map((d) => d.replace(/\s+/g, ' ').trim()).join('; ');
@@ -68,7 +69,7 @@ const KNOWN_PAGE = new RegExp('^/(' + [
   '', 'about', 'science', 'sustainability', 'faq', 'contact', 'certifications',
   'shop', 'products(/[^/]+)?', 'product/[^/]+', 'concerns(/[^/]+)?', 'ingredients',
   'blogs?(/[^/]+)?', 'journal(/[^/]+)?', 'policies/[^/]+',
-  'cart', 'login', 'checkout', 'order/[^/]+', 'account', 'admin(/.*)?',
+  'cart', 'login', 'checkout', 'order/[^/]+', 'track(/[^/]+)?', 'account', 'admin(/.*)?',
 ].join('|') + ')/?$');
 // Text files are compressed (Brotli, else gzip). Build files never change, so each is compressed once and kept.
 const COMPRESSIBLE = new Set(['.html', '.js', '.css', '.json', '.svg', '.txt', '.xml']);
@@ -115,7 +116,14 @@ function serveFile(req, res){
   const enc = /\bbr\b/.test(accept) ? 'br' : /\bgzip\b/.test(accept) ? 'gzip' : null;
   let body = readFileSync(file);
   // share previews (WhatsApp, Facebook) need absolute image / page URLs: filled from SITE_URL
-  if (ext === '.html' && SITE_URL) body = Buffer.from(body.toString('utf8').replaceAll('content="/', `content="${SITE_URL}/`));
+  if (ext === '.html' && SITE_URL) {
+    let html = body.toString('utf8').replaceAll('content="/', `content="${SITE_URL}/`);
+    if (!html.includes('rel="canonical"')) {
+      const canon = `${SITE_URL}${path === '/' ? '' : path}`;
+      html = html.replace('</head>', `  <link rel="canonical" href="${canon}">\n</head>`);
+    }
+    body = Buffer.from(html);
+  }
   if (enc) {
     const key = `${file}|${enc}`;
     let out = immutable ? packed.get(key) : null;

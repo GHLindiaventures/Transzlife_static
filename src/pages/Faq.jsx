@@ -23,6 +23,20 @@ export default function Faq() {
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            mainEntity: FAQ.items.map((it) => ({
+              '@type': 'Question',
+              name: it.q,
+              acceptedAnswer: { '@type': 'Answer', text: it.a },
+            })),
+          }).replace(/</g, '\\u003c'),
+        }}
+      />
       <section className="faq-hero">
         <div className="faq-hero__image">
           <img src="/assets/photos/faq-laptop-banner.png" alt="FAQ Banner" />

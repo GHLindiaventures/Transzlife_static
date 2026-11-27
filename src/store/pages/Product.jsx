@@ -135,14 +135,22 @@ export default function Product() {
 
   return (
     <div className="pdpx" style={{ '--p-accent': p.accent, '--tint': p.tint }}>
-      {summary.total > 0 && (
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([
+        {
           '@context': 'https://schema.org', '@type': 'Product', name: p.name, description: p.summary, brand: { '@type': 'Brand', name: 'TranzLife' },
           image: p.images.map((src) => new URL(src, window.location.origin).href),
-          offers: { '@type': 'Offer', priceCurrency: 'INR', price: String(p.price), availability: `https://schema.org/${p.stock === 'out' ? 'OutOfStock' : 'InStock'}` },
-          aggregateRating: { '@type': 'AggregateRating', ratingValue: summary.avg.toFixed(1), reviewCount: summary.total, bestRating: 5, worstRating: 1 },
-        }).replace(/</g, '\\u003c') }} />
-      )}
+          ...(sale ? { offers: { '@type': 'Offer', priceCurrency: 'INR', price: String(p.price), url: window.location.href, availability: `https://schema.org/${p.stock === 'out' ? 'OutOfStock' : 'InStock'}` } } : {}),
+          ...(summary.total > 0 ? { aggregateRating: { '@type': 'AggregateRating', ratingValue: summary.avg.toFixed(1), reviewCount: summary.total, bestRating: 5, worstRating: 1 } } : {}),
+        },
+        {
+          '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+          itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'Home', item: window.location.origin },
+            { '@type': 'ListItem', position: 2, name: 'Shop', item: `${window.location.origin}/shop` },
+            { '@type': 'ListItem', position: 3, name: p.short, item: window.location.href },
+          ],
+        },
+      ]).replace(/</g, '\\u003c') }} />
       <section className="container pdp">
         <Breadcrumbs items={[['Shop', '/shop'], [p.short]]} />
         <div className="pdp__grid">

@@ -204,7 +204,10 @@ function Integrations() {
               : t.ok ? <><span className="adm-badge is-ok">Connected</span> {t.account?.name} ({t.account?.type}, {t.account?.status}){t.verifyService && <small className="adm-sub">Verify service: {t.verifyService.name}</small>}</>
               : <><span className="adm-badge is-bad">Error</span> {t.error}{t.twilioCode ? ` (Twilio ${t.twilioCode})` : ''}</>}</td></tr>
             <tr><td>Order updates to customers</td><td>{data.orderMessages === 'off' ? <span className="adm-badge is-off">Off</span> : <span className="adm-badge is-ok">{data.orderMessages === 'whatsapp' ? 'WhatsApp' : 'SMS'}</span>}</td></tr>
-            <tr><td>Online payments (Razorpay)</td><td>{data.razorpay ? <span className="adm-badge is-ok">Connected</span> : <span className="adm-badge is-off">Not configured: cash on delivery only</span>}</td></tr>
+            <tr><td>Online payments (Razorpay)</td><td>{data.razorpay ? <span className="adm-badge is-ok">Connected</span> : <span className="adm-badge is-off">Not configured</span>}</td></tr>
+            <tr><td>Online payments (Cashfree)</td><td>{data.cashfree ? <span className="adm-badge is-ok">Connected</span> : <span className="adm-badge is-off">Not configured</span>}</td></tr>
+            <tr><td>Shipping (Shiprocket)</td><td>{data.shiprocket ? <span className="adm-badge is-ok">Connected</span> : <span className="adm-badge is-off">Not configured</span>}</td></tr>
+            <tr><td>Shipping (Delhivery)</td><td>{data.delhivery ? <span className="adm-badge is-ok">Connected</span> : <span className="adm-badge is-off">Not configured</span>}</td></tr>
           </tbody>
         </table>
       )}

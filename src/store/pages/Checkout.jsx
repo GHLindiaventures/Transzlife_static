@@ -137,6 +137,27 @@ async function payWithRazorpay(payment, method, orderNumber) {
   });
 }
 
+let cashfreeScript = null;
+function loadCashfreeSdk() {
+  if (window.Cashfree) return Promise.resolve(window.Cashfree);
+  cashfreeScript ??= new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://sdk.cashfree.com/js/v3/cashfree.js';
+    s.onload = () => resolve(window.Cashfree);
+    s.onerror = () => { cashfreeScript = null; reject(new Error('Could not load Cashfree checkout. Check your connection and try again.')); };
+    document.head.appendChild(s);
+  });
+  return cashfreeScript;
+}
+
+async function payWithCashfree(payment) {
+  const Cashfree = await loadCashfreeSdk();
+  const cf = Cashfree({ mode: payment.mode || 'sandbox' });
+  const res = await cf.checkout({ paymentSessionId: payment.paymentSessionId, redirectTarget: '_modal' });
+  if (res?.error) throw new Error(res.error.message || 'Payment failed. Please try again.');
+  return res?.paymentDetails ? { cashfree_order_id: payment.orderId } : null;
+}
+
 function CheckoutSummary({ quote }) {
   if (!quote) return <div className="summary"><h2>Order summary</h2><p className="auth-sub">Calculating…</p></div>;
   return (
@@ -200,7 +221,7 @@ export function Checkout() {
 
   // available payment methods + saved addresses
   useEffect(() => {
-    api('/api/shop/config').then((c) => { setConfig(c); setPay((p) => p ?? (c.razorpay ? 'upi' : 'cod')); })
+    api('/api/shop/config').then((c) => { setConfig(c); setPay((p) => p ?? ((c.onlineEnabled || c.razorpay || c.cashfree) ? 'upi' : 'cod')); })
       .catch(() => { setConfig({ methods: ['cod'] }); setPay('cod'); });
     api('/api/account/addresses').then((r) => {
       setAddresses(r.addresses);
@@ -226,7 +247,9 @@ export function Checkout() {
 
   const runPayment = useCallback(async (order, payment) => {
     try {
-      const result = await payWithRazorpay(payment, order.paymentMethod, order.number);
+      const result = payment.provider === 'cashfree'
+        ? await payWithCashfree(payment)
+        : await payWithRazorpay(payment, order.paymentMethod, order.number);
       if (!result) { track('payment_failed', { method: order.paymentMethod, reason: 'closed' }); setPending({ order, payment }); setBusy(false); return; }
       const v = await api('/api/checkout/verify', { method: 'POST', body: { orderNumber: order.number, ...result } });
       finish(v.order);

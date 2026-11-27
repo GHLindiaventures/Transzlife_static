@@ -300,6 +300,7 @@ export function OrderDetail() {
         )}
         {o.status === 'delivered' && can(staff, 'orders.edit') && <button className="adm-btn is-ghost no-print" onClick={() => setReturning(true)}><Undo2 size={16} /> Start a return</button>}
         <Link className="adm-btn is-ghost no-print" to={`/admin/orders/print?numbers=${o.number}`}><Printer size={16} /> Packing slip</Link>
+        <a className="adm-btn is-ghost no-print" href={`/api/admin/orders/${o.number}/invoice`} target="_blank" rel="noreferrer"><Printer size={16} /> GST Invoice</a>
       </PageHead>
       {returning && <StartReturn number={o.number} onClose={() => setReturning(false)} onCreated={(r) => navigate(`/admin/returns?id=${r.id}`)} />}
       <ErrorBox>{act.error}</ErrorBox>
@@ -438,6 +439,19 @@ function ShipmentEditor({ o, act, onSaved }) {
       (res) => res.message || (res.synced ? `Synced: ${res.status}` : 'No new courier scans.'));
     if (r?.synced) onSaved();
   };
+  const bookShipment = async () => {
+    const r = await act.run(() => api(`/api/admin/orders/${o.number}/ship`, { method: 'POST', body: {} }),
+      (res) => `Shipment booked via ${res.courierName}${res.awb ? ` (AWB ${res.awb})` : ''}.`);
+    if (r) onSaved();
+  };
+  const schedulePickup = async () => {
+    const r = await act.run(() => api(`/api/admin/orders/${o.number}/pickup`, { method: 'POST', body: {} }), 'Courier pickup scheduled.');
+    if (r) onSaved();
+  };
+  const openLabel = async () => {
+    const r = await act.run(() => api(`/api/admin/orders/${o.number}/label`));
+    if (r?.labelUrl) window.open(r.labelUrl, '_blank', 'noopener,noreferrer');
+  };
 
   return (
     <section className="adm-card">
@@ -446,9 +460,18 @@ function ShipmentEditor({ o, act, onSaved }) {
           <h2 className="adm-h2"><Truck size={17} /> Shipment &amp; tracking</h2>
           <p className="adm-muted">Tracking ID: <code>{o.trackingId}</code> · <a href={`/track/${o.trackingId}`} target="_blank" rel="noreferrer">Customer tracking page ↗</a></p>
         </div>
-        {canEdit && o.awbNumber && (
-          <button type="button" className="adm-btn is-ghost is-sm" disabled={act.busy} onClick={sync}>Sync courier</button>
-        )}
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          {canEdit && !o.awbNumber && !['cancelled', 'returned', 'rto', 'delivered'].includes(o.status) && (
+            <button type="button" className="adm-btn is-sm" disabled={act.busy} onClick={bookShipment}>Book shipment (Auto-AWB)</button>
+          )}
+          {canEdit && o.awbNumber && (
+            <>
+              <button type="button" className="adm-btn is-ghost is-sm" disabled={act.busy} onClick={schedulePickup}>Schedule pickup</button>
+              <button type="button" className="adm-btn is-ghost is-sm" disabled={act.busy} onClick={openLabel}>Shipping label</button>
+              <button type="button" className="adm-btn is-ghost is-sm" disabled={act.busy} onClick={sync}>Sync courier</button>
+            </>
+          )}
+        </div>
       </div>
       <form className="adm-form" onSubmit={save}>
         <div className="adm-pair">

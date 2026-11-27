@@ -41,8 +41,27 @@ export default function Home() {
   usePageMeta(null);   // the site defaults from index.html
   const content = useSiteContent();
   const sections = content?.home?.sections?.length ? content.home.sections : DEFAULT;
+  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.tranzlife.in';
+  const ld = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'Organization',
+      name: 'TranzLife Biosciences',
+      url: origin,
+      logo: `${origin}/assets/logo.png`,
+      contactPoint: { '@type': 'ContactPoint', telephone: '+91-91503-94443', contactType: 'customer service', areaServed: 'IN' },
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      name: 'TranzLife Biosciences',
+      url: origin,
+      potentialAction: { '@type': 'SearchAction', target: `${origin}/shop?q={search_term_string}`, 'query-input': 'required name=search_term_string' },
+    },
+  ];
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld).replace(/</g, '\\u003c') }} />
       <Hero />
       {sections.filter((s) => s.visible).map((s) => <Section key={s.key} s={s} />)}
     </>

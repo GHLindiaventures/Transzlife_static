@@ -21,6 +21,7 @@ import healthAdminRoutes from './health.js';
 import enquiryAdminRoutes from './enquiries.js';
 import { refreshRating } from '../shop/reviews.js';
 import { restoreStock } from '../shop/batches.js';
+import { renderInvoiceHtml } from '../shop/invoice.js';
 
 const PAGE = 25;
 
@@ -49,7 +50,7 @@ const like = (s) => `%${String(s).replace(/[%_\\]/g, (c) => '\\' + c)}%`;
 const staffOut = (s) => ({ id: s.id, email: s.email, name: s.name, role: s.role, mustChangePassword: s.must_change_password,
   totpEnabled: s.totp_enabled, permissions: permsOf(s.role) });
 
-export default async function adminRoutes(app, { db, razorpay, twilio, notifier, reminders, presence, ops, health, courier, auth: authInfo, log, env }) {
+export default async function adminRoutes(app, { db, razorpay, cashfree, shipping, twilio, notifier, reminders, presence, ops, health, courier, auth: authInfo, log, env }) {
   const auth = createAdminAuth({ db, env });
   const G = (perm, opts) => ({ preHandler: auth.guard(perm, opts) });
   const tight = (max) => ({ config: { rateLimit: { max, timeWindow: '15 minutes' } } });
@@ -350,6 +351,38 @@ export default async function adminRoutes(app, { db, razorpay, twilio, notifier,
     return courier.syncShipment(req.params.number);
   });
 
+  app.post('/api/admin/orders/:number/ship', G('orders.edit'), async (req, reply) => {
+    if (!shipping) return reply.code(503).send({ error: 'Shipping integration unavailable.' });
+    const body = parse(z.object({ courierId: z.number().int().optional(), weightKg: z.number().positive().max(30).optional() }), req.body, reply);
+    if (!body) return;
+    const res = await shipping.bookShipment(req.params.number, { ...body, actor: `staff:${req.staff.email}` });
+    await audit(db.query, req, 'order.ship_book', 'order', req.params.number, null, res);
+    return { ok: true, ...res };
+  });
+
+  app.post('/api/admin/orders/:number/pickup', G('orders.edit'), async (req, reply) => {
+    if (!shipping) return reply.code(503).send({ error: 'Shipping integration unavailable.' });
+    const res = await shipping.schedulePickup(req.params.number, { actor: `staff:${req.staff.email}` });
+    await audit(db.query, req, 'order.pickup', 'order', req.params.number, null, res);
+    return res;
+  });
+
+  app.get('/api/admin/orders/:number/label', G('view'), async (req, reply) => {
+    if (!shipping) return reply.code(503).send({ error: 'Shipping integration unavailable.' });
+    return shipping.getLabel(req.params.number);
+  });
+
+  app.get('/api/admin/orders/:number/invoice', G('view'), async (req, reply) => {
+    const o = await loadOrder(db.query, req.params.number);
+    if (!o) return reply.code(404).send({ error: 'Order not found.' });
+    const items = (await db.query(
+      `SELECT oi.*, p.gst_rate, p.hsn_code FROM order_items oi LEFT JOIN products p ON p.id = oi.product_id WHERE oi.order_id = $1 ORDER BY oi.id`,
+      [o.id],
+    )).rows;
+    reply.header('Content-Type', 'text/html; charset=utf-8');
+    return renderInvoiceHtml(o, items, env);
+  });
+
   // Bulk: move several orders at once. Each order is its own transaction; one failure doesn't stop the rest.
   app.post('/api/admin/orders/bulk-status', G('orders.edit'), async (req, reply) => {
     const body = parse(statusBody.extend({ numbers: z.array(z.string().max(20)).min(1).max(100) }), req.body, reply); if (!body) return;
@@ -383,10 +416,15 @@ export default async function adminRoutes(app, { db, razorpay, twilio, notifier,
 
     let method = 'manual', providerRefundId = null, status = 'processed', paymentId = null, raw = null;
     if (o.payment_method !== 'cod') {
-      const pay = (await db.query(`SELECT id, provider_payment_id FROM payments WHERE order_id = $1 AND status = 'paid' ORDER BY created_at DESC LIMIT 1`, [o.id])).rows[0];
-      if (!pay?.provider_payment_id) throw fail('No captured Razorpay payment found for this order.', 409);
-      const r = await razorpay.refund(pay.provider_payment_id, { amount, notes: { order_number: o.order_number, reason: reason.slice(0, 200) } });
-      method = 'razorpay'; providerRefundId = r.id; status = r.status === 'processed' ? 'processed' : 'pending'; paymentId = pay.id; raw = r;
+      const pay = (await db.query(`SELECT id, provider, provider_order_id, provider_payment_id FROM payments WHERE order_id = $1 AND status = 'paid' ORDER BY created_at DESC LIMIT 1`, [o.id])).rows[0];
+      if (!pay?.provider_payment_id && !(pay?.provider === 'cashfree' && pay?.provider_order_id)) throw fail('No captured payment found for this order.', 409);
+      if (pay.provider === 'cashfree') {
+        const r = await cashfree.refund(pay.provider_order_id, { amount, reason });
+        method = 'cashfree'; providerRefundId = r.id; status = r.status; paymentId = pay.id; raw = r.raw;
+      } else {
+        const r = await razorpay.refund(pay.provider_payment_id, { amount, notes: { order_number: o.order_number, reason: reason.slice(0, 200) } });
+        method = 'razorpay'; providerRefundId = r.id; status = r.status === 'processed' ? 'processed' : 'pending'; paymentId = pay.id; raw = r;
+      }
     }
     await db.tx(async (t) => {
       await t.query(
@@ -488,7 +526,7 @@ export default async function adminRoutes(app, { db, razorpay, twilio, notifier,
     const refunds = (await db.query(`
       SELECT r.amount, r.method, r.status, r.reason, r.created_at, o.order_number FROM refunds r JOIN orders o ON o.id = r.order_id
        ORDER BY r.created_at DESC LIMIT 20`)).rows;
-    return { rows, total, page, pages: Math.max(1, Math.ceil(total / PAGE)), refunds, razorpay: razorpay.enabled };
+    return { rows, total, page, pages: Math.max(1, Math.ceil(total / PAGE)), refunds, razorpay: razorpay.enabled, cashfree: !!cashfree?.enabled };
   });
 
   // ======================================================================
@@ -595,6 +633,9 @@ export default async function adminRoutes(app, { db, razorpay, twilio, notifier,
     reminders: reminders?.channel ?? 'off',
     replyWebhook: env.SITE_URL ? `${String(env.SITE_URL).replace(/\/$/, '')}/api/webhooks/twilio/sms` : null,
     razorpay: razorpay.enabled,
+    cashfree: !!cashfree?.enabled,
+    shiprocket: !!shipping?.shiprocketEnabled,
+    delhivery: !!shipping?.delhiveryEnabled,
   }));
 
   // ======================================================================
