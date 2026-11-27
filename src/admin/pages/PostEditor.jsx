@@ -9,12 +9,15 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { EditorContent, useEditor } from '@tiptap/react';
 import {
   ArrowLeft, Check, Copy, Eye, Archive, ArchiveRestore, Trash2, Globe, EyeOff, AlertTriangle, CloudOff, Loader2, ExternalLink, X, MoreHorizontal, Monitor, Smartphone,
+  CalendarClock, History as HistoryIcon,
 } from 'lucide-react';
 import { api } from '../../store/lib/api';
 import { ErrorBox, Notice, can, dt, useAdmin } from '../ui';
 import { articleExtensions } from '../cms/extensions';
 import Toolbar, { Modal } from '../cms/Toolbar';
 import SeoPanel, { ScoreBadge, useSeoAnalysis } from '../cms/SeoPanel';
+import ScheduleDialog, { fmtIST } from '../cms/Schedule';
+import HistoryDialog from '../cms/History';
 import { POST_STATUS } from './BlogPosts';
 import '../cms/editor.css';
 
@@ -188,6 +191,30 @@ function EditorScreen({ initial, choices, seoContext, onReload }) {
   });
   const openPreview = async () => { await doSave(); setDialog('preview'); };
 
+  // scheduling: save the latest edits first, so what goes live is what is on screen
+  const beforeSchedule = async () => {
+    if (slugError) throw new Error(slugError);
+    await doSave();
+    if (unsaved()) throw new Error('Save the article first: see the message next to the title.');
+  };
+  const scheduled = (p) => {
+    base.current = p.updatedAt; setPost(p); setSave({ state: 'saved', at: p.updatedAt, error: '' });
+    setDialog(null); setError(''); setNotice(`Scheduled. It goes live on its own at ${fmtIST(p.publishedAt)}.`);
+  };
+
+  // version history: what the editor holds right now (compared with earlier versions)
+  const currentSnapshot = () => {
+    const f = formRef.current;
+    return { ...f, content: editor ? editor.getJSON() : initial.content };
+  };
+  const restoreVersion = async (revisionId) => {
+    await doSave();
+    const r = await api(`/api/admin/cms/posts/${post.id}/restore-version`, { method: 'POST', body: { revisionId, baseUpdatedAt: base.current } });
+    savedEdits.current = edits.current;            // the server copy is now the truth: nothing to save on the way out
+    setDialog(null);
+    onReload(r.post.updatedAt);                    // reopen the editor on the restored version
+  };
+
   // the title box grows to fit long titles (on load, while typing and when the window is resized)
   const titleRef = useRef(null);
   useLayoutEffect(() => {
@@ -218,16 +245,23 @@ function EditorScreen({ initial, choices, seoContext, onReload }) {
           {mayEdit && <button className="adm-btn is-ghost" type="button" onClick={saveNow} disabled={busy || save.state === 'conflict'}><Check size={16} /> Save</button>}
           {can(staff, 'content.publish') && (live
             ? <button className="adm-btn is-ghost" type="button" onClick={() => status('unpublish', 'Unpublished. The article is a draft again and is no longer on the website.')} disabled={busy}><EyeOff size={16} /> Unpublish</button>
-            : post.status !== 'archived' && <button className="adm-btn is-gold" type="button" onClick={() => {
-              // advice only: a low SEO score never blocks publishing
-              if (analysis && analysis.score < 50 && !window.confirm(`The SEO checklist is at ${analysis.score}/100. Publish anyway?\n\nThe SEO tab lists what would help.`)) return;
-              status('publish', 'Published. It is live on the website now.');
-            }} disabled={busy || save.state === 'conflict'}><Globe size={16} /> Publish</button>)}
+            : post.status !== 'archived' && (<>
+              <button className="adm-btn is-ghost" type="button" onClick={() => setDialog('schedule')} disabled={busy || save.state === 'conflict'}>
+                <CalendarClock size={16} /> {post.status === 'scheduled' ? 'Change time' : 'Schedule'}
+              </button>
+              <button className="adm-btn is-gold" type="button" onClick={() => {
+                // advice only: a low SEO score never blocks publishing
+                if (analysis && analysis.score < 50 && !window.confirm(`The SEO checklist is at ${analysis.score}/100. Publish anyway?\n\nThe SEO tab lists what would help.`)) return;
+                if (post.status === 'scheduled' && !window.confirm(`This article is scheduled for ${fmtIST(post.publishedAt)}. Publish it now instead?`)) return;
+                status('publish', 'Published. It is live on the website now.');
+              }} disabled={busy || save.state === 'conflict'}><Globe size={16} /> {post.status === 'scheduled' ? 'Publish now' : 'Publish'}</button>
+            </>))}
           <div style={{ position: 'relative' }}>
             <button className="adm-icon" type="button" aria-label="More actions" aria-expanded={menu} onClick={() => setMenu((m) => !m)}><MoreHorizontal size={20} /></button>
             {menu && (
               <div className="adm-pop cms-menu" role="menu">
                 {live && <a role="menuitem" className="adm-result" href={post.url} target="_blank" rel="noreferrer"><ExternalLink size={16} /> View on the website</a>}
+                <button role="menuitem" className="adm-result" type="button" onClick={() => { setMenu(false); setDialog('history'); }}><HistoryIcon size={16} /> Version history</button>
                 {mayEdit && <button role="menuitem" className="adm-result" type="button" onClick={duplicate}><Copy size={16} /> Duplicate as a new draft</button>}
                 {mayEdit && post.status !== 'archived' && <button role="menuitem" className="adm-result" type="button" onClick={() => status('archive', 'Archived. It is hidden from the website and kept here.')}><Archive size={16} /> Archive</button>}
                 {mayEdit && post.status === 'archived' && <button role="menuitem" className="adm-result" type="button" onClick={() => status('restore', 'Restored as a draft.')}><ArchiveRestore size={16} /> Restore as a draft</button>}
@@ -263,9 +297,20 @@ function EditorScreen({ initial, choices, seoContext, onReload }) {
             <h2 className="adm-h3">Publishing</h2>
             <dl className="adm-kv">
               <div><dt>Status</dt><dd>{POST_STATUS[post.status]?.[0]}{live && ' · live on the website'}</dd></div>
-              {post.publishedAt && <div><dt>{post.status === 'scheduled' && !live ? 'Goes live' : 'First published'}</dt><dd>{dt(post.publishedAt)}</dd></div>}
+              {post.publishedAt && <div><dt>{post.status === 'scheduled' && !live ? 'Goes live' : 'First published'}</dt><dd>{fmtIST(post.publishedAt)}</dd></div>}
               <div><dt>Last updated</dt><dd>{dt(post.contentUpdatedAt)}</dd></div>
             </dl>
+            {post.status === 'scheduled' && !live && can(staff, 'content.publish') && (
+              <div className="cms-scheduled" role="status">
+                <CalendarClock size={16} />
+                <span>Goes live on its own at <strong>{fmtIST(post.publishedAt)}</strong>. Edits you make until then are included.</span>
+                <div className="adm-actions">
+                  <button type="button" className="adm-btn is-ghost is-sm" onClick={() => setDialog('schedule')} disabled={busy}>Change time</button>
+                  <button type="button" className="adm-btn is-ghost is-sm" disabled={busy}
+                    onClick={() => window.confirm('Cancel the schedule? The article goes back to being a draft.') && status('unpublish', 'Schedule cancelled. The article is a draft again.')}>Cancel schedule</button>
+                </div>
+              </div>
+            )}
             <label className="adm-check"><input type="checkbox" checked={!!form.featured} disabled={!mayEdit} onChange={(e) => set('featured')(e.target.checked)} /> Feature at the top of the Blogs page</label>
           </section>
 
@@ -326,6 +371,11 @@ function EditorScreen({ initial, choices, seoContext, onReload }) {
       </div>
 
       {dialog === 'preview' && <PreviewDialog post={post} onClose={() => setDialog(null)} />}
+      {dialog === 'schedule' && <ScheduleDialog post={post} beforeSchedule={beforeSchedule} onDone={scheduled} onClose={() => setDialog(null)} />}
+      {dialog === 'history' && (
+        <HistoryDialog postId={post.id} current={currentSnapshot} choices={choices} canRestore={mayEdit}
+          onRestore={restoreVersion} onClose={() => setDialog(null)} />
+      )}
       {dialog === 'delete' && (
         <Modal title="Delete this article?" onClose={() => setDialog(null)} onSubmit={remove}>
           {live ? (

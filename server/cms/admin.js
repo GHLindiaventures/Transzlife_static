@@ -293,7 +293,8 @@ export default async function cmsAdminRoutes(app, { db, G, parse, audit, env = {
       sql = `status = 'draft'`;
     }
     const saved = (await t.query(`UPDATE cms_posts SET ${sql}, updated_by = $2, updated_at = clock_timestamp() WHERE id = $1 RETURNING *`, [id, req.staff.id])).rows[0];
-    await revision(t, req, saved, action === 'restore' ? 'restore' : action);
+    // "restore" here = out of the archive; the 'restore' version reason is kept for restoring an earlier version
+    await revision(t, req, saved, action === 'restore' ? 'save' : action);
     await audit(t.query, req, `cms.post_${action}`, 'cms', id, { status: p.status, title: p.title }, { status: saved.status });
     return saved;
   }
@@ -305,6 +306,95 @@ export default async function cmsAdminRoutes(app, { db, G, parse, audit, env = {
       return { post: editorOut(p, await tagsOf(db, id)) };
     });
   }
+
+  // ---------------------------------------------------------------- scheduling
+  // { publishAt } is an exact moment (the dashboard sends India time, e.g. 2026-12-01T09:00:00+05:30).
+  // Another article scheduled within 30 minutes of it is reported (409 'clash') unless { allowClash: true },
+  // so two articles are not released at once by accident. The article goes live at that moment (the public
+  // pages check the time); the background job then marks it published.
+  const CLASH_MINUTES = 30;
+  app.post('/api/admin/cms/posts/:id/schedule', G('content.publish'), async (req, reply) => {
+    const id = parse(uuid, req.params.id, reply); if (!id) return;
+    const b = parse(z.object({ publishAt: z.string().datetime({ offset: true }), allowClash: z.boolean().optional().default(false) }), req.body, reply); if (!b) return;
+    const at = new Date(b.publishAt);
+    if (at.getTime() < Date.now() + 60_000) throw fail('Pick a time at least a minute from now. To publish straight away, use Publish.');
+    if (at.getTime() > Date.now() + 366 * 86_400_000) throw fail('Pick a time within the next year.');
+    const p = await db.tx(async (t) => {
+      const cur = (await t.query('SELECT * FROM cms_posts WHERE id = $1 FOR UPDATE', [id])).rows[0];
+      if (!cur) throw fail('Article not found.', 404);
+      if (cur.status === 'archived') throw fail('Restore this article from the archive before scheduling it.', 409);
+      if (cur.status === 'published') throw fail('This article is already live. Unpublish it first to schedule it again.', 409);
+      const problems = publishProblems(cur);
+      if (problems.length) throw fail(`Not scheduled yet: ${problems.join(' ')}`, 400, 'not_ready');
+      if (!b.allowClash) {
+        const near = (await t.query(`SELECT title, published_at FROM cms_posts WHERE id <> $1 AND status = 'scheduled'
+          AND published_at BETWEEN $2::timestamptz - make_interval(mins => $3) AND $2::timestamptz + make_interval(mins => $3)
+          ORDER BY abs(extract(epoch FROM published_at - $2::timestamptz)) LIMIT 1`, [id, at.toISOString(), CLASH_MINUTES])).rows[0];
+        if (near) {
+          const when = new Date(near.published_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
+          throw fail(`“${near.title}” is already scheduled for ${when} (India time). Schedule this one too?`, 409, 'clash');
+        }
+      }
+      const saved = (await t.query(`UPDATE cms_posts SET status = 'scheduled', published_at = $2, updated_by = $3, updated_at = clock_timestamp()
+        WHERE id = $1 RETURNING *`, [id, at.toISOString(), req.staff.id])).rows[0];
+      await revision(t, req, saved, 'schedule');
+      await audit(t.query, req, 'cms.post_schedule', 'cms', id, { status: cur.status, publishedAt: cur.published_at }, { status: 'scheduled', publishAt: at.toISOString() });
+      return saved;
+    });
+    return { post: editorOut(p, await tagsOf(db, id)) };
+  });
+
+  // ---------------------------------------------------------------- version history
+  app.get('/api/admin/cms/posts/:id/revisions', G('content.view'), async (req, reply) => {
+    const id = parse(uuid, req.params.id, reply); if (!id) return;
+    if (!(await q('SELECT 1 FROM cms_posts WHERE id = $1', [id])).rows.length) return reply.code(404).send({ error: 'Article not found.' });
+    const rows = (await q(`SELECT id, reason, staff_email, created_at, snapshot->>'title' AS title, snapshot->>'slug' AS slug,
+        length(snapshot->>'content') AS size FROM cms_revisions WHERE post_id = $1 ORDER BY created_at DESC, id DESC LIMIT 300`, [id])).rows;
+    return { revisions: rows.map((r) => ({ id: Number(r.id), reason: r.reason, by: r.staff_email, at: r.created_at, title: r.title, slug: r.slug, size: Number(r.size || 0) })) };
+  });
+
+  app.get('/api/admin/cms/revisions/:rid', G('content.view'), async (req, reply) => {
+    const rid = parse(z.coerce.number().int().positive(), req.params.rid, reply); if (!rid) return;
+    const r = (await q('SELECT id, post_id, reason, staff_email, created_at, snapshot FROM cms_revisions WHERE id = $1', [rid])).rows[0];
+    if (!r) return reply.code(404).send({ error: 'Version not found.' });
+    return { revision: { id: Number(r.id), postId: r.post_id, reason: r.reason, by: r.staff_email, at: r.created_at, snapshot: r.snapshot } };
+  });
+
+  /** Puts an earlier version back. The current state is kept as a version first, so nothing is lost. The URL is not
+   *  changed (that could break links); categories, bylines and tags that no longer exist are left out. */
+  app.post('/api/admin/cms/posts/:id/restore-version', G('content.edit'), async (req, reply) => {
+    const id = parse(uuid, req.params.id, reply); if (!id) return;
+    const b = parse(z.object({ revisionId: z.number().int().positive(), baseUpdatedAt: z.string().datetime({ offset: true }) }), req.body, reply); if (!b) return;
+    const p = await db.tx(async (t) => {
+      const cur = (await t.query('SELECT * FROM cms_posts WHERE id = $1 FOR UPDATE', [id])).rows[0];
+      if (!cur) throw fail('Article not found.', 404);
+      if (new Date(cur.updated_at).getTime() !== new Date(b.baseUpdatedAt).getTime()) {
+        throw fail('This article changed since you opened it. Reload, then restore the version again.', 409, 'conflict');
+      }
+      const rev = (await t.query('SELECT snapshot, created_at FROM cms_revisions WHERE id = $1 AND post_id = $2', [b.revisionId, id])).rows[0];
+      if (!rev) throw fail('That version does not belong to this article.', 404);
+      await revision(t, req, cur, 'save');   // keep what is there now
+      const s = rev.snapshot || {};
+      const exists = async (table, v) => (v && (await t.query(`SELECT 1 FROM ${table} WHERE id = $1`, [v])).rows.length ? v : null);
+      const content = cleanDoc(s.content || { type: 'doc', content: [] });
+      const r = render(content);
+      const saved = (await t.query(`UPDATE cms_posts SET title = $2, excerpt = $3, content = $4::jsonb, content_html = $5, featured_image = $6,
+          featured_image_alt = $7, category_id = $8, author_id = $9, concern = $10, disclaimer = $11, featured = $12, seo = $13::jsonb,
+          reading_minutes = $14, updated_by = $15, updated_at = clock_timestamp(), content_updated_at = clock_timestamp()
+        WHERE id = $1 RETURNING *`,
+      [id, String(s.title ?? cur.title), String(s.excerpt ?? ''), JSON.stringify(content), r.html, s.featuredImage || null, String(s.featuredImageAlt || ''),
+        await exists('cms_categories', s.categoryId), await exists('cms_authors', s.authorId), s.concern || null, s.disclaimer || null, !!s.featured,
+        JSON.stringify(s.seo && typeof s.seo === 'object' ? { ...seoOf(s.seo) } : seoOf(cur.seo)), readingMinutes(r.words), req.staff.id])).rows[0];
+      if (Array.isArray(s.tags)) {
+        await t.query('DELETE FROM cms_post_tags WHERE post_id = $1', [id]);
+        for (const tagId of await tagIds(t, s.tags.map(String).slice(0, 20))) await t.query('INSERT INTO cms_post_tags (post_id, tag_id) VALUES ($1, $2) ON CONFLICT DO NOTHING', [id, tagId]);
+      }
+      await revision(t, req, saved, 'restore');
+      await audit(t.query, req, 'cms.post_restore_version', 'cms', id, { title: cur.title }, { title: saved.title, from: rev.created_at });
+      return saved;
+    });
+    return { post: editorOut(p, await tagsOf(db, id)) };
+  });
 
   app.post('/api/admin/cms/posts/:id/duplicate', G('content.edit'), async (req, reply) => {
     const id = parse(uuid, req.params.id, reply); if (!id) return;

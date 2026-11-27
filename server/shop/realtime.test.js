@@ -34,7 +34,8 @@ function openSse(url, headers = {}) {
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
 test('SSE real-time hub: auth guards, scoped delivery, and no PII leakage', async (t) => {
-  const db = await createDb({ DATABASE_URL: '' });
+  // in memory, like the other tests: never the developer's local database (data/pglite), which `npm run dev` holds
+  const db = await createDb({ DATABASE_URL: '' }, { memory: true, log: { info() {}, log() {}, warn() {}, error() {} } });
   const app = await buildShopApp({
     db,
     logger: false,

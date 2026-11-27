@@ -217,5 +217,51 @@ export function cleanDoc(doc) {
   return { type: 'doc', content };
 }
 
+/**
+ * The article as readable lines, one per block, for comparing two versions:
+ * "Heading 2: …", paragraphs, "• list item", "1. item", "Table: a | b", "Photo: alt (caption)", "Q: …"/"A: …" …
+ */
+export function docLines(doc) {
+  const out = [];
+  const t = (n) => textOf(n).replace(/\s+/g, ' ').trim();
+  const walk = (n, prefix = '') => {
+    switch (n?.type) {
+      case 'heading': out.push(`Heading ${n.attrs?.level || 2}: ${t(n)}`); return;
+      case 'paragraph': { const s = t(n); if (s) out.push(prefix + s); return; }
+      case 'bulletList': (n.content || []).forEach((li) => (li.content || []).forEach((c) => walk(c, '• '))); return;
+      case 'orderedList': (n.content || []).forEach((li, i) => (li.content || []).forEach((c) => walk(c, `${i + 1}. `))); return;
+      case 'blockquote': (n.content || []).forEach((c) => walk(c, 'Quote: ')); return;
+      case 'callout': (n.content || []).forEach((c) => walk(c, 'Note: ')); return;
+      case 'horizontalRule': out.push('———'); return;
+      case 'table': (n.content || []).forEach((row) => out.push(`Table: ${(row.content || []).map(t).join(' | ')}`)); return;
+      case 'image': out.push(`Photo: ${n.attrs?.alt || '(no alt text)'}${n.attrs?.caption ? ` (${n.attrs.caption})` : ''}`); return;
+      case 'video': out.push(`Video: ${n.attrs?.title || n.attrs?.id}`); return;
+      case 'faq': (n.content || []).forEach((i) => { out.push(`Q: ${i.attrs?.question || ''}`); out.push(`A: ${t(i)}`); }); return;
+      case 'cta': out.push(`Button “${n.attrs?.label || ''}” → ${n.attrs?.href || ''}${t(n) ? `: ${t(n)}` : ''}`); return;
+      default: (n?.content || []).forEach((c) => walk(c, prefix));
+    }
+  };
+  (doc?.content || []).forEach((n) => walk(n));
+  return out;
+}
+
+/** Line diff (longest common subsequence): [{ type: 'same' | 'added' | 'removed', text }]. */
+export function diffLines(before, after) {
+  const a = before, b = after, n = a.length, m = b.length;
+  if (n * m > 4_000_000) return [...a.map((text) => ({ type: 'removed', text })), ...b.map((text) => ({ type: 'added', text }))];
+  const L = Array.from({ length: n + 1 }, () => new Uint16Array(m + 1));
+  for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--) L[i][j] = a[i] === b[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+  const out = [];
+  let i = 0, j = 0;
+  while (i < n && j < m) {
+    if (a[i] === b[j]) { out.push({ type: 'same', text: a[i] }); i++; j++; }
+    else if (L[i + 1][j] >= L[i][j + 1]) out.push({ type: 'removed', text: a[i++] });
+    else out.push({ type: 'added', text: b[j++] });
+  }
+  while (i < n) out.push({ type: 'removed', text: a[i++] });
+  while (j < m) out.push({ type: 'added', text: b[j++] });
+  return out;
+}
+
 /** Reading time at about 200 words a minute (at least 1). */
 export const readingMinutes = (words) => Math.max(1, Math.min(240, Math.round(Number(words || 0) / 200) || 1));

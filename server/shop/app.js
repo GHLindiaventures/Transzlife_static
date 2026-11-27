@@ -20,6 +20,7 @@ import reviewRoutes from './reviews.js';
 import contentRoutes from './content.js';
 import siteDocRoutes from './site-docs.js';
 import blogPublicRoutes from '../cms/public.js';
+import { publishDuePosts } from '../cms/scheduler.js';
 import opsWebhooks, { createOps } from './ops.js';
 import seoRoutes from './seo.js';
 import customerReturnRoutes from './returns.js';
@@ -135,6 +136,7 @@ export async function buildShopApp({ env = process.env, db, fastifyOptions = {},
     trackJob('analytics.prune', 'Analytics & session clean-up', 5, () => reminders.prune());
     trackJob('ops.sweep', 'COD check & daily summary', 5, () => ops.sweep());
     trackJob('courier.overdue', 'Overdue delivery check', 5, () => courier.flagOverdueShipments());
+    trackJob('cms.publish', 'Scheduled blog posts', 5, () => publishDuePosts(db, { log }));
     if (tick % 3 === 0) trackJob('courier.sync', 'Live courier scan sync', 15, () => courier.syncActiveShipments());
     if (tick % 2 === 0) health.sweep().catch((e) => log.error(e, '[health] sweep failed'));
   }, 5 * 60_000);
