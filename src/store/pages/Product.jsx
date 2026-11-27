@@ -12,7 +12,7 @@ import { getConcern } from '../data/concerns';
 import { ARTICLES } from '../data/articles';
 import { useCart, packPrice, packMrp } from '../context/CartContext';
 import { QtyStepper } from '../components/CartDrawer';
-import ProductCard, { Money } from '../components/ProductCard';
+import ProductCard, { Money, CatalogRow } from '../components/ProductCard';
 import Icon from '../components/Icon';
 import { Breadcrumbs, Reveal, SectionHead, useTitle } from '../components/Common';
 import { loadReviews } from '../data/reviewStore';
@@ -25,6 +25,7 @@ import OfferTimer from '../components/OfferTimer';
 import PriceTag from '../../components/PriceTag.jsx';
 import { inr, pctOff, prepaidSaving } from '../utils/format';
 import NotFound from './NotFound';
+import { packshot } from '../lib/packshot';
 
 const ROUTINE_ICON = { Dose: Pill, When: Clock, Format: Package, Pack: Package, Tip: Lightbulb, How: Hand, Use: Hand, Apply: Hand, Carry: Briefcase, Where: MapPin };
 
@@ -314,12 +315,10 @@ export default function Product() {
 
       <Reviews product={p} data={reviewData} onChanged={reloadReviews} />
 
-      <section className="section section--sand">
+      <section className="section section--catalog">
         <div className="container">
           <SectionHead eyebrow="You may also like" title="Complete your routine" />
-          <div className="grid-products grid-products--5 m-scroll">
-            {related.map((r) => <ProductCard key={r.id} product={r} />)}
-          </div>
+          <CatalogRow products={related} />
         </div>
       </section>
 
@@ -355,7 +354,7 @@ export default function Product() {
       </section>
 
       <div className="sticky-buy">
-        <img src={p.images[0]} alt="" />
+        <img src={packshot(p)} alt="" />
         <span><strong>{p.short}</strong><small>{sale ? inr(unit) : 'Price to be announced'}</small></span>
         {sale
           ? <button className="btn" disabled={p.stock === 'out'} onClick={() => add(p.id, qty, pack)}>{p.stock === 'out' ? 'Out of stock' : 'Add to cart'}</button>

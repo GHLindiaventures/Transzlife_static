@@ -19,6 +19,7 @@ import { myReviews } from '../data/reviewStore';
 import { recentlyViewed, clearViewed } from '../lib/recent';
 import { SOCIAL } from '../../components/Footer';
 import { SOCIAL_LINKS } from '../../content/site.js';
+import { packshot } from '../lib/packshot';
 import '../styles/account.css';
 
 const badgeClass = (s) => (s === 'pending_payment' ? 'is-warn' : ['cancelled', 'refunded', 'returned', 'rto'].includes(s) ? 'is-off' : '');
@@ -310,7 +311,7 @@ export default function Account() {
                 {recentProducts.slice(0, 8).map((p) => (
                   <li key={p.id}>
                     <Link to={`/products/${p.id}`} className="acm-mini">
-                      <span className="acm-mini__img" style={{ background: p.tint }}><img src={p.images?.[0]} alt="" loading="lazy" /></span>
+                      <span className="acm-mini__img" style={{ background: '#fff' }}><img src={packshot(p)} alt="" loading="lazy" /></span>
                       <span className="acm-mini__name">{p.short || p.name}</span>
                     </Link>
                   </li>
@@ -331,7 +332,7 @@ export default function Account() {
                   return (
                     <li key={x.id} className="acm-rate">
                       <div className="acm-rate__top">
-                        {prod?.images?.[0] && <span className="acm-rate__img" style={{ background: prod.tint }}><img src={prod.images[0]} alt="" loading="lazy" /></span>}
+                        {prod?.images?.[0] && <span className="acm-rate__img" style={{ background: '#fff' }}><img src={packshot(prod)} alt="" loading="lazy" /></span>}
                         <span><strong>{x.short || x.name}</strong><small>Delivered. How was it?</small></span>
                       </div>
                       <div className="acm-rate__stars" role="group" aria-label={`Rate ${x.short || x.name}`}>
@@ -469,7 +470,7 @@ export default function Account() {
                       <li key={o.number} className="acx-order">
                         <div className="acx-order__top">
                           <span className="acx-thumbs" aria-hidden="true">
-                            {thumbs.length ? thumbs.map((p) => <img key={p.id} src={p.images?.[0]} alt="" loading="lazy" style={{ background: p.tint }} />) : <Package size={20} />}
+                            {thumbs.length ? thumbs.map((p) => <img key={p.id} src={packshot(p)} alt="" loading="lazy" style={{ background: '#fff' }} />) : <Package size={20} />}
                           </span>
                           <span className="acx-order__info">
                             <strong>Order #{o.number}</strong>
@@ -536,7 +537,7 @@ export default function Account() {
                         const prod = getProduct(x.id);
                         return (
                           <li key={x.id}>
-                            {prod?.images?.[0] && <img src={prod.images[0]} alt="" loading="lazy" style={{ background: prod.tint }} />}
+                            {prod?.images?.[0] && <img src={packshot(prod)} alt="" loading="lazy" style={{ background: '#fff' }} />}
                             <span><strong>{x.short || x.name}</strong><small>Delivered. How was it?</small></span>
                             <Link className="acx-btn" to={`/products/${x.id}?review=1#reviews`}><PenLine size={15} /> Write a review</Link>
                           </li>
@@ -551,7 +552,7 @@ export default function Account() {
                         return (
                           <li key={r.id}>
                             <Link to={`/products/${r.product_id}#reviews`} className="acx-review">
-                              {prod?.images?.[0] && <img src={prod.images[0]} alt="" loading="lazy" style={{ background: prod.tint }} />}
+                              {prod?.images?.[0] && <img src={packshot(prod)} alt="" loading="lazy" style={{ background: '#fff' }} />}
                               <span className="acx-review__body">
                                 <strong>{r.product}</strong>
                                 <span className="acx-stars" aria-label={`${r.rating} out of 5 stars`}>{'★'.repeat(r.rating)}<span>{'★'.repeat(5 - r.rating)}</span></span>
@@ -577,7 +578,7 @@ export default function Account() {
                 <ul className="acx-saved">
                   {savedProducts.map((p) => (
                     <li key={p.id} className="acx-prod" style={{ '--tint': p.tint }}>
-                      <Link to={`/products/${p.id}`} className="acx-prod__img"><img src={p.images?.[0]} alt="" loading="lazy" /></Link>
+                      <Link to={`/products/${p.id}`} className="acx-prod__img"><img src={packshot(p)} alt="" loading="lazy" /></Link>
                       <button type="button" className="acx-prod__remove" onClick={() => unsave(p.id)} aria-label={`Remove ${p.name} from saved products`}><Trash2 size={15} /></button>
                       <div className="acx-prod__body">
                         <Link to={`/products/${p.id}`} className="acx-prod__name">{p.short || p.name}</Link>
@@ -604,7 +605,7 @@ export default function Account() {
                 <ul className="acx-saved">
                   {recentProducts.map((p) => (
                     <li key={p.id} className="acx-prod" style={{ '--tint': p.tint }}>
-                      <Link to={`/products/${p.id}`} className="acx-prod__img"><img src={p.images?.[0]} alt="" loading="lazy" /></Link>
+                      <Link to={`/products/${p.id}`} className="acx-prod__img"><img src={packshot(p)} alt="" loading="lazy" /></Link>
                       <div className="acx-prod__body">
                         <Link to={`/products/${p.id}`} className="acx-prod__name">{p.short || p.name}</Link>
                         <small>{p.format} · {p.size}</small>

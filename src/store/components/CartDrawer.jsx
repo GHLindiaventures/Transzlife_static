@@ -6,6 +6,7 @@ import { PRODUCTS, onSale } from '../data/products';
 import { useCatalog } from '../lib/catalog';
 import { SITE } from '../data/site';
 import { inr, prepaidSaving } from '../utils/format';
+import { packshot } from '../lib/packshot';
 
 export function QtyStepper({ value, onChange, small }) {
   useCatalog();
@@ -66,8 +67,8 @@ export default function CartDrawer() {
             <ul className="cart__lines">
               {detailed.map((l) => (
                 <li key={l.key} className="cart__line">
-                  <Link to={`/products/${l.id}`} onClick={() => setOpen(false)} className="cart__thumb" style={{ background: l.product.tint }}>
-                    <img src={l.product.images[0]} alt="" />
+                  <Link to={`/products/${l.id}`} onClick={() => setOpen(false)} className="cart__thumb" style={{ background: '#fff' }}>
+                    <img src={packshot(l.product)} alt="" />
                   </Link>
                   <div className="cart__info">
                     <Link to={`/products/${l.id}`} onClick={() => setOpen(false)} className="cart__name">{l.product.name}</Link>
@@ -87,7 +88,7 @@ export default function CartDrawer() {
                 <p className="eyebrow">Pairs well with</p>
                 {suggestions.map((p) => (
                   <div key={p.id} className="cart__up">
-                    <img src={p.images[0]} alt="" style={{ background: p.tint }} />
+                    <img src={packshot(p)} alt="" style={{ background: '#fff' }} />
                     <span><strong>{p.short}</strong><small>{inr(p.price)}</small></span>
                     <button className="btn btn--sm btn--ghost" onClick={() => add(p.id, 1, 1, { openDrawer: false })}>Add</button>
                   </div>

@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { Link, NavLink, useLocation } from 'react-router-dom';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { Media, Slot, ProductImg } from './ui.jsx';
 import { PRODUCTS, productUrl } from '../content/site.js';
 import { useCart } from '../store/context/CartContext';
@@ -20,6 +20,26 @@ const Chevron = () => (
 );
 
 function ShopMega({ onPick }) {
+  const trackRef = useRef(null);
+  const [edge, setEdge] = useState({ start: true, end: false });
+
+  const measure = () => {
+    const el = trackRef.current;
+    if (!el) return;
+    setEdge({ start: el.scrollLeft <= 2, end: el.scrollLeft + el.clientWidth >= el.scrollWidth - 2 });
+  };
+  useEffect(() => {
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, []);
+
+  // one click moves the track by the width currently visible (5 products on desktop)
+  const page = (dir) => {
+    const el = trackRef.current;
+    if (el) el.scrollBy({ left: dir * el.clientWidth, behavior: 'smooth' });
+  };
+
   return (
     <div className="mega__inner mega__inner--shop">
       <Link className="mega__card mega__card--all" to={SHOP_URL} onClick={onPick}>
@@ -29,12 +49,20 @@ function ShopMega({ onPick }) {
         </div>
         <p className="mega__caption">View All Products</p>
       </Link>
-      {PRODUCTS.map((p) => (
-        <Link className="mega__card" to={productUrl(p.id)} key={p.id} onClick={onPick}>
-          <Media className="media--mega media--product"><ProductImg n={p.photo} alt="" /></Media>
-          <p className="mega__caption">{p.short}<small className="mega__tag">{p.tag}</small></p>
-        </Link>
-      ))}
+      <button type="button" className="mega__arrow mega__arrow--prev" onClick={() => page(-1)} disabled={edge.start} aria-label="Previous products">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
+      </button>
+      <div className="mega__track" ref={trackRef} onScroll={measure}>
+        {PRODUCTS.map((p) => (
+          <Link className="mega__card" to={productUrl(p.id)} key={p.id} onClick={onPick}>
+            <Media className="media--mega media--product"><img src={`${import.meta.env.BASE_URL}assets/menu/p-${p.photo}.png?v=1`} alt="" width="400" height="560" loading="lazy" decoding="async" /></Media>
+            <p className="mega__caption">{p.short}<small className="mega__tag">{p.tag}</small></p>
+          </Link>
+        ))}
+      </div>
+      <button type="button" className="mega__arrow mega__arrow--next" onClick={() => page(1)} disabled={edge.end} aria-label="More products">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
+      </button>
     </div>
   );
 }
@@ -43,6 +71,10 @@ export default function Header({ onBurger }) {
   const [stuck, setStuck] = useState(false);
   const hoverTimeoutRef = useRef(null);
   const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const [searchOpen, setSearchOpen] = useState(false);   // phones: search bar under the header
+  const [query, setQuery] = useState('');
+  const searchRef = useRef(null);
   const [openMega, setOpenMega] = useState(null); // tap-opened menu on touch screens
   const [hoverMega, setHoverMega] = useState(null); // hover-opened menu on desktop
 
@@ -78,6 +110,7 @@ export default function Header({ onBurger }) {
   useEffect(() => {
     setHoverMega(null);
     setOpenMega(null);
+    setSearchOpen(false);
   }, [pathname]); // (was window.location.pathname, which never re-rendered the header)
 
   // touch screens: the first tap opens the menu, a second tap follows the link
@@ -109,6 +142,16 @@ export default function Header({ onBurger }) {
     }
   };
 
+  useEffect(() => { if (searchOpen) searchRef.current?.focus(); }, [searchOpen]);
+
+  // search: the shop page already filters by ?q=, so the phone search bar sends people there
+  const onSearch = (e) => {
+    e.preventDefault();
+    const q = query.trim();
+    setSearchOpen(false);
+    navigate(q ? `${SHOP_URL}?q=${encodeURIComponent(q)}` : SHOP_URL);
+  };
+
   return (
     <header className={`header${stuck ? ' is-stuck' : ''}`} id="header">
       <div className="header__inner">
@@ -116,6 +159,9 @@ export default function Header({ onBurger }) {
           <button className="icon-btn header__burger" id="burger" aria-label="Open menu" type="button" onClick={onBurger}>
             <svg className="burger__lines" width="20" height="14" viewBox="0 0 20 14" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M0 1h20M0 7h20M0 13h20" /></svg>
             <img className="burger__logo" src={`${import.meta.env.BASE_URL}assets/logo.png`} alt="" width="36" height="36" />
+          </button>
+          <button className="icon-btn header__search-m" type="button" aria-label="Search products" aria-expanded={searchOpen} onClick={() => setSearchOpen((o) => !o)}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
           </button>
           <Link className="header__logo" to="/" aria-label="TranzLife Biosciences, home">
             <img className="logo__img" src={`${import.meta.env.BASE_URL}assets/logo.png`} alt="TranzLife Biosciences, home" width="36" height="36" />
@@ -161,6 +207,14 @@ export default function Header({ onBurger }) {
           <CartButton />
         </div>
       </div>
+      {searchOpen && (
+        <form className="header__searchbar" role="search" onSubmit={onSearch}>
+          <input ref={searchRef} type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search products" aria-label="Search products" enterKeyHint="search" />
+          <button type="submit" className="header__searchbar-go" aria-label="Search">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+          </button>
+        </form>
+      )}
     </header>
   );
 }

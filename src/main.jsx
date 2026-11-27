@@ -18,6 +18,7 @@ import './styles/refine.css';
 import './styles/phi-enhance.css';
 import './styles/chat.css';
 import './styles/ingredients-carousel.css';
+import './styles/menu-and-mobile.css';
 
 /** Shows the site only after its text has loaded from the database (the dashboard at /admin does not need it). */
 function Boot() {
