@@ -666,7 +666,7 @@ export default async function adminRoutes(app, { db, razorpay, cashfree, shippin
   await offerRoutes(app, { db, G, parse, audit });
   await contentAdminRoutes(app, { db, G, parse, audit });
   await siteDocAdminRoutes(app, { db, G, parse, audit });
-  await cmsAdminRoutes(app, { db, G, parse, audit });
+  await cmsAdminRoutes(app, { db, G, parse, audit, env });
   await enquiryAdminRoutes(app, { db, G, parse, audit });
   await discountRoutes(app, { db, G });
   if (health) await healthAdminRoutes(app, { health, G });

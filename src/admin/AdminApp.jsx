@@ -1,6 +1,6 @@
 // TranzLife admin dashboard (/admin). Staff only: separate sign-in with two-step verification.
 // Lazy-loaded, so shoppers never download it. The server checks every permission again.
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import {
   Home, Package, Boxes, Users, CreditCard, UserCog, History, Settings, LogOut, Menu, X, ShieldCheck,
@@ -23,6 +23,10 @@ import PricingOffers from './pages/PricingOffers';
 import WebsiteContent from './pages/WebsiteContent';
 import SiteText from './pages/SiteText';
 import BlogPosts from './pages/BlogPosts';
+import BlogTaxonomy from './pages/BlogTaxonomy';
+
+// the article editor (TipTap) is its own chunk: only loaded when an article is opened
+const PostEditor = lazy(() => import('./pages/PostEditor'));
 import Discounts from './pages/Discounts';
 import Ingredients from './pages/Ingredients';
 import Compliance from './pages/Compliance';
@@ -82,6 +86,8 @@ export default function AdminApp() {
                     <Route path="reviews" element={only('view', <ReviewsAdmin />)} />
                     <Route path="pricing" element={only('view', <PricingOffers />)} />
                     <Route path="blog" element={only('content.view', <BlogPosts />)} />
+                    <Route path="blog/categories" element={only('content.view', <BlogTaxonomy />)} />
+                    <Route path="blog/:id" element={only('content.view', <Suspense fallback={<p className="adm-muted">Loading the editor…</p>}><PostEditor /></Suspense>)} />
                     <Route path="content" element={only(['view', 'content.site'], <WebsiteContent />)} />
                     <Route path="site-text" element={only(['view', 'content.site'], <SiteText />)} />
                     <Route path="discounts" element={only('view', <Discounts />)} />

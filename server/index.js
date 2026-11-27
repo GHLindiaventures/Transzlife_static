@@ -47,7 +47,7 @@ const CSP = [
   "media-src 'self' blob: https://videos.pexels.com",
   "font-src 'self' data:",
   `connect-src 'self' ${RAZORPAY.join(' ')} ${CASHFREE.slice(1).join(' ')} https://lumberjack.razorpay.com ${MEDIA_STORE} ${extra('CSP_CONNECT_EXTRA').join(' ')}`,
-  `frame-src ${RAZORPAY.join(' ')} ${CASHFREE.join(' ')} https://www.google.com https://maps.google.com ${VIDEO_ORIGINS.join(' ')}`,   // blog video embeds (server/cms/render.js)
+  `frame-src 'self' ${RAZORPAY.join(' ')} ${CASHFREE.join(' ')} https://www.google.com https://maps.google.com ${VIDEO_ORIGINS.join(' ')}`,   // blog video embeds (server/cms/render.js)
   "object-src 'none'",
   "base-uri 'self'",
   `form-action 'self' ${RAZORPAY[1]} ${CASHFREE.slice(1).join(' ')}`,
@@ -69,7 +69,7 @@ const SECURITY = {
 const KNOWN_PAGE = new RegExp('^/(' + [
   '', 'about', 'science', 'sustainability', 'faq', 'contact', 'certifications',
   'shop', 'products(/[^/]+)?', 'product/[^/]+', 'concerns(/[^/]+)?', 'ingredients',
-  'blogs?(/[^/]+)?', 'journal(/[^/]+)?', 'policies/[^/]+',
+  'blogs?(/[^/]+)?', 'blog-preview/[^/]+', 'journal(/[^/]+)?', 'policies/[^/]+',
   'cart', 'login', 'checkout', 'order/[^/]+', 'track(/[^/]+)?', 'account', 'admin(/.*)?',
 ].join('|') + ')/?$');
 // Text files are compressed (Brotli, else gzip). Build files never change, so each is compressed once and kept.

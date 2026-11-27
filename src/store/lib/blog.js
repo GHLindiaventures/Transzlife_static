@@ -54,5 +54,19 @@ export function usePost(slug) {
   return state;
 }
 
+/** Staff preview of any article (drafts too), by id. Fetched fresh every time; needs a dashboard sign-in. */
+export function usePreview(id) {
+  const [state, setState] = useState({ data: null, error: null, loading: true });
+  useEffect(() => {
+    let live = true;
+    setState({ data: null, error: null, loading: true });
+    getJson(`/api/admin/cms/posts/${encodeURIComponent(id)}/preview`)
+      .then((d) => live && setState({ data: d, error: null, loading: false }))
+      .catch((e) => live && setState({ data: null, error: e, loading: false }));
+    return () => { live = false; };
+  }, [id]);
+  return state;
+}
+
 /** "6 min read" */
 export const readTime = (minutes) => `${Math.max(1, Number(minutes) || 1)} min read`;

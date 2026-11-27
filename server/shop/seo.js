@@ -10,7 +10,7 @@ import { INDEXABLE, PUBLIC, postPath } from '../cms/posts.js';
 // /science is switched off and /journal moved to /blogs (both redirect), so neither is listed
 const STATIC_PAGES = ['/', '/shop', '/about', '/sustainability', '/faq', '/contact', '/concerns', '/ingredients', '/blogs',
   '/policies/privacy', '/policies/terms', '/policies/shipping'];
-const PRIVATE = ['/admin', '/api/', '/account', '/cart', '/checkout', '/login', '/order/'];
+const PRIVATE = ['/admin', '/api/', '/account', '/cart', '/checkout', '/login', '/order/', '/blog-preview/'];
 
 /** Ids from a site data file (entries are `    id: '…'` at the top level of the list). */
 function idsFrom(rel) {

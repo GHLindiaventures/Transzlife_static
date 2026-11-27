@@ -56,6 +56,7 @@ const Ingredients = lazy(() => import('./store/pages/Ingredients'));
 const content = (name) => lazy(() => import('./store/pages/Content').then((m) => ({ default: m[name] })));
 const Journal = content('Journal');
 const Article = content('Article');
+const ArticlePreview = content('ArticlePreview');
 const Policy = content('Policy');
 const checkout = (name) => lazy(() => import('./store/pages/Checkout').then((m) => ({ default: m[name] })));
 const Cart = checkout('Cart');
@@ -111,6 +112,7 @@ export default function App() {
               <Route path="ingredients" element={page(<Ingredients />)} />
               <Route path="blogs" element={page(<Journal />)} />
               <Route path="blogs/:id" element={page(<Article />)} />
+              <Route path="blog-preview/:id" element={page(<ArticlePreview />)} />
               <Route path="policies/:id" element={page(<Policy />)} />
               <Route path="cart" element={page(<Cart />)} />
               <Route path="login" element={page(<Login />)} />

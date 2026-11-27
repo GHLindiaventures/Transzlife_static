@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { ArrowRight, Sprout, Microscope, Factory, PackageCheck, FlaskConical, ShieldCheck, Leaf, HeartHandshake, Target, Eye, Phone, Mail, MapPin, Clock, Check, Dna, BrainCircuit } from 'lucide-react';
 import { SITE } from '../data/site';
-import { BLOGS_URL, blogUrl, loadBlogList, readTime, useBlogList, usePost } from '../lib/blog';
+import { BLOGS_URL, blogUrl, loadBlogList, readTime, useBlogList, usePost, usePreview } from '../lib/blog';
 import { usePageMeta } from '../../lib/pageMeta';
 import { getConcern } from '../data/concerns';
 import { PRODUCTS } from '../data/products';
@@ -215,18 +215,37 @@ export function Journal() {
 }
 
 export function Article() {
-  useCatalog();
   const { id } = useParams();
+  return <ArticleView {...usePost(id)} />;
+}
+
+/** /blog-preview/:id — any article (drafts too) exactly as the site would show it. Staff only: the data comes
+ *  from the dashboard API, which needs a staff sign-in; never indexed. */
+export function ArticlePreview() {
+  const { id } = useParams();
+  return <ArticleView {...usePreview(id)} preview />;
+}
+
+function ArticleView({ data, error, loading, preview = false }) {
+  useCatalog();
   const navigate = useNavigate();
-  const { data, error, loading } = usePost(id);
   const a = data?.post;
   const seo = a?.seo;
   usePageMeta(a ? (seo.title || a.title) : null, a ? (seo.description || a.excerpt) : null, {
     exact: !!seo?.title, image: a ? (seo.og.image || a.image || '') : '', type: a ? 'article' : 'website',
-    noindex: a ? !seo.robots.index : false, canonical: seo?.canonical || '',
+    noindex: preview || (a ? !seo.robots.index : false), canonical: seo?.canonical || '',
   });
   if (loading) return <BlogLoading />;
   if (data?.redirect) return <Navigate to={data.redirect} replace />;
+  if (preview && (error?.status === 401 || error?.status === 403)) {
+    return (
+      <section className="container empty-page">
+        <h1>Sign in to preview</h1>
+        <p>Article previews are only for the TranzLife team.</p>
+        <div className="empty-page__ctas"><Link to="/admin" className="btn btn--lg">Go to the dashboard</Link></div>
+      </section>
+    );
+  }
   if (error?.status === 404 || (data && !a)) return <NotFound />;
   if (error) return <BlogError onRetry={() => navigate(0)} />;
 
@@ -241,6 +260,11 @@ export function Article() {
   };
   return (
     <>
+      {preview && (
+        <p className="article__preview-bar" role="status">
+          Preview{a.status && a.status !== 'published' ? ` · ${a.status === 'draft' ? 'draft, not on the website yet' : a.status}` : ''}
+        </p>
+      )}
       <article className="article">
         <header className="container article__head">
           <Breadcrumbs items={a.category ? [['Blogs', BLOGS_URL], [a.category.name, `${BLOGS_URL}?category=${a.category.slug}`]] : [['Blogs', BLOGS_URL]]} />

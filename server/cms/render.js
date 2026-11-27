@@ -168,5 +168,54 @@ export function renderDoc(doc, { siteOrigin = '' } = {}) {
   return { html, text, words, headings };
 }
 
+// What may be stored: node type -> allowed attributes (anything else is dropped before saving).
+const NODE_ATTRS = {
+  doc: [], paragraph: [], text: [], hardBreak: [], heading: ['level'], bulletList: [], orderedList: ['start'], listItem: [],
+  blockquote: [], horizontalRule: [], callout: [], table: [], tableRow: [], tableHeader: ['colspan', 'rowspan'], tableCell: ['colspan', 'rowspan'],
+  image: ['src', 'alt', 'caption', 'width', 'height'], video: ['provider', 'id', 'title', 'caption'], faq: [], faqItem: ['question'], cta: ['href', 'label'],
+};
+const MARK_ATTRS = { bold: [], italic: [], link: ['href', 'nofollow', 'sponsored'] };
+const LIMITS = { depth: 24, nodes: 30000, text: 20000, attr: 2000 };
+
+/**
+ * Returns a copy of an editor document holding only allowed nodes, marks and attributes (plain values,
+ * strings capped), so what is stored is exactly what the renderer understands. Throws on oversized input.
+ */
+export function cleanDoc(doc) {
+  let count = 0;
+  const attrsOf = (allowed, attrs) => {
+    const out = {};
+    for (const k of allowed) {
+      const v = attrs?.[k];
+      if (v == null) continue;
+      if (typeof v === 'string') out[k] = v.slice(0, LIMITS.attr);
+      else if (typeof v === 'number' && Number.isFinite(v)) out[k] = v;
+      else if (typeof v === 'boolean') out[k] = v;
+    }
+    return out;
+  };
+  const walk = (n, depth) => {
+    if (!n || typeof n !== 'object' || !NODE_ATTRS[n.type] || n.type === 'doc') return null;
+    if (++count > LIMITS.nodes || depth > LIMITS.depth) throw Object.assign(new Error('This article is too long or too deeply nested to save.'), { status: 413 });
+    if (n.type === 'text') {
+      const text = String(n.text ?? '').slice(0, LIMITS.text);
+      if (!text) return null;
+      const marks = (Array.isArray(n.marks) ? n.marks : []).filter((m) => MARK_ATTRS[m?.type])
+        .map((m) => ({ type: m.type, ...(MARK_ATTRS[m.type].length ? { attrs: attrsOf(MARK_ATTRS[m.type], m.attrs) } : {}) }));
+      return { type: 'text', text, ...(marks.length ? { marks } : {}) };
+    }
+    const out = { type: n.type };
+    const attrs = attrsOf(NODE_ATTRS[n.type], n.attrs);
+    if (Object.keys(attrs).length) out.attrs = attrs;
+    if (Array.isArray(n.content)) {
+      const content = n.content.map((c) => walk(c, depth + 1)).filter(Boolean);
+      if (content.length) out.content = content;
+    }
+    return out;
+  };
+  const content = (Array.isArray(doc?.content) ? doc.content : []).map((c) => walk(c, 1)).filter(Boolean);
+  return { type: 'doc', content };
+}
+
 /** Reading time at about 200 words a minute (at least 1). */
 export const readingMinutes = (words) => Math.max(1, Math.min(240, Math.round(Number(words || 0) / 200) || 1));
