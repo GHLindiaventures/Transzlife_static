@@ -3,7 +3,7 @@ import { ArrowRight, Check, Stethoscope, Lightbulb, Activity } from 'lucide-reac
 import { getConcern, CONCERNS } from '../data/concerns';
 import { PRODUCTS } from '../data/products';
 import { useCatalog } from '../lib/catalog';
-import { ARTICLES } from '../data/articles';
+import { blogUrl, readTime, useBlogList } from '../lib/blog';
 import { getIngredient, getIngredientImg, INGREDIENT_TYPES } from '../data/ingredients';
 import ProductCard from '../components/ProductCard';
 import Icon from '../components/Icon';
@@ -48,11 +48,12 @@ export default function Concern() {
   const { id } = useParams();
   const c = getConcern(id);
   useTitle(c?.title, c?.intro?.slice(0, 160));
+  const blog = useBlogList();
   if (!c) return <NotFound />;
 
   const products = PRODUCTS.filter((p) => p.concerns.includes(c.id));
   const ingIds = [...new Set(products.flatMap((p) => p.ingredients))].slice(0, 8);
-  const articles = ARTICLES.filter((a) => a.concern === c.id);
+  const articles = (blog?.posts || []).filter((a) => a.concern === c.id).slice(0, 6);
 
   return (
     <div style={{ '--c': c.color, '--t': c.tint }}>
@@ -150,9 +151,9 @@ export default function Concern() {
             <SectionHead eyebrow="Read next" title="From our blogs" />
             <div className="grid-3">
               {articles.map((a) => (
-                <Link key={a.id} to={`/blogs/${a.id}`} className="acard">
-                  <span className="acard__img"><img src={a.image} alt="" loading="lazy" /></span>
-                  <span className="acard__meta">{a.category} · {a.readTime}</span>
+                <Link key={a.slug} to={blogUrl(a.slug)} className="acard">
+                  <span className="acard__img">{a.image && <img src={a.image} alt="" loading="lazy" decoding="async" />}</span>
+                  <span className="acard__meta">{[a.category?.name, readTime(a.readingMinutes)].filter(Boolean).join(' · ')}</span>
                   <h3>{a.title}</h3>
                   <p>{a.excerpt}</p>
                 </Link>

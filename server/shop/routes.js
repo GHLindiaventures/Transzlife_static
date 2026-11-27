@@ -24,6 +24,8 @@ import { z } from 'zod';
 import { PAYMENT_METHODS, quote, PricingError } from './pricing.js';
 import { attributeOrder } from './track.js';
 
+import { renderInvoiceHtml } from './invoice.js';
+
 const phone = z.string().trim().regex(/^[6-9]\d{9}$/, 'Enter a valid 10-digit mobile number.');
 const item = z.object({ id: z.string().min(1).max(80), pack: z.number().int().min(1).max(12), qty: z.number().int().min(1).max(10) });
 const items = z.array(item).min(1).max(30);
@@ -58,12 +60,16 @@ export function deviceName(ua = '') {
 
 const customerOut = (c) => c && { phone: c.phone, name: c.name, email: c.email, marketingConsent: !!c.marketing_consent };
 
-export default async function shopRoutes(app, { db, auth, orders, razorpay, notifier, ops, courier, log }) {
+export default async function shopRoutes(app, { db, auth, orders, razorpay, cashfree, shipping, notifier, ops, courier, log, env = process.env }) {
   const signedIn = { preHandler: auth.requireCustomer };
   const tight = (max, minutes = 15) => ({ config: { rateLimit: { max, timeWindow: `${minutes} minutes` } } });
+  const onlineEnabled = razorpay.enabled || !!cashfree?.enabled;
 
   app.get('/api/shop/config', async () => ({
-    razorpay: razorpay.enabled, razorpayKeyId: razorpay.keyId, methods: razorpay.enabled ? PAYMENT_METHODS : ['cod'],
+    razorpay: razorpay.enabled, razorpayKeyId: razorpay.keyId,
+    cashfree: !!cashfree?.enabled, cashfreeMode: cashfree?.mode || 'sandbox',
+    onlineEnabled,
+    methods: onlineEnabled ? PAYMENT_METHODS : ['cod'],
   }));
 
   // ---- sign in -----------------------------------------------------------
@@ -166,7 +172,7 @@ export default async function shopRoutes(app, { db, auth, orders, razorpay, noti
       marketingConsent: z.boolean().optional(),
       track: z.object({ v: z.string().uuid(), s: z.string().uuid().optional() }).optional(),
     }), req.body, reply); if (!body) return;
-    if (body.paymentMethod !== 'cod' && !razorpay.enabled) {
+    if (body.paymentMethod !== 'cod' && !onlineEnabled) {
       return reply.code(400).send({ error: 'Online payments are not available yet. Please choose Cash on delivery.', code: 'payments_off' });
     }
     const c = req.customer;
@@ -206,12 +212,29 @@ export default async function shopRoutes(app, { db, auth, orders, razorpay, noti
   }
 
   app.post('/api/checkout/verify', signedIn, async (req, reply) => {
-    const body = parse(z.object({
-      orderNumber: z.string().max(20),
-      razorpay_order_id: z.string().max(60), razorpay_payment_id: z.string().max(60), razorpay_signature: z.string().max(200),
-    }), req.body, reply); if (!body) return;
+    const body = parse(z.union([
+      z.object({
+        orderNumber: z.string().max(20),
+        razorpay_order_id: z.string().max(60), razorpay_payment_id: z.string().max(60), razorpay_signature: z.string().max(200),
+      }),
+      z.object({
+        orderNumber: z.string().max(20),
+        cashfree_order_id: z.string().max(80),
+      }),
+    ]), req.body, reply); if (!body) return;
     const mine = await orders.getForCustomer(req.customer.id, body.orderNumber);
     if (!mine) return reply.code(404).send({ error: 'Order not found.' });
+
+    if ('cashfree_order_id' in body) {
+      const owned = (await db.query(`SELECT 1 FROM payments WHERE order_id = $1 AND provider = 'cashfree' AND provider_order_id = $2`, [mine.row.id, body.cashfree_order_id])).rows.length;
+      const cf = owned ? await cashfree?.verifyPayment(body.cashfree_order_id) : { paid: false };
+      if (!owned || !cf.paid) {
+        return reply.code(400).send({ error: 'We could not verify this payment. If money was deducted, it will be confirmed automatically or refunded.', code: 'bad_signature' });
+      }
+      await orders.markPaid({ providerOrderId: body.cashfree_order_id, providerPaymentId: cf.paymentId, method: cf.method, raw: cf.raw, actor: 'customer' });
+      return { order: (await orders.getForCustomer(req.customer.id, body.orderNumber)).public };
+    }
+
     const owned = (await db.query('SELECT 1 FROM payments WHERE order_id = $1 AND provider_order_id = $2', [mine.row.id, body.razorpay_order_id])).rows.length;
     if (!owned || !razorpay.verifyPayment({ orderId: body.razorpay_order_id, paymentId: body.razorpay_payment_id, signature: body.razorpay_signature })) {
       return reply.code(400).send({ error: 'We could not verify this payment. If money was deducted, it will be confirmed automatically or refunded.', code: 'bad_signature' });
@@ -227,6 +250,22 @@ export default async function shopRoutes(app, { db, auth, orders, razorpay, noti
     const o = await orders.getForCustomer(req.customer.id, String(req.params.number).slice(0, 20));
     if (!o) return reply.code(404).send({ error: 'Order not found.' });
     return { order: o.public };
+  });
+
+  app.get('/api/orders/:number/invoice', signedIn, async (req, reply) => {
+    const o = await orders.getForCustomer(req.customer.id, String(req.params.number).slice(0, 20));
+    if (!o) return reply.code(404).send({ error: 'Order not found.' });
+    const items = (await db.query(
+      `SELECT oi.*, p.gst_rate, p.hsn_code FROM order_items oi LEFT JOIN products p ON p.id = oi.product_id WHERE oi.order_id = $1 ORDER BY oi.id`,
+      [o.row.id],
+    )).rows;
+    reply.header('Content-Type', 'text/html; charset=utf-8');
+    return renderInvoiceHtml(o.row, items, env);
+  });
+
+  app.get('/api/shipping/serviceability', tight(60, 10), async (req, reply) => {
+    if (!shipping) return { serviceable: true, cod: true, estimatedDays: 5, manual: true };
+    return shipping.checkServiceability(req.query?.pin, { cod: req.query?.cod !== '0' });
   });
 
   // ---- public order delivery tracking (by tracking ID, order number, or AWB) ----
@@ -284,6 +323,30 @@ export default async function shopRoutes(app, { db, auth, orders, razorpay, noti
       await orders.markPaid({ providerOrderId: p.order_id, providerPaymentId: p.id, method: p.method, raw: p, actor: 'razorpay' });
     } else if (p?.order_id && event.event === 'payment.failed') {
       await orders.markFailed({ providerOrderId: p.order_id, providerPaymentId: p.id, error: p.error_description, raw: p });
+    }
+    return { ok: true };
+  });
+
+  // ---- Cashfree webhook --------------------------------------------------
+  app.post('/api/webhooks/cashfree', { config: { rawBody: true, skipOriginCheck: true } }, async (req, reply) => {
+    const raw = req.rawBody;
+    if (!cashfree?.verifyWebhook(raw, req.headers['x-webhook-signature'], req.headers['x-webhook-timestamp'])) {
+      return reply.code(400).send({ error: 'bad signature' });
+    }
+    const event = JSON.parse(raw);
+    const data = event.data || {};
+    const orderId = data.order?.order_id;
+    const pay = data.payment || {};
+    const eventId = String(req.headers['x-idempotency-key'] || `${event.type}:${event.event_time}:${pay.cf_payment_id || orderId}`);
+    const fresh = await db.query(
+      `INSERT INTO webhook_events (provider, event_id, event_type, payload) VALUES ('cashfree',$1,$2,$3) ON CONFLICT DO NOTHING`,
+      [eventId, event.type || 'unknown', raw],
+    );
+    if (!(fresh.affectedRows ?? fresh.rowCount)) return { ok: true, duplicate: true };
+    if (orderId && (event.type === 'PAYMENT_SUCCESS_WEBHOOK' || pay.payment_status === 'SUCCESS')) {
+      await orders.markPaid({ providerOrderId: orderId, providerPaymentId: String(pay.cf_payment_id || ''), method: pay.payment_group, raw: data, actor: 'cashfree' });
+    } else if (orderId && (event.type === 'PAYMENT_FAILED_WEBHOOK' || pay.payment_status === 'FAILED')) {
+      await orders.markFailed({ providerOrderId: orderId, providerPaymentId: String(pay.cf_payment_id || ''), error: pay.payment_message, raw: data });
     }
     return { ok: true };
   });

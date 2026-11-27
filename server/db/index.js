@@ -61,8 +61,10 @@ export async function createDb(env = process.env, { log = console, memory = fals
     // so orders would be lost. The shop API stays off until DATABASE_URL is set.
     if (isHosted(env)) throw new Error('DATABASE_URL is not set. The shop API needs PostgreSQL in production.');
     const { PGlite } = await import('@electric-sql/pglite');
-    if (!memory) mkdirSync(DATA_DIR, { recursive: true });
-    const pgl = memory ? new PGlite() : new PGlite(DATA_DIR);
+    // PGLITE_DIR: a different local database folder (e.g. a throwaway copy for testing while `npm run dev` holds data/pglite)
+    const dir = env.PGLITE_DIR ? resolve(env.PGLITE_DIR) : DATA_DIR;
+    if (!memory) mkdirSync(dir, { recursive: true });
+    const pgl = memory ? new PGlite() : new PGlite(dir);
     await pgl.waitReady;
     // PGlite runs one statement at a time; a simple queue keeps transactions from interleaving
     let chain = Promise.resolve();

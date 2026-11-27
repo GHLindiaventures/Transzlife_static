@@ -9,7 +9,7 @@ import { useCatalog } from '../lib/catalog';
 import { SITE } from '../data/site';
 import { getIngredient } from '../data/ingredients';
 import { getConcern } from '../data/concerns';
-import { ARTICLES } from '../data/articles';
+import { blogUrl, readTime, useBlogList } from '../lib/blog';
 import { useCart, packPrice, packMrp } from '../context/CartContext';
 import { QtyStepper } from '../components/CartDrawer';
 import ProductCard, { Money, CatalogRow } from '../components/ProductCard';
@@ -100,6 +100,7 @@ export default function Product() {
   const [pack, setPack] = useState(1);
   const [qty, setQty] = useState(1);
   useTitle(p?.name, p ? `${p.summary || p.tagline}`.slice(0, 160) : undefined);
+  const blog = useBlogList();   // "Read before you start": articles for this product's concerns
   useEffect(() => { setPack(1); setQty(1); }, [id]);
   useEffect(() => { if (p) rememberViewed(p.id); }, [p?.id]);   // eslint-disable-line react-hooks/exhaustive-deps
   const EMPTY = { summary: { avg: 0, total: 0, counts: [0, 0, 0, 0, 0] }, reviews: [], mine: null, canReview: null, signedIn: false };
@@ -126,7 +127,7 @@ export default function Product() {
   // every other product, ones sharing a concern first
   const related = PRODUCTS.filter((x) => x.id !== p.id).sort((a, b) => (b.concerns.some((c) => p.concerns.includes(c)) ? 1 : 0) - (a.concerns.some((c) => p.concerns.includes(c)) ? 1 : 0));
   // Journal articles for this product's concerns, in the order the concerns are listed
-  const reads = [...new Set(p.concerns.flatMap((c) => ARTICLES.filter((a) => a.concern === c)))].slice(0, 3);
+  const reads = [...new Set(p.concerns.flatMap((c) => (blog?.posts || []).filter((a) => a.concern === c)))].slice(0, 3);
   const facts = [
     ings.length > 0 && { icon: Sprout, value: ings.length, label: 'Key ingredients' },
     { icon: FlaskConical, value: p.size, label: 'Pack size' },
@@ -136,14 +137,22 @@ export default function Product() {
 
   return (
     <div className="pdpx" style={{ '--p-accent': p.accent, '--tint': p.tint }}>
-      {summary.total > 0 && (
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([
+        {
           '@context': 'https://schema.org', '@type': 'Product', name: p.name, description: p.summary, brand: { '@type': 'Brand', name: 'TranzLife' },
           image: p.images.map((src) => new URL(src, window.location.origin).href),
-          offers: { '@type': 'Offer', priceCurrency: 'INR', price: String(p.price), availability: `https://schema.org/${p.stock === 'out' ? 'OutOfStock' : 'InStock'}` },
-          aggregateRating: { '@type': 'AggregateRating', ratingValue: summary.avg.toFixed(1), reviewCount: summary.total, bestRating: 5, worstRating: 1 },
-        }).replace(/</g, '\\u003c') }} />
-      )}
+          ...(sale ? { offers: { '@type': 'Offer', priceCurrency: 'INR', price: String(p.price), url: window.location.href, availability: `https://schema.org/${p.stock === 'out' ? 'OutOfStock' : 'InStock'}` } } : {}),
+          ...(summary.total > 0 ? { aggregateRating: { '@type': 'AggregateRating', ratingValue: summary.avg.toFixed(1), reviewCount: summary.total, bestRating: 5, worstRating: 1 } } : {}),
+        },
+        {
+          '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+          itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'Home', item: window.location.origin },
+            { '@type': 'ListItem', position: 2, name: 'Shop', item: `${window.location.origin}/shop` },
+            { '@type': 'ListItem', position: 3, name: p.short, item: window.location.href },
+          ],
+        },
+      ]).replace(/</g, '\\u003c') }} />
       <section className="container pdp">
         <Breadcrumbs items={[['Shop', '/shop'], [p.short]]} />
         <div className="pdp__grid">
@@ -333,10 +342,10 @@ export default function Product() {
             />
             <div className="reads2 m-scroll">
               {reads.map((a) => (
-                <Link key={a.id} to={`/blogs/${a.id}`} className="read2">
-                  <span className="read2__img"><img src={a.image} alt="" loading="lazy" /></span>
+                <Link key={a.slug} to={blogUrl(a.slug)} className="read2">
+                  <span className="read2__img">{a.image && <img src={a.image} alt="" loading="lazy" decoding="async" />}</span>
                   <span className="read2__body">
-                    <span className="acard__meta">{a.category} · {a.readTime}</span>
+                    <span className="acard__meta">{[a.category?.name, readTime(a.readingMinutes)].filter(Boolean).join(' · ')}</span>
                     <strong>{a.title}</strong>
                     <span className="read2__excerpt">{a.excerpt}</span>
                     <span className="link-arrow">Read article <ArrowRight size={14} /></span>

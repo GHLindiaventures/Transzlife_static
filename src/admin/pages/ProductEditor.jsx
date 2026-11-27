@@ -23,24 +23,24 @@ const toForm = (p) => ({
   content: {
     summary: '', highlights: [], description: [], benefits: [], routine: [], howToUse: [], whoFor: [], precautions: [], faqs: [], ingredients: [], ...p.content,
   },
-  compliance: { netQuantity: '', manufacturer: '', manufacturerAddress: '', licenceNo: '', countryOfOrigin: 'India', shelfLifeMonths: '', storage: '', consumerCare: '', certifications: [], ...p.compliance },
+  compliance: { netQuantity: '', manufacturer: '', manufacturerAddress: '', licenceNo: '', countryOfOrigin: 'India', storage: '', consumerCare: '', certifications: [], ...p.compliance, shelfLifeMonths: p.compliance?.shelfLifeMonths ?? '' },
 });
 
 function toPatch(f) {
-  const clean = (a) => a.map((x) => (typeof x === 'string' ? x.trim() : x)).filter((x) => (Array.isArray(x) ? x[0]?.trim() && x[1]?.trim() : typeof x === 'object' ? x.label?.trim() && x.value?.trim() : x));
-  const c = f.content, k = f.compliance;
+  const clean = (a) => (a || []).map((x) => (typeof x === 'string' ? x.trim() : x)).filter((x) => (Array.isArray(x) ? x[0]?.trim() && x[1]?.trim() : typeof x === 'object' ? x.label?.trim() && x.value?.trim() : x));
+  const c = f.content || {}, k = f.compliance || {};
   return {
-    name: f.name.trim(), short: f.short.trim(), tagline: f.tagline.trim(), format: f.format.trim(), size: f.size.trim(),
-    accent: f.accent, tint: f.tint, concerns: f.concerns, sortOrder: Number(f.sortOrder) || 0,
-    price: toPaise(f.price), mrp: toPaise(f.mrp), gstRate: f.gstRate === '' ? null : Number(f.gstRate), hsnCode: f.hsnCode.trim() || null,
+    name: (f.name || '').trim(), short: (f.short || '').trim(), tagline: (f.tagline || '').trim(), format: (f.format || '').trim(), size: (f.size || '').trim(),
+    accent: f.accent || null, tint: f.tint || null, concerns: f.concerns || [], sortOrder: Number(f.sortOrder) || 0,
+    price: toPaise(f.price), mrp: toPaise(f.mrp), gstRate: f.gstRate === '' || f.gstRate == null ? null : Number(f.gstRate), hsnCode: (f.hsnCode || '').trim() || null,
     lowStockAt: Number(f.lowStockAt) || 0,
-    returnable: !!f.returnable, returnDays: f.returnDays === '' ? null : Number(f.returnDays),
+    returnable: !!f.returnable, returnDays: f.returnDays === '' || f.returnDays == null ? null : Number(f.returnDays),
     content: {
-      summary: c.summary.trim(), highlights: clean(c.highlights), description: clean(c.description), benefits: clean(c.benefits),
+      summary: (c.summary || '').trim(), highlights: clean(c.highlights), description: clean(c.description), benefits: clean(c.benefits),
       routine: clean(c.routine), howToUse: clean(c.howToUse), whoFor: clean(c.whoFor), precautions: clean(c.precautions),
-      faqs: clean(c.faqs), ingredients: c.ingredients,
+      faqs: clean(c.faqs), ingredients: c.ingredients || [],
     },
-    compliance: { ...k, shelfLifeMonths: k.shelfLifeMonths === '' ? null : Number(k.shelfLifeMonths) },
+    compliance: { ...k, shelfLifeMonths: k.shelfLifeMonths === '' || k.shelfLifeMonths == null ? null : Number(k.shelfLifeMonths) },
   };
 }
 
@@ -132,6 +132,7 @@ export default function ProductEditor() {
       {dirty && (
         <div className="adm-bulk adm-savebar" role="region" aria-label="Unsaved changes">
           <strong>You have unsaved changes</strong>
+          {act.error && <span className="is-bad" role="alert">{act.error}</span>}
           <button className="adm-btn is-ghost is-sm" onClick={() => setForm(JSON.parse(saved.current))}>Discard</button>
           <button className="adm-btn is-gold is-sm" onClick={save} disabled={act.busy}>{act.busy ? 'Saving…' : 'Save changes'}</button>
         </div>

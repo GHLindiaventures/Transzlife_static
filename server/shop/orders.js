@@ -31,7 +31,7 @@ async function commitStock(t, order, ref) {
   await t.query('UPDATE orders SET stock_committed = true WHERE id = $1', [order.id]);
 }
 
-export function createOrders({ db, razorpay, log, notifier }) {
+export function createOrders({ db, razorpay, cashfree, log, notifier, env = process.env }) {
   /** Creates the order inside one transaction. Returns { order, created }. */
   async function place({ customer, items, paymentMethod, address, email, idempotencyKey }) {
     return db.tx(async (t) => {
@@ -87,11 +87,33 @@ export function createOrders({ db, razorpay, log, notifier }) {
   /** Starts (or restarts) an online payment for a pending order. */
   async function startPayment(order, customer) {
     if (order.status !== 'pending_payment' || order.payment_status === 'paid') throw Object.assign(new Error('This order does not need payment.'), { status: 409 });
+    const useCashfree = !!(cashfree?.enabled && (!razorpay.enabled || String(env.PAYMENT_PROVIDER || '').toLowerCase() === 'cashfree'));
+    if (useCashfree) {
+      const site = String(env.SITE_URL || '').replace(/\/$/, '');
+      const cf = await cashfree.createOrder({
+        amount: order.total,
+        orderNumber: order.order_number,
+        customer,
+        returnUrl: site ? `${site}/order/${order.order_number}` : undefined,
+      });
+      await db.query(
+        `INSERT INTO payments (order_id, provider, provider_order_id, amount, status) VALUES ($1,'cashfree',$2,$3,'created')`,
+        [order.id, cf.orderId, order.total]);
+      return {
+        provider: 'cashfree',
+        orderId: cf.orderId,
+        paymentSessionId: cf.paymentSessionId,
+        mode: cf.mode,
+        amount: order.total,
+        currency: 'INR',
+      };
+    }
     const rp = await razorpay.createOrder({ amount: order.total, receipt: order.order_number, notes: { order_number: order.order_number } });
     await db.query(
       `INSERT INTO payments (order_id, provider, provider_order_id, amount, status) VALUES ($1,'razorpay',$2,$3,'created')`,
       [order.id, rp.id, order.total]);
     return {
+      provider: 'razorpay',
       keyId: razorpay.keyId, orderId: rp.id, amount: rp.amount, currency: rp.currency,
       prefill: { name: customer.name || '', contact: `+91${customer.phone}`, email: customer.email || '' },
     };

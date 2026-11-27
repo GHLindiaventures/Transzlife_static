@@ -1,5 +1,5 @@
 // Creates a staff account from the terminal (needed once, for the first owner).
-//   npm run admin:create -- --email you@tranzlife.in --name "Your Name" [--role owner|manager|support]
+//   npm run admin:create -- --email you@tranzlife.in --name "Your Name" [--role owner|manager|support|content_manager]
 // Prints a temporary password. On first sign-in at /admin the person sets their own password and
 // turns on two-step verification. Uses DATABASE_URL from .env / .env.local (or the local database).
 import { parseArgs } from 'node:util';
@@ -11,7 +11,7 @@ const { values } = parseArgs({ options: { email: { type: 'string' }, name: { typ
 const email = String(values.email || '').trim().toLowerCase();
 const name = String(values.name || '').trim();
 if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || name.length < 2 || !ROLES.includes(values.role)) {
-  console.error('Usage: npm run admin:create -- --email you@example.com --name "Your Name" [--role owner|manager|support]');
+  console.error('Usage: npm run admin:create -- --email you@example.com --name "Your Name" [--role owner|manager|support|content_manager]');
   process.exit(1);
 }
 

@@ -5,6 +5,7 @@ import rateLimit from '@fastify/rate-limit';
 import { createDb, isHosted } from '../db/index.js';
 import { createAuth } from './auth.js';
 import { createRazorpay } from './razorpay.js';
+import { createCashfree } from './cashfree.js';
 import { createTwilio } from './twilio.js';
 import { createNotifier } from './notify.js';
 import { createOrders } from './orders.js';
@@ -18,12 +19,14 @@ import { createReminders } from './reminders.js';
 import reviewRoutes from './reviews.js';
 import contentRoutes from './content.js';
 import siteDocRoutes from './site-docs.js';
+import blogPublicRoutes from '../cms/public.js';
 import opsWebhooks, { createOps } from './ops.js';
 import seoRoutes from './seo.js';
 import customerReturnRoutes from './returns.js';
 import presenceRoutes, { createPresence } from './presence.js';
 import { createHealth } from '../admin/health.js';
 import { createCourier } from './courier.js';
+import { createShipping } from './shipping.js';
 
 const UNSAFE = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
@@ -38,14 +41,16 @@ export async function buildShopApp({ env = process.env, db, fastifyOptions = {},
   const hosted = isHosted(env);
   db ??= await createDb(env, { log });
   const razorpay = createRazorpay(env);
+  const cashfree = createCashfree(env);
   const twilio = createTwilio(env, { log });
   const auth = createAuth({ db, env, log, twilio });
   const notifier = createNotifier({ db, twilio, env, log });
-  const orders = createOrders({ db, razorpay, log, notifier });
+  const orders = createOrders({ db, razorpay, cashfree, log, notifier, env });
   const reminders = createReminders({ db, twilio, env, log });
   const presence = createPresence();
   const ops = createOps({ db, twilio, env, log });
   const courier = createCourier({ db, notifier, env, log });
+  const shipping = createShipping({ db, env, log });
   const health = createHealth({
     db, razorpay, twilio,
     media: { configured: !!(env.AWS_ENDPOINT_URL_S3 && env.AWS_ACCESS_KEY_ID && env.AWS_SECRET_ACCESS_KEY) },
@@ -94,14 +99,15 @@ export async function buildShopApp({ env = process.env, db, fastifyOptions = {},
     await health.recordError(req, err);
   });
 
-  await app.register(shopRoutes, { db, auth, orders, razorpay, notifier, ops, courier, log });
-  await app.register(adminRoutes, { db, razorpay, twilio, notifier, reminders, presence, ops, health, courier, auth: { mode: auth.mode }, log, env });
+  await app.register(shopRoutes, { db, auth, orders, razorpay, cashfree, shipping, notifier, ops, courier, log, env });
+  await app.register(adminRoutes, { db, razorpay, cashfree, shipping, twilio, notifier, reminders, presence, ops, health, courier, auth: { mode: auth.mode }, log, env });
   await app.register(trackRoutes, { db, log });
   await app.register(reviewRoutes, { db, env, log });
   await app.register(customerReturnRoutes, { db, env, log });
   await app.register(presenceRoutes, { presence });
   await app.register(contentRoutes, { db });
   await app.register(siteDocRoutes, { db });
+  await app.register(blogPublicRoutes, { db, log });
   await app.register(opsWebhooks, { ops, env, log });
   await app.register(seoRoutes, { db, env });
   await app.register(catalogPublic, { db });
@@ -126,11 +132,12 @@ export async function buildShopApp({ env = process.env, db, fastifyOptions = {},
     trackJob('analytics.prune', 'Analytics & session clean-up', 5, () => reminders.prune());
     trackJob('ops.sweep', 'COD check & daily summary', 5, () => ops.sweep());
     trackJob('courier.overdue', 'Overdue delivery check', 5, () => courier.flagOverdueShipments());
+    if (tick % 3 === 0) trackJob('courier.sync', 'Live courier scan sync', 15, () => courier.syncActiveShipments());
     if (tick % 2 === 0) health.sweep().catch((e) => log.error(e, '[health] sweep failed'));
   }, 5 * 60_000);
   sweep.unref();
   app.addHook('onClose', async () => { clearInterval(sweep); await db.close?.(); });
 
-  app.shop = { db, auth, orders, razorpay, twilio, notifier, reminders, presence, ops, health, courier };
+  app.shop = { db, auth, orders, razorpay, cashfree, shipping, twilio, notifier, reminders, presence, ops, health, courier };
   return app;
 }

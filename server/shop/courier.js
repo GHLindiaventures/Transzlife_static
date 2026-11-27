@@ -253,5 +253,26 @@ export function createCourier({ db, notifier, env = process.env, log }) {
     return rows.length;
   }
 
-  return { getPublicTracking, verifyWebhook, applyCourierUpdate, syncShipment, flagOverdueShipments };
+  /** Periodically polls active AWB shipments when a courier API token is configured. */
+  async function syncActiveShipments(limit = 15) {
+    if (!env.SHIPROCKET_TOKEN && !env.DELHIVERY_TOKEN) return 0;
+    const rows = (await db.query(
+      `SELECT order_number FROM orders
+        WHERE awb_number IS NOT NULL AND status IN ('packed', 'shipped', 'in_transit', 'out_for_delivery')
+        ORDER BY updated_at ASC LIMIT $1`,
+      [limit],
+    )).rows;
+    let synced = 0;
+    for (const r of rows) {
+      try {
+        const res = await syncShipment(r.order_number);
+        if (res?.synced) synced += 1;
+      } catch (e) {
+        log?.warn?.(`[courier] auto-sync ${r.order_number}: ${e.message}`);
+      }
+    }
+    return synced;
+  }
+
+  return { getPublicTracking, verifyWebhook, applyCourierUpdate, syncShipment, syncActiveShipments, flagOverdueShipments };
 }

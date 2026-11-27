@@ -1,10 +1,10 @@
 // TranzLife admin dashboard (/admin). Staff only: separate sign-in with two-step verification.
 // Lazy-loaded, so shoppers never download it. The server checks every permission again.
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import {
   Home, Package, Boxes, Users, CreditCard, UserCog, History, Settings, LogOut, Menu, X, ShieldCheck,
-  Search, Bell, Moon, Sun, MoreHorizontal, Activity as ActivityIcon, ArrowRight, User, CheckCircle2, Undo2, BarChart3, Sprout, Star, BadgePercent, Megaphone, TicketPercent, ShieldCheck as Shield, Mail, FileText,
+  Search, Bell, Moon, Sun, MoreHorizontal, Activity as ActivityIcon, ArrowRight, User, CheckCircle2, Undo2, BarChart3, Sprout, Star, BadgePercent, Megaphone, TicketPercent, ShieldCheck as Shield, Mail, FileText, Newspaper,
 } from 'lucide-react';
 import { api } from '../store/lib/api';
 import { markStaffBrowser } from '../store/lib/track';
@@ -22,6 +22,12 @@ import ReviewsAdmin from './pages/ReviewsAdmin';
 import PricingOffers from './pages/PricingOffers';
 import WebsiteContent from './pages/WebsiteContent';
 import SiteText from './pages/SiteText';
+import BlogPosts from './pages/BlogPosts';
+import BlogTaxonomy from './pages/BlogTaxonomy';
+import BlogRedirects from './pages/BlogRedirects';
+
+// the article editor (TipTap) is its own chunk: only loaded when an article is opened
+const PostEditor = lazy(() => import('./pages/PostEditor'));
 import Discounts from './pages/Discounts';
 import Ingredients from './pages/Ingredients';
 import Compliance from './pages/Compliance';
@@ -54,6 +60,7 @@ export default function AdminApp() {
   }, [refresh]);
 
   const ready = staff && !staff.mustChangePassword && staff.totpEnabled;
+  const only = (perm, el) => (can(staff, perm) ? el : <NoAccess />);
 
   return (
     <AdminContext.Provider value={{ staff, setStaff, refresh, logout, theme, toggleTheme }}>
@@ -65,29 +72,34 @@ export default function AdminApp() {
               <Route path="*" element={
                 <Shell>
                   <Routes>
-                    <Route index element={<Dashboard />} />
-                    <Route path="orders" element={<OrderList />} />
-                    <Route path="orders/:number" element={<OrderDetail />} />
-                    <Route path="products" element={<Products />} />
-                    <Route path="products/:id" element={<ProductEditor />} />
-                    <Route path="customers" element={<CustomerList />} />
-                    <Route path="customers/:id" element={<CustomerDetail />} />
-                    <Route path="payments" element={<Payments />} />
-                    <Route path="returns" element={<Returns />} />
-                    <Route path="analytics" element={<Analytics />} />
-                    <Route path="visitors" element={<Visitors />} />
-                    <Route path="reviews" element={<ReviewsAdmin />} />
-                    <Route path="pricing" element={<PricingOffers />} />
-                    <Route path="content" element={<WebsiteContent />} />
-                    <Route path="site-text" element={<SiteText />} />
-                    <Route path="discounts" element={<Discounts />} />
-                    <Route path="ingredients" element={<Ingredients />} />
-                    <Route path="compliance" element={<Compliance />} />
-                    <Route path="enquiries" element={<Enquiries />} />
+                    {/* the shop's pages need 'view'; a content manager gets the blog instead (the server checks again) */}
+                    <Route index element={can(staff, 'view') ? <Dashboard /> : <Navigate to="/admin/blog" replace />} />
+                    <Route path="orders" element={only('view', <OrderList />)} />
+                    <Route path="orders/:number" element={only('view', <OrderDetail />)} />
+                    <Route path="products" element={only('view', <Products />)} />
+                    <Route path="products/:id" element={only('view', <ProductEditor />)} />
+                    <Route path="customers" element={only('view', <CustomerList />)} />
+                    <Route path="customers/:id" element={only('view', <CustomerDetail />)} />
+                    <Route path="payments" element={only('view', <Payments />)} />
+                    <Route path="returns" element={only('view', <Returns />)} />
+                    <Route path="analytics" element={only('view', <Analytics />)} />
+                    <Route path="visitors" element={only('view', <Visitors />)} />
+                    <Route path="reviews" element={only('view', <ReviewsAdmin />)} />
+                    <Route path="pricing" element={only('view', <PricingOffers />)} />
+                    <Route path="blog" element={only('content.view', <BlogPosts />)} />
+                    <Route path="blog/categories" element={only('content.view', <BlogTaxonomy />)} />
+                    <Route path="blog/redirects" element={only('content.view', <BlogRedirects />)} />
+                    <Route path="blog/:id" element={only('content.view', <Suspense fallback={<p className="adm-muted">Loading the editor…</p>}><PostEditor /></Suspense>)} />
+                    <Route path="content" element={only(['view', 'content.site'], <WebsiteContent />)} />
+                    <Route path="site-text" element={only(['view', 'content.site'], <SiteText />)} />
+                    <Route path="discounts" element={only('view', <Discounts />)} />
+                    <Route path="ingredients" element={only('view', <Ingredients />)} />
+                    <Route path="compliance" element={only('view', <Compliance />)} />
+                    <Route path="enquiries" element={only('view', <Enquiries />)} />
                     {can(staff, 'staff') && <Route path="staff" element={<Staff />} />}
-                    <Route path="activity" element={<Activity />} />
-                    <Route path="health" element={<SystemHealth />} />
-                    <Route path="settings" element={<SettingsPage />} />
+                    <Route path="activity" element={only('view', <Activity />)} />
+                    <Route path="health" element={only('view', <SystemHealth />)} />
+                    <Route path="settings" element={only('view', <SettingsPage />)} />
                     <Route path="*" element={<Navigate to="/admin" replace />} />
                   </Routes>
                 </Shell>
@@ -99,25 +111,40 @@ export default function AdminApp() {
   );
 }
 
-/** Live counts for the sidebar badges and the bell (refreshed every minute and on page change). */
-function useLive() {
+/** Shown for a page the signed-in role cannot use (the server refuses its data as well). */
+function NoAccess() {
+  return (
+    <div className="adm-card adm-pad" role="status">
+      <h1 className="adm-h2">Not part of your role</h1>
+      <p className="adm-muted">This page belongs to another part of the dashboard. Ask the owner if you need access.</p>
+      <p style={{ marginTop: 12 }}><Link to="/admin" className="adm-btn is-ghost">Go to your home page</Link></p>
+    </div>
+  );
+}
+
+/** Live counts for the sidebar badges and the bell (refreshed every minute and on page change). Shop roles only. */
+function useLive(enabled) {
   const [live, setLive] = useState({ counts: {}, alerts: [], returns: 0, reviews: 0 });
   const location = useLocation();
   const load = useCallback(() => {
+    if (!enabled) return;
     Promise.all([api('/api/admin/orders/counts'), api('/api/admin/alerts'), api('/api/admin/returns/counts'), api('/api/admin/reviews/counts')])
       .then(([c, a, r, v]) => setLive({ counts: c.counts, alerts: a.items, returns: r.counts.open, reviews: v.pending })).catch(() => {});
-  }, []);
+  }, [enabled]);
   useEffect(() => { load(); const t = setInterval(load, 60_000); return () => clearInterval(t); }, [load]);
   useEffect(() => { load(); }, [location.pathname, load]);
   return live;
 }
+
+const ROLE_NAME = { owner: 'Owner', manager: 'Manager', support: 'Support', content_manager: 'Content manager' };
 
 function Shell({ children }) {
   const { staff, logout, theme, toggleTheme } = useAdmin();
   const [open, setOpen] = useState(false);
   const [palette, setPalette] = useState(false);
   const [bell, setBell] = useState(false);
-  const live = useLive();
+  const shop = can(staff, 'view');                 // orders, customers, products ... (not content managers)
+  const live = useLive(shop);
   const navigate = useNavigate();
   const location = useLocation();
   const toPack = live.counts.to_pack || 0;
@@ -134,14 +161,18 @@ function Shell({ children }) {
   }, []);
 
   const groups = [
-    [null, [['/admin', 'Home', Home, { end: true }]]],
-    ['Sell', [['/admin/orders', 'Orders', Package, { count: toPack, title: `${toPack} to pack` }], ['/admin/returns', 'Returns', Undo2, { count: live.returns, title: `${live.returns} open returns` }], ['/admin/payments', 'Payments', CreditCard]]],
-    ['Catalog', [['/admin/products', 'Products & stock', Boxes], ['/admin/pricing', 'Pricing & offers', BadgePercent], ['/admin/reviews', 'Reviews', Star, { count: live.reviews, title: `${live.reviews} waiting for a check` }], ['/admin/ingredients', 'Ingredients', Sprout], ['/admin/compliance', 'Licences & certificates', Shield]]],
-    ['Marketing', [['/admin/content', 'Website content', Megaphone], ['/admin/site-text', 'Site text', FileText]]],
-    ['Insights', [['/admin/analytics', 'Sales analytics', BarChart3], ['/admin/visitors', 'Visitors & carts', ActivityIcon], ['/admin/discounts', 'Discounts & campaigns', TicketPercent]]],
-    ['People', [['/admin/customers', 'Customers', Users], ['/admin/enquiries', 'Enquiries & newsletter', Mail], can(staff, 'staff') && ['/admin/staff', 'Staff', UserCog]]],
-    ['Settings', [['/admin/settings', 'Store settings', Settings], ['/admin/health', 'System health', ShieldCheck], ['/admin/activity', 'Activity log', History]]],
-  ];
+    [null, [shop && ['/admin', 'Home', Home, { end: true }]]],
+    ['Sell', shop && [['/admin/orders', 'Orders', Package, { count: toPack, title: `${toPack} to pack` }], ['/admin/returns', 'Returns', Undo2, { count: live.returns, title: `${live.returns} open returns` }], ['/admin/payments', 'Payments', CreditCard]]],
+    ['Catalog', shop && [['/admin/products', 'Products & stock', Boxes], ['/admin/pricing', 'Pricing & offers', BadgePercent], ['/admin/reviews', 'Reviews', Star, { count: live.reviews, title: `${live.reviews} waiting for a check` }], ['/admin/ingredients', 'Ingredients', Sprout], ['/admin/compliance', 'Licences & certificates', Shield]]],
+    ['Content', [
+      can(staff, 'content.view') && ['/admin/blog', 'Blog posts', Newspaper],
+      (shop || can(staff, 'content.site')) && ['/admin/content', 'Website content', Megaphone],
+      (shop || can(staff, 'content.site')) && ['/admin/site-text', 'Site text', FileText],
+    ]],
+    ['Insights', shop && [['/admin/analytics', 'Sales analytics', BarChart3], ['/admin/visitors', 'Visitors & carts', ActivityIcon], ['/admin/discounts', 'Discounts & campaigns', TicketPercent]]],
+    ['People', [shop && ['/admin/customers', 'Customers', Users], shop && ['/admin/enquiries', 'Enquiries & newsletter', Mail], can(staff, 'staff') && ['/admin/staff', 'Staff', UserCog]]],
+    ['Settings', shop && [['/admin/settings', 'Store settings', Settings], ['/admin/health', 'System health', ShieldCheck], ['/admin/activity', 'Activity log', History]]],
+  ].map(([label, links]) => [label, (links || []).filter(Boolean)]).filter(([, links]) => links.length);
 
   return (
     <div className={`adm-shell ${open ? 'is-open' : ''}`}>
@@ -163,7 +194,7 @@ function Shell({ children }) {
         ))}
         <div className="adm-me">
           <span className="adm-avatar" aria-hidden="true">{initials(staff.name)}</span>
-          <span><strong>{staff.name}</strong><small>{staff.role}</small></span>
+          <span><strong>{staff.name}</strong><small>{ROLE_NAME[staff.role] || staff.role}</small></span>
           <button className="adm-icon" title="Sign out" aria-label="Sign out" onClick={async () => { await logout(); navigate('/admin'); }}><LogOut size={17} /></button>
         </div>
       </aside>
@@ -171,29 +202,39 @@ function Shell({ children }) {
       <div className="adm-main">
         <header className="adm-top">
           <button className="adm-icon adm-top__menu" onClick={() => setOpen(true)} aria-label="Open menu"><Menu size={20} /></button>
-          <button className="adm-search-btn" onClick={() => setPalette(true)} aria-label="Search orders, customers and products">
-            <Search size={16} /> <span>Search orders, customers, products…</span> <kbd>Ctrl K</kbd>
+          <button className="adm-search-btn" onClick={() => setPalette(true)} aria-label={shop ? 'Search orders, customers and products' : 'Go to a page'}>
+            <Search size={16} /> <span>{shop ? 'Search orders, customers, products…' : 'Go to a page…'}</span> <kbd>Ctrl K</kbd>
           </button>
           <div className="adm-top__right">
             <button className="adm-icon" onClick={toggleTheme} aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} title={theme === 'dark' ? 'Light mode' : 'Dark mode'}>
               {theme === 'dark' ? <Sun size={19} /> : <Moon size={19} />}
             </button>
-            <div style={{ position: 'relative' }}>
+            {shop && <div style={{ position: 'relative' }}>
               <button className="adm-icon" onClick={() => setBell((b) => !b)} aria-label={`Alerts${alertCount ? `, ${alertCount}` : ''}`} aria-expanded={bell}>
                 <Bell size={19} />{alertCount > 0 && <span className="adm-dot">{alertCount}</span>}
               </button>
               {bell && <AlertsPopover items={live.alerts} onClose={() => setBell(false)} />}
-            </div>
+            </div>}
           </div>
         </header>
         <main className="adm-content" id="main">{children}</main>
       </div>
 
       <nav className="adm-tabbar" aria-label="Quick navigation">
-        <NavLink to="/admin" end className={({ isActive }) => (isActive ? 'is-active' : '')}><Home size={20} />Home</NavLink>
-        <NavLink to="/admin/orders" className={({ isActive }) => (isActive ? 'is-active' : '')}><Package size={20} />Orders{toPack > 0 && <span className="adm-dot">{toPack}</span>}</NavLink>
-        <NavLink to="/admin/products" className={({ isActive }) => (isActive ? 'is-active' : '')}><Boxes size={20} />Products</NavLink>
-        <button onClick={() => setBell(true)}><Bell size={20} />Alerts{alertCount > 0 && <span className="adm-dot">{alertCount}</span>}</button>
+        {shop ? (
+          <>
+            <NavLink to="/admin" end className={({ isActive }) => (isActive ? 'is-active' : '')}><Home size={20} />Home</NavLink>
+            <NavLink to="/admin/orders" className={({ isActive }) => (isActive ? 'is-active' : '')}><Package size={20} />Orders{toPack > 0 && <span className="adm-dot">{toPack}</span>}</NavLink>
+            <NavLink to="/admin/products" className={({ isActive }) => (isActive ? 'is-active' : '')}><Boxes size={20} />Products</NavLink>
+            <button onClick={() => setBell(true)}><Bell size={20} />Alerts{alertCount > 0 && <span className="adm-dot">{alertCount}</span>}</button>
+          </>
+        ) : (
+          <>
+            {can(staff, 'content.view') && <NavLink to="/admin/blog" className={({ isActive }) => (isActive ? 'is-active' : '')}><Newspaper size={20} />Blog</NavLink>}
+            {can(staff, 'content.site') && <NavLink to="/admin/content" className={({ isActive }) => (isActive ? 'is-active' : '')}><Megaphone size={20} />Website</NavLink>}
+            {can(staff, 'content.site') && <NavLink to="/admin/site-text" className={({ isActive }) => (isActive ? 'is-active' : '')}><FileText size={20} />Site text</NavLink>}
+          </>
+        )}
         <button onClick={() => setOpen(true)}><MoreHorizontal size={20} />More</button>
       </nav>
       {open && <button className="adm-overlay" aria-label="Close menu" onClick={() => setOpen(false)} style={{ border: 0 }} />}
@@ -237,18 +278,26 @@ function CommandPalette({ onClose }) {
   const [q, setQ] = useState('');
   const [res, setRes] = useState(null);
   const [active, setActive] = useState(0);
+  const shop = can(staff, 'view');
   const pages = [
-    ['Home', '/admin', Home], ['Orders', '/admin/orders', Package], ['Orders to pack', '/admin/orders?stage=to_pack', Package],
-    ['Products & stock', '/admin/products', Boxes], ['Customers', '/admin/customers', Users], ['Enquiries & newsletter', '/admin/enquiries', Mail], ['Returns', '/admin/returns', Undo2], ['Analytics', '/admin/analytics', BarChart3], ['Ingredients', '/admin/ingredients', Sprout], ['Licences & certificates', '/admin/compliance', Shield], ['Payments', '/admin/payments', CreditCard],
-    can(staff, 'staff') && ['Staff', '/admin/staff', UserCog], ['Activity log', '/admin/activity', History], ['Settings', '/admin/settings', Settings],
+    ...(shop ? [
+      ['Home', '/admin', Home], ['Orders', '/admin/orders', Package], ['Orders to pack', '/admin/orders?stage=to_pack', Package],
+      ['Products & stock', '/admin/products', Boxes], ['Customers', '/admin/customers', Users], ['Enquiries & newsletter', '/admin/enquiries', Mail], ['Returns', '/admin/returns', Undo2], ['Analytics', '/admin/analytics', BarChart3], ['Ingredients', '/admin/ingredients', Sprout], ['Licences & certificates', '/admin/compliance', Shield], ['Payments', '/admin/payments', CreditCard],
+    ] : []),
+    can(staff, 'content.view') && ['Blog posts', '/admin/blog', Newspaper],
+    (shop || can(staff, 'content.site')) && ['Website content', '/admin/content', Megaphone],
+    (shop || can(staff, 'content.site')) && ['Site text', '/admin/site-text', FileText],
+    can(staff, 'staff') && ['Staff', '/admin/staff', UserCog],
+    ...(shop ? [['Activity log', '/admin/activity', History], ['Settings', '/admin/settings', Settings]] : []),
   ].filter(Boolean);
 
   useEffect(() => {
-    if (q.trim().length < 2) { setRes(null); return undefined; }
+    // searching orders, customers and products is for shop roles only
+    if (!shop || q.trim().length < 2) { setRes(null); return undefined; }
     const ctl = new AbortController();
     const t = setTimeout(() => api(`/api/admin/search?q=${encodeURIComponent(q.trim())}`, { signal: ctl.signal }).then(setRes).catch(() => {}), 180);
     return () => { clearTimeout(t); ctl.abort(); };
-  }, [q]);
+  }, [q, shop]);
 
   const items = [
     ...(res?.orders || []).map((o) => ({ group: 'Orders', key: o.order_number, icon: Package, title: o.order_number, sub: o.name, meta: `${STATUS[o.status]?.[0] || o.status} · ${rs(o.total)}`, to: `/admin/orders/${o.order_number}` })),
@@ -271,7 +320,7 @@ function CommandPalette({ onClose }) {
         <div className="adm-palette__input">
           <Search size={18} />
           <input autoFocus value={q} onChange={(e) => { setQ(e.target.value); setActive(0); }} onKeyDown={onKey}
-            placeholder="Order number, customer name or phone, product…" aria-label="Search" role="combobox" aria-expanded="true" aria-controls="adm-results" />
+            placeholder={shop ? 'Order number, customer name or phone, product…' : 'Page name…'} aria-label="Search" role="combobox" aria-expanded="true" aria-controls="adm-results" />
           <kbd className="adm-muted" style={{ fontSize: 11 }}>Esc</kbd>
         </div>
         <div className="adm-palette__list" id="adm-results" role="listbox">
