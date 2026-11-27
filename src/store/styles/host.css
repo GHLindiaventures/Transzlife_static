@@ -105,3 +105,8 @@
     bottom: 84px
   }
 }
+
+/* Shop page renders as a single full-width column (without a left filter sidebar). */
+.tl-store:not(#tl-a):not(#tl-b) .shop.shop--solo {
+  display: block;
+}

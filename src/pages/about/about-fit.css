@@ -40,10 +40,9 @@
 /* ---------- the five chapters ---------- */
 /* equal space above and below the content (was 84–108px above, 4vh below) */
 .about-page .ast{--ast-nav:4vh}
-/* the chapter rail sits 46px further in than on Tranz-life (clear of this site's chat button),
-   so the content keeps that much more room on the right */
-.about-page .ast-rail{right:64px}
-.about-page .ast.is-pinned{--ast-rail:138px}
+/* the chapter rail sits on the left as a compact single circle that reveals all chapters on hover */
+.about-page .ast-rail{left:max(20px,env(safe-area-inset-left,0px));right:auto}
+.about-page .ast.is-pinned{--ast-rail:88px}
 /* stacked chapters (phones): one golden step between them */
 .about-page .ast.is-static .ast-scene{padding-top:var(--g5);padding-bottom:var(--g5)}
 /* phones: the five values sit two to a row, so the fifth spans the row instead of leaving half of it empty */
@@ -142,11 +141,11 @@
 .about-page .ast-orbit li.is-far{filter:saturate(.85)}
 
 /* ---------- chapter rail ----------
-   Same rail and behaviour; spacing on the golden scale (13px), and the chapters not in view are quieter
-   (dimmer, a little desaturated), so the active one, already larger with a gold ring, stands out clearly. */
-.about-page .ast-rail ol{gap:var(--g2)}
+   Single active circle on the left at rest; expands all chapters cleanly on hover/focus with golden spacing. */
+.about-page .ast-rail ol{gap:0}
+.about-page .ast-rail:hover li + li,.about-page .ast-rail:focus-within li + li{margin-top:var(--g2)}
 .about-page .ast-rail .ar-thumb{transition:opacity .3s,filter .3s,transform .35s var(--ease-expo),border-color .3s,box-shadow .3s}
-.about-page .ast-rail a:not(.is-on) .ar-thumb{opacity:.72;filter:saturate(.7)}
+.about-page .ast-rail a:not(.is-on) .ar-thumb{opacity:.78;filter:saturate(.75)}
 .about-page .ast-rail a:hover .ar-thumb,.about-page .ast-rail a:focus-visible .ar-thumb{opacity:1;filter:none}
 
 /* ---------- type: the few sizes still off the golden scale, snapped to it ---------- */

@@ -1003,37 +1003,76 @@ html { text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; 
 
 /* ================================================================
    OUR PRODUCTS carousel, on the golden-ratio tokens (phi = 1.618, Fibonacci spacing)
-   - framed: the track sits inside side margins (--fside) and clips there, so cards no
-     longer run under the screen edges; the arrows sit on the frame edges
-   - whole cards fill the frame (--fn per row); the image is a square, and the text below
-     follows Fibonacci steps 21 / 5 / 13 / 21 (image > name > size > price > button)
-   - progress line and "View all" share one row inside the same frame
-   - type, spacing and radii come from the phi tokens in golden.css
+   - full-width track (margin-inline: 0) with zero inner clip walls or vertical shadow bars
+   - desktop: soft horizontal feather beyond the gutter so off-screen card edges never slice shadows
+   - mobile: centered active card (scroll-snap-align: center) with balanced side peeks
    ================================================================ */
 .featured{
-  --fside:var(--s-6);        /* 55: frame margin at each end */
-  --fedge:var(--s-4);        /* 21: inner breathing room so the first/last card shadow fades out instead of being cut by the frame */
+  --fside:var(--s-6);        /* 55: outer frame gutter on desktop */
+  --fedge:var(--s-4);        /* 21: inner shadow breathing room */
   --fgap:var(--s-5);         /* 34 between cards */
   --ftop:var(--s-5);         /* 34 room for the hover lift */
   --fn:3;                    /* whole cards visible in the frame */
-  /* cqw = width of .featured__viewport (the container), so the scrollbar is not counted */
-  --fcard:clamp(260px,calc((100cqw - 2 * var(--fside) - 2 * var(--fedge) - (var(--fn) - 1) * var(--fgap)) / var(--fn)),440px);
+  --finset:max(calc(var(--fside) + var(--fedge)), calc((100cqw - (var(--fn) * 440px + (var(--fn) - 1) * var(--fgap))) / 2));
+  --fcard:clamp(260px, calc((100cqw - 2 * var(--finset) - (var(--fn) - 1) * var(--fgap)) / var(--fn)), 440px);
 }
 @media (min-width:1760px){.featured{--fn:4}}
-@media (max-width:1279px){.featured{--fgap:var(--s-4)}}                             /* 21 */
-@media (max-width:989px){.featured{--fside:var(--s-5);--fn:2.618}}                  /* 2 + 0.618 peek */
-@media (max-width:749px){.featured{--fside:var(--s-4);--fgap:var(--s-3);--fn:1.236;--fcard:calc((100cqw - 2 * var(--fside) - 2 * var(--fedge) - var(--fgap)) / 1.236)}}
-
-.featured__viewport{container-type:inline-size}
-.featured .featured__track{
-  margin-inline:var(--fside);                          /* the frame: cards clip here */
-  padding:var(--ftop) var(--fedge) var(--s-6);          /* bottom room so the card / button shadows are not sliced off... */
-  margin-bottom:calc(var(--s-5) - var(--s-6));          /* ...pulled back so the section height is unchanged */
-  scroll-padding-inline:var(--fedge);
-
+@media (max-width:1279px){.featured{--fgap:var(--s-5);--finset:calc(var(--s-5) + var(--fedge))}}
+@media (max-width:989px){
+  .featured{
+    --fside:var(--s-5);
+    --fgap:var(--s-4);
+    --fn:2.35;
+    --finset:var(--pad);
+    --fcard:calc((100cqw - 2 * var(--finset) - 2 * var(--fgap)) / 2.35);
+  }
 }
-.featured__arrow--prev{left:calc(var(--fside) - 27px)}
-.featured__arrow--next{right:calc(var(--fside) - 27px)}
+@media (max-width:749px){
+  .featured{
+    --fside:0px;
+    --fedge:0px;
+    --fgap:var(--s-4);
+    --finset:var(--pad);
+    --fcard:clamp(240px, 74vw, 330px);
+  }
+}
+
+.featured__viewport{container-type:inline-size;position:relative}
+.featured .featured__track{
+  margin-inline:0;
+  padding:var(--ftop) var(--finset) var(--s-6);
+  margin-bottom:calc(var(--s-5) - var(--s-6));
+  scroll-padding-inline:var(--finset);
+  -webkit-mask-image:linear-gradient(90deg, transparent 0, transparent max(0px, calc(var(--finset) - var(--fgap) + 8px)), #000 var(--finset), #000 calc(100% - var(--finset)), transparent calc(100% - max(0px, calc(var(--finset) - var(--fgap) + 8px))), transparent 100%);
+  mask-image:linear-gradient(90deg, transparent 0, transparent max(0px, calc(var(--finset) - var(--fgap) + 8px)), #000 var(--finset), #000 calc(100% - var(--finset)), transparent calc(100% - max(0px, calc(var(--finset) - var(--fgap) + 8px))), transparent 100%);
+}
+@media (max-width:989px){
+  .featured .featured__track{
+    -webkit-mask-image:none;
+    mask-image:none;
+  }
+}
+@media (max-width:749px){
+  .featured .featured__track{
+    padding:var(--ftop) 0 var(--s-6);
+    scroll-padding-inline:0;
+    scroll-snap-type:x mandatory;
+  }
+  .featured .pcard{
+    scroll-snap-align:center;
+  }
+}
+.featured__arrow--prev{left:max(10px, calc(var(--finset) - 27px))}
+.featured__arrow--next{right:max(10px, calc(var(--finset) - 27px))}
+@media (max-width:989px){
+  .featured__arrow--prev{left:12px}
+  .featured__arrow--next{right:12px}
+}
+@media (max-width:749px){
+  .featured__arrow{width:40px;height:40px}
+  .featured__arrow--prev{left:8px}
+  .featured__arrow--next{right:8px}
+}
 
 .featured__head{margin-bottom:var(--s-4)}                                          /* 21 */
 .featured__head h2{margin-bottom:var(--s-5)}                                       /* 34 */
@@ -1068,7 +1107,13 @@ html { text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; 
 /* progress line + View all: one row, aligned to the card frame */
 .featured__foot{
   display:flex;align-items:center;gap:var(--s-5);
-  margin:0 calc(var(--fside) + var(--fedge));
+  margin:0 var(--finset);
+}
+@media (max-width:749px){
+  .featured__foot{
+    margin:0 var(--pad);
+    gap:var(--s-4);
+  }
 }
 .featured__foot .featured__progress{flex:1;width:auto;max-width:none;margin:0}
 .featured__foot .featured__all{margin:0;flex:none}
