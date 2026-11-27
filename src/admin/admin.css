@@ -563,3 +563,8 @@ body.adm-body.adm-dark { background: #0d1410; }
 @media (prefers-reduced-motion: reduce) { .adm-annbar__track { animation: none; } }
 .adm-homesec { padding: var(--s-2) 0; border-bottom: 1px solid var(--line); }
 .adm-homesec:last-child { border-bottom: 0; }
+
+/* Blog: categories, tags and bylines (BlogTaxonomy.jsx) */
+.adm .cms-taxform { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px 14px; align-items: end; }
+.adm .cms-taxform .adm-actions { grid-column: 1 / -1; }
+.adm .adm-table tr.is-picked > td { background: var(--brand-soft); }

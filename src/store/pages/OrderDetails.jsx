@@ -14,6 +14,7 @@ import { loadOrderReturns } from '../data/returnStore';
 import { getProduct, onSale } from '../data/products';
 import { SITE } from '../data/site';
 import { statusLabel, PAY_LABEL, rs } from './Checkout';
+import { packshot } from '../lib/packshot';
 import '../styles/order.css';
 
 const day = (iso) => (iso ? new Date(iso).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }) : '');
@@ -188,8 +189,8 @@ export default function OrderDetails() {
                   const p = getProduct(it.id);
                   return (
                     <li key={`${it.id}-${it.pack}`} className="ord-item">
-                      <Link to={p ? `/products/${p.id}` : '/shop'} className="ord-item__img" style={{ background: p?.tint }}>
-                        {p?.images?.[0] ? <img src={p.images[0]} alt="" loading="lazy" /> : <Package size={22} />}
+                      <Link to={p ? `/products/${p.id}` : '/shop'} className="ord-item__img" style={{ background: '#fff' }}>
+                        {p?.images?.[0] ? <img src={packshot(p)} alt="" loading="lazy" /> : <Package size={22} />}
                       </Link>
                       <div className="ord-item__body">
                         <Link to={p ? `/products/${p.id}` : '/shop'} className="ord-item__name">{it.name}</Link>

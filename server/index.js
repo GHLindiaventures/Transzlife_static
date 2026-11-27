@@ -13,6 +13,8 @@ import Fastify from 'fastify';
 import { createChatApi } from './chat-api.js';
 import { createClientIp } from './client-ip.js';
 import { buildShopApp } from './shop/app.js';
+import { VIDEO_ORIGINS } from './cms/render.js';
+import { createSeoPages, injectHead } from './cms/seo-html.js';
 
 const ROOT = resolve(fileURLToPath(new URL('../dist', import.meta.url)));
 const PORT = Number(process.env.PORT || 3000);
@@ -47,7 +49,7 @@ const CSP = [
   "media-src 'self' blob: https://videos.pexels.com",
   "font-src 'self' data:",
   `connect-src 'self' ${RAZORPAY.join(' ')} ${CASHFREE.slice(1).join(' ')} https://lumberjack.razorpay.com ${MARKETING[0]} ${MARKETING[1]} ${MARKETING[3]} ${MEDIA_STORE} ${extra('CSP_CONNECT_EXTRA').join(' ')}`,
-  `frame-src ${RAZORPAY.join(' ')} ${CASHFREE.join(' ')} ${MARKETING[0]} https://www.google.com https://maps.google.com`,
+  `frame-src 'self' ${RAZORPAY.join(' ')} ${CASHFREE.join(' ')} ${MARKETING[0]} https://www.google.com https://maps.google.com ${VIDEO_ORIGINS.join(' ')}`,   // blog video embeds (server/cms/render.js)
   "object-src 'none'",
   "base-uri 'self'",
   `form-action 'self' ${RAZORPAY[1]} ${CASHFREE.slice(1).join(' ')}`,
@@ -69,7 +71,7 @@ const SECURITY = {
 const KNOWN_PAGE = new RegExp('^/(' + [
   '', 'about', 'science', 'sustainability', 'faq', 'contact', 'certifications',
   'shop', 'products(/[^/]+)?', 'product/[^/]+', 'concerns(/[^/]+)?', 'ingredients',
-  'blogs?(/[^/]+)?', 'journal(/[^/]+)?', 'policies/[^/]+',
+  'blogs?(/[^/]+)?', 'blog-preview/[^/]+', 'journal(/[^/]+)?', 'policies/[^/]+',
   'cart', 'login', 'checkout', 'order/[^/]+', 'track(/[^/]+)?', 'account', 'admin(/.*)?',
 ].join('|') + ')/?$');
 // Text files are compressed (Brotli, else gzip). Build files never change, so each is compressed once and kept.
@@ -85,7 +87,8 @@ function encode(buf, enc){
     : gzipSync(buf, { level: 9 });
 }
 
-function serveFile(req, res){
+/** page: optional { status, head } from the blog SEO pages (server/cms/seo-html.js). */
+function serveFile(req, res, page = null){
   let path;
   try { path = decodeURIComponent(req.url.split('?')[0]); } catch(e){ res.writeHead(400, SECURITY); return res.end(); }
   let file = normalize(join(ROOT, path));
@@ -96,6 +99,7 @@ function serveFile(req, res){
     if (extname(path) || !KNOWN_PAGE.test(path)) status = 404;
     file = join(ROOT, 'index.html');
   }
+  if (page?.status) status = page.status;
   const ext = extname(file).toLowerCase();
   const immutable = file.includes(`${sep}assets${sep}`) && FINGERPRINT.test(file);
   const headers = { ...SECURITY, 'Content-Type': TYPES[ext] || 'application/octet-stream',
@@ -117,7 +121,8 @@ function serveFile(req, res){
   const enc = /\bbr\b/.test(accept) ? 'br' : /\bgzip\b/.test(accept) ? 'gzip' : null;
   let body = readFileSync(file);
   // share previews (WhatsApp, Facebook) need absolute image / page URLs: filled from SITE_URL
-  if (ext === '.html' && SITE_URL) {
+  if (ext === '.html' && page?.head) body = Buffer.from(injectHead(body.toString('utf8'), page.head));   // absolute URLs already
+  else if (ext === '.html' && SITE_URL) {
     let html = body.toString('utf8').replaceAll('content="/', `content="${SITE_URL}/`);
     if (!html.includes('rel="canonical"')) {
       const canon = `${SITE_URL}${path === '/' ? '' : path}`;
@@ -154,12 +159,22 @@ try {
   app.all('/api/*', async (req, reply) => reply.code(503).send({ error: 'The shop is temporarily unavailable. Please try again shortly.', code: 'shop_down' }));
 }
 
-app.setNotFoundHandler((req, reply) => {
+// blog pages get their own title, description, share tags and structured data; old addresses redirect
+const seoPages = app.shop?.db ? createSeoPages({ db: app.shop.db, env: process.env }) : null;
+
+app.setNotFoundHandler(async (req, reply) => {
   if (req.url.startsWith('/api/')) return reply.code(404).send({ error: 'Not found.' });
   if (req.method !== 'GET' && req.method !== 'HEAD') return reply.code(405).send();
   if (!serveSite) return reply.code(404).send('Site not built.');
+  let page = null;
+  if (seoPages && !extname(req.url.split('?')[0])) {
+    try { page = await seoPages.handle(req.raw); } catch (e) { req.log.error(e, '[seo] blog page tags failed'); }   // the plain site still works
+  }
+  if (page?.redirect) {
+    return reply.code(page.status).headers({ ...SECURITY, Location: page.redirect, 'Cache-Control': page.status === 301 ? 'public, max-age=3600' : 'no-cache' }).send();
+  }
   reply.hijack();
-  serveFile(req.raw, reply.raw);
+  serveFile(req.raw, reply.raw, page);
 });
 
 await app.listen({ port: PORT, host: '0.0.0.0' });

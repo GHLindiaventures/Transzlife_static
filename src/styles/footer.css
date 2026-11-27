@@ -211,3 +211,30 @@
   .ft-bottom__links a+a::before{margin:0 8px}
   .ft-disclaimer{margin-top:8px;font-size:10px;line-height:1.4}
 }
+
+/* ==========================================================
+   Footer: natural botanical decorations + a softer start
+   (selectors are doubled with .footer.ft so they beat the older polish.css footer rules)
+   ========================================================== */
+/* the strip above the wave starts transparent, so it takes the colour of the section above instead of a hard band */
+.footer.ft .ft-decor {
+  height: clamp(100px, 9vw, 150px);
+  background: linear-gradient(180deg, transparent 0%, rgba(247, 239, 210, .55) 42%, #e3eddc 100%);
+}
+
+/* wordmark: leave room for the little leaf above the "z", so it never touches the text above or the tagline */
+.ft-logo { padding-top: .32em; }
+.ft-brand__tag { margin-top: 10px; }
+
+@media (max-width: 640px) {
+  .footer.ft .ft-decor { height: 40px; background: linear-gradient(180deg, transparent 0%, #e3eddc 100%); }
+  .ft-logo { padding-top: .4em; font-size: 34px; }
+  .ft-brand { justify-items: center; text-align: center; }
+  .ft-body { padding-top: 16px; }
+}
+
+/* very small phones: the e-mail field gets the full width (its hint was cut), the button sits under it */
+@media (max-width: 380px) {
+  .ft-sub { grid-template-columns: minmax(0, 1fr); }
+  .ft-sub__btn { width: 100%; justify-content: center; }
+}

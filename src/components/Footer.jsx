@@ -144,9 +144,6 @@ function Decor() {
           </svg>
         </span>
       </div>
-      <svg className="ft-leaf ft-leaf--a" viewBox="0 0 64 64"><path d="M6 54C10 26 30 8 58 4c-2 30-22 50-52 50z" /><path d="M6 54 40 20" /></svg>
-      <svg className="ft-leaf ft-leaf--b" viewBox="0 0 64 64"><path d="M6 54C10 26 30 8 58 4c-2 30-22 50-52 50z" /><path d="M6 54 40 20" /></svg>
-      <svg className="ft-leaf ft-leaf--c" viewBox="0 0 64 64"><path d="M6 54C10 26 30 8 58 4c-2 30-22 50-52 50z" /><path d="M6 54 40 20" /></svg>
     </div>
   );
 }
@@ -193,8 +190,6 @@ const Footer = forwardRef(function Footer(_, ref) {
       <Decor />
 
       <div className="ft-body">
-        <svg className="ft-leaf ft-leaf--d" viewBox="0 0 64 64" aria-hidden="true"><path d="M6 54C10 26 30 8 58 4c-2 30-22 50-52 50z" /><path d="M6 54 40 20" /></svg>
-        <svg className="ft-leaf ft-leaf--e" viewBox="0 0 64 64" aria-hidden="true"><path d="M6 54C10 26 30 8 58 4c-2 30-22 50-52 50z" /><path d="M6 54 40 20" /></svg>
         <div className="ft-grid">
           {/* brand */}
           <div className="ft-brand">

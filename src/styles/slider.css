@@ -837,3 +837,36 @@
     transition: none !important;
   }
 }
+/* full product names: each line is measured by FitWord (ProductSlider.jsx) so it never clips */
+.blendy-word-text { white-space: nowrap; }
+.blendy-word-line { display: block; width: max-content; margin-inline: auto; }
+
+/* Desktop / tablet: the showcase AND the certification strip under it fit inside one screen.
+   page header stack (announcement bar + menu) is ~89px and the strip is ~100px tall, so the showcase takes the rest. */
+@media (min-width: 750px) {
+  .blendy-hero-stage {
+    --hero-header: 89px;
+    --hero-strip: 100px;
+    --hero-extra: 50px;   /* a little taller than the exact fit, so the product has more room */
+    height: clamp(520px, calc(100vh - var(--hero-header) - var(--hero-strip) + var(--hero-extra)), 910px);
+    height: clamp(520px, calc(100svh - var(--hero-header) - var(--hero-strip) + var(--hero-extra)), 910px);
+    min-height: 520px;
+    max-height: 910px;
+  }
+}
+
+/* Tab row: every product stays reachable. It scrolls sideways when the names don't fit (the selected tab is
+   centred by ProductSlider.jsx) and the soft fade at both ends shows there is more to see. */
+.blendy-nav-tabs { min-width: 0; max-width: 100%; }
+.blendy-tab-btn { flex: 0 0 auto; white-space: nowrap; }
+@media (max-width: 749px) {
+  .blendy-nav-tabs {
+    padding-inline: 16px;
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%);
+  }
+}
+
+/* Exact fit: the showcase is as wide as the page content (the strip below it), not 100vw, which is wider than the
+   visible page whenever a scrollbar is showing and pushed the showcase past both edges. */
+.blendy-hero-stage { width: 100%; margin-left: 0; margin-right: 0; }

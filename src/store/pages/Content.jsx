@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { ArrowRight, Sprout, Microscope, Factory, PackageCheck, FlaskConical, ShieldCheck, Leaf, HeartHandshake, Target, Eye, Phone, Mail, MapPin, Clock, Check, Dna, BrainCircuit } from 'lucide-react';
 import { SITE } from '../data/site';
-import { ARTICLES, getArticle } from '../data/articles';
+import { BLOGS_URL, blogUrl, loadBlogList, readTime, useBlogList, usePost, usePreview } from '../lib/blog';
+import { usePageMeta } from '../../lib/pageMeta';
 import { getConcern } from '../data/concerns';
 import { PRODUCTS } from '../data/products';
 import { useCatalog } from '../lib/catalog';
@@ -133,56 +134,41 @@ export function About() {
 }
 
 /* ---------------- Blogs (wellness journal) ---------------- */
-export const BLOGS_URL = '/blogs';
-export const blogUrl = (id) => `${BLOGS_URL}/${id}`;
+// Articles come from the blog CMS (GET /api/blog/*): only published posts are ever returned.
+// The article body is HTML rendered on the server from the editor document (server/cms/render.js).
+export { BLOGS_URL, blogUrl };
 
-/** Inline text: **bold** and *italic*. */
-function Rich({ text }) {
-  const parts = String(text).split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g).filter(Boolean);
-  return parts.map((s, i) => (
-    s.startsWith('**') ? <strong key={i}>{s.slice(2, -2)}</strong>
-      : s.startsWith('*') ? <em key={i}>{s.slice(1, -1)}</em>
-        : <span key={i}>{s}</span>
-  ));
+const dateIST = (iso) => (iso ? new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' }) : '');
+const sameDay = (a, b) => dateIST(a) === dateIST(b);
+const metaLine = (a) => [a.category?.name, readTime(a.readingMinutes)].filter(Boolean).join(' · ');
+
+function BlogLoading() {
+  return <div className="page-loading" aria-busy="true" aria-label="Loading" />;
 }
 
-/** One body block: paragraph, list, table, callout or FAQ list. */
-function Block({ b }) {
-  if (typeof b === 'string') return <p><Rich text={b} /></p>;
-  if (b.ul) return <ul>{b.ul.map((t, i) => <li key={i}><Rich text={t} /></li>)}</ul>;
-  if (b.ol) return <ol>{b.ol.map((t, i) => <li key={i}><Rich text={t} /></li>)}</ol>;
-  if (b.callout) return <p className="article__callout"><Rich text={b.callout} /></p>;
-  if (b.table) {
-    const [head, ...rows] = b.table;
-    return (
-      <div className="article__table">
-        <table>
-          <thead><tr>{head.map((h) => <th key={h} scope="col">{h}</th>)}</tr></thead>
-          <tbody>{rows.map((r) => <tr key={r[0]}>{r.map((c, i) => (i === 0 ? <th key={i} scope="row">{c}</th> : <td key={i}><Rich text={c} /></td>))}</tr>)}</tbody>
-        </table>
-      </div>
-    );
-  }
-  if (b.faq) {
-    return (
-      <dl className="article__faq">
-        {b.faq.map(([q, a]) => (
-          <div key={q}><dt>{q}</dt><dd><Rich text={a} /></dd></div>
-        ))}
-      </dl>
-    );
-  }
-  return null;
+function BlogError({ onRetry }) {
+  return (
+    <section className="container empty-page">
+      <h1>We could not load the blogs just now</h1>
+      <p>Please check your connection and try again.</p>
+      <div className="empty-page__ctas"><button type="button" className="btn btn--lg" onClick={onRetry}>Try again</button></div>
+    </section>
+  );
 }
-const blocks = (body) => (Array.isArray(body) ? body : [body]);
 
 export function Journal() {
   useCatalog();
   useTitle('Blogs', 'TranzLife blogs: practical, easy-to-read guides on quitting smoking, lung, liver and menstrual wellness, immunity and everyday Ayurvedic habits.');
-  const [cat, setCat] = useState('');
-  const cats = [...new Set(ARTICLES.map((a) => a.category))];
-  const list = ARTICLES.filter((a) => !cat || a.category === cat);
-  const [first, ...rest] = list;
+  const data = useBlogList();
+  const [params, setParams] = useSearchParams();
+  const cat = params.get('category') || '';
+  const setCat = (slug) => setParams(slug ? { category: slug } : {}, { replace: true });
+  if (!data) return <BlogLoading />;
+  if (data.error) return <BlogError onRetry={() => loadBlogList({ retry: true })} />;
+  const list = data.posts.filter((a) => !cat || a.category?.slug === cat);
+  // a post marked "featured" leads the page; otherwise the newest one
+  const first = (!cat && list.find((a) => a.featured)) || list[0];
+  const rest = list.filter((a) => a !== first);
   return (
     <>
       <section className="shop-hero">
@@ -193,15 +179,19 @@ export function Journal() {
         </div>
       </section>
       <section className="container section--tight">
-        <div className="tabs">
-          <button className={!cat ? 'is-active' : ''} onClick={() => setCat('')}>All</button>
-          {cats.map((c) => <button key={c} className={cat === c ? 'is-active' : ''} onClick={() => setCat(c)}>{c}</button>)}
-        </div>
-        {first && (
-          <Link to={blogUrl(first.id)} className="feature-article">
-            <span className="feature-article__img"><img src={first.image} alt="" /></span>
+        {data.categories.length > 1 && (
+          <div className="tabs" role="toolbar" aria-label="Filter by category">
+            <button type="button" className={!cat ? 'is-active' : ''} aria-pressed={!cat} onClick={() => setCat('')}>All</button>
+            {data.categories.map((c) => (
+              <button type="button" key={c.slug} className={cat === c.slug ? 'is-active' : ''} aria-pressed={cat === c.slug} onClick={() => setCat(c.slug)}>{c.name}</button>
+            ))}
+          </div>
+        )}
+        {!first ? <p className="note">No articles here yet. Please check back soon.</p> : (
+          <Link to={blogUrl(first.slug)} className="feature-article">
+            <span className="feature-article__img">{first.image && <img src={first.image} alt="" />}</span>
             <span className="feature-article__body">
-              <span className="acard__meta">{first.category} · {first.readTime}</span>
+              <span className="acard__meta">{metaLine(first)}</span>
               <h2>{first.title}</h2>
               <p>{first.excerpt}</p>
               <span className="link-arrow">Read article <ArrowRight size={16} /></span>
@@ -210,12 +200,12 @@ export function Journal() {
         )}
         <div className="grid-3">
           {rest.map((a) => (
-            <Link key={a.id} to={blogUrl(a.id)} className="acard">
-              <span className="acard__img"><img src={a.image} alt="" loading="lazy" /></span>
-              <span className="acard__meta">{a.category} · {a.readTime}</span>
+            <Link key={a.slug} to={blogUrl(a.slug)} className="acard">
+              <span className="acard__img">{a.image && <img src={a.image} alt="" loading="lazy" decoding="async" />}</span>
+              <span className="acard__meta">{metaLine(a)}</span>
               <h3>{a.title}</h3>
               <p>{a.excerpt}</p>
-              <span className="acard__date">{fmtDate(a.date)}</span>
+              <span className="acard__date">{dateIST(a.publishedAt)}</span>
             </Link>
           ))}
         </div>
@@ -225,48 +215,72 @@ export function Journal() {
 }
 
 export function Article() {
-  useCatalog();
   const { id } = useParams();
-  const a = getArticle(id);
-  useTitle(a?.title, a?.excerpt);
-  if (!a) return <NotFound />;
+  return <ArticleView {...usePost(id)} />;
+}
+
+/** /blog-preview/:id — any article (drafts too) exactly as the site would show it. Staff only: the data comes
+ *  from the dashboard API, which needs a staff sign-in; never indexed. */
+export function ArticlePreview() {
+  const { id } = useParams();
+  return <ArticleView {...usePreview(id)} preview />;
+}
+
+function ArticleView({ data, error, loading, preview = false }) {
+  useCatalog();
+  const navigate = useNavigate();
+  const a = data?.post;
+  const seo = a?.seo;
+  usePageMeta(a ? (seo.title || a.title) : null, a ? (seo.description || a.excerpt) : null, {
+    exact: !!seo?.title, image: a ? (seo.og.image || a.image || '') : '', type: a ? 'article' : 'website',
+    noindex: preview || (a ? !seo.robots.index : false), canonical: seo?.canonical || '',
+  });
+  if (loading) return <BlogLoading />;
+  if (data?.redirect) return <Navigate to={data.redirect} replace />;
+  if (preview && (error?.status === 401 || error?.status === 403)) {
+    return (
+      <section className="container empty-page">
+        <h1>Sign in to preview</h1>
+        <p>Article previews are only for the TranzLife team.</p>
+        <div className="empty-page__ctas"><Link to="/admin" className="btn btn--lg">Go to the dashboard</Link></div>
+      </section>
+    );
+  }
+  if (error?.status === 404 || (data && !a)) return <NotFound />;
+  if (error) return <BlogError onRetry={() => navigate(0)} />;
+
   const concern = getConcern(a.concern);
-  const products = PRODUCTS.filter((p) => p.concerns.includes(a.concern)).slice(0, 2);
-  // same-topic articles first, then the rest
-  const more = ARTICLES.filter((x) => x.id !== a.id)
-    .sort((x, y) => (y.concern === a.concern) - (x.concern === a.concern))
-    .slice(0, 3);
+  const products = a.concern ? PRODUCTS.filter((p) => p.concerns.includes(a.concern)).slice(0, 2) : [];
+  // links inside the article to pages on this site open without a full page reload
+  const onBodyClick = (e) => {
+    const link = e.target.closest?.('a[href^="/"]');
+    if (!link || link.target || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    navigate(link.getAttribute('href'));
+  };
   return (
     <>
+      {preview && (
+        <p className="article__preview-bar" role="status">
+          Preview{a.status && a.status !== 'published' ? ` · ${a.status === 'draft' ? 'draft, not on the website yet' : a.status}` : ''}
+        </p>
+      )}
       <article className="article">
         <header className="container article__head">
-          <Breadcrumbs items={[['Blogs', BLOGS_URL], [a.category]]} />
-          <p className="acard__meta">{a.category} · {a.readTime} · {fmtDate(a.date)}</p>
+          <Breadcrumbs items={a.category ? [['Blogs', BLOGS_URL], [a.category.name, `${BLOGS_URL}?category=${a.category.slug}`]] : [['Blogs', BLOGS_URL]]} />
+          <p className="acard__meta">
+            {metaLine(a)} · <time dateTime={a.publishedAt}>{dateIST(a.publishedAt)}</time>
+            {a.updatedAt && !sameDay(a.updatedAt, a.publishedAt) && <> · Updated <time dateTime={a.updatedAt}>{dateIST(a.updatedAt)}</time></>}
+          </p>
           <h1>{a.title}</h1>
-          <p className="lead">{a.excerpt}</p>
+          {a.excerpt && <p className="lead">{a.excerpt}</p>}
+          {a.author && <p className="article__byline">By <strong>{a.author.name}</strong>{a.author.title && <>, {a.author.title}</>}</p>}
         </header>
-        <div className="container article__img"><img src={a.image} alt={a.imageAlt || ''} /></div>
+        {a.image && <div className="container article__img"><img src={a.image} alt={a.imageAlt || ''} fetchpriority="high" /></div>}
         <div className="container article__layout">
           <div className="article__body">
-            {a.intro && <section>{a.intro.map((b, i) => <Block key={i} b={b} />)}</section>}
-            {a.sections.map(([h, body], k) => (
-              <section key={k}>
-                <h2>{h}</h2>
-                {blocks(body).map((b, i) => <Block key={i} b={b} />)}
-                {(a.figures || []).filter((f) => f.after === k).map((f) => (
-                  <figure key={f.src} className="article__figure">
-                    <img src={f.src} alt={f.alt} loading="lazy" decoding="async" />
-                    {f.caption && <figcaption>{f.caption}</figcaption>}
-                  </figure>
-                ))}
-              </section>
-            ))}
-            {a.cta && (
-              <div className="article__cta">
-                <p><Rich text={a.cta.text} /></p>
-                <Link to={a.cta.to} className="btn">{a.cta.label} <ArrowRight size={16} /></Link>
-              </div>
-            )}
+            {/* server-rendered from an allow-list of elements (server/cms/render.js); clicks only route internal links */}
+            <div className="article__content" onClick={onBodyClick} dangerouslySetInnerHTML={{ __html: a.html }} />
             <p className="note">{a.disclaimer || 'This article is for general information only and is not medical advice. Please consult a qualified healthcare professional about your health.'}</p>
           </div>
           <aside className="article__aside">
@@ -279,20 +293,22 @@ export function Article() {
           </aside>
         </div>
       </article>
-      <section className="section section--sand">
-        <div className="container">
-          <SectionHead eyebrow="Keep reading" title="More blogs" action={<Link to={BLOGS_URL} className="link-arrow">All blogs <ArrowRight size={16} /></Link>} />
-          <div className="grid-3">
-            {more.map((m) => (
-              <Link key={m.id} to={blogUrl(m.id)} className="acard">
-                <span className="acard__img"><img src={m.image} alt="" loading="lazy" /></span>
-                <span className="acard__meta">{m.category}</span>
-                <h3>{m.title}</h3>
-              </Link>
-            ))}
+      {data.related.length > 0 && (
+        <section className="section section--sand">
+          <div className="container">
+            <SectionHead eyebrow="Keep reading" title="More blogs" action={<Link to={BLOGS_URL} className="link-arrow">All blogs <ArrowRight size={16} /></Link>} />
+            <div className="grid-3">
+              {data.related.map((m) => (
+                <Link key={m.slug} to={blogUrl(m.slug)} className="acard">
+                  <span className="acard__img">{m.image && <img src={m.image} alt="" loading="lazy" decoding="async" />}</span>
+                  <span className="acard__meta">{m.category?.name}</span>
+                  <h3>{m.title}</h3>
+                </Link>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
     </>
   );
 }

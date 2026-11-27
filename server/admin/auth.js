@@ -13,14 +13,20 @@ const SESSION_HOURS = 12;
 const MAX_FAILS = 5;
 const LOCK_MINUTES = 15;
 
-export const ROLES = ['owner', 'manager', 'support'];
-// what each role may do; every admin route declares the permission it needs
+export const ROLES = ['owner', 'manager', 'support', 'content_manager'];
+// Blog CMS. content.site = website copy (Site text, announcement bar, homepage sections).
+export const CONTENT_PERMS = ['content.view', 'content.edit', 'content.publish', 'content.delete', 'content.media',
+  'content.taxonomy', 'content.seo', 'content.redirects', 'content.analytics', 'content.site'];
+// What each role may do; every admin route declares the permission it needs.
+// 'view' opens the shop (orders, customers, payments ...): content_manager never gets it.
 const PERMS = {
-  owner:   ['view', 'orders.edit', 'orders.note', 'products.edit', 'stock.edit', 'refunds', 'customers.edit', 'staff', 'settings'],
-  manager: ['view', 'orders.edit', 'orders.note', 'products.edit', 'stock.edit', 'refunds', 'customers.edit'],
+  owner:   ['view', 'orders.edit', 'orders.note', 'products.edit', 'stock.edit', 'refunds', 'customers.edit', 'staff', 'settings', ...CONTENT_PERMS],
+  manager: ['view', 'orders.edit', 'orders.note', 'products.edit', 'stock.edit', 'refunds', 'customers.edit', 'content.site'],
   support: ['view', 'orders.note'],
+  content_manager: [...CONTENT_PERMS],
 };
-export const can = (staff, perm) => !!staff && (PERMS[staff.role] || []).includes(perm);
+/** `perm` is one permission, or a list meaning "any of these". */
+export const can = (staff, perm) => !!staff && [].concat(perm).some((p) => (PERMS[staff.role] || []).includes(p));
 export const permsOf = (role) => PERMS[role] || [];
 
 const sha256 = (s) => createHash('sha256').update(s).digest('hex');

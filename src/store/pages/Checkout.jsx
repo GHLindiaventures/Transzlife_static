@@ -11,6 +11,7 @@ import { useAuth } from '../context/AuthContext';
 import { api, newIdempotencyKey } from '../lib/api';
 import { getBuyNow, clearBuyNow } from '../lib/checkoutIntent';
 import { track, trackIds } from '../lib/track';
+import { packshot } from '../lib/packshot';
 import '../styles/account.css';
 
 function Summary({ compact, extra }) {
@@ -22,7 +23,7 @@ function Summary({ compact, extra }) {
         <ul className="summary__lines">
           {detailed.map((l) => (
             <li key={l.key}>
-              <span className="summary__thumb" style={{ background: l.product.tint }}><img src={l.product.images[0]} alt="" /><b>{l.qty}</b></span>
+              <span className="summary__thumb" style={{ background: '#fff' }}><img src={packshot(l.product)} alt="" /><b>{l.qty}</b></span>
               <span><strong>{l.product.short}</strong><small>{l.product.size}{l.pack > 1 ? ` · Pack of ${l.pack}` : ''}</small></span>
               <span>{inr(l.total)}</span>
             </li>
@@ -62,7 +63,7 @@ export function Cart() {
           <ul className="cart-table">
             {detailed.map((l) => (
               <li key={l.key}>
-                <Link to={`/products/${l.id}`} className="cart__thumb cart__thumb--lg" style={{ background: l.product.tint }}><img src={l.product.images[0]} alt="" /></Link>
+                <Link to={`/products/${l.id}`} className="cart__thumb cart__thumb--lg" style={{ background: '#fff' }}><img src={packshot(l.product)} alt="" /></Link>
                 <div className="cart-table__info">
                   <Link to={`/products/${l.id}`}><strong>{l.product.name}</strong></Link>
                   <small>{l.product.size}{l.pack > 1 ? ` · Pack of ${l.pack}` : ''} · {inr(l.unit)} each</small>
@@ -167,7 +168,7 @@ function CheckoutSummary({ quote }) {
           const p = getProduct(l.id);
           return (
             <li key={`${l.id}:${l.pack}`}>
-              <span className="summary__thumb" style={{ background: p?.tint }}>{p && <img src={p.images[0]} alt="" />}<b>{l.qty}</b></span>
+              <span className="summary__thumb" style={{ background: '#fff' }}>{p && <img src={packshot(p)} alt="" />}<b>{l.qty}</b></span>
               <span><strong>{p?.short || l.name}</strong><small>{l.size}{l.pack > 1 ? ` · Pack of ${l.pack}` : ''}</small></span>
               <span>{rs(l.total)}</span>
             </li>

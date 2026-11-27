@@ -1,19 +1,19 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { productUrl, STORE_ID } from '../../content/site.js';
 
 // The 6 TranzLife Targeted Ayurvedic Formulations
 // Static centered product image + top-to-bottom falling letters & floating botanicals.
-// Strictly NO prices displayed. Transitions automatically every 2 seconds.
+// Strictly NO prices displayed. Changes only when the visitor picks a product (tabs, arrows, keyboard).
 const ALL_FORMULATIONS = [
   {
     id: 'gummies',
     navTitle: 'PulmoClear',
     fullName: 'PulmoClear™ Lung Booster Gummies',
     subTitle: 'Respiratory Clarity & Daily Lung Detox',
-    bgWord: 'PULMO',
+    bgWord: 'PULMOCLEAR',
     bgColor: '#bca7dc', // Soft berry lilac matching Blendy reference & natural berry gummies
-    bottleImg: '/assets/product-4.png?v=4',
+    bottleImg: '/assets/product-4.png?v=5',
     alt: 'PulmoClear™ Lung Booster Gummies packaging',
     tag: 'Lung Detox',
     ingredients: [
@@ -32,9 +32,9 @@ const ALL_FORMULATIONS = [
     navTitle: 'LiverDetox',
     fullName: 'LiverDetox™ Polyherbal Concoction',
     subTitle: 'Hepatic Protection, Cell Repair & Digestion',
-    bgWord: 'LIVER',
+    bgWord: 'LIVERDETOX',
     bgColor: '#dfbe95', // Warm golden herbal ochre
-    bottleImg: '/assets/product-5.png?v=4',
+    bottleImg: '/assets/product-5.png?v=5',
     alt: 'LiverDetox™ Polyherbal Concoction bottle',
     tag: 'Liver Booster',
     ingredients: [
@@ -53,9 +53,9 @@ const ALL_FORMULATIONS = [
     navTitle: 'CycleRelief',
     fullName: 'CycleRelief™ Menstrual Comfort Roll-On',
     subTitle: 'Abdominal Soothing & Cramp Relief Ritual',
-    bgWord: 'CYCLE',
+    bgWord: 'CYCLERELIEF',
     bgColor: '#c8b3e6', // Calming orchid lavender
-    bottleImg: '/assets/product-1.png?v=4',
+    bottleImg: '/assets/product-1.png?v=5',
     alt: 'CycleRelief™ Menstrual Comfort Roll-On applicator',
     tag: 'Period Care',
     ingredients: [
@@ -74,9 +74,9 @@ const ALL_FORMULATIONS = [
     navTitle: 'Energy Booster',
     fullName: 'TranzLife Energy Booster™',
     subTitle: 'Bioactive Stamina, Vitality & Physical Endurance',
-    bgWord: 'ENERGY',
+    bgWord: 'ENERGY BOOSTER',
     bgColor: '#ad98d6', // Vibrant energized royal violet
-    bottleImg: '/assets/product-2.png?v=4',
+    bottleImg: '/assets/product-2.png?v=5',
     alt: 'TranzLife Energy Booster™ bottle',
     tag: 'Active Vitality',
     ingredients: [
@@ -97,7 +97,7 @@ const ALL_FORMULATIONS = [
     subTitle: 'Morning Awakening & Vitality Self-Care Ritual',
     bgWord: 'REVIVA',
     bgColor: '#e8bfa1', // Warm sunrise apricot peach
-    bottleImg: '/assets/product-3.png?v=4',
+    bottleImg: '/assets/product-3.png?v=5',
     alt: 'Reviva™ Botanical Massage Roll-On applicator',
     tag: 'Vitality Ritual',
     ingredients: [
@@ -116,9 +116,9 @@ const ALL_FORMULATIONS = [
     navTitle: 'BreatheFree',
     fullName: 'BreatheFree™ Aromatherapy Inhaler',
     subTitle: 'Fast-Acting Nicotine & Smoking Urge Relief',
-    bgWord: 'BREATHE',
+    bgWord: 'BREATHEFREE',
     bgColor: '#9ecfc5', // Crisp cooling peppermint teal
-    bottleImg: '/assets/product-6.png?v=4',
+    bottleImg: '/assets/product-6.png?v=5',
     alt: 'BreatheFree™ Aromatherapy Inhaler',
     tag: 'Quit Smoking Support',
     ingredients: [
@@ -132,7 +132,63 @@ const ALL_FORMULATIONS = [
       { key: 'base-r', zone: 'base-right', src: '/assets/ingredients/cutout/eucalyptus.webp', size: 100, rot: 25, delay: '0.25s', label: 'Eucalyptus' },
     ],
   },
+  {
+    id: 'drops',
+    navTitle: 'BreatheFree Drops',
+    fullName: 'BreatheFree™ Respiratory Wellness Drops',
+    subTitle: 'Respiratory Wellness · Breathe Easy, Stay Clear',
+    bgWord: 'BREATHEFREE DROPS',
+    bgColor: '#a9cdb4', // Fresh eucalyptus green
+    bottleImg: '/assets/product-7.png?v=5',
+    alt: 'BreatheFree™ Respiratory Wellness Drops 30 ml bottle',
+    tag: 'Respiratory Wellness',
+    ingredients: [
+      { key: 'tl-bokeh', zone: 'top-left-bokeh', src: '/assets/ingredients/cutout/peppermint.webp', blur: 10, size: 130, rot: -15, delay: '0.04s', label: 'Peppermint' },
+      { key: 'tl-inner', zone: 'top-left-inner', src: '/assets/ingredients/cutout/tulsi.webp', size: 80, rot: -8, delay: '0.12s', label: 'Tulsi' },
+      { key: 'mid-l', zone: 'mid-left', src: '/assets/ingredients/cutout/ginger.webp', size: 84, rot: 14, delay: '0.18s', label: 'Ginger' },
+      { key: 'base-l', zone: 'base-left', src: '/assets/ingredients/cutout/peppermint.webp', size: 105, rot: -22, delay: '0.22s', label: 'Peppermint' },
+      { key: 'tr-bokeh', zone: 'top-right-bokeh', src: '/assets/ingredients/cutout/tulsi.webp', blur: 10, size: 120, rot: 18, delay: '0.08s', label: 'Tulsi' },
+      { key: 'tr-inner', zone: 'top-right-inner', src: '/assets/ingredients/cutout/eucalyptus.webp', size: 80, rot: 10, delay: '0.15s', label: 'Eucalyptus' },
+      { key: 'mid-r', zone: 'mid-right', src: '/assets/ingredients/cutout/ginger.webp', size: 84, rot: -12, delay: '0.20s', label: 'Ginger' },
+      { key: 'base-r', zone: 'base-right', src: '/assets/ingredients/cutout/peppermint.webp', size: 100, rot: 25, delay: '0.25s', label: 'Peppermint' },
+    ],
+  },
 ];
+
+
+/**
+ * The big white product name behind the bottle. It shows the FULL name and always fits: the font size is the
+ * normal CSS size, scaled down only as far as needed so the longest line fits the stage width (no clipping, no
+ * overflow). Names with two words (Energy Booster, BreatheFree Drops) stack on two lines, so they stay big.
+ */
+function FitWord({ word }) {
+  const ref = useRef(null);
+  const lines = word.split(' ');
+  useLayoutEffect(() => {
+    const el = ref.current;
+    const box = el?.parentElement;
+    if (!el || !box) return undefined;
+    const fit = () => {
+      el.style.fontSize = '';
+      const cap = parseFloat(getComputedStyle(el).fontSize) || 160;     // the size the stylesheet wants
+      el.style.fontSize = '100px';
+      let widest = 0;
+      el.querySelectorAll('.blendy-word-line').forEach((l) => { widest = Math.max(widest, l.getBoundingClientRect().width); });
+      const room = box.clientWidth * 0.94;
+      el.style.fontSize = widest > 0 ? `${Math.floor(Math.min(cap, (100 * room) / widest))}px` : '';
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(box);
+    if (document.fonts?.ready) document.fonts.ready.then(fit);
+    return () => ro.disconnect();
+  }, [word]);
+  return (
+    <span ref={ref} key={word} className="blendy-word-text" aria-label={word}>
+      {lines.map((l) => <span className="blendy-word-line" key={l} aria-hidden="true">{l}</span>)}
+    </span>
+  );
+}
 
 /** productIds: shop product ids in the order to show (from the dashboard); empty = all six. */
 export default function ProductSlider({ productIds }) {
@@ -144,6 +200,7 @@ export default function ProductSlider({ productIds }) {
   const [activeIdx, setActiveIdx] = useState(0);
   const [reduceMotion, setReduceMotion] = useState(false);
   const timerRef = useRef(null);
+  const tabsRef = useRef(null);
 
   // Detect accessibility preference for reduced motion
   useEffect(() => {
@@ -166,15 +223,20 @@ export default function ProductSlider({ productIds }) {
     setActiveIdx((prev) => (prev + 1) % FORMULATIONS.length);
   }, []);
 
-  // Automatic transition every 2 seconds without requiring user interaction
+  // Keep the selected product's tab in view: when the tab row scrolls sideways (phones), slide it so the active
+  // tab sits in the middle. Only the tab row moves, never the page.
   useEffect(() => {
-    if (reduceMotion) return undefined;
-    timerRef.current = setInterval(() => {
-      setActiveIdx((prev) => (prev + 1) % FORMULATIONS.length);
-    }, 2000);
+    const nav = tabsRef.current;
+    const tab = nav?.querySelector('.blendy-tab-btn.is-active');
+    if (!nav || !tab) return;
+    const n = nav.getBoundingClientRect();
+    const t = tab.getBoundingClientRect();
+    const left = nav.scrollLeft + (t.left - n.left) - (n.width - t.width) / 2;
+    nav.scrollTo({ left: Math.max(0, left), behavior: reduceMotion ? 'auto' : 'smooth' });
+  }, [activeIdx, reduceMotion]);
 
-    return () => clearInterval(timerRef.current);
-  }, [reduceMotion]);
+  // No automatic transition: the visitor changes products with the tabs, the arrows or the keyboard.
+
 
   // Keyboard navigation (Left / Right arrow keys)
   useEffect(() => {
@@ -207,7 +269,7 @@ export default function ProductSlider({ productIds }) {
           </Link>
         </div>
 
-        <nav className="blendy-nav-tabs" aria-label="Formulation selector">
+        <nav className="blendy-nav-tabs" ref={tabsRef} aria-label="Formulation selector">
           {FORMULATIONS.map((formulation, idx) => {
             const isActive = idx === activeIdx;
             return (
@@ -240,9 +302,7 @@ export default function ProductSlider({ productIds }) {
       <div className="blendy-center-stage">
         {/* Large background letters: falling smoothly from top to bottom */}
         <div className="blendy-backdrop-word" aria-hidden="true">
-          <span key={current.bgWord} className="blendy-word-text">
-            {current.bgWord}
-          </span>
+          <FitWord key={current.bgWord} word={current.bgWord} />
         </div>
 
         {/* Floating Botanicals Layer: evenly distributed with equal spacing, falling smoothly from top */}

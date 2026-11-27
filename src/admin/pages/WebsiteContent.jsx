@@ -20,7 +20,7 @@ const swap = (arr, i, j) => { const a = [...arr]; [a[i], a[j]] = [a[j], a[i]]; r
 export default function WebsiteContent() {
   const { staff } = useAdmin();
   const { data, error, reload } = useApi('/api/admin/content');
-  const edit = can(staff, 'products.edit');
+  const edit = can(staff, 'content.site');
   const isOwner = staff?.role === 'owner';
   return (
     <>

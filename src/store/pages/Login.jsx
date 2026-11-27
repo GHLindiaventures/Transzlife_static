@@ -7,6 +7,7 @@ import { getBuyNow } from '../lib/checkoutIntent';
 import { getProduct } from '../data/products';
 import { useCatalog } from '../lib/catalog';
 import { api } from '../lib/api';
+import { packshot } from '../lib/packshot';
 import '../styles/account.css';
 
 /**
@@ -110,7 +111,7 @@ export default function Login() {
         )}
         {buyNowProduct && (
           <div className="auth-item">
-            <span className="auth-item__thumb" style={{ background: buyNowProduct.tint }}><img src={buyNowProduct.images[0]} alt="" /></span>
+            <span className="auth-item__thumb" style={{ background: '#fff' }}><img src={packshot(buyNowProduct)} alt="" /></span>
             <span><strong>{buyNowProduct.short}</strong><small>{buyNowProduct.size}{buyNow.pack > 1 ? ` · Pack of ${buyNow.pack}` : ''} · Qty {buyNow.qty}</small></span>
           </div>
         )}

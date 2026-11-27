@@ -1,0 +1,337 @@
+/* ==========================================================
+   Late overrides (imported last):
+   1. Shop mega menu: scrolling row of equal tiles, image-only hover
+   2. Home "Our products" heading, View details button, price order
+   3. "Talk to Our Wellness Team" feature row on phones
+   ========================================================== */
+
+/* ---------------- 1. Shop mega menu ---------------- */
+.mega .mega__inner.mega__inner--shop {
+  --mg: clamp(24px, 2.4vw, 56px);   /* gap between tiles */
+  --n: 5;              /* products visible at once (View All is separate and fixed) */
+  --a: 38px;           /* arrow size */
+  --g: 10px;           /* gap between All / arrows / track */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--g);
+  padding: 18px 0 26px;
+  box-sizing: border-box;
+  /* the showcase fills the marked area: about 78% of the screen on wide monitors (it keeps growing with the
+     screen), and the normal page gutters on laptops and tablets */
+  width: max(78vw, min(100% - 2 * var(--pad), 1462px));
+  max-width: 100%;
+  margin-inline: auto;
+}
+.mega__track {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  gap: var(--mg);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+  padding: 14px 0 10px;               /* room so the hover zoom and shadow are not clipped */
+}
+.mega__track::-webkit-scrollbar { display: none; }
+
+/* every tile: same width, same image box, content aligned to the top */
+.mega .mega__inner--shop .mega__card,
+.mega .mega__inner--shop .mega__card:hover {
+  /* one tile = (row - gaps - arrows) / (products + the fixed View All) */
+  flex: 0 0 calc((100% - var(--mg) * (var(--n) - 1) - 2 * var(--a) - 3 * var(--g)) / (var(--n) + 1));
+  width: auto;
+  max-width: none;
+  min-width: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  scroll-snap-align: start;
+  /* no yellow card, no background change, no lift: only the picture reacts */
+  background: transparent;
+  box-shadow: none;
+  transform: none;
+  border-radius: 0;
+}
+.mega .mega__inner--shop .mega__card:hover .mega__caption { text-decoration: none; color: var(--green-700); }
+
+.mega .mega__inner--shop .media--mega,
+.mega .mega__inner--shop .media--product,
+.mega .mega__inner--shop .mega__circle {
+  width: 100%;
+  max-width: none;
+  aspect-ratio: 5 / 6;
+  margin: 0 0 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  overflow: visible;
+}
+/* the old ground shadow under each bottle is gone: the shadow now only appears on hover */
+.mega .mega__inner--shop .media--product::after { display: none; }
+
+.mega .mega__inner--shop .media--product > img {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  padding: 0;
+  box-sizing: border-box;
+  object-fit: contain;
+  object-position: center bottom;
+  mix-blend-mode: normal;
+  filter: drop-shadow(0 0 0 rgba(15, 47, 29, 0));
+  transform: scale(var(--z, 1));
+  transition: transform .3s ease, filter .3s ease;
+  will-change: transform;
+}
+/* every menu picture is a trimmed cut-out on the same canvas with the bottle standing on the same baseline */
+.mega .mega__inner--shop .mega__card:hover .media--product > img,
+.mega .mega__inner--shop .mega__card:focus-visible .media--product > img {
+  transform: scale(calc(var(--z, 1) * 1.08));
+  filter: drop-shadow(0 10px 12px rgba(15, 47, 29, .22));
+}
+/* "View all" circle: same box, same hover idea */
+.mega .mega__inner--shop .media--circle { width: 80%; transition: transform .3s ease, filter .3s ease; }
+.mega .mega__inner--shop .mega__card--all:hover .media--circle {
+  transform: scale(1.08);
+  filter: drop-shadow(0 10px 12px rgba(15, 47, 29, .22));
+}
+.mega .mega__inner--shop .mega__card:focus-visible { outline: 2px solid var(--green-700); outline-offset: 4px; }
+
+.mega .mega__inner--shop .mega__caption {
+  margin-top: 0;
+  width: 100%;
+  font-size: 14px;
+  line-height: 20px;
+  text-align: center;
+}
+.mega .mega__inner--shop .mega__tag { margin-top: 4px; font-size: 11.5px; line-height: 1.35; }
+
+.mega__arrow {
+  flex: 0 0 auto;
+  width: var(--a);
+  height: var(--a);
+  display: inline-grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid rgba(15, 47, 29, .22);
+  background: #fff;
+  color: var(--green-800, #14532d);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(15, 47, 29, .12);
+  transition: background .2s ease, color .2s ease, opacity .2s ease;
+}
+.mega__arrow:hover:not(:disabled) { background: var(--green-800, #14532d); color: #fff; }
+.mega__arrow:focus-visible { outline: 2px solid var(--green-700); outline-offset: 2px; }
+.mega__arrow:disabled { opacity: .3; cursor: default; box-shadow: none; }
+
+@media (max-width: 1199px) { .mega .mega__inner.mega__inner--shop { --n: 4; --mg: 16px; } }
+@media (max-width: 899px)  { .mega .mega__inner.mega__inner--shop { --n: 3; --mg: 14px; } }
+@media (max-width: 639px)  { .mega .mega__inner.mega__inner--shop { --n: 2; --a: 34px; } }
+@media (prefers-reduced-motion: reduce) {
+  .mega__track { scroll-behavior: auto; }
+  .mega .mega__inner--shop .media--product > img { transition: none; }
+}
+
+/* ---------------- 2. Home "Our products" (phones) ---------------- */
+@media (max-width: 749px) {
+  /* smaller, calmer heading with its own colour, so it no longer competes with the page headline */
+  .featured.featured--titled .featured__head h2.headline,
+  .featured.featured--titled .featured__head .headline {
+    font-size: clamp(19px, 5.6vw, 23px);
+    letter-spacing: .1em;
+    color: var(--green-700, #1d6b3a);
+    margin-bottom: 4px;
+  }
+  .featured .featured__head { margin-bottom: 10px; }
+  .featured .featured__sub { margin-top: 0; font-size: 14.5px; line-height: 1.4; }
+
+  /* compact, centred "View details" pill */
+  .featured .pcard__quick {
+    left: 50%;
+    right: auto;
+    bottom: 12px;
+    width: auto;
+    min-width: 0;
+    height: 32px;
+    padding: 0 18px;
+    border-radius: 999px;
+    font-size: 11px;
+    letter-spacing: 1.4px;
+    white-space: nowrap;
+    transform: translateX(-50%);
+  }
+  .featured .pcard:hover .pcard__quick { transform: translateX(-50%); }
+  .featured .pcard__quick .slot { --w: auto; }
+}
+
+/* price: MRP (struck) on the left, selling price on the right, discount after it */
+.ptag.ptag:not(#tl-a):not(#tl-b) { flex-direction: row; align-items: baseline; }
+
+/* ---------------- 3. Talk to Our Wellness Team: feature row (phones) ---------------- */
+@media (max-width: 749px) {
+  .wc .wc__features {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    align-items: start;
+    margin: 0;
+    width: 100%;
+  }
+  .wc .wc__features li,
+  .wc .wc__features li:first-child,
+  .wc .wc__features li + li {
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 6px;
+    padding: 0 2px;
+    border-left: 0;
+    text-align: center;
+    white-space: normal;
+    font-size: clamp(11px, 3.2vw, 13px);
+    line-height: 1.25;
+  }
+  .wc .wc__features svg { width: 22px; height: 22px; }
+  .wc .wc__content { padding: 30px 20px 14px; }
+  .wc .wc__eyebrow { margin-bottom: 6px; }
+  .wc .wc__title { margin-bottom: 8px; }
+  .wc .wc__text { margin-bottom: 14px; }
+  .wc .wc__actions { margin-bottom: 14px; }
+  .wc .wc__media { min-height: 240px; }
+}
+
+/* inside the track, 100% is the track itself: n products share it. View All sits outside, fixed. */
+.mega .mega__inner--shop .mega__track > .mega__card,
+.mega .mega__inner--shop .mega__track > .mega__card:hover {
+  flex: 0 0 calc((100% - var(--mg) * (var(--n) - 1)) / var(--n));
+}
+.mega .mega__inner--shop > .mega__card--all { scroll-snap-align: none; }
+
+
+/* ==========================================================
+   FAQ accordions: smooth, light on the GPU
+   Opening a row changes the page height every frame. Anything expensive that repaints with it (large animated
+   glows, hover lifts, frosted-glass blur on every row) makes the click stutter, so:
+   - no animated blur-glow / lift on the rows (the glow is a small static ring), only a quick border/colour fade
+   - frosted-glass blur removed from the FAQ rows (they stay translucent)
+   - each row is contained, so its inner layout never touches the rest of the page
+   ========================================================== */
+.ct .ct-faq__item.ct-glow {
+  contain: layout style;
+  transition: border-color .2s ease, background-color .2s ease;
+  transform: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
+}
+.ct .ct-faq__item.ct-glow:hover,
+.ct .ct-faq__item.ct-glow:focus-within {
+  transform: none;
+  border-color: color-mix(in srgb, var(--glow) 70%, transparent);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
+}
+.ct .ct-faq__item.ct-glow.is-on {
+  border-color: transparent;
+  box-shadow: 0 0 0 1px var(--glow), 0 6px 14px -8px var(--glow);   /* small static ring, not animated */
+}
+.ct .ct-faq__a { transition: grid-template-rows .3s cubic-bezier(.2, .7, .1, 1); }
+.ct .ct-faq__a > div { min-height: 0; }
+.ct .ct-faq__item button svg { transition: transform .25s ease; }
+
+/* FAQ page rows: no backdrop blur per row */
+.faq .faq__item {
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+  background: rgba(255, 255, 255, .78);
+  box-shadow: 0 1px 2px rgba(15, 47, 29, .06);
+  contain: layout style;
+  transition: background-color .2s ease;
+}
+.faq .faq__item.is-open { background: #fff; box-shadow: 0 6px 16px -10px rgba(15, 47, 29, .3); }
+
+@media (prefers-reduced-motion: reduce) { .ct .ct-faq__a, .ct .ct-faq__item button svg { transition: none; } }
+
+/* ---- FAQ: open instantly, fade the answer in ----
+   Animating the row height re-lays-out the whole page on every frame; with the footer "curtain" fixed behind the page
+   that made the first click stutter and nudge the scroll position. The row now changes height once (a single layout) and
+   only the answer's opacity animates, which the compositor handles on its own. */
+.ct .ct-faq__a { transition: none; }
+.ct .ct-faq__item.is-on .ct-faq__a > div > p { animation: faqFadeIn .22s ease both; }
+@keyframes faqFadeIn { from { opacity: 0; } to { opacity: 1; } }
+.ct .ct-faq { overflow-anchor: auto; }
+@media (prefers-reduced-motion: reduce) { .ct .ct-faq__item.is-on .ct-faq__a > div > p { animation: none; } }
+
+/* Contact page: opening a question must never move the page.
+   Scroll anchoring was picking the footer as its anchor and scrolling the page down by the height of the answer
+   (the clicked question jumped up under the pointer). With the footer fixed behind the page that looked like lag. */
+html:has(.ct), html:has(.faq__list) { overflow-anchor: none; }
+.ct, .ct * { overflow-anchor: none; }
+
+/* ---------------- Talk to Our Wellness Team: phones ----------------
+   No photo on phones (desktop and tablet keep it). The three feature items sit in one equal-width row with room
+   below them, and the section ends cleanly before Customer Reviews. */
+@media (max-width: 749px) {
+  .wc .wc__media { display: none; }
+  .wc .wc__inner { min-height: 0; display: block; }
+  .wc .wc__inner::before { display: none; }
+  .wc .wc__content { padding: 34px 20px 32px; }
+  .wc .wc__features {
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; width: 100%;
+    margin: 0; padding-top: 6px; align-items: start;
+  }
+  .wc .wc__features li,
+  .wc .wc__features li:first-child,
+  .wc .wc__features li + li {
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 7px;
+    padding: 0 2px; border: 0; text-align: center; white-space: normal;
+    font-size: clamp(10.5px, 3vw, 12.5px); line-height: 1.25; text-wrap: balance;
+  }
+  .wc .wc__features svg { width: 22px; height: 22px; flex: none; }
+  .wc { padding-bottom: 0; }
+}
+
+/* ==========================================================
+   Mobile header: one compact row
+   [ menu  search ]      TranzLife (centred on the screen)      [ account  cart ]
+   ========================================================== */
+@media (max-width: 989px) {
+  :root { --header-h: 54px; }
+  .header__inner { grid-template-columns: 1fr auto 1fr; padding-inline: 8px; align-items: center; }
+  .header__left { display: flex; align-items: center; gap: 0; }
+  .header__right { justify-content: flex-end; gap: 0; }
+
+  /* real hamburger lines instead of the emblem picture */
+  .header__burger .burger__lines { display: block; }
+  .header__burger .burger__logo { display: none; }
+
+  .header__burger, .header__search-m, .header__right .icon-btn {
+    display: inline-grid; place-items: center; width: 42px; height: 42px; min-width: 42px; min-height: 42px; padding: 0;
+  }
+  .header__right .header__cta--icon { display: none; }      /* the Shop bag: Shop is in the menu */
+
+  /* the wordmark is centred on the whole screen, whatever sits on either side */
+  .header__logo, .header__logo:hover { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+  .header__logo .logo__text { font-size: clamp(21px, 6.4vw, 27px); }
+
+  /* search bar that drops down under the header */
+  .header__searchbar {
+    position: absolute; left: 0; right: 0; top: 100%; z-index: 5; display: flex; align-items: center; gap: 8px;
+    padding: 8px 12px 10px; background: rgba(252, 250, 241, .98); border-top: 1px solid rgba(15, 47, 29, .08);
+    box-shadow: 0 10px 20px -12px rgba(15, 47, 29, .25);
+  }
+  .header__searchbar input {
+    flex: 1; min-width: 0; height: 42px; padding: 0 14px; border-radius: 12px; font: inherit; font-size: 16px;   /* 16px: no zoom on iPhone */
+    border: 1px solid rgba(15, 47, 29, .16); background: #fff; color: var(--ink, #0f2f1d);
+  }
+  .header__searchbar input:focus { outline: 2px solid var(--green-700, #1a6b3c); outline-offset: 1px; }
+  .header__searchbar-go {
+    flex: none; width: 42px; height: 42px; border: 0; border-radius: 12px; display: grid; place-items: center; cursor: pointer;
+    color: #fff; background: var(--green-700, #1a6b3c);
+  }
+}
+@media (min-width: 990px) { .header__searchbar { display: none; } }

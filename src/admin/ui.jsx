@@ -24,7 +24,8 @@ function inferTopics(path) {
 
 export const AdminContext = createContext(null);
 export const useAdmin = () => useContext(AdminContext);
-export const can = (staff, perm) => !!staff?.permissions?.includes(perm);
+/** `perm` is one permission, or a list meaning "any of these" (same rule as the server's can()). */
+export const can = (staff, perm) => [].concat(perm).some((p) => !!staff?.permissions?.includes(p));
 
 export const rs = (paise) => {
   const v = Number(paise || 0) / 100;
