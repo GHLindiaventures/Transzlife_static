@@ -443,3 +443,10 @@
 .pack span .money__sym { font-size: .7em; vertical-align: .3em; }
 .pack__save { font-style: normal; font-size: .72rem; font-weight: 700; color: var(--forest-2); }
 .cart__prepaid { margin: 0 0 8px; padding: 8px 12px; border-radius: 10px; background: var(--leaf-soft); color: var(--forest); font-size: .84rem; }
+
+/* Phones: stepper + Add to cart on the first row, Buy now full width below, button text on one line */
+@media (max-width: 560px) {
+  .pdp__buy > .btn--grow { white-space: nowrap; padding: 14px 18px; }
+  .pdp__buy > .btn--grow:nth-child(3) { flex: 1 1 100%; }
+  .pdp__buy > .qty { height: auto; }
+}

@@ -622,15 +622,34 @@ hr {
    display: block
 }
 
+/* wordmark beside the logo: same as the footer logo (.ft-logo, leaf over the "z"), in black */
 .logo__text {
-   display: none;
+   display: inline-flex;
+   align-items: flex-start;
+   margin-left: 10px;
+   padding-top: .3em;          /* room for the leaf above the "z" */
+   font-family: 'Manrope', 'Archivo', system-ui, sans-serif;
    font-weight: 800;
-   font-size: clamp(40px, 3.6vw, 58px);
+   font-size: 28px;
    line-height: 1;
    letter-spacing: -0.03em;
-   color: #fff;
+   color: #000;
    white-space: nowrap
 }
+.logo__word { display: inline-flex }
+.logo__z { position: relative }
+.logo__z svg {
+   position: absolute;
+   left: 30%;
+   top: -.5em;
+   width: .95em;
+   height: .6em;
+   fill: #6fbf3a;
+   stroke: #3f8f2c;
+   stroke-width: 2
+}
+.logo__z svg path:last-child { fill: none; stroke: rgba(230, 255, 210, .6) }
+.logo__text sup { font-size: .3em; margin: .15em 0 0 .08em; font-weight: 600; line-height: 1 }
 
 /* On desktop the burger logo image is hidden (the whole burger is hidden anyway) */
 .burger__logo {
@@ -794,6 +813,7 @@ hr {
    .logo__text {
       display: inline-flex;
       align-items: flex-start;
+      margin-left: 0;
       padding-top: .3em;          /* room for the leaf above the "z" */
       font-family: 'Manrope', 'Archivo', system-ui, sans-serif;
       font-weight: 800;

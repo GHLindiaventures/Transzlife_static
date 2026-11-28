@@ -1,30 +1,14 @@
 // Article editor toolbar and its small dialogs (link, photo, video).
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useEditorState } from '@tiptap/react';
 import {
   Bold, Italic, Link as LinkIcon, List, ListOrdered, Quote, Minus, Table as TableIcon, Image as ImageIcon, Video, MessageSquareQuote,
   HelpCircle, MousePointerClick, Undo2, Redo2, X, Rows3, Columns3, Trash2,
 } from 'lucide-react';
 import { parseVideoUrl } from './extensions';
+import { Modal } from './Modal';
 
-/** Small centred dialog in the dashboard's style. */
-export function Modal({ title, onClose, children, onSubmit, wide = false }) {
-  useEffect(() => {
-    const esc = (e) => e.key === 'Escape' && onClose();
-    document.addEventListener('keydown', esc);
-    return () => document.removeEventListener('keydown', esc);
-  }, [onClose]);
-  return (
-    <>
-      <div className="adm-overlay" onClick={onClose} />
-      <form className={`adm-palette adm-modal ${wide ? 'cms-modal--wide' : ''}`} role="dialog" aria-label={title}
-        onSubmit={(e) => { e.preventDefault(); e.stopPropagation(); onSubmit?.(e); }}>
-        <div className="adm-drawer__head"><h2 style={{ flex: 1 }}>{title}</h2><button type="button" className="adm-icon" onClick={onClose} aria-label="Close"><X size={20} /></button></div>
-        <div className="adm-form adm-pad">{children}</div>
-      </form>
-    </>
-  );
-}
+export { Modal };
 
 const isSafeLink = (u) => /^(\/(?!\/)|#[A-Za-z0-9_-]+$|https?:\/\/[^\s]+$|mailto:[^\s]+$|tel:[+\d\s-]+$)/i.test(u);
 const isSafeImage = (u) => /^(\/(?!\/)[^\s]*|https:\/\/[^\s]+)$/i.test(u);

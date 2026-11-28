@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Copy, CornerDownRight, ExternalLink, FolderTree, Newspaper, Plus, Search } from 'lucide-react';
 import { api } from '../../store/lib/api';
+import { fmtIST } from '../cms/time';
 import { Badge, Empty, ErrorBox, Loading, Notice, PageHead, Pager, can, d, dt, useAction, useAdmin, useApi } from '../ui';
 
 export const POST_STATUS = {
@@ -110,7 +111,7 @@ export default function BlogPosts() {
                     </td>
                     <td>{p.category?.name || <span className="adm-muted">None</span>}</td>
                     <td><Badge map={POST_STATUS} value={p.status} /></td>
-                    <td>{p.status === 'draft' || !p.publishedAt ? '—' : d(p.publishedAt)}</td>
+                    <td>{p.status === 'draft' || !p.publishedAt ? '—' : p.status === 'scheduled' ? <span className="adm-badge is-info" title="Goes live on its own">{fmtIST(p.publishedAt)}</span> : d(p.publishedAt)}</td>
                     <td>{dt(p.editedAt)}</td>
                     <td className="adm-rowbtns">
                       {mayEdit && <button type="button" className="adm-btn is-ghost is-sm" onClick={() => duplicate(p)} disabled={act.busy} aria-label={`Duplicate ${p.title}`}><Copy size={14} /> Duplicate</button>}

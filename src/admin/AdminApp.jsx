@@ -135,13 +135,15 @@ function useLive(enabled) {
   useEffect(() => { load(); const t = setInterval(load, 60_000); return () => clearInterval(t); }, [load]);
   useEffect(() => { load(); }, [location.pathname, load]);
   useEffect(() => {
+    // the live-update stream needs the shop 'view' permission (content managers would only get a 403)
+    if (!enabled) return undefined;
     return subscribeAdminEvents({
       onEvent: (ev) => {
         emitAdminSync(ev);
         if (['order', 'payment', 'return', 'review'].includes(ev?.type)) load();
       },
     });
-  }, [load]);
+  }, [load, enabled]);
   return live;
 }
 

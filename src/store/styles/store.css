@@ -1940,3 +1940,11 @@
 .tl-store:not(#tl-a):not(#tl-b) .faq2__item.is-on .faq2__a p { transition-delay: 0s; }
 .tl-store:not(#tl-a):not(#tl-b) .faq2__icon { transition: transform .26s cubic-bezier(.2, .7, .2, 1), background .2s, color .2s; }
 @media (prefers-reduced-motion: reduce) { .tl-store:not(#tl-a):not(#tl-b) .faq2__a { transition: none; } }
+
+/* Product page on phones: "Add to cart" and "Buy now" were squeezed next to the quantity stepper and broke onto
+   three lines. Stepper + Add to cart share the first row, Buy now gets the full second row, text stays on one line. */
+@media (max-width: 560px) {
+  .tl-store:not(#tl-a):not(#tl-b) .pdp__buy > .btn--grow { white-space: nowrap; padding: 14px 18px; }
+  .tl-store:not(#tl-a):not(#tl-b) .pdp__buy > .btn--grow:nth-child(3) { flex: 1 1 100%; }
+  .tl-store:not(#tl-a):not(#tl-b) .pdp__buy > .qty { height: auto; }
+}
