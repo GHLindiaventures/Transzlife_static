@@ -1,6 +1,7 @@
 // Admin dashboard API (Fastify plugin). All routes are under /api/admin and need a staff session;
 // each declares the permission it needs (see PERMS in auth.js). Every change is written to audit_log.
 // Money is in paise.
+import { createHash, randomBytes } from 'node:crypto';
 import QRCode from 'qrcode';
 import { z } from 'zod';
 import { createAdminAuth, ROLES, permsOf } from './auth.js';
@@ -99,6 +100,105 @@ export default async function adminRoutes(app, { db, razorpay, cashfree, shippin
     await db.query('UPDATE staff_users SET password_hash = $2, must_change_password = false WHERE id = $1', [req.staff.id, await hashPassword(body.next)]);
     await auth.endAllSessions(req.staff.id, req.cookies.tl_admin);     // sign out other devices
     await audit(db.query, req, 'staff.password_change', 'staff', req.staff.id, null, null);
+    return { ok: true };
+  });
+
+  // Forgot password via 2FA Authenticator (TOTP) — always available for accounts with 2FA enabled
+  app.post('/api/admin/auth/forgot-password/totp', tight(10), async (req, reply) => {
+    const body = parse(z.object({
+      email: z.string().trim().toLowerCase().email('Enter your email.').max(120),
+      code: z.string().trim().regex(/^\d{6}$/, 'Enter the 6-digit authenticator code.'),
+      next: z.string().max(128),
+    }), req.body, reply); if (!body) return;
+    const s = (await db.query('SELECT * FROM staff_users WHERE email = $1', [body.email])).rows[0];
+    const bad = 'Email or authenticator code is not right.';
+    if (!s || !s.active || !s.totp_enabled || !s.totp_secret) throw fail(bad, 401);
+    if (s.locked_until && new Date(s.locked_until) > new Date()) {
+      const mins = Math.ceil((new Date(s.locked_until) - Date.now()) / 60000);
+      throw fail(`Too many failed attempts. Try again in ${mins} minute${mins === 1 ? '' : 's'}.`, 429);
+    }
+    const step = verifyTotp(s.totp_secret, body.code, s.totp_last_step);
+    if (step == null) {
+      const r = (await db.query(
+        `UPDATE staff_users SET failed_logins = failed_logins + 1,
+           locked_until = CASE WHEN failed_logins + 1 >= 5 THEN now() + interval '15 minutes' ELSE locked_until END
+         WHERE id = $1 RETURNING failed_logins`, [s.id])).rows[0];
+      if (r.failed_logins >= 5) {
+        await db.query('UPDATE staff_users SET failed_logins = 0 WHERE id = $1', [s.id]);
+        throw fail('Too many failed attempts. Account locked for 15 minutes.', 429);
+      }
+      throw fail(bad, 401);
+    }
+    const weak = checkPasswordStrength(body.next); if (weak) throw fail(weak);
+    if (await verifyPassword(body.next, s.password_hash)) throw fail('Choose a password different from the current one.');
+    await db.query(
+      `UPDATE staff_users SET password_hash = $2, must_change_password = false, failed_logins = 0, locked_until = NULL,
+              totp_last_step = $3, reset_token_hash = NULL, reset_token_expires_at = NULL WHERE id = $1`,
+      [s.id, await hashPassword(body.next), step]);
+    await auth.endAllSessions(s.id);
+    await audit(db.query, { ...req, staff: s }, 'staff.password_reset', 'staff', s.id, null, { method: 'totp' });
+    return { ok: true };
+  });
+
+  // Forgot password via email reset link (when Resend email is configured)
+  app.post('/api/admin/auth/forgot-password', tight(5), async (req, reply) => {
+    const body = parse(z.object({
+      email: z.string().trim().toLowerCase().email('Enter your email.').max(120),
+    }), req.body, reply); if (!body) return;
+    const emailReady = !!(env.RESEND_API_KEY && env.EMAIL_FROM);
+    if (emailReady) {
+      const s = (await db.query('SELECT id, email, name, active FROM staff_users WHERE email = $1', [body.email])).rows[0];
+      if (s && s.active) {
+        const token = randomBytes(32).toString('base64url');
+        const hash = createHash('sha256').update(token).digest('hex');
+        await db.query(`UPDATE staff_users SET reset_token_hash = $2, reset_token_expires_at = now() + interval '15 minutes' WHERE id = $1`, [s.id, hash]);
+        const base = String(env.SITE_URL || `${req.protocol}://${req.headers['x-forwarded-host'] || req.headers.host}`).replace(/\/$/, '');
+        const link = `${base}/admin?reset=${encodeURIComponent(token)}`;
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            from: env.EMAIL_FROM,
+            to: [s.email],
+            subject: 'TranzLife Admin — Password Reset',
+            text: `Hi ${s.name},\n\nUse this link within 15 minutes to reset your TranzLife Admin password:\n${link}\n\nIf you did not request this, you can ignore this email.`,
+          }),
+          signal: AbortSignal.timeout(5000),
+        }).catch((e) => log?.warn?.(`[admin] reset email failed: ${e.message}`));
+      }
+    }
+    return {
+      ok: true,
+      emailConfigured: emailReady,
+      message: emailReady
+        ? 'If an active admin account exists for that email, a password reset link has been sent.'
+        : 'Email delivery is not configured on the server. Use your 2FA authenticator code to reset your password, or ask an owner.',
+    };
+  });
+
+  app.post('/api/admin/auth/reset-password', tight(10), async (req, reply) => {
+    const body = parse(z.object({
+      token: z.string().trim().min(20).max(200),
+      code: z.string().trim().regex(/^\d{6}$/, 'Enter the 6-digit authenticator code.').optional(),
+      next: z.string().max(128),
+    }), req.body, reply); if (!body) return;
+    const hash = createHash('sha256').update(body.token).digest('hex');
+    const s = (await db.query(`SELECT * FROM staff_users WHERE reset_token_hash = $1 AND reset_token_expires_at > now()`, [hash])).rows[0];
+    if (!s || !s.active) throw fail('This reset link is invalid or has expired.', 400);
+    let nextStep = s.totp_last_step;
+    if (s.totp_enabled) {
+      if (!body.code) throw fail('Enter your 6-digit authenticator code.', 400, { code: 'need_totp' });
+      const step = verifyTotp(s.totp_secret, body.code, s.totp_last_step);
+      if (step == null) throw fail('That authenticator code is not right.', 401);
+      nextStep = step;
+    }
+    const weak = checkPasswordStrength(body.next); if (weak) throw fail(weak);
+    await db.query(
+      `UPDATE staff_users SET password_hash = $2, must_change_password = false, failed_logins = 0, locked_until = NULL,
+              totp_last_step = $3, reset_token_hash = NULL, reset_token_expires_at = NULL WHERE id = $1`,
+      [s.id, await hashPassword(body.next), nextStep]);
+    await auth.endAllSessions(s.id);
+    await audit(db.query, { ...req, staff: s }, 'staff.password_reset', 'staff', s.id, null, { method: 'email_token' });
     return { ok: true };
   });
 

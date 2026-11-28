@@ -278,3 +278,34 @@ test('stage counts, bulk status change, packing slips, search', async () => {
   assert.equal(byProduct.products[0].id, 'cyclerelief-roll-on');
   assert.equal((await call('owner', 'GET', '/api/admin/search?q=x')).status, 400, 'at least 2 characters');
 });
+
+test('forgot password via TOTP resets password, invalidates old sessions, and rejects reused codes', async () => {
+  const secretRow = (await db.query(`SELECT email, totp_secret FROM staff_users WHERE role = 'owner' AND active AND totp_enabled LIMIT 1`)).rows[0];
+  const badCode = await call(null, 'POST', '/api/admin/auth/forgot-password/totp', {
+    email: secretRow.email, code: '000000', next: 'ResetPass#2026!',
+  });
+  assert.equal(badCode.status, 401);
+
+  await db.query('UPDATE staff_users SET totp_last_step = NULL WHERE email = $1', [secretRow.email]);
+  const validCode = totpCode(secretRow.totp_secret);
+  const okReset = await call(null, 'POST', '/api/admin/auth/forgot-password/totp', {
+    email: secretRow.email, code: validCode, next: 'ResetPass#2026!',
+  });
+  assert.equal(okReset.status, 200);
+  assert.equal(okReset.body.ok, true);
+
+  // Old session was invalidated
+  const oldSessionCheck = await call('owner', 'GET', '/api/admin/auth/me');
+  assert.equal(oldSessionCheck.status, 401);
+
+  // Reusing the same TOTP code fails
+  const replay = await call(null, 'POST', '/api/admin/auth/forgot-password/totp', {
+    email: secretRow.email, code: validCode, next: 'AnotherPass#2026!',
+  });
+  assert.equal(replay.status, 401);
+
+  // Generic forgot-password email endpoint does not leak account existence
+  const emailReq = await call(null, 'POST', '/api/admin/auth/forgot-password', { email: 'nonexistent@tranzlife.in' });
+  assert.equal(emailReq.status, 200);
+  assert.equal(emailReq.body.ok, true);
+});
