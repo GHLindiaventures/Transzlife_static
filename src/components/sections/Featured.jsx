@@ -65,6 +65,8 @@ export function ProductCard({ product }) {
               src={`${import.meta.env.BASE_URL}${product.showcase.replace(/^\//, '')}`}
               alt={product.name}
               className="pcard__showcase-img"
+              width={800}
+              height={800}
               loading="lazy"
               decoding="async"
             />
