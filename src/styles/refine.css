@@ -124,6 +124,10 @@
 
 /* ---- one backdrop per product, keyed to its pack colours ----
    every tile: a soft light pool behind the pack, then the product's own texture (--tex) over its colour wash (--wash) */
+.featured .pcard,
+.blog .bcard{
+  contain:layout style;
+}
 .featured .pcard__media>.media{
   border-radius:inherit;overflow:hidden;
   background:

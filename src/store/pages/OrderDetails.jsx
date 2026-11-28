@@ -5,6 +5,7 @@ import {
   CreditCard, Banknote, Smartphone, Landmark, MessageCircle, RotateCcw, ChevronRight, Copy, Check, ShoppingBag, Receipt,
 } from 'lucide-react';
 import { Breadcrumbs, useTitle } from '../components/Common';
+import DnaLoader from '../../components/DnaLoader';
 import ReturnSection from '../components/ReturnSection';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
@@ -134,7 +135,7 @@ export default function OrderDetails() {
       </section>
     );
   }
-  if (!order) return <div className="page-loading" aria-busy="true" />;
+  if (!order) return <DnaLoader variant="page" />;
 
   const o = order;
   const h = headline(o, (customer?.name || '').split(' ')[0]);

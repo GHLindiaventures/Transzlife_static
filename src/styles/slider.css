@@ -252,6 +252,12 @@
   display: block;
 }
 
+.blendy-botanical-item,
+.blendy-word-text {
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
 /* Ingredients falling from top into designated positions */
 @keyframes ingredientFallIn {
   0% {

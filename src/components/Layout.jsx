@@ -87,7 +87,7 @@ export default function Layout() {
       // let the new page lay out first, then go to the section (scroll-margin-top clears the sticky header)
       requestAnimationFrame(() => target.scrollIntoView({ behavior: samePage && !reduce ? 'smooth' : 'auto', block: 'start' }));
     } else if (!samePage || !hash) {
-      window.scrollTo(0, 0);
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     }
   }, [pathname, hash, key]);
 
