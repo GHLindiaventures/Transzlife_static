@@ -524,9 +524,9 @@ hr {
 /* ==========================================================
    Announcement bar — 34px sticky
    ========================================================== */
+/* scrolls away with the page: only the header stays pinned, the bar is back at the very top */
 .announcement {
-   position: sticky;
-   top: 0;
+   position: relative;
    z-index: 55;
    height: var(--announcement-h, 34px);
    background: var(--accent);
@@ -575,7 +575,7 @@ hr {
 
 .header {
    position: sticky;
-   top: var(--announcement-h, 34px);
+   top: 0;
    z-index: 50;
    height: var(--header-h);
    transition: background-color .3s, box-shadow .3s, transform .4s var(--ease);

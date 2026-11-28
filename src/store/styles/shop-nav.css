@@ -4,7 +4,7 @@
 
 .tl-store:not(#tl-a):not(#tl-b) .shopnav {
   /* sticky dock that takes no layout space; the circle sits in the left gutter of the page */
-  position: sticky; top: calc(var(--header-h, 58px) + var(--announcement-h, 34px) + 22px); height: 0; z-index: 30;
+  position: sticky; top: calc(var(--header-h, 58px) + 22px); height: 0; z-index: 30;
   --nav-left: calc((100% - 100vw) / 2 + 22px);   /* 14px from the screen edge, whatever the page gutter */
 }
 .tl-store:not(#tl-a):not(#tl-b) .shopnav__btn {
@@ -21,7 +21,7 @@
   font-size: 11px; font-weight: 800; color: #3a2700; background: linear-gradient(135deg, #f6e3a1, #e0a826); border: 2px solid #fff;
 }
 .tl-store:not(#tl-a):not(#tl-b) .shopnav__panel {
-  position: absolute; left: var(--nav-left); top: 0; width: min(290px, calc(100vw - 24px)); max-height: calc(100vh - var(--header-h, 58px) - var(--announcement-h, 34px) - 60px); overflow-y: auto; overscroll-behavior: contain;
+  position: absolute; left: var(--nav-left); top: 0; width: min(290px, calc(100vw - 24px)); max-height: calc(100vh - var(--header-h, 58px) - 60px); overflow-y: auto; overscroll-behavior: contain;
   padding: 74px 16px 18px; display: grid; gap: 22px; border-radius: 30px 30px 24px 24px; z-index: -1;
   background: linear-gradient(160deg, #ffffff, #f6f3dc); border: 1px solid #fff;
   box-shadow: 0 30px 60px -24px rgba(15, 47, 29, .5), 0 4px 12px rgba(15, 47, 29, .08);

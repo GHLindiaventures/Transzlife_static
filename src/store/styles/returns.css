@@ -62,4 +62,4 @@
 .tl-store:not(#tl-a):not(#tl-b) .acx-return:hover { border-color: var(--forest, #173f24); }
 
 /* #returns links land just below the sticky header + announcement bar */
-.tl-store:not(#tl-a):not(#tl-b) .rtn { scroll-margin-top: calc(var(--header-h, 76px) + var(--announcement-h, 34px) + 16px); }
+.tl-store:not(#tl-a):not(#tl-b) .rtn { scroll-margin-top: calc(var(--header-h, 76px) + 16px); }
