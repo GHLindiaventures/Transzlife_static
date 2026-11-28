@@ -37,7 +37,6 @@ export default defineConfig(({ mode }) => {
             if (id.includes('react-dom') || id.includes('react-router') || id.includes(`${path.sep}react${path.sep}`) || id.includes('/react/')) return 'react-vendor';
             if (id.includes('lucide-react')) return 'icons-vendor';
             if (id.includes('@tiptap') || id.includes('prosemirror')) return 'editor-vendor';
-            if (id.includes('recharts') || id.includes('d3-')) return 'charts-vendor';
             return undefined;
           },
         },
