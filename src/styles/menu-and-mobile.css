@@ -335,3 +335,29 @@ html:has(.ct), html:has(.faq__list) { overflow-anchor: none; }
   }
 }
 @media (min-width: 990px) { .header__searchbar { display: none; } }
+
+/* ==========================================================
+   Section transitions (one reusable fix for the whole site)
+   1. The page-wide soft glows are painted on <main> as a tile that repeats every 1700px. The last tile was cut off
+      by the bottom edge of <main>, which showed as a hard line just above the footer on every page. A fade to the
+      page colour at the very bottom hides the cut.
+   2. Sections that carry their own picture or colour (Wellness Team) fade into the page colour at the top and bottom
+      instead of starting and stopping with a straight edge.
+   ========================================================== */
+.main { isolation: isolate; }
+.main::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; z-index: -1; pointer-events: none;
+  height: clamp(140px, 24vw, 260px);
+  background: linear-gradient(180deg, rgba(252, 250, 241, 0), #fcfaf1 88%);
+}
+
+/* Wellness Team: its picture lives on a layer that fades out at the top and bottom, so the section melts into the
+   sections above and below (whatever colour they are) instead of starting and stopping with a straight edge. */
+.wc { position: relative; isolation: isolate; background: none !important; }
+.wc::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background-color: var(--bg-warm, #f7efd2); background-image: var(--wc-bg); background-size: cover; background-position: center; background-repeat: no-repeat;
+  --wc-fade: clamp(64px, 14vw, 120px);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 var(--wc-fade), #000 calc(100% - var(--wc-fade)), transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0, #000 var(--wc-fade), #000 calc(100% - var(--wc-fade)), transparent 100%);
+}

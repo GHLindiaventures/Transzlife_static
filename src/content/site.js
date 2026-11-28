@@ -154,7 +154,7 @@ export const COMPARE_INTRO = {
 };
 
 export const BENEFITS = {
-  headline: 'Why TranzLife',
+  headline: 'THE LIVING SCIENCE.',
   subtitle: 'The TranzLife Difference',
   lead: 'A thoughtful blend of nature, science and quality — creating trusted wellness solutions for everyday life.',
   items: [
