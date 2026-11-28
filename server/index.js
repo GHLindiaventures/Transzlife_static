@@ -180,3 +180,16 @@ app.setNotFoundHandler(async (req, reply) => {
 await app.listen({ port: PORT, host: '0.0.0.0' });
 console.log(`TranzLife site + Tulsi chat + shop API on http://localhost:${PORT}`);
 chat.warmUp();
+
+// Close the database cleanly on Ctrl+C / terminal close. A local PGlite folder that is killed
+// mid-write often cannot be opened again ("PGlite failed to initialize properly").
+let closing = false;
+const shutdown = (sig) => {
+  if (closing) return;
+  closing = true;
+  console.log(`\n${sig} received, closing the database...`);
+  const force = setTimeout(() => process.exit(1), 8000);
+  force.unref();
+  app.close().then(() => process.exit(0), (e) => { console.error(e); process.exit(1); });
+};
+for (const sig of ['SIGINT', 'SIGTERM', 'SIGHUP', 'SIGBREAK']) process.on(sig, () => shutdown(sig));
