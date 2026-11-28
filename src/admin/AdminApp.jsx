@@ -9,7 +9,7 @@ import {
 import { api } from '../store/lib/api';
 import { subscribeAdminEvents } from '../store/lib/realtime';
 import { markStaffBrowser } from '../store/lib/track';
-import { AdminContext, can, emitAdminSync, ErrorBox, initials, rs, useAdmin, useTheme, STATUS } from './ui';
+import { AdminContext, can, emitAdminSync, ErrorBox, initials, Notice, rs, useAdmin, useTheme, STATUS } from './ui';
 import Dashboard from './pages/Dashboard';
 import { OrderList, OrderDetail, PrintSlips } from './pages/Orders';
 import Products from './pages/Products';
@@ -354,44 +354,129 @@ function CommandPalette({ onClose }) {
 
 function Login() {
   const { setStaff } = useAdmin();
-  const [form, setForm] = useState({ email: '', password: '', code: '' });
-  const [needsCode, setNeedsCode] = useState(false);
+  const [resetToken, setResetToken] = useState(() => new URLSearchParams(window.location.search).get('reset') || '');
+  const [mode, setMode] = useState(() => (new URLSearchParams(window.location.search).get('reset') ? 'token' : 'login')); // 'login' | 'totp' | 'forgot' | 'forgot_email' | 'token'
+  const [form, setForm] = useState({ email: '', password: '', code: '', next: '', confirm: '' });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
+
+  const clearUrlToken = () => {
+    if (window.location.search.includes('reset=')) {
+      const u = new URL(window.location.href);
+      u.searchParams.delete('reset');
+      window.history.replaceState({}, '', u.pathname + u.search);
+    }
+    setResetToken('');
+  };
+
   const submit = async (e) => {
     e.preventDefault();
-    setBusy(true); setError('');
+    setBusy(true); setError(''); setNotice('');
     try {
-      const r = await api('/api/admin/auth/login', { method: 'POST', body: { email: form.email, password: form.password, ...(needsCode ? { code: form.code } : {}) } });
-      if (r.needsCode) setNeedsCode(true); else setStaff(r.staff);
+      if (mode === 'login' || mode === 'totp') {
+        const r = await api('/api/admin/auth/login', {
+          method: 'POST',
+          body: { email: form.email, password: form.password, ...(mode === 'totp' ? { code: form.code } : {}) },
+        });
+        if (r.needsCode) setMode('totp'); else setStaff(r.staff);
+      } else if (mode === 'forgot') {
+        if (form.next !== form.confirm) throw new Error('The two new passwords do not match.');
+        await api('/api/admin/auth/forgot-password/totp', {
+          method: 'POST',
+          body: { email: form.email, code: form.code, next: form.next },
+        });
+        setForm((f) => ({ ...f, password: '', code: '', next: '', confirm: '' }));
+        setMode('login');
+        setNotice('Password reset. Sign in with your new password.');
+      } else if (mode === 'forgot_email') {
+        const r = await api('/api/admin/auth/forgot-password', { method: 'POST', body: { email: form.email } });
+        setNotice(r.message);
+      } else if (mode === 'token') {
+        if (form.next !== form.confirm) throw new Error('The two new passwords do not match.');
+        await api('/api/admin/auth/reset-password', {
+          method: 'POST',
+          body: { token: resetToken, ...(form.code ? { code: form.code } : {}), next: form.next },
+        });
+        clearUrlToken();
+        setForm((f) => ({ ...f, password: '', code: '', next: '', confirm: '' }));
+        setMode('login');
+        setNotice('Password reset. Sign in with your new password.');
+      }
     } catch (err) {
       setError(err.message);
-      if (needsCode) setForm((f) => ({ ...f, code: '' }));
+      if (mode === 'totp' || mode === 'forgot') setForm((f) => ({ ...f, code: '' }));
     } finally { setBusy(false); }
   };
+
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
+  const setDigits = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value.replace(/\D/g, '').slice(0, 6) }));
+
   return (
     <div className="adm-center">
       <form className="adm-card adm-auth" onSubmit={submit}>
         <div className="adm-brand"><img src={`${import.meta.env.BASE_URL}assets/logo.png`} alt="" width="38" height="38" /><span>TranzLife <small>Seller</small></span></div>
-        {!needsCode ? (
+        {mode === 'login' && (
           <>
             <h1>Welcome back</h1>
             <p className="adm-muted">Sign in to manage orders, products and customers.</p>
             <label>Email<input type="email" autoComplete="username" value={form.email} onChange={set('email')} required autoFocus /></label>
             <label>Password<input type="password" autoComplete="current-password" value={form.password} onChange={set('password')} required /></label>
           </>
-        ) : (
+        )}
+        {mode === 'totp' && (
           <>
             <h1>Two-step verification</h1>
             <p className="adm-muted">Enter the 6-digit code from your authenticator app.</p>
-            <label>Code<input className="adm-code" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={form.code}
-              onChange={(e) => setForm((f) => ({ ...f, code: e.target.value.replace(/\D/g, '').slice(0, 6) }))} required autoFocus /></label>
+            <label>Code<input className="adm-code" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={form.code} onChange={setDigits('code')} required autoFocus /></label>
+          </>
+        )}
+        {mode === 'forgot' && (
+          <>
+            <h1>Reset password</h1>
+            <p className="adm-muted">Verify with your 2FA authenticator app to set a new password.</p>
+            <label>Email<input type="email" autoComplete="username" value={form.email} onChange={set('email')} required autoFocus /></label>
+            <label>6-digit authenticator code<input className="adm-code" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={form.code} onChange={setDigits('code')} required /></label>
+            <label>New password<input type="password" autoComplete="new-password" minLength={10} value={form.next} onChange={set('next')} required /></label>
+            <label>Repeat new password<input type="password" autoComplete="new-password" minLength={10} value={form.confirm} onChange={set('confirm')} required /></label>
+          </>
+        )}
+        {mode === 'forgot_email' && (
+          <>
+            <h1>Email reset link</h1>
+            <p className="adm-muted">Enter your admin email to receive a 15-minute password reset link.</p>
+            <label>Email<input type="email" autoComplete="username" value={form.email} onChange={set('email')} required autoFocus /></label>
+          </>
+        )}
+        {mode === 'token' && (
+          <>
+            <h1>Set new password</h1>
+            <p className="adm-muted">Choose a strong new password (10+ characters).</p>
+            <label>New password<input type="password" autoComplete="new-password" minLength={10} value={form.next} onChange={set('next')} required autoFocus /></label>
+            <label>Repeat new password<input type="password" autoComplete="new-password" minLength={10} value={form.confirm} onChange={set('confirm')} required /></label>
+            <label>6-digit authenticator code (if 2FA is enabled)<input className="adm-code" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={form.code} onChange={setDigits('code')} /></label>
           </>
         )}
         <ErrorBox>{error}</ErrorBox>
-        <button className="adm-btn is-block" disabled={busy}>{busy ? 'Checking…' : needsCode ? 'Verify' : 'Continue'}</button>
-        {needsCode && <button type="button" className="adm-link" onClick={() => { setNeedsCode(false); setError(''); }}>Use a different account</button>}
+        <Notice>{notice}</Notice>
+        <button className="adm-btn is-block" disabled={busy}>
+          {busy ? 'Checking…' : mode === 'totp' ? 'Verify' : mode === 'forgot' || mode === 'token' ? 'Reset password' : mode === 'forgot_email' ? 'Send reset link' : 'Continue'}
+        </button>
+        {mode === 'login' && (
+          <button type="button" className="adm-link" onClick={() => { setMode('forgot'); setError(''); setNotice(''); }}>Forgot password?</button>
+        )}
+        {mode === 'totp' && (
+          <button type="button" className="adm-link" onClick={() => { setMode('login'); setError(''); setNotice(''); }}>Use a different account</button>
+        )}
+        {mode === 'forgot' && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+            <button type="button" className="adm-link" onClick={() => { setMode('login'); setError(''); setNotice(''); }}>Back to sign in</button>
+            <button type="button" className="adm-link" onClick={() => { setMode('forgot_email'); setError(''); setNotice(''); }}>Reset via email instead</button>
+          </div>
+        )}
+        {(mode === 'forgot_email' || mode === 'token') && (
+          <button type="button" className="adm-link" onClick={() => { clearUrlToken(); setMode('login'); setError(''); setNotice(''); }}>Back to sign in</button>
+        )}
       </form>
     </div>
   );

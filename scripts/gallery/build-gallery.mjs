@@ -280,7 +280,7 @@ function slideTrust(p, c) {
   return page(p, 'trust', `
     ${c.photo ? `<img class="bg" src="${asset(c.photo)}" alt="">` : ''}
     <div class="copy">
-      <span class="eyebrow">Why TranzLife</span>
+      <span class="eyebrow">THE LIVING SCIENCE.</span>
       <h1 class="serif">Purity you can trust,<br><em>in every pack.</em></h1>
       <div class="tiles">${tiles}</div>
     </div>
