@@ -18,6 +18,18 @@ import { createSeoPages, injectHead } from './cms/seo-html.js';
 
 const ROOT = resolve(fileURLToPath(new URL('../dist', import.meta.url)));
 const PORT = Number(process.env.PORT || 3000);
+
+// Stop before opening the database if another copy of this server already runs on PORT
+// (e.g. a second `npm run dev`). Two processes opening the same local PGlite folder damage it.
+await new Promise((ok) => {
+  const probe = createServer();
+  probe.once('error', (e) => {
+    if (e.code !== 'EADDRINUSE') return ok();
+    console.error(`Port ${PORT} is already in use: another copy of the server is running. Stop it first (Ctrl+C in its terminal).`);
+    process.exit(1);
+  });
+  probe.listen(PORT, '0.0.0.0', () => probe.close(ok));
+});
 const TYPES = { '.html':'text/html; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.css':'text/css; charset=utf-8',
   '.json':'application/json', '.svg':'image/svg+xml', '.png':'image/png', '.jpg':'image/jpeg', '.jpeg':'image/jpeg',
   '.webp':'image/webp', '.ico':'image/x-icon', '.woff2':'font/woff2', '.txt':'text/plain; charset=utf-8', '.pdf':'application/pdf' };
@@ -193,3 +205,5 @@ const shutdown = (sig) => {
   app.close().then(() => process.exit(0), (e) => { console.error(e); process.exit(1); });
 };
 for (const sig of ['SIGINT', 'SIGTERM', 'SIGHUP', 'SIGBREAK']) process.on(sig, () => shutdown(sig));
+// scripts/dev-api.mjs asks for a clean restart this way when a server file changes
+if (process.send) process.on('message', (m) => { if (m === 'shutdown') shutdown('restart'); });
