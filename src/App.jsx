@@ -1,6 +1,7 @@
 import { lazy as reactLazy, Suspense, useEffect } from 'react';
 import { Routes, Route, Navigate, useParams } from 'react-router-dom';
 import Layout from './components/Layout.jsx';
+import DnaLoader from './components/DnaLoader.jsx';
 import Home from './pages/Home.jsx';
 import About from './pages/About.jsx';
 // Science page is switched off for now (route redirects to /blogs); the file stays for later.
@@ -33,17 +34,24 @@ function lazy(factory) {
   });
   return C;
 }
-/** Fetch every page chunk once the browser is idle after the first page has loaded (admin excluded). */
+/** Fetch lazy page chunks gently in staggered idle slices so scrolling & first paint stay smooth. */
 function usePreloadPages() {
   useEffect(() => {
     if (navigator.connection?.saveData) return undefined;
-    const run = () => preloads.forEach((p) => p());
-    const idle = window.requestIdleCallback || ((cb) => setTimeout(cb, 1200));
+    let cancelled = false;
+    let timer;
+    let idx = 0;
+    const idle = window.requestIdleCallback || ((cb) => setTimeout(cb, 200));
     const cancel = window.cancelIdleCallback || clearTimeout;
+    const step = () => {
+      if (cancelled || idx >= preloads.length) return;
+      preloads[idx++]();
+      timer = setTimeout(() => { if (!cancelled) id = idle(step, { timeout: 2000 }); }, 160);
+    };
     let id;
-    const start = () => { id = idle(run, { timeout: 4000 }); };
+    const start = () => { id = idle(step, { timeout: 3000 }); };
     if (document.readyState === 'complete') start(); else window.addEventListener('load', start, { once: true });
-    return () => { window.removeEventListener('load', start); if (id) cancel(id); };
+    return () => { cancelled = true; clearTimeout(timer); window.removeEventListener('load', start); if (id) cancel(id); };
   }, []);
 }
 
@@ -69,7 +77,7 @@ const TrackOrder = lazy(() => import('./store/pages/TrackOrder'));
 const AdminApp = reactLazy(() => import('./admin/AdminApp'));
 const NotFound = lazy(() => import('./store/pages/NotFound'));
 
-const page = (el) => <Suspense fallback={<div className="page-loading" aria-busy="true" />}>{el}</Suspense>;
+const page = (el) => <Suspense fallback={<DnaLoader variant="page" />}>{el}</Suspense>;
 
 /** Old /product/<id> links point at the store's product pages. */
 function OldProductLink() {

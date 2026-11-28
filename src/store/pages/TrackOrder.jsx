@@ -7,6 +7,7 @@ import {
 import { api } from '../lib/api';
 import { subscribePublicEvents } from '../lib/realtime';
 import { Breadcrumbs, useTitle } from '../components/Common';
+import DnaLoader from '../../components/DnaLoader';
 import '../styles/track.css';
 
 const fmtDateTime = (d) =>
@@ -110,7 +111,7 @@ export default function TrackOrder() {
           </form>
         </div>
 
-        {loading && <div className="trk-card"><p className="trk-muted">Looking up shipment details…</p></div>}
+        {loading && <div className="trk-card"><DnaLoader variant="inline" size="sm" columns={8} label="TRACKING SHIPMENT" /></div>}
 
         {error && !loading && (
           <div className="trk-card trk-error" role="alert">

@@ -171,11 +171,16 @@ const Footer = forwardRef(function Footer(_, ref) {
       root.classList.toggle('ft-fixed', fixed);
       if (fixed) root.style.setProperty('--ft-h', h + 'px');
     };
+    let lastFtp = '';
     const update = () => {
       raf = 0;
       const vh = window.innerHeight;
       const p = (vh - curtain.getBoundingClientRect().bottom) / vh;
-      el.style.setProperty('--ftp', Math.max(0, Math.min(1, p)).toFixed(3));
+      const next = Math.max(0, Math.min(1, p)).toFixed(3);
+      if (next !== lastFtp) {
+        lastFtp = next;
+        el.style.setProperty('--ftp', next);
+      }
     };
     const onScroll = () => { if (!raf) raf = requestAnimationFrame(update); };
     const onResize = () => { measure(); onScroll(); };

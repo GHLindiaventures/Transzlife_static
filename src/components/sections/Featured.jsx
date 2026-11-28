@@ -65,6 +65,8 @@ export function ProductCard({ product }) {
               src={`${import.meta.env.BASE_URL}${product.showcase.replace(/^\//, '')}`}
               alt={product.name}
               className="pcard__showcase-img"
+              width={800}
+              height={800}
               loading="lazy"
               decoding="async"
             />
@@ -171,13 +173,16 @@ const pick = (ids) => {
 export default function Featured({ headline = PRODUCTS_SECTION.headline, sub = PRODUCTS_SECTION.sub, layout = 'slider', productIds }) {
   const items = pick(productIds);
   const COUNT = items.length;
+  const sectionRef = useRef(null);
   const trackRef = useRef(null);
+  const metricsRef = useRef(null);
   const isSlider = layout === 'slider';
   const isJumpingRef = useRef(false);
   useCardFront(trackRef, isSlider);
 
   const [activeIdx, setActiveIdx] = useState(0);
   const [isInteracting, setIsInteracting] = useState(false);
+  const [inView, setInView] = useState(true);
   const [reduce, setReduce] = useState(false);
 
   useEffect(() => {
@@ -193,7 +198,7 @@ export default function Featured({ headline = PRODUCTS_SECTION.headline, sub = P
     ? [...items, ...items, ...items]
     : items;
 
-  const getMetrics = useCallback(() => {
+  const measureMetrics = useCallback(() => {
     const el = trackRef.current;
     if (!el) return null;
     const cards = el.children;
@@ -210,7 +215,9 @@ export default function Featured({ headline = PRODUCTS_SECTION.headline, sub = P
     const restScroll = isMobile
       ? startCard.offsetLeft - (el.clientWidth - cardW) / 2
       : startCard.offsetLeft - padLeft;
-    return { stepWidth, singleSetWidth, restScroll };
+    const m = { stepWidth, singleSetWidth, restScroll };
+    metricsRef.current = m;
+    return m;
   }, [COUNT]);
 
   // Start scroll at middle set (Set 1) so user can scroll left or right indefinitely
@@ -220,7 +227,7 @@ export default function Featured({ headline = PRODUCTS_SECTION.headline, sub = P
     if (!el) return;
 
     const init = () => {
-      const m = getMetrics();
+      const m = measureMetrics();
       if (m && m.singleSetWidth > 0) {
         const prevBehavior = el.style.scrollBehavior;
         const prevSnap = el.style.scrollSnapType;
@@ -240,9 +247,9 @@ export default function Featured({ headline = PRODUCTS_SECTION.headline, sub = P
       clearTimeout(t);
       window.removeEventListener('resize', init);
     };
-  }, [isSlider, getMetrics]);
+  }, [isSlider, measureMetrics]);
 
-  // Handle scroll events: seamless wrapping and tracking active product index
+  // Handle scroll events: seamless wrapping using cached metrics (zero forced reflow per frame)
   useEffect(() => {
     if (!isSlider) return;
     const el = trackRef.current;
@@ -250,9 +257,10 @@ export default function Featured({ headline = PRODUCTS_SECTION.headline, sub = P
 
     let frame = 0;
     const onScroll = () => {
-      cancelAnimationFrame(frame);
+      if (frame) return;
       frame = requestAnimationFrame(() => {
-        const m = getMetrics();
+        frame = 0;
+        const m = metricsRef.current || measureMetrics();
         if (!m || m.singleSetWidth <= 0 || isJumpingRef.current) return;
 
         const { scrollLeft } = el;
@@ -282,42 +290,49 @@ export default function Featured({ headline = PRODUCTS_SECTION.headline, sub = P
           });
         }
 
-        // Calculate currently active product (0..COUNT-1)
         const rel = ((el.scrollLeft - restScroll) % singleSetWidth + singleSetWidth) % singleSetWidth;
         const currentCard = Math.round(rel / stepWidth) % COUNT;
-        setActiveIdx(currentCard);
+        setActiveIdx((prev) => (prev === currentCard ? prev : currentCard));
       });
     };
 
     el.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll);
     return () => {
-      cancelAnimationFrame(frame);
+      if (frame) cancelAnimationFrame(frame);
       el.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
     };
-  }, [isSlider, getMetrics, COUNT]);
+  }, [isSlider, measureMetrics]);
+
+  // Pause auto-cycling when section is offscreen
+  useEffect(() => {
+    const sec = sectionRef.current;
+    if (!isSlider || !sec || !('IntersectionObserver' in window)) return undefined;
+    const io = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), { threshold: 0.05 });
+    io.observe(sec);
+    return () => io.disconnect();
+  }, [isSlider]);
 
   // Step helper for next/prev
   const step = useCallback((dir) => {
     const el = trackRef.current;
     if (!el) return;
-    const m = getMetrics();
+    const m = metricsRef.current || measureMetrics();
     const by = m ? m.stepWidth : el.clientWidth * 0.8;
     el.scrollBy({ left: dir * by, behavior: reduce ? 'auto' : 'smooth' });
-  }, [getMetrics, reduce]);
+  }, [measureMetrics, reduce]);
 
-  // Automatic cycling loop (every 3.5s)
+  // Automatic cycling loop (every 3.5s, paused when offscreen or hidden)
   useEffect(() => {
-    if (!isSlider || isInteracting || reduce) return undefined;
+    if (!isSlider || isInteracting || reduce || !inView) return undefined;
     const interval = setInterval(() => {
-      step(1);
+      if (!document.hidden) step(1);
     }, 3500);
     return () => clearInterval(interval);
-  }, [isSlider, isInteracting, reduce, step]);
+  }, [isSlider, isInteracting, reduce, inView, step]);
 
   return (
     <section
+      ref={sectionRef}
       className={`featured featured--titled featured--${layout}`}
       id={PRODUCTS_SECTION.id}
       aria-labelledby="productsHeading"

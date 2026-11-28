@@ -29,6 +29,19 @@ export default defineConfig(({ mode }) => {
         '@': path.resolve(__dirname, 'src/store'),
       },
     },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (!id.includes('node_modules')) return undefined;
+            if (id.includes('react-dom') || id.includes('react-router') || id.includes(`${path.sep}react${path.sep}`) || id.includes('/react/')) return 'react-vendor';
+            if (id.includes('lucide-react')) return 'icons-vendor';
+            if (id.includes('@tiptap') || id.includes('prosemirror')) return 'editor-vendor';
+            return undefined;
+          },
+        },
+      },
+    },
     server: {
       // 127.0.0.1, not "localhost": on Windows Node resolves "localhost" to IPv6 (::1) while the API listens on
       // IPv4, so the API proxy failed and the site showed "could not load". http://localhost:5173 still works.

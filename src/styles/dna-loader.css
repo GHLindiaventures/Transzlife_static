@@ -1,0 +1,145 @@
+/* TranzLife DNA Double-Helix Loader (compositor-only transforms, adapted from Tranz-life/public/page-loader.js) */
+.tl-dna-wrap {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 18px;
+}
+
+.tl-dna-wrap--overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: radial-gradient(60% 60% at 50% 45%, #fbfaf2 0%, #eef2e6 60%, #e2eada 100%);
+}
+
+.tl-dna-wrap--page {
+  min-height: 61.8vh;
+  padding: 48px 24px;
+  opacity: 0;
+  animation: tl-dna-fade-in 0.24s ease 0.14s forwards;
+}
+
+.tl-dna-wrap--inline {
+  padding: 28px 16px;
+  gap: 14px;
+}
+
+@keyframes tl-dna-fade-in {
+  to {
+    opacity: 1;
+  }
+}
+
+.tl-dna {
+  display: flex;
+  gap: clamp(8px, 1vw, 12px);
+  height: 68px;
+}
+
+.tl-dna--sm {
+  gap: 7px;
+  height: 50px;
+  transform: scale(0.82);
+}
+
+.tl-dna__col {
+  position: relative;
+  width: 9px;
+  height: 68px;
+}
+
+.tl-dna__bead {
+  position: absolute;
+  left: 0;
+  top: 30px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  animation: tl-dna-bead 1.8s infinite both;
+  will-change: transform;
+}
+
+.tl-dna__bead--a {
+  background: #24502a;
+}
+
+.tl-dna__bead--b {
+  background: #c99a3a;
+}
+
+.tl-dna__rung {
+  position: absolute;
+  left: 3.5px;
+  top: 13px;
+  width: 2px;
+  height: 42px;
+  border-radius: 2px;
+  background: #8cb86a;
+  opacity: 0.6;
+  animation: tl-dna-rung 1.8s infinite both;
+  will-change: transform;
+}
+
+@keyframes tl-dna-bead {
+  0% {
+    transform: translateY(0) scale(1.3);
+    animation-timing-function: cubic-bezier(0.61, 1, 0.88, 1);
+  }
+
+  25% {
+    transform: translateY(-21px) scale(0.85);
+    animation-timing-function: cubic-bezier(0.12, 0, 0.39, 0);
+  }
+
+  50% {
+    transform: translateY(0) scale(0.45);
+    animation-timing-function: cubic-bezier(0.61, 1, 0.88, 1);
+  }
+
+  75% {
+    transform: translateY(21px) scale(0.85);
+    animation-timing-function: cubic-bezier(0.12, 0, 0.39, 0);
+  }
+
+  100% {
+    transform: translateY(0) scale(1.3);
+  }
+}
+
+@keyframes tl-dna-rung {
+
+  0%,
+  50%,
+  100% {
+    transform: scaleY(0);
+    animation-timing-function: cubic-bezier(0.61, 1, 0.88, 1);
+  }
+
+  25%,
+  75% {
+    transform: scaleY(1);
+    animation-timing-function: cubic-bezier(0.12, 0, 0.39, 0);
+  }
+}
+
+.tl-dna__label {
+  font: 700 11px / 1 var(--f-ui, Arial, Helvetica, sans-serif);
+  letter-spacing: 0.42em;
+  padding-left: 0.42em;
+  color: #4c6648;
+  text-transform: uppercase;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .tl-dna__bead,
+  .tl-dna__rung {
+    animation: none;
+  }
+
+  .tl-dna-wrap--page {
+    opacity: 1;
+    animation: none;
+  }
+}
